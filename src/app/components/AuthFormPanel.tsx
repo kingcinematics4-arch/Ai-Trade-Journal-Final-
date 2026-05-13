@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2, Copy, Check, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import ToastProvider from '@/components/ui/ToastProvider';
+import { createClient } from '@/lib/supabase';
 
 type AuthTab = 'login' | 'signup';
 
@@ -71,23 +72,22 @@ export default function AuthFormPanel() {
 
   const handleLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    // BACKEND: POST /api/auth/login — validate credentials, create session
-    await new Promise((r) => setTimeout(r, 1200));
+    const supabase = createClient();
 
-    const valid = demoCredentials.find(
-      (c) => c.email === data.email && c.password === data.password
-    );
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
 
-    if (!valid) {
-      loginForm.setError('email', {
-        message: 'Invalid credentials — use the demo accounts below to sign in',
-      });
+    if (error) {
+      loginForm.setError('email', { message: error.message });
       setIsLoading(false);
       return;
     }
 
-    toast.success(`Welcome back! Logged in as ${valid.role}`);
-    setTimeout(() => router.push('/dashboard'), 800);
+    toast.success('Welcome back!');
+    router.push('/dashboard');
+    router.refresh();
     setIsLoading(false);
   };
 
@@ -97,10 +97,30 @@ export default function AuthFormPanel() {
       return;
     }
     setIsLoading(true);
-    // BACKEND: POST /api/auth/signup — create user record, send verification email
-    await new Promise((r) => setTimeout(r, 1400));
-    toast.success('Account created! Redirecting to dashboard...');
-    setTimeout(() => router.push('/dashboard'), 1000);
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: {
+          full_name: data.fullName,
+          username: data.username,
+          experience_level: data.experienceLevel,
+          trading_style: data.tradingStyle,
+          country: data.country,
+        },
+      },
+    });
+
+    if (error) {
+      signupForm.setError('email', { message: error.message });
+      setIsLoading(false);
+      return;
+    }
+
+    toast.success('Account created! Check your email to confirm.');
     setIsLoading(false);
   };
 

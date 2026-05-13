@@ -51,6 +51,8 @@
   "dependencies": {
     "@dhiwise/component-tagger": "^1.0.15",
     "@heroicons/react": "^2.2.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "lucide-react": "^1.7.0",
@@ -69,14 +71,14 @@
     "@types/react-dom": "19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
-    "autoprefixer": "10.4.2",
+    "autoprefixer": "^10.4.2",
     "eslint": "^9",
     "eslint-config-next": "^15.2.4",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",
-    "postcss": "8.4.8",
+    "postcss": "^8.4.8",
     "prettier": "^3.5.3",
-    "tailwindcss": "3.4.6",
+    "tailwindcss": "^3.4.6",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
   }

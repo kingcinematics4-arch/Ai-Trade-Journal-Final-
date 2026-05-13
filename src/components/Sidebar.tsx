@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 import AppLogo from '@/components/ui/AppLogo';
 import {
   LayoutDashboard,
@@ -48,12 +50,19 @@ const secondaryNavItems: NavItem[] = [
 
 export default function Sidebar({ activePath }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  };
 
   return (
     <aside
-      className={`${
-        collapsed ? 'w-16' : 'w-60'
-      } sidebar-transition flex-shrink-0 bg-card border-r border-border flex flex-col h-full relative`}
+      className={`${collapsed ? 'w-16' : 'w-60'
+        } sidebar-transition flex-shrink-0 bg-card border-r border-border flex flex-col h-full relative`}
     >
       {/* Logo */}
       <div className={`flex items-center h-16 px-3 border-b border-border ${collapsed ? 'justify-center' : 'gap-2'}`}>
@@ -166,14 +175,14 @@ export default function Sidebar({ activePath }: SidebarProps) {
           <ShieldCheck size={18} className="flex-shrink-0 text-amber-400" />
           {!collapsed && <span className="text-amber-400">Admin Panel</span>}
         </Link>
-        <Link
-          href="/"
-          className={`nav-item ${collapsed ? 'justify-center px-2' : ''} hover:text-red-400`}
+        <button
+          onClick={handleLogout}
+          className={`nav-item ${collapsed ? 'justify-center px-2' : ''} hover:text-red-400 w-full`}
           title={collapsed ? 'Logout' : undefined}
         >
           <LogOut size={18} className="flex-shrink-0" />
           {!collapsed && <span>Logout</span>}
-        </Link>
+        </button>
       </div>
     </aside>
   );
