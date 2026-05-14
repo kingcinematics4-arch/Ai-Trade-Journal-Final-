@@ -54,13 +54,13 @@
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
     "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/typography": "^0.5.19",
     "lucide-react": "^1.7.0",
     "next": "15.1.11",
     "react": "19.0.3",
     "react-dom": "19.0.3",
     "react-hook-form": "^7.75.0",
-    "recharts": "^2.15.2",
+    "recharts": "^3.8.1",
     "sonner": "^1.7.4"
   },
   "devDependencies": {

@@ -70,10 +70,7 @@ export default function AuthBrandPanel() {
         {/* Features */}
         <div className="grid grid-cols-1 gap-3">
           {features?.map((feat) => (
-            <div
-              key={feat?.id}
-              className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]"
-            >
+            <div key={feat?.id} className="flex items-start gap-3">
               <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
                 {feat?.icon}
               </div>

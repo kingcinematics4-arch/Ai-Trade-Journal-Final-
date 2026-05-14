@@ -157,10 +157,8 @@ export default function AuthFormPanel() {
               key={`tab-${tab}`}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-all duration-150 ${
-                activeTab === tab
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+                activeTab === tab ? 'bg-card text-foreground shadow-sm' : ''
+              } tab-button`}
             >
               {tab === 'login' ? 'Sign In' : 'Sign Up'}
             </button>
@@ -205,7 +203,7 @@ export default function AuthFormPanel() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="input-action-btn"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -320,7 +318,7 @@ export default function AuthFormPanel() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="input-action-btn"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -343,7 +341,7 @@ export default function AuthFormPanel() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="input-action-btn"
                     aria-label={showConfirmPassword ? 'Hide' : 'Show'}
                   >
                     {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -432,7 +430,7 @@ export default function AuthFormPanel() {
         )}
 
         {/* Demo Credentials Box */}
-        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+        <div className="demo-banner">
           <div className="flex items-center gap-2 mb-3">
             <Zap size={14} className="text-amber-400" />
             <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Demo Accounts</p>
@@ -441,7 +439,7 @@ export default function AuthFormPanel() {
             {demoCredentials.map((cred) => (
               <div
                 key={cred.id}
-                className="flex items-center justify-between gap-2 p-2 rounded-md bg-black/20 border border-white/5"
+                className="demo-item"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-xs font-semibold text-muted-foreground w-12 flex-shrink-0">
