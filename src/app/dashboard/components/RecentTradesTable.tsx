@@ -25,7 +25,6 @@ export interface TradeRow {
   rating: number;
 }
 
-
 type SortKey = 'date' | 'pnl' | 'rr';
 type SortDir = 'asc' | 'desc';
 
@@ -142,7 +141,11 @@ export default function RecentTradesTable() {
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown size={12} className="text-muted-foreground" />;
-    return sortDir === 'asc' ? <ChevronUp size={12} className="text-primary" /> : <ChevronDown size={12} className="text-primary" />;
+    return sortDir === 'asc' ? (
+      <ChevronUp size={12} className="text-primary" />
+    ) : (
+      <ChevronDown size={12} className="text-primary" />
+    );
   };
 
   return (
@@ -152,7 +155,10 @@ export default function RecentTradesTable() {
           <h3 className="text-base font-semibold text-foreground">Recent Trades</h3>
           <p className="text-xs text-muted-foreground mt-0.5">{trades.length} trades this month</p>
         </div>
-        <Link href="/dashboard" className="text-xs text-primary hover:text-blue-400 font-medium transition-colors">
+        <Link
+          href="/dashboard"
+          className="text-xs text-primary hover:text-blue-400 font-medium transition-colors"
+        >
           View All Trades →
         </Link>
       </div>
@@ -202,87 +208,96 @@ export default function RecentTradesTable() {
                 </td>
               </tr>
             )}
-            {!authLoading && !isLoadingTrades && trades.map((trade) => (
-              <tr
-                key={trade.id}
-                className={`border-b border-border/50 transition-colors duration-100 ${
-                  hoveredRow === trade.id ? 'bg-muted/30' : ''
-                }`}
-                onMouseEnter={() => setHoveredRow(trade.id)}
-                onMouseLeave={() => setHoveredRow(null)}
-              >
-                <td className="px-4 py-3">
-                  <div>
-                    <p className="font-medium text-foreground font-tabular">{trade.asset}</p>
-                    <p className="text-xs text-muted-foreground">{trade.market}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge variant={trade.direction} label={trade.direction === 'buy' ? '▲ Long' : '▼ Short'} />
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`font-tabular font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`font-tabular text-sm ${trade.rr >= 2 ? 'text-green-400' : trade.rr >= 1 ? 'text-amber-400' : 'text-red-400'}`}>
-                    {trade.rr.toFixed(1)}R
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                    {trade.strategy}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge variant={trade.status} />
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                  {trade.date}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span
-                        key={`star-${trade.id}-${star}`}
-                        className={`text-xs ${star <= trade.rating ? 'text-amber-400' : 'text-muted'}`}
+            {!authLoading &&
+              !isLoadingTrades &&
+              trades.map((trade) => (
+                <tr
+                  key={trade.id}
+                  className={`border-b border-border/50 transition-colors duration-100 ${
+                    hoveredRow === trade.id ? 'bg-muted/30' : ''
+                  }`}
+                  onMouseEnter={() => setHoveredRow(trade.id)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                >
+                  <td className="px-4 py-3">
+                    <div>
+                      <p className="font-medium text-foreground font-tabular">{trade.asset}</p>
+                      <p className="text-xs text-muted-foreground">{trade.market}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge
+                      variant={trade.direction}
+                      label={trade.direction === 'buy' ? '▲ Long' : '▼ Short'}
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`font-tabular font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                    >
+                      {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`font-tabular text-sm ${trade.rr >= 2 ? 'text-green-400' : trade.rr >= 1 ? 'text-amber-400' : 'text-red-400'}`}
+                    >
+                      {trade.rr.toFixed(1)}R
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                      {trade.strategy}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge variant={trade.status} />
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {trade.date}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={`star-${trade.id}-${star}`}
+                          className={`text-xs ${star <= trade.rating ? 'text-amber-400' : 'text-muted'}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div
+                      className={`flex items-center gap-1 transition-opacity duration-150 ${
+                        hoveredRow === trade.id ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <button
+                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        title="View trade details"
                       >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div
-                    className={`flex items-center gap-1 transition-opacity duration-150 ${
-                      hoveredRow === trade.id ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
-                    <button
-                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                      title="View trade details"
-                    >
-                      <Eye size={14} />
-                    </button>
-                    <Link
-                      href="/add-trade"
-                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-blue-400 transition-colors"
-                      title="Edit trade"
-                    >
-                      <Pencil size={14} />
-                    </Link>
-                    <button
-                      onClick={() => setDeleteTarget(trade.id)}
-                      className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
-                      title="Delete trade — this cannot be undone"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                        <Eye size={14} />
+                      </button>
+                      <Link
+                        href="/add-trade"
+                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-blue-400 transition-colors"
+                        title="Edit trade"
+                      >
+                        <Pencil size={14} />
+                      </Link>
+                      <button
+                        onClick={() => setDeleteTarget(trade.id)}
+                        className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
+                        title="Delete trade — this cannot be undone"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
@@ -295,13 +310,11 @@ export default function RecentTradesTable() {
         size="sm"
       >
         <p className="text-sm text-muted-foreground mb-5">
-          Are you sure you want to delete this trade? This action cannot be undone and will affect your analytics.
+          Are you sure you want to delete this trade? This action cannot be undone and will affect
+          your analytics.
         </p>
         <div className="flex gap-3 justify-end">
-          <button
-            onClick={() => setDeleteTarget(null)}
-            className="btn-secondary text-sm"
-          >
+          <button onClick={() => setDeleteTarget(null)} className="btn-secondary text-sm">
             Cancel
           </button>
           <button

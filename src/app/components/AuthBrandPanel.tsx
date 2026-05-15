@@ -57,13 +57,15 @@ export default function AuthBrandPanel() {
       <div className="relative z-10 space-y-6">
         <div>
           <h1 className="text-3xl xl:text-4xl font-bold text-foreground leading-tight mb-3">
-            Stop guessing.<br />
-            <span className="text-primary">Start understanding</span><br />
+            Stop guessing.
+            <br />
+            <span className="text-primary">Start understanding</span>
+            <br />
             your trades.
           </h1>
           <p className="text-muted-foreground text-base leading-relaxed max-w-sm">
-            Log every trade, track your psychology, and let AI find the patterns
-            costing you money — before they become habits.
+            Log every trade, track your psychology, and let AI find the patterns costing you money —
+            before they become habits.
           </p>
         </div>
 

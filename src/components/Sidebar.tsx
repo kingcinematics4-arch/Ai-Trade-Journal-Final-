@@ -35,16 +35,33 @@ interface SidebarProps {
 }
 
 const primaryNavItems: NavItem[] = [
-  { id: 'nav-dashboard', label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={18} /> },
+  {
+    id: 'nav-dashboard',
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: <LayoutDashboard size={18} />,
+  },
   { id: 'nav-add-trade', label: 'Add Trade', href: '/add-trade', icon: <PlusCircle size={18} /> },
   { id: 'nav-history', label: 'Trade History', href: '/dashboard', icon: <BookOpen size={18} /> },
   { id: 'nav-analytics', label: 'Analytics', href: '/dashboard', icon: <BarChart3 size={18} /> },
-  { id: 'nav-ai-coach', label: 'AI Coach', href: '/dashboard', icon: <BrainCircuit size={18} />, badge: 3 },
+  {
+    id: 'nav-ai-coach',
+    label: 'AI Coach',
+    href: '/dashboard',
+    icon: <BrainCircuit size={18} />,
+    badge: 3,
+  },
 ];
 
 const secondaryNavItems: NavItem[] = [
   { id: 'nav-goals', label: 'Goals', href: '/dashboard', icon: <Target size={18} /> },
-  { id: 'nav-notifications', label: 'Notifications', href: '/dashboard', icon: <Bell size={18} />, badge: 2 },
+  {
+    id: 'nav-notifications',
+    label: 'Notifications',
+    href: '/dashboard',
+    icon: <Bell size={18} />,
+    badge: 2,
+  },
   { id: 'nav-profile', label: 'Profile', href: '/dashboard', icon: <User size={18} /> },
   { id: 'nav-settings', label: 'Settings', href: '/dashboard', icon: <Settings size={18} /> },
 ];
@@ -62,11 +79,14 @@ export default function Sidebar({ activePath }: SidebarProps) {
 
   return (
     <aside
-      className={`${collapsed ? 'w-16' : 'w-60'
-        } sidebar-transition flex-shrink-0 bg-card border-r border-border flex flex-col h-full relative`}
+      className={`${
+        collapsed ? 'w-16' : 'w-60'
+      } sidebar-transition flex-shrink-0 bg-card border-r border-border flex flex-col h-full relative`}
     >
       {/* Logo */}
-      <div className={`flex items-center h-16 px-3 border-b border-border ${collapsed ? 'justify-center' : 'gap-2'}`}>
+      <div
+        className={`flex items-center h-16 px-3 border-b border-border ${collapsed ? 'justify-center' : 'gap-2'}`}
+      >
         <AppLogo size={32} />
         {!collapsed && (
           <div className="flex flex-col">
@@ -86,31 +106,15 @@ export default function Sidebar({ activePath }: SidebarProps) {
       </button>
 
       {/* Account Info */}
-      {!collapsed && (
+      {collapsed ? (
+        (profile || isLoading) && (
+          <div className="flex justify-center mt-4 mb-2 px-2" title={displayName}>
+            <UserAvatar size="sm" />
+          </div>
+        )
+      ) : (
         <div className="mx-3 mt-4 mb-2 p-2.5 bg-muted/50 rounded-lg border border-border">
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <Skeleton className="w-7 h-7 rounded-full flex-shrink-0" />
-              <div className="flex-1 space-y-1.5">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-3 w-32" />
-              </div>
-            </div>
-          ) : profile ? (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <TrendingUp size={14} className="text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-foreground truncate" title={profile.id}>
-                  {displayName}
-                </p>
-                <p className="text-xs text-muted-foreground truncate" title={profile.email}>
-                  {displaySubtitle}
-                </p>
-              </div>
-            </div>
-          ) : null}
+          <UserProfileSummary size="xs" layout="horizontal" compact />
         </div>
       )}
 
@@ -122,7 +126,8 @@ export default function Sidebar({ activePath }: SidebarProps) {
           </p>
         )}
         {primaryNavItems.map((item) => {
-          const isActive = activePath === item.href || (item.href === '/dashboard' && activePath === '/');
+          const isActive =
+            activePath === item.href || (item.href === '/dashboard' && activePath === '/');
           return (
             <Link
               key={item.id}

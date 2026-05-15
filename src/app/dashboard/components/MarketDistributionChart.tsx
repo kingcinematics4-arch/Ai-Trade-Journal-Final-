@@ -1,13 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 // BACKEND: GET /api/analytics/market-distribution — replace with real data
 const marketData = [
@@ -21,7 +14,7 @@ const COLORS = ['var(--primary)', 'var(--accent)', '#f59e0b', '#8b5cf6'];
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: typeof marketData[0] }>;
+  payload?: Array<{ payload: (typeof marketData)[0] }>;
 }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
@@ -88,7 +81,9 @@ export default function MarketDistributionChart() {
               style={{ backgroundColor: COLORS[i % COLORS.length] }}
             />
             <span className="text-xs text-muted-foreground truncate">{d.name}</span>
-            <span className="text-xs font-tabular font-medium text-foreground ml-auto">{d.value}%</span>
+            <span className="text-xs font-tabular font-medium text-foreground ml-auto">
+              {d.value}%
+            </span>
           </div>
         ))}
       </div>

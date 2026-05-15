@@ -35,9 +35,13 @@ const goals = [
 ];
 
 const statusConfig = {
-  'on-track': { color: 'bg-green-500', textColor: 'text-green-400', icon: <CheckCircle2 size={12} /> },
-  'warning': { color: 'bg-amber-500', textColor: 'text-amber-400', icon: <AlertCircle size={12} /> },
-  'exceeded': { color: 'bg-red-500', textColor: 'text-red-400', icon: <AlertCircle size={12} /> },
+  'on-track': {
+    color: 'bg-green-500',
+    textColor: 'text-green-400',
+    icon: <CheckCircle2 size={12} />,
+  },
+  warning: { color: 'bg-amber-500', textColor: 'text-amber-400', icon: <AlertCircle size={12} /> },
+  exceeded: { color: 'bg-red-500', textColor: 'text-red-400', icon: <AlertCircle size={12} /> },
 };
 
 export default function GoalsMiniPanel() {
@@ -67,7 +71,9 @@ export default function GoalsMiniPanel() {
                 />
               </div>
               <div className="flex justify-between mt-1">
-                <p className="text-xs text-muted-foreground">{goal.note ?? `Target: ${goal.target}`}</p>
+                <p className="text-xs text-muted-foreground">
+                  {goal.note ?? `Target: ${goal.target}`}
+                </p>
               </div>
             </div>
           );

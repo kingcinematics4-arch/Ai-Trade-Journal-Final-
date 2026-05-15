@@ -47,13 +47,18 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
           <span className="text-muted-foreground">Session P&L</span>
-          <span className={`font-semibold font-tabular ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {pnl >= 0 ? '+' : ''}{pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+          <span
+            className={`font-semibold font-tabular ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
+          >
+            {pnl >= 0 ? '+' : ''}
+            {pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
           </span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-muted-foreground">Cumulative</span>
-          <span className={`font-semibold font-tabular ${cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          <span
+            className={`font-semibold font-tabular ${cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}
+          >
             {cumulative >= 0 ? '+' : ''}${cumulative.toLocaleString()}
           </span>
         </div>

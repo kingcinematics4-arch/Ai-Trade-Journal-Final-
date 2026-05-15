@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form/dist/types';
+import { UseFormReturn } from 'react-hook-form';
 import { TradeFormData } from './AddTradeForm';
 
 interface PsychologySectionProps {
@@ -8,9 +8,19 @@ interface PsychologySectionProps {
 }
 
 const strategies = [
-  'Breakout', 'Trend Following', 'Reversal', 'Range Trading',
-  'Momentum', 'Scalping', 'News Trading', 'Support/Resistance',
-  'Moving Average Cross', 'VWAP', 'ICT/SMC', 'Elliott Wave', 'Custom',
+  'Breakout',
+  'Trend Following',
+  'Reversal',
+  'Range Trading',
+  'Momentum',
+  'Scalping',
+  'News Trading',
+  'Support/Resistance',
+  'Moving Average Cross',
+  'VWAP',
+  'ICT/SMC',
+  'Elliott Wave',
+  'Custom',
 ];
 
 const emotions = [
@@ -43,7 +53,12 @@ const mistakeCategories = [
 ];
 
 export default function PsychologySection({ form }: PsychologySectionProps) {
-  const { register, watch, setValue, formState: { errors } } = form;
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = form;
   const emotionBefore = watch('emotionBefore');
   const emotionAfter = watch('emotionAfter');
 
@@ -52,7 +67,9 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
       {/* Strategy */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="form-label" htmlFor="strategy-used">Strategy Used</label>
+          <label className="form-label" htmlFor="strategy-used">
+            Strategy Used
+          </label>
           <p className="form-helper">Which trading strategy was applied</p>
           <select
             id="strategy-used"
@@ -61,13 +78,17 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
           >
             <option value="">Select strategy</option>
             {strategies.map((s) => (
-              <option key={`strat-${s}`} value={s}>{s}</option>
+              <option key={`strat-${s}`} value={s}>
+                {s}
+              </option>
             ))}
           </select>
           {errors.strategyUsed && <p className="form-error">{errors.strategyUsed.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="mistake-category">Mistake Category</label>
+          <label className="form-label" htmlFor="mistake-category">
+            Mistake Category
+          </label>
           <p className="form-helper">Identify what went wrong (if anything)</p>
           <select
             id="mistake-category"
@@ -76,7 +97,9 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
           >
             <option value="">Select category</option>
             {mistakeCategories.map((m) => (
-              <option key={`mistake-${m}`} value={m}>{m}</option>
+              <option key={`mistake-${m}`} value={m}>
+                {m}
+              </option>
             ))}
           </select>
         </div>
@@ -95,7 +118,8 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
                 onClick={() => setValue('emotionBefore', e.value)}
                 className={`px-2 py-1.5 rounded-lg border text-xs transition-all duration-150 text-left truncate ${
                   emotionBefore === e.value
-                    ? 'border-primary/50 bg-primary/10 text-primary' :'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
+                    ? 'border-primary/50 bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
                 }`}
                 title={e.label}
               >
@@ -116,7 +140,8 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
                 onClick={() => setValue('emotionAfter', e.value)}
                 className={`px-2 py-1.5 rounded-lg border text-xs transition-all duration-150 text-left truncate ${
                   emotionAfter === e.value
-                    ? 'border-primary/50 bg-primary/10 text-primary' :'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
+                    ? 'border-primary/50 bg-primary/10 text-primary'
+                    : 'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
                 }`}
                 title={e.label}
               >
@@ -129,8 +154,12 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
 
       {/* Lessons Learned */}
       <div>
-        <label className="form-label" htmlFor="lessons-learned">Lessons Learned</label>
-        <p className="form-helper">What would you do differently? This feeds AI coaching analysis.</p>
+        <label className="form-label" htmlFor="lessons-learned">
+          Lessons Learned
+        </label>
+        <p className="form-helper">
+          What would you do differently? This feeds AI coaching analysis.
+        </p>
         <textarea
           id="lessons-learned"
           rows={3}
@@ -142,7 +171,9 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
 
       {/* Notes */}
       <div>
-        <label className="form-label" htmlFor="trade-notes">Additional Notes</label>
+        <label className="form-label" htmlFor="trade-notes">
+          Additional Notes
+        </label>
         <p className="form-helper">Market context, news events, or anything else relevant</p>
         <textarea
           id="trade-notes"

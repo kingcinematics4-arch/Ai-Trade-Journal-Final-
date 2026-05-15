@@ -21,10 +21,7 @@ export default function AddTradeHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Link
-          href="/dashboard"
-          className="btn-secondary flex items-center gap-2 text-sm py-2"
-        >
+        <Link href="/dashboard" className="btn-secondary flex items-center gap-2 text-sm py-2">
           <BookOpen size={14} />
           Trade History
         </Link>

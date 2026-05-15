@@ -44,7 +44,13 @@
     scroll-behavior: smooth;
   }
 
-  h1, h2, h3, h4, h5, h6, p {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
     margin: 0;
   }
 
@@ -98,7 +104,9 @@
   }
 
   .card-hover {
-    transition: border-color 200ms ease, box-shadow 200ms ease;
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease;
   }
 
   .card-hover:hover {
@@ -144,18 +152,32 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulseHighlight {
-  0% { background-color: rgba(59, 130, 246, 0.2); }
-  100% { background-color: transparent; }
+  0% {
+    background-color: rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
 @layer components {
@@ -205,9 +227,9 @@
            transition-all duration-150 cursor-pointer;
   }
   .nav-item-active {
-  @apply text-primary;
-  background-color: rgba(59, 130, 246, 0.1);
-}
+    @apply text-primary;
+    background-color: rgba(59, 130, 246, 0.1);
+  }
   .input-action-btn {
     @apply absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground 
            hover:text-foreground transition-all duration-150 cursor-pointer;

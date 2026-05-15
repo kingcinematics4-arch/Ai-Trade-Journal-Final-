@@ -21,10 +21,26 @@ const popularAssets: Record<string, string[]> = {
   Indices: ['S&P 500', 'NASDAQ 100', 'Dow Jones', 'DAX 40', 'FTSE 100'],
 };
 
-const durations = ['< 5 min', '5–15 min', '15–30 min', '30–60 min', '1–2h', '2–4h', '4–8h', '8–24h', '1–3 days', '3+ days'];
+const durations = [
+  '< 5 min',
+  '5–15 min',
+  '15–30 min',
+  '30–60 min',
+  '1–2h',
+  '2–4h',
+  '4–8h',
+  '8–24h',
+  '1–3 days',
+  '3+ days',
+];
 
 export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSectionProps) {
-  const { register, watch, setValue, formState: { errors } } = form;
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = form;
   const selectedMarket = watch('marketType');
   const selectedDirection = watch('tradeDirection');
 
@@ -33,7 +49,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
       {/* Row 1: Title + Date */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="form-label" htmlFor="trade-title">Trade Title</label>
+          <label className="form-label" htmlFor="trade-title">
+            Trade Title
+          </label>
           <p className="form-helper">Optional label for quick identification</p>
           <input
             id="trade-title"
@@ -44,7 +62,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           />
         </div>
         <div>
-          <label className="form-label" htmlFor="trade-date">Trade Date</label>
+          <label className="form-label" htmlFor="trade-date">
+            Trade Date
+          </label>
           <p className="form-helper">Date the trade was executed</p>
           <input
             id="trade-date"
@@ -59,7 +79,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
       {/* Row 2: Market + Asset */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="form-label" htmlFor="market-type">Market Type</label>
+          <label className="form-label" htmlFor="market-type">
+            Market Type
+          </label>
           <p className="form-helper">Asset class of this trade</p>
           <select
             id="market-type"
@@ -68,13 +90,17 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           >
             <option value="">Select market</option>
             {marketTypes.map((m) => (
-              <option key={`mkt-${m}`} value={m}>{m}</option>
+              <option key={`mkt-${m}`} value={m}>
+                {m}
+              </option>
             ))}
           </select>
           {errors.marketType && <p className="form-error">{errors.marketType.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="asset-name">Asset Name / Symbol</label>
+          <label className="form-label" htmlFor="asset-name">
+            Asset Name / Symbol
+          </label>
           <p className="form-helper">
             {selectedMarket && popularAssets[selectedMarket]
               ? `Quick: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...`
@@ -84,7 +110,11 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
             id="asset-name"
             type="text"
             className="form-input mt-1.5"
-            placeholder={selectedMarket && popularAssets[selectedMarket] ? popularAssets[selectedMarket][0] : 'Enter symbol'}
+            placeholder={
+              selectedMarket && popularAssets[selectedMarket]
+                ? popularAssets[selectedMarket][0]
+                : 'Enter symbol'
+            }
             list="asset-suggestions"
             {...register('assetName', { required: 'Asset name is required' })}
           />
@@ -108,23 +138,33 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
             <button
               key={`dir-${dir}`}
               type="button"
-              onClick={() => { setValue('tradeDirection', dir); onPriceChange(); }}
+              onClick={() => {
+                setValue('tradeDirection', dir);
+                onPriceChange();
+              }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-medium transition-all duration-150 ${
                 selectedDirection === dir
-                  ? dir === 'buy' ?'bg-green-500/15 border-green-500/40 text-green-400' :'bg-red-500/15 border-red-500/40 text-red-400' :'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
+                  ? dir === 'buy'
+                    ? 'bg-green-500/15 border-green-500/40 text-green-400'
+                    : 'bg-red-500/15 border-red-500/40 text-red-400'
+                  : 'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
               }`}
             >
               {dir === 'buy' ? '▲ Long (Buy)' : '▼ Short (Sell)'}
             </button>
           ))}
         </div>
-        {errors.tradeDirection && <p className="form-error mt-1">{errors.tradeDirection.message}</p>}
+        {errors.tradeDirection && (
+          <p className="form-error mt-1">{errors.tradeDirection.message}</p>
+        )}
       </div>
 
       {/* Row 4: Prices */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <label className="form-label" htmlFor="entry-price">Entry Price</label>
+          <label className="form-label" htmlFor="entry-price">
+            Entry Price
+          </label>
           <input
             id="entry-price"
             type="number"
@@ -140,7 +180,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           {errors.entryPrice && <p className="form-error">{errors.entryPrice.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="exit-price">Exit Price</label>
+          <label className="form-label" htmlFor="exit-price">
+            Exit Price
+          </label>
           <input
             id="exit-price"
             type="number"
@@ -156,7 +198,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           {errors.exitPrice && <p className="form-error">{errors.exitPrice.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="stop-loss">Stop Loss</label>
+          <label className="form-label" htmlFor="stop-loss">
+            Stop Loss
+          </label>
           <input
             id="stop-loss"
             type="number"
@@ -169,7 +213,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           {errors.stopLoss && <p className="form-error">{errors.stopLoss.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="take-profit">Take Profit</label>
+          <label className="form-label" htmlFor="take-profit">
+            Take Profit
+          </label>
           <input
             id="take-profit"
             type="number"
@@ -185,7 +231,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
       {/* Row 5: Lot Size + Risk + Duration */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="form-label" htmlFor="lot-size">Lot Size / Quantity</label>
+          <label className="form-label" htmlFor="lot-size">
+            Lot Size / Quantity
+          </label>
           <p className="form-helper">Number of units, contracts, or shares</p>
           <input
             id="lot-size"
@@ -202,7 +250,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           {errors.lotSize && <p className="form-error">{errors.lotSize.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="risk-amount">Risk Amount ($)</label>
+          <label className="form-label" htmlFor="risk-amount">
+            Risk Amount ($)
+          </label>
           <p className="form-helper">Dollar amount risked on this trade</p>
           <input
             id="risk-amount"
@@ -218,16 +268,16 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           {errors.riskAmount && <p className="form-error">{errors.riskAmount.message}</p>}
         </div>
         <div>
-          <label className="form-label" htmlFor="trade-duration">Trade Duration</label>
+          <label className="form-label" htmlFor="trade-duration">
+            Trade Duration
+          </label>
           <p className="form-helper">How long the trade was held</p>
-          <select
-            id="trade-duration"
-            className="form-input mt-1.5"
-            {...register('tradeDuration')}
-          >
+          <select id="trade-duration" className="form-input mt-1.5" {...register('tradeDuration')}>
             <option value="">Select duration</option>
             {durations.map((d) => (
-              <option key={`dur-${d}`} value={d}>{d}</option>
+              <option key={`dur-${d}`} value={d}>
+                {d}
+              </option>
             ))}
           </select>
         </div>

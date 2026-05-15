@@ -1,6 +1,13 @@
 'use client';
 import React, { useState } from 'react';
-import { BrainCircuit, ChevronDown, ChevronUp, TrendingDown, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import {
+  BrainCircuit,
+  ChevronDown,
+  ChevronUp,
+  TrendingDown,
+  AlertTriangle,
+  CheckCircle2,
+} from 'lucide-react';
 
 // BACKEND: GET /api/ai-insights/weekly — replace with rule-based insight engine output
 const insights = [
@@ -72,9 +79,13 @@ export default function AiInsightCard() {
         className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
       >
         {expanded ? (
-          <>Show less <ChevronUp size={12} /></>
+          <>
+            Show less <ChevronUp size={12} />
+          </>
         ) : (
-          <>See all {insights.length} insights <ChevronDown size={12} /></>
+          <>
+            See all {insights.length} insights <ChevronDown size={12} />
+          </>
         )}
       </button>
     </div>

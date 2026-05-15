@@ -1,6 +1,15 @@
 import React from 'react';
 
-type BadgeVariant = 'win' | 'loss' | 'breakeven' | 'active' | 'pending' | 'buy' | 'sell' | 'warning' | 'info';
+type BadgeVariant =
+  | 'win'
+  | 'loss'
+  | 'breakeven'
+  | 'active'
+  | 'pending'
+  | 'buy'
+  | 'sell'
+  | 'warning'
+  | 'info';
 
 interface StatusBadgeProps {
   variant: BadgeVariant;

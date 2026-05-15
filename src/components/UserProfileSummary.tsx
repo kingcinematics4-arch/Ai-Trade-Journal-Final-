@@ -8,6 +8,7 @@ interface UserProfileSummaryProps {
   size?: UserAvatarSize;
   layout?: 'horizontal' | 'stacked';
   showEmail?: boolean;
+  compact?: boolean;
   className?: string;
 }
 
@@ -19,7 +20,13 @@ function ProfileSummarySkeleton({
   layout: 'horizontal' | 'stacked';
 }) {
   const box =
-    size === 'xl' ? 'h-16 w-16' : size === 'lg' ? 'h-12 w-12' : size === 'md' ? 'h-10 w-10' : 'h-8 w-8';
+    size === 'xl'
+      ? 'h-16 w-16'
+      : size === 'lg'
+        ? 'h-12 w-12'
+        : size === 'md'
+          ? 'h-10 w-10'
+          : 'h-8 w-8';
   const isStacked = layout === 'stacked';
 
   return (
@@ -37,6 +44,7 @@ export default function UserProfileSummary({
   size = 'sm',
   layout = 'horizontal',
   showEmail = true,
+  compact = false,
   className = '',
 }: UserProfileSummaryProps) {
   const { profile, displayName, isLoading } = useAuth();
@@ -53,21 +61,23 @@ export default function UserProfileSummary({
     <div
       className={[
         'min-w-0',
-        isStacked ? 'flex flex-col items-center gap-2 text-center' : 'flex items-center gap-2.5 sm:gap-3',
+        isStacked
+          ? 'flex flex-col items-center gap-2 text-center'
+          : 'flex items-center gap-2.5 sm:gap-3',
         className,
       ].join(' ')}
     >
       <UserAvatar size={size} showLoading={false} />
       <div className={`min-w-0 ${isStacked ? 'w-full' : 'flex-1'}`}>
         <p
-          className="text-sm font-semibold text-foreground truncate leading-tight"
+          className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-foreground truncate leading-tight`}
           title={displayName}
         >
           {displayName}
         </p>
         {showEmail && profile.email && (
           <p
-            className="text-xs text-muted-foreground truncate leading-tight mt-0.5"
+            className={`${compact ? 'text-[11px]' : 'text-xs'} text-muted-foreground truncate leading-tight mt-0.5`}
             title={profile.email}
           >
             {profile.email}

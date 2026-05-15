@@ -2,7 +2,18 @@
 import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ChevronUp, Loader2, Save, X, Zap, Info, TrendingUp, Brain, Camera,  } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  Save,
+  X,
+  Zap,
+  Info,
+  TrendingUp,
+  Brain,
+  Camera,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import TradeInfoSection from './TradeInfoSection';
 import PerformanceSection from './PerformanceSection';
@@ -138,10 +149,30 @@ export default function AddTradeForm() {
   };
 
   const sections: { key: SectionKey; label: string; icon: React.ReactNode; desc: string }[] = [
-    { key: 'tradeInfo', label: 'Trade Information', icon: <TrendingUp size={15} />, desc: 'Asset, direction, prices' },
-    { key: 'performance', label: 'Performance Metrics', icon: <Zap size={15} />, desc: 'P&L, RR ratio, outcome' },
-    { key: 'psychology', label: 'Psychology & Strategy', icon: <Brain size={15} />, desc: 'Emotions, mistakes, lessons' },
-    { key: 'media', label: 'Media & Metadata', icon: <Camera size={15} />, desc: 'Screenshots, tags, rating' },
+    {
+      key: 'tradeInfo',
+      label: 'Trade Information',
+      icon: <TrendingUp size={15} />,
+      desc: 'Asset, direction, prices',
+    },
+    {
+      key: 'performance',
+      label: 'Performance Metrics',
+      icon: <Zap size={15} />,
+      desc: 'P&L, RR ratio, outcome',
+    },
+    {
+      key: 'psychology',
+      label: 'Psychology & Strategy',
+      icon: <Brain size={15} />,
+      desc: 'Emotions, mistakes, lessons',
+    },
+    {
+      key: 'media',
+      label: 'Media & Metadata',
+      icon: <Camera size={15} />,
+      desc: 'Screenshots, tags, rating',
+    },
   ];
 
   return (
@@ -176,12 +207,8 @@ export default function AddTradeForm() {
               {section.key === 'tradeInfo' && (
                 <TradeInfoSection form={form} onPriceChange={recalculate} />
               )}
-              {section.key === 'performance' && (
-                <PerformanceSection form={form} />
-              )}
-              {section.key === 'psychology' && (
-                <PsychologySection form={form} />
-              )}
+              {section.key === 'performance' && <PerformanceSection form={form} />}
+              {section.key === 'psychology' && <PsychologySection form={form} />}
               {section.key === 'media' && (
                 <MediaMetaSection
                   form={form}

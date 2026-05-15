@@ -42,8 +42,17 @@ const tradingStyles = [
 ];
 
 const countries = [
-  'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany',
-  'Singapore', 'India', 'UAE', 'Japan', 'South Korea', 'Other',
+  'United States',
+  'United Kingdom',
+  'Canada',
+  'Australia',
+  'Germany',
+  'Singapore',
+  'India',
+  'UAE',
+  'Japan',
+  'South Korea',
+  'Other',
 ];
 
 export default function AuthFormPanel() {
@@ -59,8 +68,14 @@ export default function AuthFormPanel() {
 
   const signupForm = useForm<SignupFormData>({
     defaultValues: {
-      fullName: '', username: '', email: '', password: '',
-      confirmPassword: '', experienceLevel: '', tradingStyle: '', country: '',
+      fullName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      experienceLevel: '',
+      tradingStyle: '',
+      country: '',
     },
   });
 
@@ -150,7 +165,9 @@ export default function AuthFormPanel() {
             {activeTab === 'login' ? 'Sign in to your account' : 'Create your account'}
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
-            {activeTab === 'login' ?'Track your trades and improve your performance' :'Start journaling your trades today — free forever'}
+            {activeTab === 'login'
+              ? 'Track your trades and improve your performance'
+              : 'Start journaling your trades today — free forever'}
           </p>
         </div>
 
@@ -173,7 +190,9 @@ export default function AuthFormPanel() {
         {activeTab === 'login' && (
           <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
             <div>
-              <label className="form-label" htmlFor="login-email">Email address</label>
+              <label className="form-label" htmlFor="login-email">
+                Email address
+              </label>
               <input
                 id="login-email"
                 type="email"
@@ -191,7 +210,9 @@ export default function AuthFormPanel() {
             </div>
 
             <div>
-              <label className="form-label" htmlFor="login-password">Password</label>
+              <label className="form-label" htmlFor="login-password">
+                Password
+              </label>
               <div className="relative">
                 <input
                   id="login-password"
@@ -257,7 +278,9 @@ export default function AuthFormPanel() {
           <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="form-label" htmlFor="signup-fullname">Full Name</label>
+                <label className="form-label" htmlFor="signup-fullname">
+                  Full Name
+                </label>
                 <input
                   id="signup-fullname"
                   type="text"
@@ -270,7 +293,9 @@ export default function AuthFormPanel() {
                 )}
               </div>
               <div>
-                <label className="form-label" htmlFor="signup-username">Username</label>
+                <label className="form-label" htmlFor="signup-username">
+                  Username
+                </label>
                 <input
                   id="signup-username"
                   type="text"
@@ -279,7 +304,10 @@ export default function AuthFormPanel() {
                   {...signupForm.register('username', {
                     required: 'Username is required',
                     minLength: { value: 3, message: 'Min 3 characters' },
-                    pattern: { value: /^[a-zA-Z0-9_]+$/, message: 'Letters, numbers, underscores only' },
+                    pattern: {
+                      value: /^[a-zA-Z0-9_]+$/,
+                      message: 'Letters, numbers, underscores only',
+                    },
                   })}
                 />
                 {signupForm.formState.errors.username && (
@@ -289,7 +317,9 @@ export default function AuthFormPanel() {
             </div>
 
             <div>
-              <label className="form-label" htmlFor="signup-email">Email address</label>
+              <label className="form-label" htmlFor="signup-email">
+                Email address
+              </label>
               <input
                 id="signup-email"
                 type="email"
@@ -307,7 +337,9 @@ export default function AuthFormPanel() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="form-label" htmlFor="signup-password">Password</label>
+                <label className="form-label" htmlFor="signup-password">
+                  Password
+                </label>
                 <div className="relative">
                   <input
                     id="signup-password"
@@ -333,14 +365,18 @@ export default function AuthFormPanel() {
                 )}
               </div>
               <div>
-                <label className="form-label" htmlFor="signup-confirm">Confirm Password</label>
+                <label className="form-label" htmlFor="signup-confirm">
+                  Confirm Password
+                </label>
                 <div className="relative">
                   <input
                     id="signup-confirm"
                     type={showConfirmPassword ? 'text' : 'password'}
                     className="form-input pr-10"
                     placeholder="Repeat password"
-                    {...signupForm.register('confirmPassword', { required: 'Please confirm your password' })}
+                    {...signupForm.register('confirmPassword', {
+                      required: 'Please confirm your password',
+                    })}
                   />
                   <button
                     type="button"
@@ -352,30 +388,42 @@ export default function AuthFormPanel() {
                   </button>
                 </div>
                 {signupForm.formState.errors.confirmPassword && (
-                  <p className="form-error">{signupForm.formState.errors.confirmPassword.message}</p>
+                  <p className="form-error">
+                    {signupForm.formState.errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="form-label" htmlFor="signup-exp">Experience Level</label>
+                <label className="form-label" htmlFor="signup-exp">
+                  Experience Level
+                </label>
                 <select
                   id="signup-exp"
                   className="form-input"
-                  {...signupForm.register('experienceLevel', { required: 'Select your experience' })}
+                  {...signupForm.register('experienceLevel', {
+                    required: 'Select your experience',
+                  })}
                 >
                   <option value="">Select level</option>
                   {experienceLevels.map((l) => (
-                    <option key={`exp-${l.value}`} value={l.value}>{l.label}</option>
+                    <option key={`exp-${l.value}`} value={l.value}>
+                      {l.label}
+                    </option>
                   ))}
                 </select>
                 {signupForm.formState.errors.experienceLevel && (
-                  <p className="form-error">{signupForm.formState.errors.experienceLevel.message}</p>
+                  <p className="form-error">
+                    {signupForm.formState.errors.experienceLevel.message}
+                  </p>
                 )}
               </div>
               <div>
-                <label className="form-label" htmlFor="signup-style">Trading Style</label>
+                <label className="form-label" htmlFor="signup-style">
+                  Trading Style
+                </label>
                 <select
                   id="signup-style"
                   className="form-input"
@@ -383,7 +431,9 @@ export default function AuthFormPanel() {
                 >
                   <option value="">Select style</option>
                   {tradingStyles.map((s) => (
-                    <option key={`style-${s.value}`} value={s.value}>{s.label}</option>
+                    <option key={`style-${s.value}`} value={s.value}>
+                      {s.label}
+                    </option>
                   ))}
                 </select>
                 {signupForm.formState.errors.tradingStyle && (
@@ -393,7 +443,9 @@ export default function AuthFormPanel() {
             </div>
 
             <div>
-              <label className="form-label" htmlFor="signup-country">Country</label>
+              <label className="form-label" htmlFor="signup-country">
+                Country
+              </label>
               <select
                 id="signup-country"
                 className="form-input"
@@ -401,7 +453,9 @@ export default function AuthFormPanel() {
               >
                 <option value="">Select country</option>
                 {countries.map((c) => (
-                  <option key={`country-${c}`} value={c}>{c}</option>
+                  <option key={`country-${c}`} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
               {signupForm.formState.errors.country && (
@@ -426,13 +480,16 @@ export default function AuthFormPanel() {
 
             <p className="text-xs text-muted-foreground text-center">
               By signing up, you agree to our{' '}
-              <button type="button" className="text-primary hover:underline">Terms of Service</button>
-              {' '}and{' '}
-              <button type="button" className="text-primary hover:underline">Privacy Policy</button>
+              <button type="button" className="text-primary hover:underline">
+                Terms of Service
+              </button>{' '}
+              and{' '}
+              <button type="button" className="text-primary hover:underline">
+                Privacy Policy
+              </button>
             </p>
           </form>
         )}
-
       </div>
     </div>
   );

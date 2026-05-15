@@ -51,13 +51,16 @@ export default function KpiCard({
   isAlert = false,
 }: KpiCardProps) {
   const trendIcon =
-    trend === 'up' ? <TrendingUp size={12} /> :
-    trend === 'down' ? <TrendingDown size={12} /> :
-    <Minus size={12} />;
+    trend === 'up' ? (
+      <TrendingUp size={12} />
+    ) : trend === 'down' ? (
+      <TrendingDown size={12} />
+    ) : (
+      <Minus size={12} />
+    );
 
   const trendColor =
-    trend === 'up' ? 'text-green-400' :
-    trend === 'down'? 'text-red-400' : 'text-muted-foreground';
+    trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-muted-foreground';
 
   return (
     <div
@@ -70,12 +73,16 @@ export default function KpiCard({
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {label}
         </p>
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBgStyles[variant]}`}>
+        <div
+          className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconBgStyles[variant]}`}
+        >
           {icon}
         </div>
       </div>
 
-      <p className={`font-tabular font-bold ${isHero ? 'text-4xl' : 'text-2xl'} ${valueStyles[variant]} mb-1`}>
+      <p
+        className={`font-tabular font-bold ${isHero ? 'text-4xl' : 'text-2xl'} ${valueStyles[variant]} mb-1`}
+      >
         {value}
       </p>
 

@@ -34,7 +34,7 @@ export default function UserAvatar({
   const sizeConfig = SIZE_CLASSES[size];
   const initials = useMemo(
     () => getInitials(displayName, profile?.email),
-    [displayName, profile?.email],
+    [displayName, profile?.email]
   );
   const avatarUrl = profile?.avatarUrl ?? null;
   const hasInitials = initials.length > 0;
@@ -64,9 +64,7 @@ export default function UserAvatar({
   if (showImage && avatarUrl) {
     return (
       <span className={baseClass} title={displayName}>
-        {!imageLoaded && (
-          <span className="absolute inset-0 animate-pulse bg-muted" aria-hidden />
-        )}
+        {!imageLoaded && <span className="absolute inset-0 animate-pulse bg-muted" aria-hidden />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={avatarUrl}

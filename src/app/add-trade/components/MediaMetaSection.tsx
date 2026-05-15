@@ -1,6 +1,6 @@
 'use client';
 import React, { useRef, useState } from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import { TradeFormData } from './AddTradeForm';
 import { Upload, X, Camera, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -24,7 +24,15 @@ interface ImageUploadZoneProps {
   zoneId: string;
 }
 
-function ImageUploadZone({ label, description, icon, files, onAdd, onRemove, zoneId }: ImageUploadZoneProps) {
+function ImageUploadZone({
+  label,
+  description,
+  icon,
+  files,
+  onAdd,
+  onRemove,
+  zoneId,
+}: ImageUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -41,13 +49,21 @@ function ImageUploadZone({ label, description, icon, files, onAdd, onRemove, zon
 
       {/* Drop Zone */}
       <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFiles(e.dataTransfer.files); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          handleFiles(e.dataTransfer.files);
+        }}
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-150 ${
           isDragging
-            ? 'border-primary bg-primary/10' :'border-border hover:border-zinc-600 hover:bg-muted/30'
+            ? 'border-primary bg-primary/10'
+            : 'border-border hover:border-zinc-600 hover:bg-muted/30'
         }`}
       >
         <input
@@ -64,7 +80,9 @@ function ImageUploadZone({ label, description, icon, files, onAdd, onRemove, zon
             {icon}
           </div>
           <div>
-            <p className="text-xs font-medium text-foreground">Drop images here or click to upload</p>
+            <p className="text-xs font-medium text-foreground">
+              Drop images here or click to upload
+            </p>
             <p className="text-xs text-muted-foreground">PNG, JPG, WebP up to 10MB each</p>
           </div>
         </div>
@@ -129,7 +147,8 @@ function StarRating({
             <span
               className={`${
                 star <= (hovered || value)
-                  ? 'text-amber-400 star-rating-glow' :'text-muted-foreground'
+                  ? 'text-amber-400 star-rating-glow'
+                  : 'text-muted-foreground'
               } transition-colors duration-100`}
             >
               ★
@@ -144,13 +163,7 @@ function StarRating({
   );
 }
 
-function TagInput({
-  tags,
-  onChange,
-}: {
-  tags: string[];
-  onChange: (tags: string[]) => void;
-}) {
+function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
   const [input, setInput] = useState('');
 
   const addTag = (raw: string) => {
@@ -165,7 +178,20 @@ function TagInput({
     onChange(tags.filter((t) => t !== tag));
   };
 
-  const suggestions = ['breakout', 'trend', 'reversal', 'news-trade', 'high-rr', 'fomo', 'revenge', 'planned', 'impulsive', 'morning-session', 'london', 'ny-session'];
+  const suggestions = [
+    'breakout',
+    'trend',
+    'reversal',
+    'news-trade',
+    'high-rr',
+    'fomo',
+    'revenge',
+    'planned',
+    'impulsive',
+    'morning-session',
+    'london',
+    'ny-session',
+  ];
 
   return (
     <div>
@@ -199,8 +225,14 @@ function TagInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') { e.preventDefault(); addTag(input); }
-            if (e.key === ',' || e.key === ' ') { e.preventDefault(); addTag(input); }
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addTag(input);
+            }
+            if (e.key === ',' || e.key === ' ') {
+              e.preventDefault();
+              addTag(input);
+            }
           }}
           className="form-input flex-1 text-sm"
           placeholder="Type tag and press Enter or comma"
@@ -219,16 +251,19 @@ function TagInput({
       {/* Suggestions */}
       <div className="flex flex-wrap gap-1.5 mt-2">
         <span className="text-xs text-muted-foreground">Suggestions:</span>
-        {suggestions.filter((s) => !tags.includes(s)).slice(0, 6).map((s) => (
-          <button
-            key={`tag-sug-${s}`}
-            type="button"
-            onClick={() => onChange([...tags, s])}
-            className="text-xs text-muted-foreground hover:text-foreground border border-border hover:border-zinc-600 px-2 py-0.5 rounded-full transition-colors duration-100"
-          >
-            + {s}
-          </button>
-        ))}
+        {suggestions
+          .filter((s) => !tags.includes(s))
+          .slice(0, 6)
+          .map((s) => (
+            <button
+              key={`tag-sug-${s}`}
+              type="button"
+              onClick={() => onChange([...tags, s])}
+              className="text-xs text-muted-foreground hover:text-foreground border border-border hover:border-zinc-600 px-2 py-0.5 rounded-full transition-colors duration-100"
+            >
+              + {s}
+            </button>
+          ))}
       </div>
     </div>
   );
@@ -236,9 +271,12 @@ function TagInput({
 
 export default function MediaMetaSection({
   form,
-  entryImages, setEntryImages,
-  exitImages, setExitImages,
-  chartImages, setChartImages,
+  entryImages,
+  setEntryImages,
+  exitImages,
+  setExitImages,
+  chartImages,
+  setChartImages,
 }: MediaMetaSectionProps) {
   const { watch, setValue, control } = form;
   const tags = watch('tags');
@@ -282,9 +320,7 @@ export default function MediaMetaSection({
       <Controller
         name="tags"
         control={control}
-        render={({ field }) => (
-          <TagInput tags={field.value} onChange={field.onChange} />
-        )}
+        render={({ field }) => <TagInput tags={field.value} onChange={field.onChange} />}
       />
 
       {/* Confidence Level + Trade Rating */}

@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import {
@@ -121,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       displayName,
       displaySubtitle,
     }),
-    [user, session, profile, isLoading, signOut, displayName, displaySubtitle],
+    [user, session, profile, isLoading, signOut, displayName, displaySubtitle]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
