@@ -84,18 +84,10 @@ export default function AuthBrandPanel() {
           ))}
         </div>
       </div>
-      {/* Stats row */}
-      <div className="relative z-10 flex gap-6">
-        {[
-          { id: 'stat-traders', value: '2,400+', label: 'Active Traders' },
-          { id: 'stat-trades', value: '48K+', label: 'Trades Logged' },
-          { id: 'stat-improvement', value: '+23%', label: 'Avg Win Rate Gain' },
-        ]?.map((stat) => (
-          <div key={stat?.id}>
-            <p className="text-xl font-bold text-foreground font-tabular">{stat?.value}</p>
-            <p className="text-xs text-muted-foreground">{stat?.label}</p>
-          </div>
-        ))}
+      <div className="relative z-10">
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Your journal starts empty. Every metric, chart, and insight is built only from trades you log.
+        </p>
       </div>
     </div>
   );

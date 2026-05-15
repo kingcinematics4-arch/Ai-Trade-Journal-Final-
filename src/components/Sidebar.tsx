@@ -49,7 +49,6 @@ const primaryNavItems: NavItem[] = [
     label: 'AI Coach',
     href: '/dashboard',
     icon: <BrainCircuit size={18} />,
-    badge: 3,
   },
 ];
 
@@ -60,7 +59,6 @@ const secondaryNavItems: NavItem[] = [
     label: 'Notifications',
     href: '/dashboard',
     icon: <Bell size={18} />,
-    badge: 2,
   },
   { id: 'nav-profile', label: 'Profile', href: '/dashboard', icon: <User size={18} /> },
   { id: 'nav-settings', label: 'Settings', href: '/dashboard', icon: <Settings size={18} /> },

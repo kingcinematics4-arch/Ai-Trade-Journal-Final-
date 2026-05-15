@@ -235,14 +235,6 @@
            hover:text-foreground transition-all duration-150 cursor-pointer;
   }
 
-  .demo-banner {
-    @apply rounded-lg border border-amber-500/20 bg-amber-500/5 p-4;
-  }
-
-  .demo-item {
-    @apply flex items-center justify-between gap-2 p-2 rounded-md bg-black/20 border border-white/5;
-  }
-
   .tab-button {
     @apply flex-1 py-2 text-sm font-medium rounded-md transition-all duration-150 
            text-muted-foreground hover:text-foreground;

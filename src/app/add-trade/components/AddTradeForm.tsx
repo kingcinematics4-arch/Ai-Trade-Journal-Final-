@@ -15,6 +15,8 @@ import {
   Camera,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { createClient } from '@/lib/supabase';
 import TradeInfoSection from './TradeInfoSection';
 import PerformanceSection from './PerformanceSection';
 import PsychologySection from './PsychologySection';
@@ -55,6 +57,7 @@ type SectionKey = 'tradeInfo' | 'performance' | 'psychology' | 'media';
 
 export default function AddTradeForm() {
   const router = useRouter();
+  const { user } = useAuth();
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
     tradeInfo: true,
     performance: true,
@@ -128,13 +131,51 @@ export default function AddTradeForm() {
   }, [form]);
 
   const handleSubmit = async (data: TradeFormData) => {
-    setIsSubmitting(true);
-    // BACKEND: POST /api/trades — save trade to database with images
-    // BACKEND: POST /api/ai-insights/generate — trigger rule-based analysis
-    await new Promise((r) => setTimeout(r, 1400));
+    if (!user) {
+      toast.error('You must be signed in to log a trade.');
+      return;
+    }
 
-    toast.success('Trade logged successfully! AI analysis generated.');
-    setTimeout(() => router.push('/dashboard'), 1000);
+    setIsSubmitting(true);
+    const supabase = createClient();
+
+    const { error } = await supabase.from('trades').insert({
+      user_id: user.id,
+      trade_title: data.tradeTitle,
+      trade_date: data.tradeDate,
+      market_type: data.marketType,
+      asset_name: data.assetName,
+      trade_direction: data.tradeDirection,
+      entry_price: parseFloat(data.entryPrice) || null,
+      exit_price: parseFloat(data.exitPrice) || null,
+      stop_loss: parseFloat(data.stopLoss) || null,
+      take_profit: parseFloat(data.takeProfit) || null,
+      lot_size: parseFloat(data.lotSize) || null,
+      risk_amount: parseFloat(data.riskAmount) || null,
+      trade_duration: data.tradeDuration || null,
+      pnl_amount: parseFloat(data.pnlAmount) || null,
+      rr_ratio: parseFloat(data.rrRatio) || null,
+      trade_status: data.tradeStatus || null,
+      strategy_used: data.strategyUsed || null,
+      emotion_before: data.emotionBefore || null,
+      emotion_after: data.emotionAfter || null,
+      mistake_category: data.mistakeCategory || null,
+      lessons_learned: data.lessonsLearned || null,
+      notes: data.notes || null,
+      tags: data.tags,
+      confidence_level: data.confidenceLevel,
+      trade_rating: data.tradeRating,
+    });
+
+    if (error) {
+      toast.error(error.message || 'Failed to save trade.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    toast.success('Trade logged successfully.');
+    router.push('/dashboard');
+    router.refresh();
     setIsSubmitting(false);
   };
 

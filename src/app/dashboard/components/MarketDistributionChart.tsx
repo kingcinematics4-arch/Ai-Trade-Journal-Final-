@@ -1,20 +1,18 @@
 'use client';
+
 import React, { useState } from 'react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart as PieChartIcon } from 'lucide-react';
+import { useTrades } from '@/contexts/TradesContext';
+import type { MarketDistributionPoint } from '@/lib/trades/types';
+import { ChartSkeleton } from '@/components/ui/LoadingSkeleton';
+import EmptyState from '@/components/ui/EmptyState';
 
-// BACKEND: GET /api/analytics/market-distribution — replace with real data
-const marketData = [
-  { id: 'mkt-crypto', name: 'Crypto', value: 42, trades: 25, pnl: 2140 },
-  { id: 'mkt-forex', name: 'Forex', value: 31, trades: 18, pnl: 1180 },
-  { id: 'mkt-stocks', name: 'Stocks', value: 18, trades: 11, pnl: 720 },
-  { id: 'mkt-futures', name: 'Futures', value: 9, trades: 5, pnl: 247 },
-];
-
-const COLORS = ['var(--primary)', 'var(--accent)', '#f59e0b', '#8b5cf6'];
+const COLORS = ['var(--primary)', 'var(--accent)', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: (typeof marketData)[0] }>;
+  payload?: Array<{ payload: MarketDistributionPoint }>;
 }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
@@ -34,7 +32,9 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         </div>
         <div className="flex justify-between gap-3">
           <span className="text-muted-foreground">P&L</span>
-          <span className="font-tabular text-green-400">+${d.pnl.toLocaleString()}</span>
+          <span className={`font-tabular ${d.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {d.pnl >= 0 ? '+' : ''}${Math.abs(d.pnl).toLocaleString()}
+          </span>
         </div>
       </div>
     </div>
@@ -42,7 +42,26 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 }
 
 export default function MarketDistributionChart() {
+  const { analytics, isLoading, isEmpty } = useTrades();
+  const marketData = analytics.marketDistribution;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  if (isLoading) {
+    return <ChartSkeleton height={180} />;
+  }
+
+  if (isEmpty || marketData.length === 0) {
+    return (
+      <EmptyState
+        icon={<PieChartIcon size={24} />}
+        title="No market breakdown"
+        description="Market distribution will appear once you log trades across asset classes."
+        actionLabel="Add a trade"
+        actionHref="/add-trade"
+        className="py-6"
+      />
+    );
+  }
 
   return (
     <div>
@@ -72,7 +91,6 @@ export default function MarketDistributionChart() {
         </PieChart>
       </ResponsiveContainer>
 
-      {/* Legend */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2">
         {marketData.map((d, i) => (
           <div key={d.id} className="flex items-center gap-2">

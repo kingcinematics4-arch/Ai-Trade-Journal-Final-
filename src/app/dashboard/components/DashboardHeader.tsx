@@ -100,7 +100,6 @@ export default function DashboardHeader() {
           aria-label="Notifications"
         >
           <Bell size={16} />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
         </button>
         <Link href="/add-trade" className="btn-primary flex items-center gap-2 py-2 px-4 text-sm">
           <PlusCircle size={15} />

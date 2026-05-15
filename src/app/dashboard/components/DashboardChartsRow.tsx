@@ -22,7 +22,7 @@ export default function DashboardChartsRow() {
           <div>
             <h3 className="text-base font-semibold text-foreground">P&L Trend</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Daily profit/loss over the last 30 days
+              Cumulative P&L from your logged trades
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
