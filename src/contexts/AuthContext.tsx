@@ -10,16 +10,16 @@ import {
 } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
+import {
+  buildProfile,
+  getDisplayName,
+  getDisplaySubtitle,
+  type UserProfile,
+} from '@/lib/auth/profile';
 
-export type UserProfile = {
-  id: string;
-  email: string | undefined;
-  fullName: string | null;
-  username: string | null;
-  experienceLevel: string | null;
-  tradingStyle: string | null;
-  country: string | null;
-};
+export type { UserProfile };
+export { getDisplayName, getDisplaySubtitle, buildProfile } from '@/lib/auth/profile';
+export { getInitials, getAvatarUrlFromMetadata } from '@/lib/auth/profile';
 
 type AuthContextValue = {
   user: User | null;
@@ -39,44 +39,6 @@ function logAuth(event: string, payload?: Record<string, unknown>) {
   }
 }
 
-function buildProfile(user: User | null): UserProfile | null {
-  if (!user) return null;
-
-  const meta = user.user_metadata ?? {};
-
-  return {
-    id: user.id,
-    email: user.email,
-    fullName: (meta.full_name as string) ?? null,
-    username: (meta.username as string) ?? null,
-    experienceLevel: (meta.experience_level as string) ?? null,
-    tradingStyle: (meta.trading_style as string) ?? null,
-    country: (meta.country as string) ?? null,
-  };
-}
-
-function formatLabel(value: string): string {
-  return value
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-export function getDisplayName(profile: UserProfile | null): string {
-  if (!profile) return '';
-  if (profile.fullName?.trim()) return profile.fullName.trim();
-  if (profile.username?.trim()) return profile.username.trim();
-  if (profile.email) return profile.email.split('@')[0];
-  return 'Trader';
-}
-
-export function getDisplaySubtitle(profile: UserProfile | null): string {
-  if (!profile) return '';
-  if (profile.tradingStyle) return formatLabel(profile.tradingStyle);
-  if (profile.experienceLevel) return formatLabel(profile.experienceLevel);
-  return profile.email ?? '';
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => createClient(), []);
   const [session, setSession] = useState<Session | null>(null);
@@ -91,10 +53,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(nextSession);
     setUser(nextSession?.user ?? null);
 
+    const meta = (nextSession?.user?.user_metadata ?? {}) as Record<string, unknown>;
+
     logAuth('state updated', {
       userId: nextSession?.user?.id ?? null,
       email: nextSession?.user?.email ?? null,
       hasSession: Boolean(nextSession),
+      hasAvatar: Boolean(meta.avatar_url ?? meta.picture),
     });
   }, []);
 

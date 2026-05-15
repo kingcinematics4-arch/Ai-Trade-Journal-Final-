@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/components/ui/LoadingSkeleton';
+import UserProfileSummary from '@/components/UserProfileSummary';
+import UserAvatar from '@/components/ui/UserAvatar';
 import AppLogo from '@/components/ui/AppLogo';
 import {
   LayoutDashboard,
@@ -18,7 +19,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
   ShieldCheck,
 } from 'lucide-react';
 
@@ -52,7 +52,7 @@ const secondaryNavItems: NavItem[] = [
 export default function Sidebar({ activePath }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
-  const { profile, displayName, displaySubtitle, isLoading, signOut } = useAuth();
+  const { profile, displayName, isLoading, signOut } = useAuth();
 
   const handleLogout = async () => {
     await signOut();
