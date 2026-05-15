@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Loader2, Copy, Check, Zap } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ToastProvider from '@/components/ui/ToastProvider';
 import { createClient } from '@/lib/supabase';
@@ -25,11 +25,6 @@ interface SignupFormData {
   tradingStyle: string;
   country: string;
 }
-
-const demoCredentials = [
-  { id: 'cred-user', role: 'Trader', email: 'marcus@aitj.io', password: 'TradeWin2026!' },
-  { id: 'cred-admin', role: 'Admin', email: 'admin@aitj.io', password: 'AdminAccess2026!' },
-];
 
 const experienceLevels = [
   { value: 'beginner', label: 'Beginner (< 1 year)' },
@@ -56,7 +51,6 @@ export default function AuthFormPanel() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const router = useRouter();
 
   const loginForm = useForm<LoginFormData>({
@@ -74,7 +68,7 @@ export default function AuthFormPanel() {
     setIsLoading(true);
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
     });
@@ -83,6 +77,13 @@ export default function AuthFormPanel() {
       loginForm.setError('email', { message: error.message });
       setIsLoading(false);
       return;
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[auth] login success', {
+        userId: authData.user?.id,
+        email: authData.user?.email,
+      });
     }
 
     toast.success('Welcome back!');
@@ -99,7 +100,7 @@ export default function AuthFormPanel() {
     setIsLoading(true);
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -120,20 +121,23 @@ export default function AuthFormPanel() {
       return;
     }
 
-    toast.success('Account created! Check your email to confirm.');
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[auth] signup success', {
+        userId: authData.user?.id,
+        email: authData.user?.email,
+        hasSession: Boolean(authData.session),
+      });
+    }
+
+    if (authData.session) {
+      toast.success('Account created! Welcome aboard.');
+      router.push('/dashboard');
+      router.refresh();
+    } else {
+      toast.success('Account created! Check your email to confirm.');
+    }
+
     setIsLoading(false);
-  };
-
-  const autofillCredential = (cred: typeof demoCredentials[0]) => {
-    loginForm.setValue('email', cred.email);
-    loginForm.setValue('password', cred.password);
-    setActiveTab('login');
-  };
-
-  const copyToClipboard = async (text: string, fieldId: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedField(fieldId);
-    setTimeout(() => setCopiedField(null), 2000);
   };
 
   return (
@@ -258,7 +262,7 @@ export default function AuthFormPanel() {
                   id="signup-fullname"
                   type="text"
                   className="form-input"
-                  placeholder="Marcus Chen"
+                  placeholder="Your full name"
                   {...signupForm.register('fullName', { required: 'Full name is required' })}
                 />
                 {signupForm.formState.errors.fullName && (
@@ -271,7 +275,7 @@ export default function AuthFormPanel() {
                   id="signup-username"
                   type="text"
                   className="form-input"
-                  placeholder="marcustrader"
+                  placeholder="your_username"
                   {...signupForm.register('username', {
                     required: 'Username is required',
                     minLength: { value: 3, message: 'Min 3 characters' },
@@ -429,49 +433,6 @@ export default function AuthFormPanel() {
           </form>
         )}
 
-        {/* Demo Credentials Box */}
-        <div className="demo-banner">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap size={14} className="text-amber-400" />
-            <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Demo Accounts</p>
-          </div>
-          <div className="space-y-2">
-            {demoCredentials.map((cred) => (
-              <div
-                key={cred.id}
-                className="demo-item"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xs font-semibold text-muted-foreground w-12 flex-shrink-0">
-                    {cred.role}
-                  </span>
-                  <span className="text-xs text-foreground font-mono truncate">{cred.email}</span>
-                </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(cred.password, `${cred.id}-pw`)}
-                    className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                    aria-label={`Copy password for ${cred.role}`}
-                  >
-                    {copiedField === `${cred.id}-pw` ? (
-                      <Check size={12} className="text-accent" />
-                    ) : (
-                      <Copy size={12} />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillCredential(cred)}
-                    className="text-xs text-primary hover:text-blue-400 font-medium transition-colors px-1.5 py-0.5 rounded hover:bg-primary/10"
-                  >
-                    Use
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

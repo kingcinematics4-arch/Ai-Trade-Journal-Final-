@@ -3,13 +3,18 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { RefreshCw, Bell, PlusCircle, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/LoadingSkeleton';
 
 const timeframes = ['Today', 'This Week', 'This Month', 'Last 3 Months', 'All Time'];
 
 export default function DashboardHeader() {
+  const { displayName, profile, isLoading } = useAuth();
   const [selectedTimeframe, setSelectedTimeframe] = useState('This Month');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
+
+  const firstName = displayName.split(' ')[0] || displayName;
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -24,7 +29,16 @@ export default function DashboardHeader() {
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Welcome back, Marcus — here is your trading performance overview
+          {isLoading ? (
+            <Skeleton className="h-4 w-72 inline-block" />
+          ) : (
+            <>
+              Welcome back, {firstName} — here is your trading performance overview
+              {profile?.email && (
+                <span className="block text-xs mt-1 text-muted-foreground/80">{profile.email}</span>
+              )}
+            </>
+          )}
         </p>
       </div>
       <div className="flex items-center gap-2">

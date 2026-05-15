@@ -1,145 +1,112 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Eye, Pencil, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import Modal from '@/components/ui/Modal';
+import { TableRowSkeleton } from '@/components/ui/LoadingSkeleton';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { createClient } from '@/lib/supabase';
 
-// BACKEND: GET /api/trades?limit=8&sort=date_desc — replace with real data
-const mockTrades = [
-  {
-    id: 'trade-001',
-    asset: 'BTC/USDT',
-    market: 'Crypto',
-    direction: 'buy' as const,
-    entry: 61240.50,
-    exit: 63480.00,
-    pnl: 1240.00,
-    rr: 2.8,
-    strategy: 'Breakout',
-    status: 'win' as const,
-    date: 'May 8, 2026',
-    duration: '4h 22m',
-    rating: 5,
-  },
-  {
-    id: 'trade-002',
-    asset: 'EUR/USD',
-    market: 'Forex',
-    direction: 'sell' as const,
-    entry: 1.0842,
-    exit: 1.0798,
-    pnl: 440.00,
-    rr: 2.1,
-    strategy: 'Trend Follow',
-    status: 'win' as const,
-    date: 'May 9, 2026',
-    duration: '2h 05m',
-    rating: 4,
-  },
-  {
-    id: 'trade-003',
-    asset: 'AAPL',
-    market: 'Stocks',
-    direction: 'buy' as const,
-    entry: 187.40,
-    exit: 184.20,
-    pnl: -320.00,
-    rr: 0.6,
-    strategy: 'Reversal',
-    status: 'loss' as const,
-    date: 'May 7, 2026',
-    duration: '1h 48m',
-    rating: 2,
-  },
-  {
-    id: 'trade-004',
-    asset: 'ETH/USDT',
-    market: 'Crypto',
-    direction: 'buy' as const,
-    entry: 2940.00,
-    exit: 3120.50,
-    pnl: 680.00,
-    rr: 2.4,
-    strategy: 'Breakout',
-    status: 'win' as const,
-    date: 'May 10, 2026',
-    duration: '6h 10m',
-    rating: 5,
-  },
-  {
-    id: 'trade-005',
-    asset: 'GBP/JPY',
-    market: 'Forex',
-    direction: 'sell' as const,
-    entry: 196.420,
-    exit: 195.880,
-    pnl: 380.00,
-    rr: 1.9,
-    strategy: 'Range',
-    status: 'win' as const,
-    date: 'May 6, 2026',
-    duration: '45m',
-    rating: 3,
-  },
-  {
-    id: 'trade-006',
-    asset: 'TSLA',
-    market: 'Stocks',
-    direction: 'buy' as const,
-    entry: 178.60,
-    exit: 175.20,
-    pnl: -210.00,
-    rr: 0.8,
-    strategy: 'Momentum',
-    status: 'loss' as const,
-    date: 'May 5, 2026',
-    duration: '3h 20m',
-    rating: 2,
-  },
-  {
-    id: 'trade-007',
-    asset: 'SOL/USDT',
-    market: 'Crypto',
-    direction: 'buy' as const,
-    entry: 148.20,
-    exit: 156.80,
-    pnl: 520.00,
-    rr: 2.6,
-    strategy: 'Breakout',
-    status: 'win' as const,
-    date: 'May 4, 2026',
-    duration: '8h 15m',
-    rating: 4,
-  },
-  {
-    id: 'trade-008',
-    asset: 'NQ Futures',
-    market: 'Futures',
-    direction: 'sell' as const,
-    entry: 18420.00,
-    exit: 18295.00,
-    pnl: 247.00,
-    rr: 1.5,
-    strategy: 'Trend Follow',
-    status: 'win' as const,
-    date: 'May 3, 2026',
-    duration: '1h 30m',
-    rating: 3,
-  },
-];
+export interface TradeRow {
+  id: string;
+  asset: string;
+  market: string;
+  direction: 'buy' | 'sell';
+  entry: number;
+  exit: number;
+  pnl: number;
+  rr: number;
+  strategy: string;
+  status: 'win' | 'loss' | 'breakeven';
+  date: string;
+  duration: string;
+  rating: number;
+}
+
 
 type SortKey = 'date' | 'pnl' | 'rr';
 type SortDir = 'asc' | 'desc';
 
+function mapDbTrade(row: Record<string, unknown>): TradeRow {
+  const tradeDate = row.trade_date ?? row.created_at;
+  const formattedDate =
+    typeof tradeDate === 'string' || tradeDate instanceof Date
+      ? new Date(tradeDate).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      : '—';
+
+  return {
+    id: String(row.id),
+    asset: String(row.asset_name ?? row.asset ?? '—'),
+    market: String(row.market_type ?? row.market ?? '—'),
+    direction: (row.trade_direction as 'buy' | 'sell') ?? 'buy',
+    entry: Number(row.entry_price ?? 0),
+    exit: Number(row.exit_price ?? 0),
+    pnl: Number(row.pnl_amount ?? row.pnl ?? 0),
+    rr: Number(row.rr_ratio ?? row.rr ?? 0),
+    strategy: String(row.strategy_used ?? row.strategy ?? '—'),
+    status: (row.trade_status as TradeRow['status']) ?? 'breakeven',
+    date: formattedDate,
+    duration: String(row.trade_duration ?? '—'),
+    rating: Number(row.trade_rating ?? 0),
+  };
+}
+
 export default function RecentTradesTable() {
-  const [trades, setTrades] = useState(mockTrades);
+  const { user, isLoading: authLoading } = useAuth();
+  const [trades, setTrades] = useState<TradeRow[]>([]);
+  const [isLoadingTrades, setIsLoadingTrades] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      setTrades([]);
+      setIsLoadingTrades(false);
+      return;
+    }
+
+    const supabase = createClient();
+
+    const loadTrades = async () => {
+      setIsLoadingTrades(true);
+
+      const { data, error } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(8);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[auth] trades fetch', {
+          userId: user.id,
+          count: data?.length ?? 0,
+          error: error?.message ?? null,
+        });
+      }
+
+      if (!error && data?.length) {
+        setTrades(data.map((row) => mapDbTrade(row as Record<string, unknown>)));
+      } else {
+        setTrades([]);
+      }
+
+      setIsLoadingTrades(false);
+    };
+
+    void loadTrades();
+  }, [user, authLoading]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -151,10 +118,22 @@ export default function RecentTradesTable() {
   };
 
   const confirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget || !user) return;
     setIsDeleting(true);
-    // BACKEND: DELETE /api/trades/:id — remove trade record
-    await new Promise((r) => setTimeout(r, 800));
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('trades')
+      .delete()
+      .eq('id', deleteTarget)
+      .eq('user_id', user.id);
+
+    if (error) {
+      toast.error('Failed to delete trade');
+      setIsDeleting(false);
+      return;
+    }
+
     setTrades((prev) => prev.filter((t) => t.id !== deleteTarget));
     setDeleteTarget(null);
     setIsDeleting(false);
@@ -209,7 +188,21 @@ export default function RecentTradesTable() {
             </tr>
           </thead>
           <tbody>
-            {trades.map((trade) => (
+            {(authLoading || isLoadingTrades) &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <TableRowSkeleton key={`trade-skel-${i}`} cols={9} />
+              ))}
+            {!authLoading && !isLoadingTrades && trades.length === 0 && (
+              <tr>
+                <td colSpan={9} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  No trades yet.{' '}
+                  <Link href="/add-trade" className="text-primary hover:underline">
+                    Log your first trade
+                  </Link>
+                </td>
+              </tr>
+            )}
+            {!authLoading && !isLoadingTrades && trades.map((trade) => (
               <tr
                 key={trade.id}
                 className={`border-b border-border/50 transition-colors duration-100 ${

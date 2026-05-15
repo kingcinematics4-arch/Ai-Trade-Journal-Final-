@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import AppLogo from '@/components/ui/AppLogo';
 import {
   LayoutDashboard,
@@ -51,10 +52,10 @@ const secondaryNavItems: NavItem[] = [
 export default function Sidebar({ activePath }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  const { profile, displayName, displaySubtitle, isLoading, signOut } = useAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.push('/');
     router.refresh();
   };
@@ -87,15 +88,29 @@ export default function Sidebar({ activePath }: SidebarProps) {
       {/* Account Info */}
       {!collapsed && (
         <div className="mx-3 mt-4 mb-2 p-2.5 bg-muted/50 rounded-lg border border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <TrendingUp size={14} className="text-primary" />
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Skeleton className="w-7 h-7 rounded-full flex-shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate">Marcus Chen</p>
-              <p className="text-xs text-muted-foreground truncate">Pro Trader</p>
+          ) : profile ? (
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <TrendingUp size={14} className="text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate" title={profile.id}>
+                  {displayName}
+                </p>
+                <p className="text-xs text-muted-foreground truncate" title={profile.email}>
+                  {displaySubtitle}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       )}
 
