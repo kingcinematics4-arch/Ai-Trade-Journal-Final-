@@ -34,56 +34,46 @@ export function parseSafeNumber(val: any): number {
   if (val === null || val === undefined) return 0;
   if (typeof val === 'number') return val;
   
-  const str = String(val).trim();
+  let str = String(val);
   
-  // 1. Identify loss/win indicators from text before stripping characters
-  // We check for (Red), (Green), and common sign symbols.
-  const isExplicitLoss = str.includes('(Red)') || str.includes('loss') || str.includes('-');
-  const isExplicitWin = str.includes('(Green)') || str.includes('win') || str.includes('+');
+  // 1. Remove everything inside parentheses (e.g. "(Green)")
+  str = str.replace(/\(.*?\)/g, '');
   
-  // 2. Extract only numeric characters (digits, dot, and negative sign)
-  // We keep the first minus sign if it exists, and the first dot.
-  // This removes "$", ",", "(Green)", etc.
-  const cleaned = str.replace(/[^0-9.-]+/g, '');
+  // 2. Remove $ and commas
+  str = str.replace(/[$,]/g, '');
   
-  // Handle edge case where multiple minus signs might exist or be misplaced
-  let parsed = parseFloat(cleaned);
+  // 3. Keep + and - but remove any other whitespace
+  str = str.trim();
   
-  if (isNaN(parsed)) return 0;
+  // 4. Convert to float
+  const parsed = parseFloat(str);
   
-  // 3. Apply logic for color-based signs if the numeric parsing was ambiguous
-  // If the string says "(Red)" but the number is positive, flip it to negative.
-  if (isExplicitLoss && parsed > 0) {
-    parsed = -parsed;
-  } 
-  // If the string says "(Green)" or has a "+", ensure it's positive.
-  else if (isExplicitWin && parsed < 0) {
-    parsed = Math.abs(parsed);
-  }
-  
-  // Return a clean number rounded to 2 decimals to avoid floating point noise
-  return Number(parsed.toFixed(2));
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 function normalizeStatus(status: string | null | undefined): TradeStatus {
-  if (status === 'win' || status === 'loss' || status === 'breakeven') return status;
+  if (!status) return 'breakeven';
+  const s = status.toLowerCase();
+  if (s === 'win' || s === 'profit') return 'win';
+  if (s === 'loss') return 'loss';
   return 'breakeven';
 }
 
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Raw trades received from DB:', trades);
-  }
-
-  const sorted = [...trades].sort((a, b) => {
-    const timeA = tradeTimestamp(a);
-    const timeB = tradeTimestamp(b);
+  // 3. Sort by DATE ascending, keep original order for ties (stable sort)
+  const indexed = trades.map((t, i) => ({ t, i }));
+  indexed.sort((a, b) => {
+    const timeA = tradeTimestamp(a.t);
+    const timeB = tradeTimestamp(b.t);
     if (timeA !== timeB) return timeA - timeB;
-    // Stable fallback if dates are identical
-    return (a.id ?? '').localeCompare(b.id ?? '');
+    return a.i - b.i;
   });
+  const sorted = indexed.map(x => x.t);
+
+  // DEBUG: Sorted trade list
+  console.log('[Debug] Sorted trade list (IDs):', sorted.map(t => t.id));
 
   // State for metrics
   let winCount = 0;
@@ -96,19 +86,29 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   // State for P&L trend
   let runningTotal = 0;
   const pnlTrend: PnlTrendPoint[] = [];
+  const pnlArray: number[] = [];
+  const cumulativeArray: number[] = [];
 
-  // Add an initial starting point at 0 so the chart has a baseline
-  if (sorted.length > 0) {
-    pnlTrend.push({ date: 'Start', pnl: 0, cumulative: 0 });
-  }
+  // 4. Start from 0 baseline
+  pnlTrend.push({ date: 'Start', pnl: 0, cumulative: 0 });
 
   for (const trade of sorted) {
-    const pnl = parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
+    let pnl = parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
     const rr = parseSafeNumber(trade.rr_ratio ?? (trade as any).rr);
+    const statusStr = trade.trade_status?.toLowerCase() || '';
+    
+    // 2. Break-even logic (B/E forces pnl to 0)
+    if (statusStr === 'b/e' || statusStr === 'breakeven') {
+      pnl = 0;
+    }
+    
     const status = normalizeStatus(trade.trade_status);
 
     runningTotal = Number((runningTotal + pnl).toFixed(2));
     
+    pnlArray.push(pnl);
+    cumulativeArray.push(runningTotal);
+
     if (status === 'win') winCount += 1;
     else if (status === 'loss') lossCount += 1;
     else breakevenCount += 1;
@@ -134,12 +134,17 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
       day: 'numeric' 
     });
     
+    // 5. Ensure chart dataset consumes ONLY numeric data
     pnlTrend.push({ 
       date: label, 
-      pnl, 
+      pnl: pnl, 
       cumulative: runningTotal 
     });
   }
+
+  // DEBUG: Final numeric arrays
+  console.log('[Debug] Parsed P&L array:', pnlArray);
+  console.log('[Debug] Cumulative array:', cumulativeArray);
 
   // Final totals
   const totalPnl = runningTotal;
@@ -161,11 +166,6 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
         else break;
       }
     }
-  }
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Final computed total P&L:', totalPnl);
-    console.log('[Analytics] P&L Trend dataset points:', pnlTrend.length);
   }
 
   const marketMap = new Map<string, { trades: number; pnl: number }>();
