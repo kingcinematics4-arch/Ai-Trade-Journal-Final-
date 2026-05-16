@@ -23,7 +23,7 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
   marketDistribution: [],
 };
 
-export function parseSafeNumber(value: string | number): number {
+export function parseSafeNumber(value: any): number {
   if (typeof value === "number") return isNaN(value) ? 0 : value;
   if (!value) return 0;
 
@@ -37,46 +37,55 @@ export function parseSafeNumber(value: string | number): number {
   return isNaN(num) ? 0 : num;
 }
 
-// STEP 1 & 2 — SINGLE SOURCE OF TRUTH PIPELINE
-export type EquityPoint = {
-  date: string;
-  pnl: number;
-  cumulative: number;
-};
+// STEP 2 — CREATE SINGLE CALCULATION FUNCTION (DETERMINISTIC)
+export function calculatePnL(trade: any): number {
+  const entry = Number(trade.entry_price);
+  const exit = Number(trade.exit_price);
+  const lots = Number(trade.lot_size || 1);
 
-export function buildEquityCurve(trades: any[]): EquityPoint[] {
-  const parseDate = (d: string) => new Date(Date.parse(d)).getTime();
+  if (isNaN(entry) || isNaN(exit)) return 0;
 
-  // STEP 2 — Build full pipeline in one place
-  const sorted = [...trades].sort((a, b) =>
-    parseDate(a.date || a.trade_date || a.created_at) - parseDate(b.date || b.trade_date || b.created_at)
+  // Rule: Recalculate from raw prices and direction
+  const diff =
+    trade.trade_direction === "buy"
+      ? exit - entry
+      : entry - exit;
+
+  return Number((diff * lots).toFixed(2));
+}
+
+// STEP 3 — BUILD EQUITY FROM RAW DATA ONLY
+export function buildEquity(trades: any[]): PnlTrendPoint[] {
+  // Sort by DATE ascending
+  const sorted = [...trades].sort(
+    (a, b) => new Date(a.trade_date || a.created_at).getTime() - new Date(b.trade_date || b.created_at).getTime()
   );
 
-  let running = 0;
+  let sum = 0;
 
   const curve = sorted.map(t => {
-    // Ensure pnl is numeric
-    const pnl = typeof t.pnl === "number" ? t.pnl : parseSafeNumber(t.pnl_amount ?? t.pnl);
+    // STEP 4 — ONLY use calculated values
+    const pnl = calculatePnL(t);
+    sum = Number((sum + pnl).toFixed(2));
 
-    running = Number((running + pnl).toFixed(2));
-
-    const dateStr = t.date || t.trade_date || t.created_at;
-    const label = new Date(parseDate(dateStr)).toLocaleDateString('en-US', { 
+    const dateStr = t.trade_date || t.created_at;
+    const label = new Date(dateStr).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
     });
 
     return {
       date: label,
-      pnl,
-      cumulative: running
+      pnl, // We keep pnl for tooltips, but derived from raw inputs
+      cumulative: sum
     };
   });
 
-  // STEP 5 — DEBUG CHECK
-  console.log('[Source of Truth] buildEquityCurve output:', curve);
-  
-  return curve;
+  // Baseline
+  return [
+    { date: 'Start', pnl: 0, cumulative: 0 },
+    ...curve
+  ];
 }
 
 function normalizeStatus(status: string | null | undefined): TradeStatus {
@@ -90,24 +99,13 @@ function normalizeStatus(status: string | null | undefined): TradeStatus {
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
-  // Mapping to initial numeric structure
-  const mappedTrades = trades.map(t => ({
-    ...t,
-    pnl: parseSafeNumber(t.pnl_amount ?? (t as any).pnl),
-    date: t.trade_date || t.created_at || new Date().toISOString()
-  }));
+  // STEP 3 & 4 — Build equity strictly from raw inputs
+  const pnlTrend = buildEquity(trades);
 
-  // STEP 3 & 4 — Use the single pipeline
-  const equityCurve = buildEquityCurve(mappedTrades);
-
-  // Add initial baseline for chart smoothness
-  const pnlTrend = [
-    { date: 'Start', pnl: 0, cumulative: 0 },
-    ...equityCurve
-  ];
+  // Total P&L from the last point of the deterministic curve
+  const totalPnl = pnlTrend.length > 0 ? pnlTrend[pnlTrend.length - 1].cumulative : 0;
 
   // Metrics calculation
-  let totalPnl = equityCurve.length > 0 ? equityCurve[equityCurve.length - 1].cumulative : 0;
   let winCount = 0;
   let lossCount = 0;
   let breakevenCount = 0;
@@ -115,8 +113,11 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let rrCount = 0;
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
-  for (const t of mappedTrades) {
+  for (const t of trades) {
+    const pnl = calculatePnL(t);
+    const statusStr = t.trade_status?.toLowerCase() || '';
     const status = normalizeStatus(t.trade_status);
+    
     if (status === 'win') winCount += 1;
     else if (status === 'loss') lossCount += 1;
     else breakevenCount += 1;
@@ -127,10 +128,10 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
       rrCount += 1;
     }
 
-    if (!bestTrade || t.pnl > bestTrade.pnl) {
+    if (!bestTrade || pnl > bestTrade.pnl) {
       const mapped = mapDbTrade(t as unknown as Record<string, unknown>);
       bestTrade = {
-        pnl: t.pnl,
+        pnl,
         asset: mapped.asset,
         strategy: mapped.strategy,
         date: mapped.date,
@@ -143,8 +144,8 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   const avgRr = rrCount > 0 ? rrSum / rrCount : 0;
 
   // Streak (chronological DESC)
-  const chronological = [...mappedTrades].sort((a, b) => 
-    new Date(Date.parse(b.date)).getTime() - new Date(Date.parse(a.date)).getTime()
+  const chronological = [...trades].sort((a, b) => 
+    new Date(b.trade_date || b.created_at).getTime() - new Date(a.trade_date || a.created_at).getTime()
   );
   
   let streakType: 'win' | 'loss' | 'none' = 'none';
@@ -161,15 +162,15 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   }
 
   const marketMap = new Map<string, { trades: number; pnl: number }>();
-  for (const t of mappedTrades) {
+  for (const t of trades) {
     const market = String(t.market_type ?? 'Other').trim() || 'Other';
     const entry = marketMap.get(market) ?? { trades: 0, pnl: 0 };
     entry.trades += 1;
-    entry.pnl += t.pnl;
+    entry.pnl += calculatePnL(t);
     marketMap.set(market, entry);
   }
 
-  const totalForShare = mappedTrades.length;
+  const totalForShare = trades.length;
   const marketDistribution: MarketDistributionPoint[] = [...marketMap.entries()]
     .map(([name, stats], index) => ({
       id: `mkt-${index}-${name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -182,7 +183,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
 
   return {
     isEmpty: false,
-    totalTrades: mappedTrades.length,
+    totalTrades: trades.length,
     totalPnl,
     winCount,
     lossCount,
@@ -191,7 +192,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     avgRr,
     currentStreak: { type: streakType, count: streakCount },
     bestTrade,
-    pnlTrend: pnlTrend as PnlTrendPoint[],
+    pnlTrend,
     marketDistribution,
   };
 }
