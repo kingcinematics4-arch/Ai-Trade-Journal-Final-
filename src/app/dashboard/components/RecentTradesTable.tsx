@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
 import { createClient } from '@/lib/supabase';
 import type { TradeRow } from '@/lib/trades/types';
+import TradeDetailsModal from './TradeDetailsModal';
 
 export type { TradeRow };
 
@@ -18,10 +19,11 @@ type SortDir = 'asc' | 'desc';
 
 export default function RecentTradesTable() {
   const { user } = useAuth();
-  const { tradeRows, isLoading: isLoadingTrades, refetch } = useTrades();
+  const { tradeRows, trades: rawTrades, isLoading: isLoadingTrades, refetch } = useTrades();
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
@@ -204,6 +206,7 @@ export default function RecentTradesTable() {
                       }`}
                     >
                       <button
+                        onClick={() => setSelectedTradeId(trade.id)}
                         className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                         title="View trade details"
                       >
@@ -255,6 +258,12 @@ export default function RecentTradesTable() {
           </button>
         </div>
       </Modal>
+
+      <TradeDetailsModal
+        isOpen={!!selectedTradeId}
+        onClose={() => setSelectedTradeId(null)}
+        trade={rawTrades.find((t) => String(t.id) === selectedTradeId) || null}
+      />
     </div>
   );
 }

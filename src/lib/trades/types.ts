@@ -11,12 +11,26 @@ export interface DbTrade {
   trade_direction?: 'buy' | 'sell' | string | null;
   entry_price?: number | null;
   exit_price?: number | null;
+  stop_loss?: number | null;
+  take_profit?: number | null;
+  lot_size?: number | null;
+  risk_amount?: number | null;
   pnl_amount?: number | null;
   rr_ratio?: number | null;
   trade_status?: TradeStatus | string | null;
   strategy_used?: string | null;
   trade_duration?: string | null;
   trade_rating?: number | null;
+  emotion_before?: string | null;
+  emotion_after?: string | null;
+  mistake_category?: string | null;
+  lessons_learned?: string | null;
+  notes?: string | null;
+  tags?: string[] | null;
+  confidence_level?: number | null;
+  entry_images?: string[] | null;
+  exit_images?: string[] | null;
+  chart_images?: string[] | null;
 }
 
 export interface TradeRow {

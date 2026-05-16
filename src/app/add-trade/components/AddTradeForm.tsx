@@ -130,6 +130,26 @@ export default function AddTradeForm() {
     }
   }, [form]);
 
+  const uploadImages = async (supabase: any, files: File[], bucket: string, path: string) => {
+    const urls: string[] = [];
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${user!.id}/${path}/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage.from(bucket).upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      urls.push(publicUrl);
+    }
+    return urls;
+  };
+
   const handleSubmit = async (data: TradeFormData) => {
     if (!user) {
       toast.error('You must be signed in to log a trade.');
@@ -139,44 +159,56 @@ export default function AddTradeForm() {
     setIsSubmitting(true);
     const supabase = createClient();
 
-    const { error } = await supabase.from('trades').insert({
-      user_id: user.id,
-      trade_title: data.tradeTitle,
-      trade_date: data.tradeDate,
-      market_type: data.marketType,
-      asset_name: data.assetName,
-      trade_direction: data.tradeDirection,
-      entry_price: parseFloat(data.entryPrice) || null,
-      exit_price: parseFloat(data.exitPrice) || null,
-      stop_loss: parseFloat(data.stopLoss) || null,
-      take_profit: parseFloat(data.takeProfit) || null,
-      lot_size: parseFloat(data.lotSize) || null,
-      risk_amount: parseFloat(data.riskAmount) || null,
-      trade_duration: data.tradeDuration || null,
-      pnl_amount: parseFloat(data.pnlAmount) || null,
-      rr_ratio: parseFloat(data.rrRatio) || null,
-      trade_status: data.tradeStatus || null,
-      strategy_used: data.strategyUsed || null,
-      emotion_before: data.emotionBefore || null,
-      emotion_after: data.emotionAfter || null,
-      mistake_category: data.mistakeCategory || null,
-      lessons_learned: data.lessonsLearned || null,
-      notes: data.notes || null,
-      tags: data.tags,
-      confidence_level: data.confidenceLevel,
-      trade_rating: data.tradeRating,
-    });
+    try {
+      // 1. Upload Images
+      const [entryUrls, exitUrls, chartUrls] = await Promise.all([
+        uploadImages(supabase, entryImages, 'trade-media', 'entry'),
+        uploadImages(supabase, exitImages, 'trade-media', 'exit'),
+        uploadImages(supabase, chartImages, 'trade-media', 'charts'),
+      ]);
 
-    if (error) {
+      // 2. Insert Trade Record
+      const { error } = await supabase.from('trades').insert({
+        user_id: user.id,
+        trade_title: data.tradeTitle || `Trade: ${data.assetName} ${data.tradeDirection}`,
+        trade_date: data.tradeDate,
+        market_type: data.marketType,
+        asset_name: data.assetName,
+        trade_direction: data.tradeDirection,
+        entry_price: parseFloat(data.entryPrice) || null,
+        exit_price: parseFloat(data.exitPrice) || null,
+        stop_loss: parseFloat(data.stopLoss) || null,
+        take_profit: parseFloat(data.takeProfit) || null,
+        lot_size: parseFloat(data.lotSize) || null,
+        risk_amount: parseFloat(data.riskAmount) || null,
+        trade_duration: data.tradeDuration || null,
+        pnl_amount: parseFloat(data.pnlAmount) || null,
+        rr_ratio: parseFloat(data.rrRatio) || null,
+        trade_status: data.tradeStatus || null,
+        strategy_used: data.strategyUsed || null,
+        emotion_before: data.emotionBefore || null,
+        emotion_after: data.emotionAfter || null,
+        mistake_category: data.mistakeCategory || null,
+        lessons_learned: data.lessonsLearned || null,
+        notes: data.notes || null,
+        tags: data.tags,
+        confidence_level: data.confidenceLevel,
+        trade_rating: data.tradeRating,
+        entry_images: entryUrls,
+        exit_images: exitUrls,
+        chart_images: chartUrls,
+      });
+
+      if (error) throw error;
+
+      toast.success('Trade logged successfully.');
+      router.push('/dashboard');
+      router.refresh();
+    } catch (error: any) {
       toast.error(error.message || 'Failed to save trade.');
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    toast.success('Trade logged successfully.');
-    router.push('/dashboard');
-    router.refresh();
-    setIsSubmitting(false);
   };
 
   const handleCancel = () => {
