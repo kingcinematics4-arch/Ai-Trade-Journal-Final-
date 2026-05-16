@@ -24,10 +24,19 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
 };
 
 function tradeTimestamp(trade: DbTrade): number {
-  const raw = trade.trade_date ?? trade.created_at;
-  if (!raw) return 0;
-  const t = new Date(raw).getTime();
-  return Number.isNaN(t) ? 0 : t;
+  const dateStr = trade.trade_date || trade.created_at;
+  if (!dateStr) return 0;
+  const t = new Date(dateStr).getTime();
+  return isNaN(t) ? 0 : t;
+}
+
+function parseSafeNumber(val: any): number {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return val;
+  // Remove currency symbols, commas, etc.
+  const cleaned = String(val).replace(/[^0-9.-]+/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 function normalizeStatus(status: string | null | undefined): TradeStatus {
@@ -38,7 +47,13 @@ function normalizeStatus(status: string | null | undefined): TradeStatus {
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
-  const sorted = [...trades].sort((a, b) => tradeTimestamp(a) - tradeTimestamp(b));
+  const sorted = [...trades].sort((a, b) => {
+    const timeA = tradeTimestamp(a);
+    const timeB = tradeTimestamp(b);
+    if (timeA !== timeB) return timeA - timeB;
+    // Stable fallback if dates are identical
+    return (a.id ?? '').localeCompare(b.id ?? '');
+  });
 
   let totalPnl = 0;
   let winCount = 0;
@@ -49,16 +64,18 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
   for (const trade of sorted) {
-    const pnl = Number(trade.pnl_amount ?? (trade as any).pnl ?? 0);
-    const rr = Number(trade.rr_ratio ?? (trade as any).rr ?? 0);
+    const pnl = parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
+    const rr = parseSafeNumber(trade.rr_ratio ?? (trade as any).rr);
     const status = normalizeStatus(trade.trade_status);
 
-    totalPnl += pnl;
+    // Ensure numeric addition (prevents string concatenation)
+    totalPnl = Number((totalPnl + pnl).toFixed(2));
+    
     if (status === 'win') winCount += 1;
     else if (status === 'loss') lossCount += 1;
     else breakevenCount += 1;
 
-    if (!Number.isNaN(rr) && rr > 0) {
+    if (rr > 0) {
       rrSum += rr;
       rrCount += 1;
     }
@@ -93,16 +110,35 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     }
   }
 
+  // Build cumulative P&L Trend
   let cumulative = 0;
-  const pnlTrend: PnlTrendPoint[] = sorted.map((trade) => {
-    const pnl = Number(trade.pnl_amount ?? (trade as any).pnl ?? 0);
-    cumulative += pnl;
-    const label = new Date(trade.trade_date ?? trade.created_at ?? Date.now()).toLocaleDateString(
-      'en-US',
-      { month: 'short', day: 'numeric' },
-    );
-    return { date: label, pnl, cumulative };
-  });
+  const pnlTrend: PnlTrendPoint[] = [];
+
+  // Add an initial starting point at 0 so the chart has a baseline
+  if (sorted.length > 0) {
+    pnlTrend.push({
+      date: 'Start',
+      pnl: 0,
+      cumulative: 0,
+    });
+  }
+
+  for (const trade of sorted) {
+    const pnl = parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
+    cumulative = Number((cumulative + pnl).toFixed(2));
+    
+    const dateObj = new Date(trade.trade_date ?? trade.created_at ?? Date.now());
+    const label = dateObj.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    
+    pnlTrend.push({ 
+      date: label, 
+      pnl, 
+      cumulative 
+    });
+  }
 
   const marketMap = new Map<string, { trades: number; pnl: number }>();
   for (const trade of sorted) {
