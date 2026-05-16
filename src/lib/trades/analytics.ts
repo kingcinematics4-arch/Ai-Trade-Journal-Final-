@@ -23,7 +23,6 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
   marketDistribution: [],
 };
 
-// TASK 2 — IMPLEMENT FUNCTION (STRICT)
 export function parseSafeNumber(value: string | number): number {
   if (typeof value === "number") return isNaN(value) ? 0 : value;
   if (!value) return 0;
@@ -38,6 +37,48 @@ export function parseSafeNumber(value: string | number): number {
   return isNaN(num) ? 0 : num;
 }
 
+// STEP 1 & 2 — SINGLE SOURCE OF TRUTH PIPELINE
+export type EquityPoint = {
+  date: string;
+  pnl: number;
+  cumulative: number;
+};
+
+export function buildEquityCurve(trades: any[]): EquityPoint[] {
+  const parseDate = (d: string) => new Date(Date.parse(d)).getTime();
+
+  // STEP 2 — Build full pipeline in one place
+  const sorted = [...trades].sort((a, b) =>
+    parseDate(a.date || a.trade_date || a.created_at) - parseDate(b.date || b.trade_date || b.created_at)
+  );
+
+  let running = 0;
+
+  const curve = sorted.map(t => {
+    // Ensure pnl is numeric
+    const pnl = typeof t.pnl === "number" ? t.pnl : parseSafeNumber(t.pnl_amount ?? t.pnl);
+
+    running = Number((running + pnl).toFixed(2));
+
+    const dateStr = t.date || t.trade_date || t.created_at;
+    const label = new Date(parseDate(dateStr)).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+
+    return {
+      date: label,
+      pnl,
+      cumulative: running
+    };
+  });
+
+  // STEP 5 — DEBUG CHECK
+  console.log('[Source of Truth] buildEquityCurve output:', curve);
+  
+  return curve;
+}
+
 function normalizeStatus(status: string | null | undefined): TradeStatus {
   if (!status) return 'breakeven';
   const s = status.toLowerCase();
@@ -49,48 +90,24 @@ function normalizeStatus(status: string | null | undefined): TradeStatus {
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
-  // 1. Mandatory Date Parsing & Sorting
-  const parseDate = (d: string) => new Date(Date.parse(d)).getTime();
-  
-  // Create cleaned trades with ONLY numeric pnl
-  const cleanedTrades = trades.map(t => ({
+  // Mapping to initial numeric structure
+  const mappedTrades = trades.map(t => ({
     ...t,
     pnl: parseSafeNumber(t.pnl_amount ?? (t as any).pnl),
     date: t.trade_date || t.created_at || new Date().toISOString()
   }));
 
-  // Strict sorting by timestamp
-  cleanedTrades.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  // STEP 3 & 4 — Use the single pipeline
+  const equityCurve = buildEquityCurve(mappedTrades);
 
-  // 5. Debug Log: SORTED
-  console.log("SORTED:", cleanedTrades);
-
-  // 3. Rebuild cumulative equity curve
-  let runningTotal = 0;
-  const equityCurve = cleanedTrades.map(t => {
-    runningTotal = Number((runningTotal + t.pnl).toFixed(2));
-    
-    const dateObj = new Date(parseDate(t.date));
-    const label = dateObj.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-
-    // 4. Chart input restriction (STRICT) - ONLY date and cumulative
-    return {
-      date: label,
-      cumulative: runningTotal
-    };
-  });
-
-  // Add initial baseline
-  equityCurve.unshift({ date: "Start", cumulative: 0 });
-
-  // 5. Debug Log: EQUITY
-  console.log("EQUITY:", equityCurve.map(e => e.cumulative));
+  // Add initial baseline for chart smoothness
+  const pnlTrend = [
+    { date: 'Start', pnl: 0, cumulative: 0 },
+    ...equityCurve
+  ];
 
   // Metrics calculation
-  let totalPnl = runningTotal;
+  let totalPnl = equityCurve.length > 0 ? equityCurve[equityCurve.length - 1].cumulative : 0;
   let winCount = 0;
   let lossCount = 0;
   let breakevenCount = 0;
@@ -98,10 +115,8 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let rrCount = 0;
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
-  for (const t of cleanedTrades) {
-    const statusStr = t.trade_status?.toLowerCase() || '';
+  for (const t of mappedTrades) {
     const status = normalizeStatus(t.trade_status);
-    
     if (status === 'win') winCount += 1;
     else if (status === 'loss') lossCount += 1;
     else breakevenCount += 1;
@@ -128,7 +143,10 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   const avgRr = rrCount > 0 ? rrSum / rrCount : 0;
 
   // Streak (chronological DESC)
-  const chronological = [...cleanedTrades].sort((a, b) => parseDate(b.date) - parseDate(a.date));
+  const chronological = [...mappedTrades].sort((a, b) => 
+    new Date(Date.parse(b.date)).getTime() - new Date(Date.parse(a.date)).getTime()
+  );
+  
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let streakCount = 0;
   if (chronological.length > 0) {
@@ -143,7 +161,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   }
 
   const marketMap = new Map<string, { trades: number; pnl: number }>();
-  for (const t of cleanedTrades) {
+  for (const t of mappedTrades) {
     const market = String(t.market_type ?? 'Other').trim() || 'Other';
     const entry = marketMap.get(market) ?? { trades: 0, pnl: 0 };
     entry.trades += 1;
@@ -151,7 +169,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     marketMap.set(market, entry);
   }
 
-  const totalForShare = cleanedTrades.length;
+  const totalForShare = mappedTrades.length;
   const marketDistribution: MarketDistributionPoint[] = [...marketMap.entries()]
     .map(([name, stats], index) => ({
       id: `mkt-${index}-${name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -164,7 +182,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
 
   return {
     isEmpty: false,
-    totalTrades: cleanedTrades.length,
+    totalTrades: mappedTrades.length,
     totalPnl,
     winCount,
     lossCount,
@@ -173,7 +191,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     avgRr,
     currentStreak: { type: streakType, count: streakCount },
     bestTrade,
-    pnlTrend: equityCurve as PnlTrendPoint[],
+    pnlTrend: pnlTrend as PnlTrendPoint[],
     marketDistribution,
   };
 }
