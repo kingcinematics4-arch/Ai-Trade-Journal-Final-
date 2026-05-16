@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
 import { createClient } from '@/lib/supabase';
+import { formatCurrency } from '@/lib/trades/analytics';
 import type { TradeRow } from '@/lib/trades/types';
 import TradeDetailsModal from './TradeDetailsModal';
 
@@ -166,7 +167,7 @@ export default function RecentTradesTable() {
                     <span
                       className={`font-tabular font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
                     >
-                      {trade.pnl >= 0 ? '+' : ''}${Math.abs(trade.pnl).toFixed(2)}
+                      {formatCurrency(trade.pnl, { showSign: true })}
                     </span>
                   </td>
                   <td className="px-4 py-3">

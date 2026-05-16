@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase';
+import { parseSafeNumber } from '@/lib/trades/analytics';
 import TradeInfoSection from './TradeInfoSection';
 import PerformanceSection from './PerformanceSection';
 import PsychologySection from './PsychologySection';
@@ -182,8 +183,8 @@ export default function AddTradeForm() {
         lot_size: parseFloat(data.lotSize) || null,
         risk_amount: parseFloat(data.riskAmount) || null,
         trade_duration: data.tradeDuration || null,
-        pnl_amount: parseFloat(data.pnlAmount) || null,
-        rr_ratio: parseFloat(data.rrRatio) || null,
+        pnl_amount: parseSafeNumber(data.pnlAmount),
+        rr_ratio: parseSafeNumber(data.rrRatio),
         trade_status: data.tradeStatus || null,
         strategy_used: data.strategyUsed || null,
         emotion_before: data.emotionBefore || null,

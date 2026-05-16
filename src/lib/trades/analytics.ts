@@ -30,13 +30,39 @@ function tradeTimestamp(trade: DbTrade): number {
   return isNaN(t) ? 0 : t;
 }
 
-function parseSafeNumber(val: any): number {
+export function parseSafeNumber(val: any): number {
   if (val === null || val === undefined) return 0;
   if (typeof val === 'number') return val;
-  // Remove currency symbols, commas, etc.
-  const cleaned = String(val).replace(/[^0-9.-]+/g, '');
-  const parsed = parseFloat(cleaned);
-  return isNaN(parsed) ? 0 : parsed;
+  
+  const str = String(val).trim();
+  
+  // 1. Identify loss/win indicators from text before stripping characters
+  // We check for (Red), (Green), and common sign symbols.
+  const isExplicitLoss = str.includes('(Red)') || str.includes('loss') || str.includes('-');
+  const isExplicitWin = str.includes('(Green)') || str.includes('win') || str.includes('+');
+  
+  // 2. Extract only numeric characters (digits, dot, and negative sign)
+  // We keep the first minus sign if it exists, and the first dot.
+  // This removes "$", ",", "(Green)", etc.
+  const cleaned = str.replace(/[^0-9.-]+/g, '');
+  
+  // Handle edge case where multiple minus signs might exist or be misplaced
+  let parsed = parseFloat(cleaned);
+  
+  if (isNaN(parsed)) return 0;
+  
+  // 3. Apply logic for color-based signs if the numeric parsing was ambiguous
+  // If the string says "(Red)" but the number is positive, flip it to negative.
+  if (isExplicitLoss && parsed > 0) {
+    parsed = -parsed;
+  } 
+  // If the string says "(Green)" or has a "+", ensure it's positive.
+  else if (isExplicitWin && parsed < 0) {
+    parsed = Math.abs(parsed);
+  }
+  
+  // Return a clean number rounded to 2 decimals to avoid floating point noise
+  return Number(parsed.toFixed(2));
 }
 
 function normalizeStatus(status: string | null | undefined): TradeStatus {
@@ -47,6 +73,10 @@ function normalizeStatus(status: string | null | undefined): TradeStatus {
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Analytics] Raw trades received from DB:', trades);
+  }
+
   const sorted = [...trades].sort((a, b) => {
     const timeA = tradeTimestamp(a);
     const timeB = tradeTimestamp(b);
@@ -55,7 +85,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     return (a.id ?? '').localeCompare(b.id ?? '');
   });
 
-  let totalPnl = 0;
+  // State for metrics
   let winCount = 0;
   let lossCount = 0;
   let breakevenCount = 0;
@@ -63,13 +93,21 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let rrCount = 0;
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
+  // State for P&L trend
+  let runningTotal = 0;
+  const pnlTrend: PnlTrendPoint[] = [];
+
+  // Add an initial starting point at 0 so the chart has a baseline
+  if (sorted.length > 0) {
+    pnlTrend.push({ date: 'Start', pnl: 0, cumulative: 0 });
+  }
+
   for (const trade of sorted) {
     const pnl = parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
     const rr = parseSafeNumber(trade.rr_ratio ?? (trade as any).rr);
     const status = normalizeStatus(trade.trade_status);
 
-    // Ensure numeric addition (prevents string concatenation)
-    totalPnl = Number((totalPnl + pnl).toFixed(2));
+    runningTotal = Number((runningTotal + pnl).toFixed(2));
     
     if (status === 'win') winCount += 1;
     else if (status === 'loss') lossCount += 1;
@@ -89,12 +127,27 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
         date: mapped.date,
       };
     }
+
+    const dateObj = new Date(trade.trade_date ?? trade.created_at ?? Date.now());
+    const label = dateObj.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    
+    pnlTrend.push({ 
+      date: label, 
+      pnl, 
+      cumulative: runningTotal 
+    });
   }
 
+  // Final totals
+  const totalPnl = runningTotal;
   const decided = winCount + lossCount;
   const winRate = decided > 0 ? (winCount / decided) * 100 : 0;
   const avgRr = rrCount > 0 ? rrSum / rrCount : 0;
 
+  // Streak calculation
   const chronological = [...sorted].sort((a, b) => tradeTimestamp(b) - tradeTimestamp(a));
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let streakCount = 0;
@@ -110,34 +163,9 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     }
   }
 
-  // Build cumulative P&L Trend
-  let cumulative = 0;
-  const pnlTrend: PnlTrendPoint[] = [];
-
-  // Add an initial starting point at 0 so the chart has a baseline
-  if (sorted.length > 0) {
-    pnlTrend.push({
-      date: 'Start',
-      pnl: 0,
-      cumulative: 0,
-    });
-  }
-
-  for (const trade of sorted) {
-    const pnl = parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
-    cumulative = Number((cumulative + pnl).toFixed(2));
-    
-    const dateObj = new Date(trade.trade_date ?? trade.created_at ?? Date.now());
-    const label = dateObj.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-    
-    pnlTrend.push({ 
-      date: label, 
-      pnl, 
-      cumulative 
-    });
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Analytics] Final computed total P&L:', totalPnl);
+    console.log('[Analytics] P&L Trend dataset points:', pnlTrend.length);
   }
 
   const marketMap = new Map<string, { trades: number; pnl: number }>();
@@ -145,7 +173,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     const market = String(trade.market_type ?? 'Other').trim() || 'Other';
     const entry = marketMap.get(market) ?? { trades: 0, pnl: 0 };
     entry.trades += 1;
-    entry.pnl += Number(trade.pnl_amount ?? (trade as any).pnl ?? 0);
+    entry.pnl += parseSafeNumber(trade.pnl_amount ?? (trade as any).pnl);
     marketMap.set(market, entry);
   }
 
@@ -219,6 +247,14 @@ export function generateTradeInsights(trades: DbTrade[]): TradeInsight[] {
 }
 
 export function formatCurrency(value: number, options?: { showSign?: boolean }): string {
-  const sign = options?.showSign && value > 0 ? '+' : '';
-  return `${sign}$${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const isNegative = value < 0;
+  const absValue = Math.abs(value);
+  const formattedValue = absValue.toLocaleString('en-US', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
+  
+  // Use explicit minus sign if negative, or plus sign if requested and positive
+  const sign = isNegative ? '-' : (options?.showSign && value > 0 ? '+' : '');
+  return `${sign}$${formattedValue}`;
 }

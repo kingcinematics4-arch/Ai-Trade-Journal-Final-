@@ -1,3 +1,4 @@
+import { parseSafeNumber } from './analytics';
 import type { DbTrade, TradeRow } from './types';
 
 export function mapDbTrade(row: Record<string, unknown>): TradeRow {
@@ -20,10 +21,10 @@ export function mapDbTrade(row: Record<string, unknown>): TradeRow {
     asset: String(row.asset_name ?? row.asset ?? '—'),
     market: String(row.market_type ?? row.market ?? '—'),
     direction: (row.trade_direction as 'buy' | 'sell') ?? 'buy',
-    entry: Number(row.entry_price ?? 0),
-    exit: Number(row.exit_price ?? 0),
-    pnl: Number(row.pnl_amount ?? row.pnl ?? 0),
-    rr: Number(row.rr_ratio ?? row.rr ?? 0),
+    entry: parseSafeNumber(row.entry_price),
+    exit: parseSafeNumber(row.exit_price),
+    pnl: parseSafeNumber(row.pnl_amount ?? row.pnl),
+    rr: parseSafeNumber(row.rr_ratio ?? row.rr),
     strategy: String(row.strategy_used ?? row.strategy ?? '—'),
     status: (row.trade_status as TradeRow['status']) ?? 'breakeven',
     date: formattedDate,
