@@ -49,8 +49,8 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
   for (const trade of sorted) {
-    const pnl = Number(trade.pnl_amount ?? 0);
-    const rr = Number(trade.rr_ratio ?? 0);
+    const pnl = Number(trade.pnl_amount ?? (trade as any).pnl ?? 0);
+    const rr = Number(trade.rr_ratio ?? (trade as any).rr ?? 0);
     const status = normalizeStatus(trade.trade_status);
 
     totalPnl += pnl;
@@ -95,7 +95,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
 
   let cumulative = 0;
   const pnlTrend: PnlTrendPoint[] = sorted.map((trade) => {
-    const pnl = Number(trade.pnl_amount ?? 0);
+    const pnl = Number(trade.pnl_amount ?? (trade as any).pnl ?? 0);
     cumulative += pnl;
     const label = new Date(trade.trade_date ?? trade.created_at ?? Date.now()).toLocaleDateString(
       'en-US',
@@ -109,7 +109,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     const market = String(trade.market_type ?? 'Other').trim() || 'Other';
     const entry = marketMap.get(market) ?? { trades: 0, pnl: 0 };
     entry.trades += 1;
-    entry.pnl += Number(trade.pnl_amount ?? 0);
+    entry.pnl += Number(trade.pnl_amount ?? (trade as any).pnl ?? 0);
     marketMap.set(market, entry);
   }
 

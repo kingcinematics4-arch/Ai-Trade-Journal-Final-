@@ -44,21 +44,26 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { data, error: fetchError } = await supabase
-      .from('trades')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    try {
+      const supabase = createClient();
+      const { data, error: fetchError } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (fetchError) {
-      setTrades([]);
-      setError(fetchError.message);
-    } else {
+      if (fetchError) {
+        throw fetchError;
+      }
+
       setTrades((data ?? []).map((row) => dbTradeFromRow(row as Record<string, unknown>)));
+    } catch (err: any) {
+      console.error('Error fetching trades:', err);
+      setTrades([]);
+      setError(err.message || 'An error occurred while fetching trades.');
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   }, [user]);
 
   useEffect(() => {
