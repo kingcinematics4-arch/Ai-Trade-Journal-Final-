@@ -23,10 +23,9 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
   marketDistribution: [],
 };
 
-// TASK 2 — IMPLEMENT FUNCTION (IF MISSING)
+// TASK 2 — IMPLEMENT FUNCTION (STRICT)
 export function parseSafeNumber(value: string | number): number {
   if (typeof value === "number") return isNaN(value) ? 0 : value;
-
   if (!value) return 0;
 
   const cleaned = value
@@ -36,15 +35,7 @@ export function parseSafeNumber(value: string | number): number {
     .trim();
 
   const num = Number(cleaned);
-
   return isNaN(num) ? 0 : num;
-}
-
-function tradeTimestamp(trade: DbTrade): number {
-  const dateStr = trade.trade_date || trade.created_at;
-  if (!dateStr) return 0;
-  const t = new Date(dateStr).getTime();
-  return isNaN(t) ? 0 : t;
 }
 
 function normalizeStatus(status: string | null | undefined): TradeStatus {
@@ -58,65 +49,48 @@ function normalizeStatus(status: string | null | undefined): TradeStatus {
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
-  // RULE 3 — FORCE DATA SANITIZATION (In case not done at entry)
-  const cleanedTrades = trades.map(t => {
-    const pnl = parseSafeNumber(t.pnl_amount ?? (t as any).pnl);
-    const statusStr = t.trade_status?.toLowerCase() || '';
-    
-    // Rule 2 — Force pnl = 0 for B/E
-    const finalPnl = (statusStr === 'b/e' || statusStr === 'breakeven') ? 0 : pnl;
-    
-    return {
-      ...t,
-      pnl: finalPnl, // Rule 1: ONLY this is used for calculation
-      rr: parseSafeNumber(t.rr_ratio ?? (t as any).rr)
-    };
-  });
-
-  // RULE 4 — FIX DATE ORDER (MANDATORY)
-  cleanedTrades.sort((a, b) => {
-    const timeA = new Date(a.trade_date ?? a.created_at ?? 0).getTime();
-    const timeB = new Date(b.trade_date ?? b.created_at ?? 0).getTime();
-    return timeA - timeB;
-  });
-
-  // RULE 5 — CUMULATIVE EQUITY ENGINE (REWRITE)
-  let running = 0;
-  const pnlArray: number[] = [];
-  const cumulativeArray: number[] = [];
+  // 1. Mandatory Date Parsing & Sorting
+  const parseDate = (d: string) => new Date(Date.parse(d)).getTime();
   
-  const pnlTrend = cleanedTrades.map(t => {
-    running = Number((running + t.pnl).toFixed(2));
-    pnlArray.push(t.pnl);
-    cumulativeArray.push(running);
+  // Create cleaned trades with ONLY numeric pnl
+  const cleanedTrades = trades.map(t => ({
+    ...t,
+    pnl: parseSafeNumber(t.pnl_amount ?? (t as any).pnl),
+    date: t.trade_date || t.created_at || new Date().toISOString()
+  }));
+
+  // Strict sorting by timestamp
+  cleanedTrades.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+  // 5. Debug Log: SORTED
+  console.log("SORTED:", cleanedTrades);
+
+  // 3. Rebuild cumulative equity curve
+  let runningTotal = 0;
+  const equityCurve = cleanedTrades.map(t => {
+    runningTotal = Number((runningTotal + t.pnl).toFixed(2));
     
-    const dateObj = new Date(t.trade_date ?? t.created_at ?? Date.now());
+    const dateObj = new Date(parseDate(t.date));
     const label = dateObj.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
     });
-    
+
+    // 4. Chart input restriction (STRICT) - ONLY date and cumulative
     return {
       date: label,
-      pnl: t.pnl,
-      cumulative: running
+      cumulative: runningTotal
     };
   });
 
-  // RULE 5 — Add initial point
-  pnlTrend.unshift({ date: "Start", pnl: 0, cumulative: 0 });
-  
-  // RULE 7 — DEBUG LOCK (TEMP)
-  console.log('[Source of Truth] Parsed P&L values:', pnlArray);
-  console.log('[Source of Truth] Sorted dates:', cleanedTrades.map(t => t.trade_date));
-  console.log('[Source of Truth] Cumulative progression:', cumulativeArray);
-  
-  // Validation Check
-  if (pnlArray.some(p => typeof p !== 'number' || isNaN(p))) {
-    throw new Error('BUILD FAIL: Invalid non-numeric data detected in P&L pipeline');
-  }
+  // Add initial baseline
+  equityCurve.unshift({ date: "Start", cumulative: 0 });
 
-  // Metrics calculation using cleaned data
+  // 5. Debug Log: EQUITY
+  console.log("EQUITY:", equityCurve.map(e => e.cumulative));
+
+  // Metrics calculation
+  let totalPnl = runningTotal;
   let winCount = 0;
   let lossCount = 0;
   let breakevenCount = 0;
@@ -125,13 +99,16 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
   for (const t of cleanedTrades) {
+    const statusStr = t.trade_status?.toLowerCase() || '';
     const status = normalizeStatus(t.trade_status);
+    
     if (status === 'win') winCount += 1;
     else if (status === 'loss') lossCount += 1;
     else breakevenCount += 1;
 
-    if (t.rr > 0) {
-      rrSum += t.rr;
+    const rr = parseSafeNumber(t.rr_ratio);
+    if (rr > 0) {
+      rrSum += rr;
       rrCount += 1;
     }
 
@@ -146,18 +123,12 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     }
   }
 
-  const totalPnl = running;
   const decided = winCount + lossCount;
   const winRate = decided > 0 ? (winCount / decided) * 100 : 0;
   const avgRr = rrCount > 0 ? rrSum / rrCount : 0;
 
   // Streak (chronological DESC)
-  const chronological = [...cleanedTrades].sort((a, b) => {
-    const timeA = new Date(a.trade_date ?? a.created_at ?? 0).getTime();
-    const timeB = new Date(b.trade_date ?? b.created_at ?? 0).getTime();
-    return timeB - timeA;
-  });
-  
+  const chronological = [...cleanedTrades].sort((a, b) => parseDate(b.date) - parseDate(a.date));
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let streakCount = 0;
   if (chronological.length > 0) {
@@ -202,7 +173,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     avgRr,
     currentStreak: { type: streakType, count: streakCount },
     bestTrade,
-    pnlTrend,
+    pnlTrend: equityCurve as PnlTrendPoint[],
     marketDistribution,
   };
 }

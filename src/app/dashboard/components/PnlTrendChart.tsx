@@ -25,23 +25,18 @@ interface CustomTooltipProps {
 
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
-  const pnl = payload.find((p) => p.dataKey === 'pnl')?.value ?? 0;
+  
+  // Rule 4 Compliance: Only 'cumulative' is available
   const cumulative = payload.find((p) => p.dataKey === 'cumulative')?.value ?? 0;
+  
   return (
     <div className="card-elevated shadow-xl p-3 text-xs min-w-[140px]">
       <p className="text-muted-foreground font-medium mb-2">{label}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Session P&L</span>
-          <span className={`font-semibold font-tabular ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {pnl >= 0 ? '+' : ''}
-            {pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-          </span>
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Cumulative</span>
+          <span className="text-muted-foreground">Equity Balance</span>
           <span className={`font-semibold font-tabular ${cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {cumulative >= 0 ? '+' : ''}${cumulative.toLocaleString()}
+            {cumulative >= 0 ? '+' : ''}${cumulative.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>
@@ -53,14 +48,20 @@ export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend;
 
-  // RULE 6 — CHART INPUT CONTRACT (HARD RULE)
+  // RULE 6 — CHART INPUT CONTRACT (STRICT VALIDATION)
   if (pnlData.length > 0) {
     pnlData.forEach((point) => {
+      // Validate that ONLY 'date' and 'cumulative' exist and are valid types
       if (typeof point.cumulative !== 'number' || isNaN(point.cumulative)) {
-        console.error('[Chart Error] Invalid point:', point);
+        console.error('[Chart Error] Contract violation in point:', point);
         throw new Error(
-          `CHART CONTRACT VIOLATION: Cumulative P&L at ${point.date} is not a number. Received: ${typeof point.cumulative}`,
+          `CHART CONTRACT VIOLATION: Invalid cumulative value at ${point.date}.`
         );
+      }
+      
+      // Check for forbidden keys (Rule 4)
+      if ('pnl' in point || 'pnlRaw' in point) {
+        console.warn('[Chart Warning] Data point contains forbidden fields:', Object.keys(point));
       }
     });
   }
@@ -103,7 +104,7 @@ export default function PnlTrendChart() {
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(v) => `$${v}`}
+          tickFormatter={(v) => `$${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`}
         />
         <Tooltip content={<CustomTooltip />} />
         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="4 4" />
