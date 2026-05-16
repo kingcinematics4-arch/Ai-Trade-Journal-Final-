@@ -53,6 +53,18 @@ export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend;
 
+  // RULE 6 — CHART INPUT CONTRACT (HARD RULE)
+  if (pnlData.length > 0) {
+    pnlData.forEach((point) => {
+      if (typeof point.cumulative !== 'number' || isNaN(point.cumulative)) {
+        console.error('[Chart Error] Invalid point:', point);
+        throw new Error(
+          `CHART CONTRACT VIOLATION: Cumulative P&L at ${point.date} is not a number. Received: ${typeof point.cumulative}`,
+        );
+      }
+    });
+  }
+
   if (isLoading) {
     return <ChartSkeleton height={240} />;
   }

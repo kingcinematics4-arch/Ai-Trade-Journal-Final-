@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { computeTradeAnalytics, generateTradeInsights } from '@/lib/trades/analytics';
+import { computeTradeAnalytics, generateTradeInsights, parsePnL } from '@/lib/trades/analytics';
 import { dbTradeFromRow, mapDbTrades } from '@/lib/trades/mapTrade';
 import type { DbTrade, TradeAnalytics, TradeInsight, TradeRow } from '@/lib/trades/types';
 
@@ -56,7 +56,16 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
         throw fetchError;
       }
 
-      setTrades((data ?? []).map((row) => dbTradeFromRow(row as Record<string, unknown>)));
+      const cleaned = (data ?? []).map((row) => {
+        const t = dbTradeFromRow(row as Record<string, unknown>);
+        return {
+          ...t,
+          pnl_amount: parsePnL(t.pnl_amount ?? (t as any).pnl),
+          rr_ratio: parsePnL(t.rr_ratio ?? (t as any).rr),
+        };
+      });
+
+      setTrades(cleaned);
     } catch (err: any) {
       console.error('Error fetching trades:', err);
       setTrades([]);
