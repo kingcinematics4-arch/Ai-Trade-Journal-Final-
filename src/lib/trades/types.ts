@@ -50,11 +50,10 @@ export interface TradeRow {
   sortDate: number;
 }
 
-export interface PnlTrendPoint {
+export type PnlTrendPoint = {
   date: string;
-  pnl: number;
   cumulative: number;
-}
+};
 
 export interface MarketDistributionPoint {
   id: string;

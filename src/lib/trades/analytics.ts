@@ -23,71 +23,69 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
   marketDistribution: [],
 };
 
+// SAFE NUMBER PARSER
 export function parseSafeNumber(value: any): number {
-  if (typeof value === "number") return isNaN(value) ? 0 : value;
+  if (typeof value === 'number') return isNaN(value) ? 0 : value;
   if (!value) return 0;
 
   const cleaned = value
     .toString()
-    .replace(/[$,]/g, "")
-    .replace(/\(.*?\)/g, "")
+    .replace(/[$,]/g, '')
+    .replace(/\(.*?\)/g, '')
     .trim();
 
   const num = Number(cleaned);
   return isNaN(num) ? 0 : num;
 }
 
-// STEP 2 — CREATE SINGLE CALCULATION FUNCTION (DETERMINISTIC)
-export function calculatePnL(trade: any): number {
-  const entry = Number(trade.entry_price);
-  const exit = Number(trade.exit_price);
-  const lots = Number(trade.lot_size || 1);
+// PNL CALCULATION (ONLY RAW DATA)
+export function calculatePnL(t: any): number {
+  const entry = Number(t.entry_price);
+  const exit = Number(t.exit_price);
+  const lots = Number(t.lot_size || 1);
 
   if (isNaN(entry) || isNaN(exit)) return 0;
 
-  // Rule: Recalculate from raw prices and direction
   const diff =
-    trade.trade_direction === "buy"
+    t.trade_direction === 'buy'
       ? exit - entry
       : entry - exit;
 
   return Number((diff * lots).toFixed(2));
 }
 
-// STEP 3 — BUILD EQUITY FROM RAW DATA ONLY
+// EQUITY CURVE (FIXED - NO FORMATTED DATE, NO EXTRA FIELDS)
 export function buildEquity(trades: any[]): PnlTrendPoint[] {
-  // Sort by DATE ascending
   const sorted = [...trades].sort(
-    (a, b) => new Date(a.trade_date || a.created_at).getTime() - new Date(b.trade_date || b.created_at).getTime()
+    (a, b) =>
+      new Date(a.trade_date ?? a.created_at ?? 0).getTime() -
+      new Date(b.trade_date || b.created_at).getTime()
   );
 
   let sum = 0;
 
-  const curve = sorted.map(t => {
-    // STEP 4 — ONLY use calculated values
+  const curve = sorted.map((t) => {
     const pnl = calculatePnL(t);
     sum = Number((sum + pnl).toFixed(2));
 
-    const dateStr = t.trade_date || t.created_at;
-    const label = new Date(dateStr).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
+    const date = t.trade_date || t.created_at;
 
     return {
-      date: label,
-      pnl, // We keep pnl for tooltips, but derived from raw inputs
-      cumulative: sum
-    };
+  date,
+  pnl,
+  cumulative: sum,
+};
   });
 
-  // Baseline
+  if (curve.length === 0) return [];
+
   return [
-    { date: 'Start', pnl: 0, cumulative: 0 },
-    ...curve
-  ];
+  { date: 'Start', pnl: 0, cumulative: 0 },
+  ...curve,
+];
 }
 
+// NORMALIZE STATUS
 function normalizeStatus(status: string | null | undefined): TradeStatus {
   if (!status) return 'breakeven';
   const s = status.toLowerCase();
@@ -96,16 +94,14 @@ function normalizeStatus(status: string | null | undefined): TradeStatus {
   return 'breakeven';
 }
 
+// MAIN ANALYTICS ENGINE
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
-  // STEP 3 & 4 — Build equity strictly from raw inputs
   const pnlTrend = buildEquity(trades);
+  const totalPnl =
+    pnlTrend.length > 0 ? pnlTrend[pnlTrend.length - 1].cumulative : 0;
 
-  // Total P&L from the last point of the deterministic curve
-  const totalPnl = pnlTrend.length > 0 ? pnlTrend[pnlTrend.length - 1].cumulative : 0;
-
-  // Metrics calculation
   let winCount = 0;
   let lossCount = 0;
   let breakevenCount = 0;
@@ -115,21 +111,20 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
 
   for (const t of trades) {
     const pnl = calculatePnL(t);
-    const statusStr = t.trade_status?.toLowerCase() || '';
     const status = normalizeStatus(t.trade_status);
-    
-    if (status === 'win') winCount += 1;
-    else if (status === 'loss') lossCount += 1;
-    else breakevenCount += 1;
+
+    if (status === 'win') winCount++;
+    else if (status === 'loss') lossCount++;
+    else breakevenCount++;
 
     const rr = parseSafeNumber(t.rr_ratio);
     if (rr > 0) {
       rrSum += rr;
-      rrCount += 1;
+      rrCount++;
     }
 
     if (!bestTrade || pnl > bestTrade.pnl) {
-      const mapped = mapDbTrade(t as unknown as Record<string, unknown>);
+      const mapped = mapDbTrade(t as any);
       bestTrade = {
         pnl,
         asset: mapped.asset,
@@ -139,43 +134,53 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     }
   }
 
-  const decided = winCount + lossCount;
-  const winRate = decided > 0 ? (winCount / decided) * 100 : 0;
-  const avgRr = rrCount > 0 ? rrSum / rrCount : 0;
+  const totalDecided = winCount + lossCount;
+  const winRate = totalDecided ? (winCount / totalDecided) * 100 : 0;
+  const avgRr = rrCount ? rrSum / rrCount : 0;
 
-  // Streak (chronological DESC)
-  const chronological = [...trades].sort((a, b) => 
-    new Date(b.trade_date || b.created_at).getTime() - new Date(a.trade_date || a.created_at).getTime()
-  );
-  
+  // STREAK
+  const getTime = (t: any) =>
+  new Date(t.trade_date ?? t.created_at ?? 0).getTime();
+
+const sortedDesc = [...trades].sort(
+  (a, b) => getTime(b) - getTime(a)
+);
+
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let streakCount = 0;
-  if (chronological.length > 0) {
-    const firstStatus = normalizeStatus(chronological[0].trade_status);
-    if (firstStatus === 'win' || firstStatus === 'loss') {
-      streakType = firstStatus;
-      for (const t of chronological) {
-        if (normalizeStatus(t.trade_status) === streakType) streakCount += 1;
-        else break;
+
+  if (sortedDesc.length > 0) {
+    const first = normalizeStatus(sortedDesc[0].trade_status);
+
+    if (first === 'win' || first === 'loss') {
+      streakType = first;
+
+      for (const t of sortedDesc) {
+        if (normalizeStatus(t.trade_status) === streakType) {
+          streakCount++;
+        } else break;
       }
     }
   }
 
+  // MARKET DISTRIBUTION
   const marketMap = new Map<string, { trades: number; pnl: number }>();
+
   for (const t of trades) {
     const market = String(t.market_type ?? 'Other').trim() || 'Other';
     const entry = marketMap.get(market) ?? { trades: 0, pnl: 0 };
-    entry.trades += 1;
+
+    entry.trades++;
     entry.pnl += calculatePnL(t);
+
     marketMap.set(market, entry);
   }
 
-  const totalForShare = trades.length;
   const marketDistribution: MarketDistributionPoint[] = [...marketMap.entries()]
     .map(([name, stats], index) => ({
       id: `mkt-${index}-${name.toLowerCase().replace(/\s+/g, '-')}`,
       name,
-      value: Math.round((stats.trades / totalForShare) * 100),
+      value: Math.round((stats.trades / trades.length) * 100),
       trades: stats.trades,
       pnl: stats.pnl,
     }))
@@ -197,6 +202,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   };
 }
 
+// INSIGHTS
 export function generateTradeInsights(trades: DbTrade[]): TradeInsight[] {
   if (trades.length < 2) return [];
 
@@ -205,48 +211,53 @@ export function generateTradeInsights(trades: DbTrade[]): TradeInsight[] {
 
   if (analytics.totalTrades > 0) {
     insights.push({
-      id: 'insight-win-rate',
+      id: 'win-rate',
       type: analytics.winRate >= 50 ? 'positive' : 'warning',
-      text: `Your win rate is ${analytics.winRate.toFixed(1)}% across ${analytics.totalTrades} logged trade${analytics.totalTrades === 1 ? '' : 's'}.`,
+      text: `Win rate ${analytics.winRate.toFixed(1)}% across ${analytics.totalTrades} trades.`,
     });
   }
 
-  if (analytics.bestTrade && analytics.bestTrade.pnl > 0) {
-    insights.push({
-      id: 'insight-best-trade',
-      type: 'positive',
-      text: `Best trade: ${analytics.bestTrade.asset} (${analytics.bestTrade.strategy}) at +$${analytics.bestTrade.pnl.toFixed(2)}.`,
-    });
-  }
+   const best = analytics.bestTrade;
+
+if (best && (best.pnl ?? 0) > 0) {
+  insights.push({
+    id: 'best-trade',
+    type: 'positive',
+    text: `Best trade ${best.asset} +$${(best.pnl ?? 0).toFixed(2)}.`,
+  });
+}
 
   if (analytics.currentStreak.type === 'loss' && analytics.currentStreak.count >= 2) {
     insights.push({
-      id: 'insight-loss-streak',
+      id: 'loss-streak',
       type: 'warning',
-      text: `${analytics.currentStreak.count} consecutive losses — review your recent entries before the next trade.`,
+      text: `${analytics.currentStreak.count} loss streak.`,
     });
   }
 
-  const topMarket = analytics.marketDistribution[0];
-  if (topMarket && analytics.marketDistribution.length > 1) {
+  const top = analytics.marketDistribution[0];
+  if (top && analytics.marketDistribution.length > 1) {
     insights.push({
-      id: 'insight-market',
+      id: 'market',
       type: 'positive',
-      text: `Most activity is in ${topMarket.name} (${topMarket.trades} trade${topMarket.trades === 1 ? '' : 's'}, ${topMarket.value}% of journal).`,
+      text: `${top.name} leads with ${top.value}%.`,
     });
   }
 
   return insights.slice(0, 4);
 }
 
+// FORMAT CURRENCY
 export function formatCurrency(value: number, options?: { showSign?: boolean }): string {
   const isNegative = value < 0;
-  const absValue = Math.abs(value);
-  const formattedValue = absValue.toLocaleString('en-US', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+  const abs = Math.abs(value);
+
+  const formatted = abs.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
-  
-  const sign = isNegative ? '-' : (options?.showSign && value > 0 ? '+' : '');
-  return `${sign}$${formattedValue}`;
+
+  const sign = isNegative ? '-' : options?.showSign && value > 0 ? '+' : '';
+
+  return `${sign}$${formatted}`;
 }
