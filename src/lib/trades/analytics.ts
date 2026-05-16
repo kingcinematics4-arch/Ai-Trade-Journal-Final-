@@ -23,22 +23,21 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
   marketDistribution: [],
 };
 
-// RULE 2 — HARD PARSER (NO EXCEPTIONS)
-export function parsePnL(value: any): number {
-  if (typeof value === 'number') return isNaN(value) ? 0 : value;
-  if (value === null || value === undefined) return 0;
-  
-  const str = String(value).trim();
-  
-  // Remove everything inside parentheses (e.g. "(Green)")
-  // Remove $, commas, and all spaces
-  const cleaned = str.replace(/\(.*?\)/g, '').replace(/[$,\s]/g, '');
-  
-  // Convert to float
-  const parsed = parseFloat(cleaned);
-  
-  // Return NaN-free float. If invalid → return 0
-  return isNaN(parsed) ? 0 : parsed;
+// TASK 2 — IMPLEMENT FUNCTION (IF MISSING)
+export function parseSafeNumber(value: string | number): number {
+  if (typeof value === "number") return isNaN(value) ? 0 : value;
+
+  if (!value) return 0;
+
+  const cleaned = value
+    .toString()
+    .replace(/[$,]/g, "")
+    .replace(/\(.*?\)/g, "")
+    .trim();
+
+  const num = Number(cleaned);
+
+  return isNaN(num) ? 0 : num;
 }
 
 function tradeTimestamp(trade: DbTrade): number {
@@ -60,9 +59,8 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
   // RULE 3 — FORCE DATA SANITIZATION (In case not done at entry)
-  // RULE 1 — CANONICAL DATA MODEL (Simplified for existing types)
   const cleanedTrades = trades.map(t => {
-    const pnl = parsePnL(t.pnl_amount ?? (t as any).pnl);
+    const pnl = parseSafeNumber(t.pnl_amount ?? (t as any).pnl);
     const statusStr = t.trade_status?.toLowerCase() || '';
     
     // Rule 2 — Force pnl = 0 for B/E
@@ -71,7 +69,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     return {
       ...t,
       pnl: finalPnl, // Rule 1: ONLY this is used for calculation
-      rr: parsePnL(t.rr_ratio ?? (t as any).rr)
+      rr: parseSafeNumber(t.rr_ratio ?? (t as any).rr)
     };
   });
 
@@ -113,7 +111,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   console.log('[Source of Truth] Sorted dates:', cleanedTrades.map(t => t.trade_date));
   console.log('[Source of Truth] Cumulative progression:', cumulativeArray);
   
-  // RULE 7 — FAIL if any string exists in pnl field
+  // Validation Check
   if (pnlArray.some(p => typeof p !== 'number' || isNaN(p))) {
     throw new Error('BUILD FAIL: Invalid non-numeric data detected in P&L pipeline');
   }

@@ -111,22 +111,29 @@ export default function AddTradeForm() {
     const sl = parseFloat(values.stopLoss);
     const tp = parseFloat(values.takeProfit);
     const lots = parseFloat(values.lotSize) || 1;
-    const risk = parseFloat(values.riskAmount) || 100;
     const dir = values.tradeDirection;
 
+    // 1. Calculate P&L and Outcome if entry and exit are available
     if (!isNaN(entry) && !isNaN(exit) && dir) {
       const priceDiff = dir === 'buy' ? exit - entry : entry - exit;
-      const pnl = priceDiff * lots * 10; // simplified calculation
+      const pnl = priceDiff * lots; 
       form.setValue('pnlAmount', pnl.toFixed(2));
       form.setValue('tradeStatus', pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven');
     }
 
-    if (!isNaN(entry) && !isNaN(sl) && !isNaN(tp) && dir) {
+    // 2. Calculate RR Ratio (Actual if exited, Target if open)
+    if (!isNaN(entry) && !isNaN(sl) && dir) {
       const riskPts = Math.abs(entry - sl);
-      const rewardPts = Math.abs(tp - entry);
       if (riskPts > 0) {
-        const rr = rewardPts / riskPts;
-        form.setValue('rrRatio', rr.toFixed(2));
+        if (!isNaN(exit)) {
+          // Actual RR based on real exit
+          const rewardPts = Math.abs(exit - entry);
+          form.setValue('rrRatio', (rewardPts / riskPts).toFixed(2));
+        } else if (!isNaN(tp)) {
+          // Potential RR based on take profit target
+          const rewardPts = Math.abs(tp - entry);
+          form.setValue('rrRatio', (rewardPts / riskPts).toFixed(2));
+        }
       }
     }
   }, [form]);
@@ -176,12 +183,13 @@ export default function AddTradeForm() {
         market_type: data.marketType,
         asset_name: data.assetName,
         trade_direction: data.tradeDirection,
-        entry_price: parseFloat(data.entryPrice) || null,
-        exit_price: parseFloat(data.exitPrice) || null,
-        stop_loss: parseFloat(data.stopLoss) || null,
-        take_profit: parseFloat(data.takeProfit) || null,
-        lot_size: parseFloat(data.lotSize) || null,
-        risk_amount: parseFloat(data.riskAmount) || null,
+        // Use parseSafeNumber for all numeric fields to avoid the "0 || null" bug
+        entry_price: parseSafeNumber(data.entryPrice),
+        exit_price: parseSafeNumber(data.exitPrice),
+        stop_loss: parseSafeNumber(data.stopLoss),
+        take_profit: parseSafeNumber(data.takeProfit),
+        lot_size: parseSafeNumber(data.lotSize),
+        risk_amount: parseSafeNumber(data.riskAmount),
         trade_duration: data.tradeDuration || null,
         pnl_amount: parseSafeNumber(data.pnlAmount),
         rr_ratio: parseSafeNumber(data.rrRatio),

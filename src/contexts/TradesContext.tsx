@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { computeTradeAnalytics, generateTradeInsights, parsePnL } from '@/lib/trades/analytics';
+import { computeTradeAnalytics, generateTradeInsights, parseSafeNumber } from '@/lib/trades/analytics';
 import { dbTradeFromRow, mapDbTrades } from '@/lib/trades/mapTrade';
 import type { DbTrade, TradeAnalytics, TradeInsight, TradeRow } from '@/lib/trades/types';
 
@@ -60,8 +60,8 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
         const t = dbTradeFromRow(row as Record<string, unknown>);
         return {
           ...t,
-          pnl_amount: parsePnL(t.pnl_amount ?? (t as any).pnl),
-          rr_ratio: parsePnL(t.rr_ratio ?? (t as any).rr),
+          pnl_amount: parseSafeNumber(t.pnl_amount ?? (t as any).pnl),
+          rr_ratio: parseSafeNumber(t.rr_ratio ?? (t as any).rr),
         };
       });
 
