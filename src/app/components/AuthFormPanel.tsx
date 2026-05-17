@@ -177,55 +177,56 @@ export default function AuthFormPanel() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden bg-gradient-to-b from-[#02040a] via-[#050814] to-[#02040a] min-h-screen">
-      <ToastProvider />
-      
-      {/* Background grids and abstract glows on the form side */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(59, 130, 246, 0.2) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-        }}
-      />
-
-      {/* Extreme Glassmorphic refraction glow directly behind the card */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-blue-600/10 blur-[80px] pointer-events-none" />
-      <div className="absolute top-[20%] right-[-10%] w-[200px] h-[200px] rounded-full bg-indigo-500/5 blur-[70px] pointer-events-none" />
-
-      {/* Main glassmorphism login container */}
-      <div className="w-full max-w-[480px] bg-slate-950/45 backdrop-blur-xl border border-white/[0.07] rounded-[24px] p-6 sm:p-8 xl:p-10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+    <div className="flex-1 h-full overflow-y-auto bg-gradient-to-b from-[#02040a] via-[#050814] to-[#02040a]">
+      <div className="min-h-full w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 xl:p-10 relative overflow-hidden">
+        <ToastProvider />
         
-        {/* Neon blue ambient corner borders */}
-        <div className="absolute top-0 left-0 w-24 h-[1px] bg-gradient-to-r from-blue-500/0 via-blue-500/30 to-blue-500/0" />
-        <div className="absolute top-0 left-0 w-[1px] h-24 bg-gradient-to-b from-blue-500/0 via-blue-500/30 to-blue-500/0" />
+        {/* Background grids and abstract glows on the form side */}
+        <div 
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(59, 130, 246, 0.2) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+          }}
+        />
 
-        {/* Mobile Header Logo */}
-        <div className="lg:hidden flex flex-col items-center justify-center mb-6 text-center">
-          <div className="p-2.5 rounded-xl bg-gradient-to-tr from-blue-600/20 to-indigo-600/10 border border-blue-500/20 shadow-lg mb-2">
-            <AppLogo size={28} />
+        {/* Extreme Glassmorphic refraction glow directly behind the card */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-blue-600/10 blur-[80px] pointer-events-none" />
+        <div className="absolute top-[20%] right-[-10%] w-[200px] h-[200px] rounded-full bg-indigo-500/5 blur-[70px] pointer-events-none" />
+
+        {/* Main glassmorphism login container */}
+        <div className="w-full max-w-[480px] bg-slate-950/45 backdrop-blur-xl border border-white/[0.07] rounded-[24px] p-5 sm:p-6 xl:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+          
+          {/* Neon blue ambient corner borders */}
+          <div className="absolute top-0 left-0 w-24 h-[1px] bg-gradient-to-r from-blue-500/0 via-blue-500/30 to-blue-500/0" />
+          <div className="absolute top-0 left-0 w-[1px] h-24 bg-gradient-to-b from-blue-500/0 via-blue-500/30 to-blue-500/0" />
+
+          {/* Mobile Header Logo */}
+          <div className="lg:hidden flex flex-col items-center justify-center mb-5 text-center">
+            <div className="p-2.5 rounded-xl bg-gradient-to-tr from-blue-600/20 to-indigo-600/10 border border-blue-500/20 shadow-lg mb-2">
+              <AppLogo size={28} />
+            </div>
+            <span className="font-bold text-lg text-white tracking-tight">AITradeJournal</span>
+            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Smart journaling for institutional performance</p>
           </div>
-          <span className="font-bold text-lg text-white tracking-tight">AITradeJournal</span>
-          <p className="text-[10px] text-slate-400 font-medium mt-0.5">Smart journaling for institutional performance</p>
-        </div>
 
-        {/* Header Title */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            {activeTab === 'login' ? 'Welcome back' : 'Create an Account'}
-          </h2>
-          <p className="text-slate-400 text-xs mt-1.5 font-medium leading-relaxed">
-            {activeTab === 'login'
-              ? 'Institutional-grade journaling, driven by AI insights.'
-              : 'Begin building a data-backed, disciplined edge today.'}
-          </p>
-        </div>
+          {/* Header Title */}
+          <div className="text-center mb-5">
+            <h2 className="text-2xl font-bold text-white tracking-tight">
+              {activeTab === 'login' ? 'Welcome back' : 'Create an Account'}
+            </h2>
+            <p className="text-slate-400 text-xs mt-1.5 font-medium leading-relaxed">
+              {activeTab === 'login'
+                ? 'Institutional-grade journaling, driven by AI insights.'
+                : 'Begin building a data-backed, disciplined edge today.'}
+            </p>
+          </div>
 
-        {/* Sliding segmented tab switcher */}
-        <div className="relative flex bg-slate-950/80 border border-white/[0.05] p-1 rounded-xl mb-6">
+          {/* Sliding segmented tab switcher */}
+          <div className="relative flex bg-slate-950/80 border border-white/[0.05] p-1 rounded-xl mb-5">
           {(['login', 'signup'] as AuthTab[]).map((tab) => (
             <button
               key={`tab-${tab}`}
@@ -668,5 +669,6 @@ export default function AuthFormPanel() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
