@@ -116,7 +116,7 @@ export default function AddTradeForm() {
     // 1. Calculate P&L and Outcome if entry and exit are available
     if (!isNaN(entry) && !isNaN(exit) && dir) {
       const priceDiff = dir === 'buy' ? exit - entry : entry - exit;
-      const pnl = priceDiff * lots; 
+      const pnl = priceDiff * lots;
       form.setValue('pnlAmount', pnl.toFixed(2));
       form.setValue('tradeStatus', pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven');
     }
@@ -145,14 +145,18 @@ export default function AddTradeForm() {
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user!.id}/${path}/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage.from(bucket).upload(filePath, file);
+      const { error: uploadError, data } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file);
 
       if (uploadError) {
         console.error('Error uploading image:', uploadError);
         continue;
       }
 
-      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(filePath);
       urls.push(publicUrl);
     }
     return urls;

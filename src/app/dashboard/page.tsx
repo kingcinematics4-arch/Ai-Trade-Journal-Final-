@@ -14,23 +14,23 @@ export default function DashboardPage() {
   return (
     <AuthGuard>
       <TradesProvider>
-      <AppLayout activePath="/dashboard">
-        <ToastProvider />
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6">
-          <DashboardHeader />
-          <KpiBentoGrid />
-          <DashboardChartsRow />
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <RecentTradesTable />
-            </div>
-            <div className="space-y-4">
-              <AiInsightCard />
-              <GoalsMiniPanel />
+        <AppLayout activePath="/dashboard">
+          <ToastProvider />
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6">
+            <DashboardHeader />
+            <KpiBentoGrid />
+            <DashboardChartsRow />
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2">
+                <RecentTradesTable />
+              </div>
+              <div className="space-y-4">
+                <AiInsightCard />
+                <GoalsMiniPanel />
+              </div>
             </div>
           </div>
-        </div>
-      </AppLayout>
+        </AppLayout>
       </TradesProvider>
     </AuthGuard>
   );

@@ -3,53 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import AppLogo from '@/components/ui/AppLogo';
-import {
-  TrendingUp,
-  BrainCircuit,
-  BarChart3,
-  Brain,
-  ArrowUpRight,
-  CheckCircle2,
-  Activity,
-} from 'lucide-react';
-
-const features = [
-  {
-    id: 'feat-journal',
-    icon: <TrendingUp size={18} className="text-blue-400" />,
-    title: 'Detailed Trade Logging',
-    desc: 'Capture execution, visual charts, custom metrics, and emotional states.',
-    glowColor: 'group-hover:border-blue-500/30 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]',
-    iconBg: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-  },
-  {
-    id: 'feat-ai',
-    icon: <BrainCircuit size={18} className="text-emerald-400" />,
-    title: 'Personalized Coaching',
-    desc: 'AI-driven rule audits to detect patterns, blindspots, and rule-breaks.',
-    glowColor:
-      'group-hover:border-emerald-500/30 group-hover:shadow-[0_0_15px_rgba(52,211,153,0.15)]',
-    iconBg: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-  },
-  {
-    id: 'feat-analytics',
-    icon: <BarChart3 size={18} className="text-amber-400" />,
-    title: 'Performance Analytics',
-    desc: 'Unlock win rates, R:R metrics, strategy performance, and setup tracking.',
-    glowColor:
-      'group-hover:border-amber-500/30 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.15)]',
-    iconBg: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-  },
-  {
-    id: 'feat-psychology',
-    icon: <Brain size={18} className="text-violet-400" />,
-    title: 'Psychology Tracking',
-    desc: 'Identify emotional triggers, avoid trading tilt, and build solid discipline.',
-    glowColor:
-      'group-hover:border-violet-500/30 group-hover:shadow-[0_0_15px_rgba(167,139,250,0.15)]',
-    iconBg: 'bg-violet-500/10 text-violet-400 border border-violet-500/20',
-  },
-];
+import { ArrowUpRight, CheckCircle2, Activity } from 'lucide-react';
 
 // High fidelity realistic mock candlestick chart data
 const chartCandles = [
@@ -114,7 +68,7 @@ export default function AuthBrandPanel() {
       </div>
 
       {/* Middle Section: Hero Copy & Candlestick Chart */}
-      <div className="relative z-10 my-auto py-6 space-y-8">
+      <div className="relative z-10 my-auto py-6 space-y-12">
         {/* Hero Title */}
         <div className="space-y-3 max-w-lg">
           <h1 className="text-3xl xl:text-4xl font-extrabold text-white leading-[1.15] tracking-tight">
@@ -323,40 +277,6 @@ export default function AuthBrandPanel() {
             <Activity size={10} className="text-cyan-400 animate-pulse" />
             <span>Volume: 124.8K</span>
           </motion.div>
-        </div>
-
-        {/* 4 Feature Cards (Glassmorphism layout - Compact 2x2 grid) */}
-        <div className="grid grid-cols-2 gap-3 max-w-lg">
-          {features.map((feat, idx) => (
-            <motion.div
-              key={feat.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + idx * 0.1, duration: 0.4 }}
-              whileHover={{ x: 6, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
-              className={`flex items-start gap-3 p-3 rounded-xl border border-white/[0.03] bg-white/[0.015] backdrop-blur-sm transition-all duration-200 cursor-pointer group ${feat.glowColor}`}
-            >
-              <div
-                className={`p-1.5 rounded-lg flex-shrink-0 mt-0.5 transition-transform group-hover:scale-110 ${feat.iconBg}`}
-              >
-                {feat.icon}
-              </div>
-              <div className="space-y-0.5 min-w-0">
-                <div className="flex items-center gap-1">
-                  <h4 className="text-xs font-bold text-white tracking-wide truncate">
-                    {feat.title}
-                  </h4>
-                  <ArrowUpRight
-                    size={10}
-                    className="text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                  />
-                </div>
-                <p className="text-[10px] text-slate-400 font-medium leading-normal line-clamp-2">
-                  {feat.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
         </div>
       </div>
     </div>

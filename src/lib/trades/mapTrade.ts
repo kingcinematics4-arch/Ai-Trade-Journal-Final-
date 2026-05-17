@@ -4,9 +4,7 @@ import type { DbTrade, TradeRow } from './types';
 export function mapDbTrade(row: Record<string, unknown>): TradeRow {
   const tradeDate = row.trade_date ?? row.created_at;
   const parsedDate =
-    typeof tradeDate === 'string' || tradeDate instanceof Date
-      ? new Date(tradeDate)
-      : null;
+    typeof tradeDate === 'string' || tradeDate instanceof Date ? new Date(tradeDate) : null;
 
   const formattedDate = parsedDate
     ? parsedDate.toLocaleDateString('en-US', {

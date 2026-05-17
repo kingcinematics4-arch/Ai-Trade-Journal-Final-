@@ -1,16 +1,13 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { computeTradeAnalytics, generateTradeInsights, parseSafeNumber } from '@/lib/trades/analytics';
+import {
+  computeTradeAnalytics,
+  generateTradeInsights,
+  parseSafeNumber,
+} from '@/lib/trades/analytics';
 import { dbTradeFromRow, mapDbTrades } from '@/lib/trades/mapTrade';
 import type { DbTrade, TradeAnalytics, TradeInsight, TradeRow } from '@/lib/trades/types';
 
@@ -80,7 +77,10 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     void fetchTrades();
   }, [authLoading, fetchTrades]);
 
-  const tradeRows = useMemo(() => mapDbTrades(trades as unknown as Record<string, unknown>[]), [trades]);
+  const tradeRows = useMemo(
+    () => mapDbTrades(trades as unknown as Record<string, unknown>[]),
+    [trades]
+  );
   const analytics = useMemo(() => computeTradeAnalytics(trades), [trades]);
   const insights = useMemo(() => generateTradeInsights(trades), [trades]);
 
@@ -95,7 +95,7 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
       error,
       refetch: fetchTrades,
     }),
-    [trades, tradeRows, analytics, insights, authLoading, isLoading, error, fetchTrades],
+    [trades, tradeRows, analytics, insights, authLoading, isLoading, error, fetchTrades]
   );
 
   return <TradesContext.Provider value={value}>{children}</TradesContext.Provider>;

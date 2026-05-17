@@ -46,10 +46,7 @@ export function calculatePnL(t: any): number {
 
   if (isNaN(entry) || isNaN(exit)) return 0;
 
-  const diff =
-    t.trade_direction === 'buy'
-      ? exit - entry
-      : entry - exit;
+  const diff = t.trade_direction === 'buy' ? exit - entry : entry - exit;
 
   return Number((diff * lots).toFixed(2));
 }
@@ -71,18 +68,15 @@ export function buildEquity(trades: any[]): PnlTrendPoint[] {
     const date = t.trade_date || t.created_at;
 
     return {
-  date,
-  pnl,
-  cumulative: sum,
-};
+      date,
+      pnl,
+      cumulative: sum,
+    };
   });
 
   if (curve.length === 0) return [];
 
-  return [
-  { date: 'Start', pnl: 0, cumulative: 0 },
-  ...curve,
-];
+  return [{ date: 'Start', pnl: 0, cumulative: 0 }, ...curve];
 }
 
 // NORMALIZE STATUS
@@ -99,8 +93,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   if (!trades.length) return { ...EMPTY_ANALYTICS };
 
   const pnlTrend = buildEquity(trades);
-  const totalPnl =
-    pnlTrend.length > 0 ? pnlTrend[pnlTrend.length - 1].cumulative : 0;
+  const totalPnl = pnlTrend.length > 0 ? pnlTrend[pnlTrend.length - 1].cumulative : 0;
 
   let winCount = 0;
   let lossCount = 0;
@@ -139,12 +132,9 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   const avgRr = rrCount ? rrSum / rrCount : 0;
 
   // STREAK
-  const getTime = (t: any) =>
-  new Date(t.trade_date ?? t.created_at ?? 0).getTime();
+  const getTime = (t: any) => new Date(t.trade_date ?? t.created_at ?? 0).getTime();
 
-const sortedDesc = [...trades].sort(
-  (a, b) => getTime(b) - getTime(a)
-);
+  const sortedDesc = [...trades].sort((a, b) => getTime(b) - getTime(a));
 
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let streakCount = 0;
@@ -217,15 +207,15 @@ export function generateTradeInsights(trades: DbTrade[]): TradeInsight[] {
     });
   }
 
-   const best = analytics.bestTrade;
+  const best = analytics.bestTrade;
 
-if (best && (best.pnl ?? 0) > 0) {
-  insights.push({
-    id: 'best-trade',
-    type: 'positive',
-    text: `Best trade ${best.asset} +$${(best.pnl ?? 0).toFixed(2)}.`,
-  });
-}
+  if (best && (best.pnl ?? 0) > 0) {
+    insights.push({
+      id: 'best-trade',
+      type: 'positive',
+      text: `Best trade ${best.asset} +$${(best.pnl ?? 0).toFixed(2)}.`,
+    });
+  }
 
   if (analytics.currentStreak.type === 'loss' && analytics.currentStreak.count >= 2) {
     insights.push({

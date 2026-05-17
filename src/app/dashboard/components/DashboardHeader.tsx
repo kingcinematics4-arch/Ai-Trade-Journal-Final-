@@ -51,61 +51,61 @@ export default function DashboardHeader() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-        <div className="relative">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowTimeframeDropdown(!showTimeframeDropdown)}
+              className="flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors duration-150"
+            >
+              {selectedTimeframe}
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-150 ${showTimeframeDropdown ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {showTimeframeDropdown && (
+              <div className="absolute left-0 top-full mt-1 w-44 card-elevated z-20 py-1 shadow-xl">
+                {timeframes.map((tf) => (
+                  <button
+                    key={`tf-${tf}`}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTimeframe(tf);
+                      setShowTimeframeDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors duration-100 ${
+                      selectedTimeframe === tf
+                        ? 'text-primary bg-primary/10'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {tf}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             type="button"
-            onClick={() => setShowTimeframeDropdown(!showTimeframeDropdown)}
-            className="flex items-center gap-2 px-3 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors duration-150"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150 disabled:opacity-50"
+            aria-label="Refresh analytics"
           >
-            {selectedTimeframe}
-            <ChevronDown
-              size={14}
-              className={`transition-transform duration-150 ${showTimeframeDropdown ? 'rotate-180' : ''}`}
-            />
+            <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
           </button>
-          {showTimeframeDropdown && (
-            <div className="absolute left-0 top-full mt-1 w-44 card-elevated z-20 py-1 shadow-xl">
-              {timeframes.map((tf) => (
-                <button
-                  key={`tf-${tf}`}
-                  type="button"
-                  onClick={() => {
-                    setSelectedTimeframe(tf);
-                    setShowTimeframeDropdown(false);
-                  }}
-                  className={`w-full text-left px-4 py-2 text-sm transition-colors duration-100 ${
-                    selectedTimeframe === tf
-                      ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:bg-muted'
-                  }`}
-                >
-                  {tf}
-                </button>
-              ))}
-            </div>
-          )}
+          <button
+            type="button"
+            className="relative p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150"
+            aria-label="Notifications"
+          >
+            <Bell size={16} />
+          </button>
+          <Link href="/add-trade" className="btn-primary flex items-center gap-2 py-2 px-4 text-sm">
+            <PlusCircle size={15} />
+            Add Trade
+          </Link>
         </div>
-        <button
-          type="button"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150 disabled:opacity-50"
-          aria-label="Refresh analytics"
-        >
-          <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-        </button>
-        <button
-          type="button"
-          className="relative p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150"
-          aria-label="Notifications"
-        >
-          <Bell size={16} />
-        </button>
-        <Link href="/add-trade" className="btn-primary flex items-center gap-2 py-2 px-4 text-sm">
-          <PlusCircle size={15} />
-          Add Trade
-        </Link>
-      </div>
       </div>
     </div>
   );

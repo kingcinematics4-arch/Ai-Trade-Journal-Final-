@@ -25,11 +25,11 @@ interface CustomTooltipProps {
 
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
-  
+
   // STEP 1 Compliance: type EquityPoint = { date, pnl, cumulative }
   const pnl = payload.find((p) => p.dataKey === 'pnl')?.value ?? 0;
   const cumulative = payload.find((p) => p.dataKey === 'cumulative')?.value ?? 0;
-  
+
   return (
     <div className="card-elevated shadow-xl p-3 text-xs min-w-[140px]">
       <p className="text-muted-foreground font-medium mb-2">{label}</p>
@@ -37,15 +37,21 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
         {label !== 'Start' && (
           <div className="flex justify-between gap-4">
             <span className="text-muted-foreground">Session P&L</span>
-            <span className={`font-semibold font-tabular ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {pnl >= 0 ? '+' : ''}${Math.abs(pnl).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            <span
+              className={`font-semibold font-tabular ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
+            >
+              {pnl >= 0 ? '+' : ''}$
+              {Math.abs(pnl).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </span>
           </div>
         )}
         <div className="flex justify-between gap-4 border-t border-border/50 pt-1 mt-1">
           <span className="text-muted-foreground">Equity Balance</span>
-          <span className={`font-semibold font-tabular ${cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {cumulative >= 0 ? '+' : ''}${Math.abs(cumulative).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          <span
+            className={`font-semibold font-tabular ${cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}
+          >
+            {cumulative >= 0 ? '+' : ''}$
+            {Math.abs(cumulative).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
         </div>
       </div>
@@ -55,7 +61,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
-  
+
   // STEP 3 — FORCE chart to use ONLY the pipeline output (analytics.pnlTrend is buildEquityCurve output)
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend;
 
@@ -102,7 +108,7 @@ export default function PnlTrendChart() {
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(v) => `$${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`}
+          tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`}
         />
         <Tooltip content={<CustomTooltip />} />
         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="4 4" />

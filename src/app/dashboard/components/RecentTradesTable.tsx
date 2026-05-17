@@ -85,7 +85,9 @@ export default function RecentTradesTable() {
         <div>
           <h3 className="text-base font-semibold text-foreground">Recent Trades</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {trades.length === 0 ? 'No trades logged' : `${trades.length} recent trade${trades.length === 1 ? '' : 's'}`}
+            {trades.length === 0
+              ? 'No trades logged'
+              : `${trades.length} recent trade${trades.length === 1 ? '' : 's'}`}
           </p>
         </div>
         <Link

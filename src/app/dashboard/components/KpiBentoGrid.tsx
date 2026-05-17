@@ -99,10 +99,18 @@ export default function KpiBentoGrid() {
           label="Current Streak"
           value={streakLabel}
           subtext={streakSubtext}
-          trend={currentStreak.type === 'win' ? 'up' : currentStreak.type === 'loss' ? 'down' : 'neutral'}
+          trend={
+            currentStreak.type === 'win' ? 'up' : currentStreak.type === 'loss' ? 'down' : 'neutral'
+          }
           trendValue={currentStreak.type === 'none' ? '—' : 'Latest trades'}
           icon={<Flame size={18} />}
-          variant={currentStreak.type === 'win' ? 'profit' : currentStreak.type === 'loss' ? 'loss' : 'neutral'}
+          variant={
+            currentStreak.type === 'win'
+              ? 'profit'
+              : currentStreak.type === 'loss'
+                ? 'loss'
+                : 'neutral'
+          }
         />
       </div>
 

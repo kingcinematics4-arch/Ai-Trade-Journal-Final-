@@ -33,13 +33,13 @@
   }
 
   body {
-  background-color: #050505;
-  background-image: none !important;
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+    background-color: #050505;
+    background-image: none !important;
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
   html {
     scroll-behavior: smooth;
