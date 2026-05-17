@@ -33,12 +33,13 @@
   }
 
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  background-color: #050505;
+  background-image: none !important;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
   html {
     scroll-behavior: smooth;
@@ -244,3 +245,4 @@
     @apply flex items-start gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06];
   }
 }
+/* Premium visuals enabled: removed previous rules that disabled elements with blur, glow, or orb in class names */
