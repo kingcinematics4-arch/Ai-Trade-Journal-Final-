@@ -1,6 +1,5 @@
-import React from 'react';
-import AuthScreen from './components/AuthScreen';
+import MaintenancePage from "./maintenance/page";
 
-export default function Page() {
-  return <AuthScreen />;
+export default function Home() {
+  return <MaintenancePage />;
 }
