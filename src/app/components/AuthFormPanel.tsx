@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,7 +73,31 @@ export default function AuthFormPanel() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
+
+  // Initialize Supabase client once per component mount to avoid recreating it on every action
+  const supabase = useMemo(() => createClient(), []);
+
+  // Listen to auth state changes and reset local loading state if session is null or signed out
+  useEffect(() => {
+    // Reset loading states on mount (handles page back-button/BFcache restoration)
+    setIsGoogleLoading(false);
+    setIsLoading(false);
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setIsGoogleLoading(false);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const loginForm = useForm<LoginFormData>({
     defaultValues: { email: '', password: '', rememberMe: false },
@@ -94,7 +118,6 @@ export default function AuthFormPanel() {
 
   const handleLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    const supabase = createClient();
 
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
@@ -128,7 +151,6 @@ export default function AuthFormPanel() {
       return;
     }
     setIsLoading(true);
-    const supabase = createClient();
 
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
@@ -172,25 +194,29 @@ export default function AuthFormPanel() {
   };
 
   const handleSocialLogin = async (provider: string) => {
-    setIsLoading(true);
-    toast.info(`Connecting to ${provider}...`);
-
-    const supabase = createClient();
-    let supabaseProvider: 'google';
-
-    if (provider.toLowerCase() === 'google') {
-      supabaseProvider = 'google';
-    } else {
+    if (provider.toLowerCase() !== 'google') {
       toast.error(`Unsupported provider: ${provider}`);
-      setIsLoading(false);
       return;
     }
 
+    if (isGoogleLoading) return; // Prevent double requests
+
+    setIsGoogleLoading(true);
+    toast.info('Connecting to Google...');
+
     try {
-      // Construction of dynamic callback URL that supports both localhost and production environments
-      const redirectTo = `${window.location.origin}/auth/callback`;
+      // Dynamic callback URL: uses local server callback during development, and the requested production callback url otherwise.
+      const redirectTo =
+        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+          ? `${window.location.origin}/auth/callback`
+          : 'https://ai-trade-journal-final-yjks.vercel.app/auth/callback';
+
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[auth] Google OAuth redirect destination:', redirectTo);
+      }
+
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: supabaseProvider,
+        provider: 'google',
         options: {
           redirectTo,
         },
@@ -204,12 +230,12 @@ export default function AuthFormPanel() {
         // Redirecting user to the third-party OAuth provider
         window.location.href = data.url;
       } else {
-        throw new Error(`Failed to initialize ${provider} authentication flow`);
+        throw new Error('Failed to initialize Google authentication flow');
       }
     } catch (err: any) {
-      console.error(`[auth] social login error with ${provider}:`, err);
-      toast.error(err.message || `Failed to authenticate using ${provider}`);
-      setIsLoading(false);
+      console.error('[auth] Google login error:', err);
+      toast.error(err.message || 'Failed to authenticate using Google');
+      setIsGoogleLoading(false);
     }
   };
 
@@ -406,7 +432,7 @@ export default function AuthFormPanel() {
                 {/* Animated Neon Sign In CTA */}
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || isGoogleLoading}
                   className="w-full relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold tracking-wide rounded-xl py-3.5 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {isLoading ? (
@@ -723,7 +749,7 @@ export default function AuthFormPanel() {
                 {/* Submit CTA */}
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || isGoogleLoading}
                   className="w-full relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold tracking-wide rounded-xl py-3 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {isLoading ? (
@@ -770,19 +796,28 @@ export default function AuthFormPanel() {
             {/* Google */}
             <button
               type="button"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               onClick={() => handleSocialLogin('Google')}
               className="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold text-slate-200"
               title="Continue with Google"
             >
-              <svg
-                className="w-4 h-4 text-slate-300 transition-transform group-hover:scale-110"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12.24 10.285V13.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.578-7.859-8s3.529-8 7.859-8c2.46 0 4.105 1.025 5.047 1.926l2.427-2.334C17.955 2.192 15.34 1 12.24 1 6.12 1 1.16 5.92 1.16 12s4.96 11 11.08 11c6.38 0 10.62-4.474 10.62-10.785 0-.726-.078-1.285-.172-1.93H12.24z" />
-              </svg>
-              <span>Continue with Google</span>
+              {isGoogleLoading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin text-blue-400" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4 text-slate-300 transition-transform group-hover:scale-110"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12.24 10.285V13.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.578-7.859-8s3.529-8 7.859-8c2.46 0 4.105 1.025 5.047 1.926l2.427-2.334C17.955 2.192 15.34 1 12.24 1 6.12 1 1.16 5.92 1.16 12s4.96 11 11.08 11c6.38 0 10.62-4.474 10.62-10.785 0-.726-.078-1.285-.172-1.93H12.24z" />
+                  </svg>
+                  <span>Continue with Google</span>
+                </>
+              )}
             </button>
           </div>
         </div>
