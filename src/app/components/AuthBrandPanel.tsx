@@ -52,14 +52,7 @@ export default function AuthBrandPanel() {
             <AppLogo size={28} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-white tracking-tight font-sans">
-                AITradeJournal
-              </span>
-              <span className="text-[9px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/20">
-                PRO
-              </span>
-            </div>
+            
             <p className="text-[10px] text-slate-400 font-medium">
               Smart journaling for institutional performance
             </p>
