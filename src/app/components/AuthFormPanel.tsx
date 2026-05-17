@@ -171,9 +171,54 @@ export default function AuthFormPanel() {
     setIsLoading(false);
   };
 
-  const handleSocialLogin = (provider: string) => {
+  const handleSocialLogin = async (provider: string) => {
+    setIsLoading(true);
     toast.info(`Connecting to ${provider}...`);
-    // Connect to Supabase social login in future
+
+    const supabase = createClient();
+    let supabaseProvider: 'google' | 'apple' | 'azure';
+
+    if (provider.toLowerCase() === 'google') {
+      supabaseProvider = 'google';
+    } else if (provider.toLowerCase() === 'apple') {
+      supabaseProvider = 'apple';
+    } else if (provider.toLowerCase() === 'microsoft') {
+      supabaseProvider = 'azure';
+    } else {
+      toast.error(`Unsupported provider: ${provider}`);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Construction of dynamic callback URL that supports both localhost and production environments
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: supabaseProvider,
+        options: {
+          redirectTo,
+          queryParams: supabaseProvider === 'azure' ? {
+            // Azure/Microsoft sometimes benefits from prompt=select_account to let the user select their account
+            prompt: 'select_account',
+          } : undefined,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // Redirecting user to the third-party OAuth provider
+        window.location.href = data.url;
+      } else {
+        throw new Error(`Failed to initialize ${provider} authentication flow`);
+      }
+    } catch (err: any) {
+      console.error(`[auth] social login error with ${provider}:`, err);
+      toast.error(err.message || `Failed to authenticate using ${provider}`);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -733,8 +778,9 @@ export default function AuthFormPanel() {
             {/* Google */}
             <button
               type="button"
+              disabled={isLoading}
               onClick={() => handleSocialLogin('Google')}
-              className="flex items-center justify-center py-2.5 px-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer"
+              className="flex items-center justify-center py-2.5 px-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title="Authenticate with Google"
             >
               <svg
@@ -749,8 +795,9 @@ export default function AuthFormPanel() {
             {/* Apple */}
             <button
               type="button"
+              disabled={isLoading}
               onClick={() => handleSocialLogin('Apple')}
-              className="flex items-center justify-center py-2.5 px-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer"
+              className="flex items-center justify-center py-2.5 px-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title="Authenticate with Apple"
             >
               <svg
@@ -765,8 +812,9 @@ export default function AuthFormPanel() {
             {/* Microsoft */}
             <button
               type="button"
+              disabled={isLoading}
               onClick={() => handleSocialLogin('Microsoft')}
-              className="flex items-center justify-center py-2.5 px-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer"
+              className="flex items-center justify-center py-2.5 px-3 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title="Authenticate with Microsoft"
             >
               <svg
