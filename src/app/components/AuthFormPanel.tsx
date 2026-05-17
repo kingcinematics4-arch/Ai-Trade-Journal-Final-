@@ -226,7 +226,7 @@ export default function AuthFormPanel() {
           </div>
 
           {/* Sliding segmented tab switcher */}
-          <div className="relative flex bg-slate-950/80 border border-white/[0.05] p-1 rounded-xl mb-5">
+          <div className="relative flex bg-slate-950/80 border border-white/[0.05] p-1 rounded-xl mb-5" role="tablist">
           {(['login', 'signup'] as AuthTab[]).map((tab) => (
             <button
               key={`tab-${tab}`}
@@ -236,7 +236,10 @@ export default function AuthFormPanel() {
                 setShowConfirmPassword(false);
               }}
               type="button"
-              className={`relative flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 z-10 flex items-center justify-center gap-1.5 cursor-pointer ${
+              role="tab"
+              aria-selected={activeTab === tab}
+              aria-label={tab === 'login' ? 'Sign In' : 'Create Account'}
+              className={`relative flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 z-10 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 activeTab === tab ? 'text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -247,7 +250,7 @@ export default function AuthFormPanel() {
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                 />
               )}
-              {tab === 'login' ? 'Sign In' : 'Sign Up'}
+              {tab === 'login' ? 'Sign In' : 'Create Account'}
             </button>
           ))}
         </div>
