@@ -33,16 +33,7 @@ export default function AuthBrandPanel() {
   return (
     <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative flex-col justify-between p-10 xl:p-14 bg-gradient-to-br from-zinc-900 via-zinc-950 to-background border-r border-border overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute top-20 -left-20 w-96 h-96 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, var(--primary) 0%, transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-20 right-10 w-64 h-64 rounded-full opacity-8"
-          style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)' }}
-        />
-      </div>
+      
       {/* Logo */}
       <div className="relative z-10">
         <div className="flex items-center gap-3">
