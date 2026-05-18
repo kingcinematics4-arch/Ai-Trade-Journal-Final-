@@ -49,8 +49,8 @@ function AuthCallbackContent() {
 
         if (active) {
           toast.success('Sign in successful!');
-          router.replace('/dashboard');
           router.refresh();
+          router.replace('/dashboard');
         }
       } catch (err: any) {
         console.error('[auth] OAuth callback verification failed:', err);

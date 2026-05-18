@@ -139,8 +139,8 @@ export default function AuthFormPanel() {
     }
 
     toast.success('Welcome back!');
-    router.push('/dashboard');
     router.refresh();
+    router.push('/dashboard');
     setIsLoading(false);
   };
 
@@ -184,8 +184,8 @@ export default function AuthFormPanel() {
 
     if (authData.session) {
       toast.success('Account created! Welcome aboard.');
-      router.push('/dashboard');
       router.refresh();
+      router.push('/dashboard');
     } else {
       toast.success('Account created! Check your email to confirm.');
     }
@@ -205,11 +205,7 @@ export default function AuthFormPanel() {
     toast.info('Connecting to Google...');
 
     try {
-      // Dynamic callback URL: uses local server callback during development, and the requested production callback url otherwise.
-      const redirectTo =
-        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? `${window.location.origin}/auth/callback`
-          : 'https://ai-trade-journal-final-yjks.vercel.app/auth/callback';
+      const redirectTo = `${window.location.origin}/auth/callback`;
 
       if (process.env.NODE_ENV === 'development') {
         console.debug('[auth] Google OAuth redirect destination:', redirectTo);
