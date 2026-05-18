@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase';
 import {
@@ -19,6 +20,7 @@ type AuthContextValue = {
   session: Session | null;
   profile: UserProfile | null;
   isLoading: boolean;
+  isInitialized: boolean;
   signOut: () => Promise<void>;
   displayName: string;
   displaySubtitle: string;
@@ -37,6 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const router = useRouter();
 
   const profile = useMemo(() => buildProfile(user), [user]);
   const displayName = useMemo(() => getDisplayName(profile), [profile]);
@@ -60,43 +64,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
 
     const init = async () => {
-      logAuth('checking session');
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error) {
-        logAuth('getSession error', { message: error.message });
-      }
-
-      if (mounted) {
-        applySession(data.session);
-        setIsLoading(false);
-        logAuth('initial session resolved', {
-          userId: data.session?.user?.id ?? null,
-        });
+      try {
+        logAuth('checking initial session');
+        const { data } = await supabase.auth.getSession();
+        if (mounted) {
+          applySession(data.session);
+          // We don't set isInitialized to true yet if no session is found,
+          // to give onAuthStateChange a chance to fire for OAuth flows.
+          if (data.session) {
+            setIsInitialized(true);
+            setIsLoading(false);
+          }
+        }
+      } catch (err) {
+        console.error('[auth] initialization error', err);
       }
     };
 
-    void init();
+    init();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      logAuth(`onAuthStateChange: ${event}`, {
-        userId: nextSession?.user?.id ?? null,
-        email: nextSession?.user?.email ?? null,
-      });
+      if (!mounted) return;
+      
+      logAuth(`onAuthStateChange: ${event}`, { userId: nextSession?.user?.id });
+      applySession(nextSession);
+      setIsLoading(false);
+      setIsInitialized(true);
 
-      if (mounted) {
-        applySession(nextSession);
-        setIsLoading(false);
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        router.refresh();
       }
     });
 
+    // Safety timeout: if no session is found within 1.5s, consider initialization complete
+    const timer = setTimeout(() => {
+      if (mounted && !isInitialized) {
+        setIsInitialized(true);
+        setIsLoading(false);
+      }
+    }, 1500);
+
     return () => {
       mounted = false;
+      clearTimeout(timer);
       subscription.unsubscribe();
     };
-  }, [supabase, applySession]);
+  }, [supabase, applySession, isInitialized, router]);
 
   const signOut = useCallback(async () => {
     logAuth('signing out');
@@ -110,11 +125,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       profile,
       isLoading,
+      isInitialized,
       signOut,
       displayName,
       displaySubtitle,
     }),
-    [user, session, profile, isLoading, signOut, displayName, displaySubtitle]
+    [user, session, profile, isLoading, isInitialized, signOut, displayName, displaySubtitle]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

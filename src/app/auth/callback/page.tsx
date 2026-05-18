@@ -49,7 +49,6 @@ function AuthCallbackContent() {
 
         if (active) {
           toast.success('Sign in successful!');
-          router.refresh();
           router.replace('/dashboard');
         }
       } catch (err: any) {

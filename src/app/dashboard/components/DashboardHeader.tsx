@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { RefreshCw, Bell, PlusCircle, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrades } from '@/contexts/TradesContext';
 import UserProfileSummary from '@/components/UserProfileSummary';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 
@@ -12,6 +13,7 @@ const timeframes = ['Today', 'This Week', 'This Month', 'Last 3 Months', 'All Ti
 
 export default function DashboardHeader() {
   const { displayName, isLoading } = useAuth();
+  const { refetch } = useTrades();
   const [selectedTimeframe, setSelectedTimeframe] = useState('This Month');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
@@ -20,7 +22,7 @@ export default function DashboardHeader() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await new Promise((r) => setTimeout(r, 1000));
+    await refetch();
     setIsRefreshing(false);
     toast?.success('Dashboard data refreshed');
   };

@@ -17,7 +17,6 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import ToastProvider from '@/components/ui/ToastProvider';
 import { createClient } from '@/lib/supabase';
 import AppLogo from '@/components/ui/AppLogo';
 
@@ -139,6 +138,8 @@ export default function AuthFormPanel() {
     }
 
     toast.success('Welcome back!');
+    router.push('/dashboard');
+    setIsLoading(false);
   };
 
   const handleSignupSubmit = async (data: SignupFormData) => {
@@ -181,10 +182,12 @@ export default function AuthFormPanel() {
 
     if (authData.session) {
       toast.success('Account created! Welcome aboard.');
+      router.push('/dashboard');
     } else {
       toast.success('Account created! Check your email to confirm.');
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   const handleSocialLogin = async (provider: string) => {
@@ -209,6 +212,7 @@ export default function AuthFormPanel() {
         provider: 'google',
         options: {
           redirectTo,
+          queryParams: { prompt: 'select_account' }
         },
       });
 
@@ -232,7 +236,6 @@ export default function AuthFormPanel() {
   return (
     <div className="flex-1 h-full overflow-y-auto bg-gradient-to-b from-[#02040a] via-[#050814] to-[#02040a]">
       <div className="min-h-full w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 xl:p-10 relative overflow-hidden">
-        <ToastProvider />
 
         {/* Background grids and abstract glows on the form side */}
         <div

@@ -1,8 +1,8 @@
+import '@/styles/tailwind.css';
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import { DM_Sans } from 'next/font/google';
 import Providers from '@/components/Providers';
-import '../styles/tailwind.css';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],

@@ -34,27 +34,23 @@ export async function middleware(request: NextRequest) {
   const protectedRoutes = ['/dashboard', '/add-trade'];
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
-  console.log(`[middleware] Path: ${pathname}, User: ${user ? 'Yes' : 'No'}, Protected: ${isProtectedRoute}`);
-
   if (isProtectedRoute && !user) {
-    console.log(`[middleware] Redirecting from ${pathname} to /login (no session)`);
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     loginUrl.searchParams.set('redirected', 'true');
     const redirectResponse = NextResponse.redirect(loginUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+      redirectResponse.cookies.set(cookie.name, cookie.value, { ...cookie });
     });
     return redirectResponse;
   }
 
   if ((pathname === '/' || pathname === '/login') && user) {
-    console.log(`[middleware] Redirecting authenticated user from ${pathname} to /dashboard`);
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = '/dashboard';
     const redirectResponse = NextResponse.redirect(dashboardUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+      redirectResponse.cookies.set(cookie.name, cookie.value, { ...cookie });
     });
     return redirectResponse;
   }

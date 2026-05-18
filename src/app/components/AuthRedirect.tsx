@@ -6,19 +6,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function AuthRedirect() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isInitialized } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    console.log('[AuthRedirect] Checking state...', { isLoading, hasUser: !!user });
-    if (!isLoading && user) {
-      console.log('[AuthRedirect] Triggering redirect to /dashboard');
-      router.refresh();
+    if (isInitialized && !isLoading && user) {
       router.replace('/dashboard');
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, isInitialized, user, router]);
 
-  if (isLoading || user) {
+  if (!isInitialized || isLoading || user) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-3">
