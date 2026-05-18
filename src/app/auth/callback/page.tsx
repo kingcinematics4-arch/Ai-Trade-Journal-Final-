@@ -21,30 +21,56 @@ function AuthCallbackContent() {
       const errorDesc = searchParams.get('error_description');
 
       if (errorCode || errorDesc) {
-        console.error('[auth] OAuth error received in callback:', { errorCode, errorDesc });
+        console.error('[auth] OAuth error received in callback:', {
+          errorCode,
+          errorDesc,
+        });
+
         toast.error(errorDesc || 'Authentication request was declined.');
-        await cleanupAndRedirect();
+
+        router.replace('/login');
         return;
       }
 
       try {
         if (code) {
           setStatusMessage('Exchanging security credentials...');
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
+
+          const { error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code);
+
+          if (exchangeError) {
+            throw exchangeError;
+          }
         }
 
-        // Always check for a valid session using getSession()
         setStatusMessage('Verifying active session...');
+
         const {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
 
-        if (sessionError) throw sessionError;
+        if (sessionError) {
+          throw sessionError;
+        }
 
         if (!session) {
-          throw new Error('No active session found.');
+          console.log('Session not ready yet. Waiting 2 seconds...');
+
+          setTimeout(async () => {
+            const {
+              data: { session: retrySession },
+            } = await supabase.auth.getSession();
+
+            if (retrySession) {
+              router.replace('/dashboard');
+            } else {
+              router.replace('/login');
+            }
+          }, 2000);
+
+          return;
         }
 
         if (active) {
@@ -53,22 +79,12 @@ function AuthCallbackContent() {
         }
       } catch (err: any) {
         console.error('[auth] OAuth callback verification failed:', err);
-        toast.error(err.message || 'Authentication failed. Returning to login.');
-        await cleanupAndRedirect();
-      }
-    }
 
-    async function cleanupAndRedirect() {
-      if (!active) return;
-      try {
-        // Clear any auth/loading states in local storage if any, and sign out
-        await supabase.auth.signOut();
-      } catch (e) {
-        console.error('[auth] Failed to signOut during cleanup:', e);
-      } finally {
-        if (active) {
-          router.replace('/login');
-        }
+        toast.error(
+          err.message || 'Authentication failed. Returning to login.'
+        );
+
+        router.replace('/login');
       }
     }
 
@@ -84,8 +100,14 @@ function AuthCallbackContent() {
       <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl shadow-lg animate-pulse">
         <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
       </div>
-      <h2 className="text-xl font-bold tracking-tight">Authenticating with Google</h2>
-      <p className="text-xs text-slate-400 font-medium leading-relaxed">{statusMessage}</p>
+
+      <h2 className="text-xl font-bold tracking-tight">
+        Authenticating with Google
+      </h2>
+
+      <p className="text-xs text-slate-400 font-medium leading-relaxed">
+        {statusMessage}
+      </p>
     </div>
   );
 }
@@ -103,13 +125,16 @@ export default function AuthCallbackPage() {
           backgroundSize: '40px 40px',
         }}
       />
+
       <div className="absolute w-[300px] h-[300px] rounded-full bg-blue-600/10 blur-[80px] pointer-events-none" />
 
       <Suspense
         fallback={
           <div className="flex flex-col items-center gap-4 text-center z-10 max-w-sm">
             <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
-            <p className="text-xs text-slate-400">Loading callback...</p>
+            <p className="text-xs text-slate-400">
+              Loading callback...
+            </p>
           </div>
         }
       >
