@@ -139,9 +139,6 @@ export default function AuthFormPanel() {
     }
 
     toast.success('Welcome back!');
-    router.refresh();
-    router.push('/dashboard');
-    setIsLoading(false);
   };
 
   const handleSignupSubmit = async (data: SignupFormData) => {
@@ -184,13 +181,10 @@ export default function AuthFormPanel() {
 
     if (authData.session) {
       toast.success('Account created! Welcome aboard.');
-      router.refresh();
-      router.push('/dashboard');
     } else {
       toast.success('Account created! Check your email to confirm.');
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleSocialLogin = async (provider: string) => {

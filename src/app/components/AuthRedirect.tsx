@@ -10,7 +10,10 @@ export default function AuthRedirect() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('[AuthRedirect] Checking state...', { isLoading, hasUser: !!user });
     if (!isLoading && user) {
+      console.log('[AuthRedirect] Triggering redirect to /dashboard');
+      router.refresh();
       router.replace('/dashboard');
     }
   }, [isLoading, user, router]);
