@@ -211,7 +211,7 @@ export default function AuthFormPanel() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo,
+          redirectTo: 'https://ai-trade-journal-final-yjks.vercel.app/auth/callback',
           queryParams: { prompt: 'select_account' }
         },
       });
