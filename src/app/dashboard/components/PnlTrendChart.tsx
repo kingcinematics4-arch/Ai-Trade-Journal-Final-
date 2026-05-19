@@ -83,6 +83,7 @@ export default function PnlTrendChart() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [isZPressed, setIsZPressed] = useState(false);
+  const [isChartHovered, setIsChartHovered] = useState(false);
 
   // Safely initialize to max data length when loaded
   useEffect(() => {
@@ -118,25 +119,26 @@ export default function PnlTrendChart() {
 
   /* ── Native Wheel Listener (Non-Passive) ── */
   // Use a ref for state to avoid stale closures inside the native event listener
-  const stateRef = useRef({ zoomMode, isZPressed, zoomRange, dataLength });
+  const stateRef = useRef({ zoomMode, isZPressed, isChartHovered, zoomRange, dataLength });
   useEffect(() => {
-    stateRef.current = { zoomMode, isZPressed, zoomRange, dataLength };
-  }, [zoomMode, isZPressed, zoomRange, dataLength]);
+    stateRef.current = { zoomMode, isZPressed, isChartHovered, zoomRange, dataLength };
+  }, [zoomMode, isZPressed, isChartHovered, zoomRange, dataLength]);
 
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
 
     const handleNativeWheel = (e: WheelEvent) => {
-      const { zoomMode, isZPressed, zoomRange, dataLength } = stateRef.current;
+      const { zoomMode, isZPressed, isChartHovered, zoomRange, dataLength } = stateRef.current;
       
-      if (!zoomMode || !isZPressed) {
+      if (!zoomMode || !isZPressed || !isChartHovered) {
         // Normal page scroll
         return;
       }
       
       // Prevent browser scrolling and zooming!
       e.preventDefault();
+      e.stopPropagation();
       
       const rect = el.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -330,6 +332,11 @@ export default function PnlTrendChart() {
         className={`w-full h-[350px] transition-colors select-none ${
           !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
+        onMouseEnter={() => setIsChartHovered(true)}
+        onMouseLeave={(e) => {
+          setIsChartHovered(false);
+          handleMouseUp();
+        }}
         onDoubleClick={handleResetZoom}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
