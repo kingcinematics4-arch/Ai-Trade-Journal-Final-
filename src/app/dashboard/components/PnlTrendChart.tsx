@@ -87,6 +87,28 @@ export default function PnlTrendChart() {
     return dataMax / (dataMax - dataMin);
   }, [pnlData]);
 
+  // Calculate dynamic domain with padding to prevent visual flattening
+  const { domainMin, domainMax } = useMemo(() => {
+    if (!pnlData || pnlData.length === 0) return { domainMin: 0, domainMax: 0 };
+    
+    const equities = pnlData.map((d) => d.cumulative);
+    const min = Math.min(...equities);
+    const max = Math.max(...equities);
+    
+    const padding = (max - min) * 0.15;
+    
+    // Fallback padding if all trades result in the exact same equity
+    if (padding === 0) {
+       return { domainMin: min - 100, domainMax: max + 100 };
+    }
+
+    return { 
+      // Ensure we don't start the chart unnecessarily high or low, but add breathing room
+      domainMin: min - padding, 
+      domainMax: max + padding 
+    };
+  }, [pnlData]);
+
   if (isLoading) {
     return <ChartSkeleton height={240} />;
   }
@@ -107,7 +129,7 @@ export default function PnlTrendChart() {
   const off = gradientOffset;
 
   return (
-    <ResponsiveContainer width="100%" height={260}>
+    <ResponsiveContainer width="100%" height={350}>
       <AreaChart data={pnlData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
         <defs>
           <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
@@ -134,6 +156,7 @@ export default function PnlTrendChart() {
           }}
         />
         <YAxis
+          domain={[domainMin, domainMax]}
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
