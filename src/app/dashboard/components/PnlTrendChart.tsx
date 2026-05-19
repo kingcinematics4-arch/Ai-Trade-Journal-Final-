@@ -15,24 +15,23 @@ import { useTrades } from '@/contexts/TradesContext';
 import type { PnlTrendPoint } from '@/lib/trades/types';
 import { ChartSkeleton } from '@/components/ui/LoadingSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
-import { LineChart, ZoomIn, ZoomOut, Info, RefreshCw } from 'lucide-react';
+import { LineChart, Info, Search, RefreshCw } from 'lucide-react';
 
 /* ── Tooltip ────────────────────────────────────────────── */
 interface CustomTooltipProps {
   active?: boolean;
   payload?: Array<{ payload: PnlTrendPoint }>;
   label?: string;
-  isDragging?: boolean;
 }
 
-function CustomTooltip({ active, payload, isDragging }: CustomTooltipProps) {
-  if (!active || !payload || payload.length === 0 || isDragging) return null;
+function CustomTooltip({ active, payload }: CustomTooltipProps) {
+  if (!active || !payload || payload.length === 0) return null;
 
   const point = payload[0].payload;
   const isStart = point.tradeNumber === 0;
 
   return (
-    <div className="card-elevated shadow-xl p-3 text-xs min-w-[180px] border border-border/50 rounded-md bg-background/95 backdrop-blur">
+    <div className="card-elevated shadow-xl p-3 text-xs min-w-[180px] border border-border/50 rounded-md bg-background/95 backdrop-blur z-50">
       <p className="text-muted-foreground font-medium mb-2 pb-2 border-b border-border/50">
         {isStart ? 'Starting Point' : `Trade #${point.tradeNumber} — ${point.date}`}
       </p>
@@ -77,7 +76,8 @@ export default function PnlTrendChart() {
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend || [];
   const dataLength = pnlData.length;
   
-  // Viewport state
+  // Viewport & Interaction states
+  const [zoomMode, setZoomMode] = useState(false);
   const [zoomRange, setZoomRange] = useState({ start: 0, end: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
@@ -96,46 +96,18 @@ export default function PnlTrendChart() {
     return pnlData.slice(start, end + 1);
   }, [pnlData, dataLength, zoomRange]);
 
-  /* ── Zoom Controls ── */
-  const handleZoomIn = () => {
-    setZoomRange((prev) => {
-      const windowSize = prev.end - prev.start;
-      if (windowSize <= 2) return prev; // max zoom reached
-      const shift = Math.max(1, Math.floor(windowSize * 0.15));
-      return { 
-        start: prev.start + shift, 
-        end: prev.end - shift 
-      };
-    });
-  };
-
-  const handleZoomOut = () => {
-    setZoomRange((prev) => {
-      const windowSize = prev.end - prev.start;
-      const shift = Math.max(1, Math.floor(windowSize * 0.15));
-      return { 
-        start: Math.max(0, prev.start - shift), 
-        end: Math.min(dataLength - 1, prev.end + shift) 
-      };
-    });
-  };
-
-  const handleResetZoom = () => {
-    setZoomRange({ start: 0, end: Math.max(0, dataLength - 1) });
-  };
-
   /* ── Pan & Drag Controls ── */
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (!zoomMode) return;
     setIsDragging(true);
     setDragStartX(e.clientX);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+    if (!zoomMode || !isDragging) return;
     const deltaX = e.clientX - dragStartX;
     
     // Sensitivity: how many pixels mouse moves to shift by 1 trade point
-    // We adjust sensitivity based on how zoomed in we are (more zoomed in = slower pan needed)
     const windowSize = zoomRange.end - zoomRange.start;
     const sensitivity = Math.max(5, 500 / windowSize);
 
@@ -164,16 +136,51 @@ export default function PnlTrendChart() {
   };
 
   const handleMouseUp = () => {
+    if (!zoomMode) return;
     setIsDragging(false);
   };
 
+  const handleResetZoom = () => {
+    setZoomRange({ start: 0, end: Math.max(0, dataLength - 1) });
+  };
+
   const handleWheel = (e: React.WheelEvent) => {
+    if (!zoomMode) return;
+    
     if (e.ctrlKey || e.metaKey) {
-      // Zoom
-      if (e.deltaY < 0) handleZoomIn();
-      else handleZoomOut();
+      // Prevent browser zoom if possible, though React synthetic events can't always do this cleanly.
+      // Zoom centered around cursor X position
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const focalRatio = Math.max(0, Math.min(1, x / rect.width));
+      
+      const windowSize = zoomRange.end - zoomRange.start;
+      
+      if (e.deltaY < 0) {
+        // Zoom IN
+        if (windowSize <= 2) return;
+        const shift = Math.max(1, Math.floor(windowSize * 0.15));
+        const shiftStart = Math.floor(shift * focalRatio);
+        const shiftEnd = shift - shiftStart;
+        
+        setZoomRange(prev => ({
+          start: prev.start + shiftStart,
+          end: prev.end - shiftEnd
+        }));
+      } else {
+        // Zoom OUT
+        const shift = Math.max(1, Math.floor(windowSize * 0.15));
+        const shiftStart = Math.floor(shift * focalRatio);
+        const shiftEnd = shift - shiftStart;
+        
+        setZoomRange(prev => {
+          const newStart = Math.max(0, prev.start - shiftStart);
+          const newEnd = Math.min(dataLength - 1, prev.end + shiftEnd);
+          return { start: newStart, end: newEnd };
+        });
+      }
     } else if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      // Pan
+      // Horizontal Pan
       const shift = e.deltaX > 0 || e.deltaY > 0 ? 1 : -1;
       setZoomRange((prev) => {
         const windowSize = prev.end - prev.start;
@@ -245,49 +252,45 @@ export default function PnlTrendChart() {
           </button>
           
           {showTooltip && (
-            <div className="absolute top-8 right-0 bg-popover text-popover-foreground text-xs p-3 rounded-md shadow-xl border border-border w-64 whitespace-nowrap z-50">
-              <p className="font-semibold mb-2">Zoom & Pan Controls:</p>
+            <div className="absolute top-8 right-0 bg-popover text-popover-foreground text-xs p-3 rounded-md shadow-xl border border-border w-56 whitespace-nowrap z-50">
+              <p className="font-semibold mb-2">Zoom Controls:</p>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• Drag chart = Pan left/right</li>
-                <li>• Ctrl + Wheel = Zoom in/out</li>
-                <li>• Shift + Wheel = Pan left/right</li>
-                <li>• Double click = Reset zoom</li>
+                <li>• Ctrl + Scroll = Zoom</li>
+                <li>• Drag = Move chart</li>
+                <li>• Double click = Reset view</li>
               </ul>
             </div>
           )}
         </div>
         
-        <div className="flex items-center bg-background/50 backdrop-blur border border-border rounded-md shadow-sm">
-          <button 
-            type="button" 
-            onClick={handleResetZoom}
-            className="p-1.5 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors border-r border-border"
-            title="Reset View"
-          >
-            <RefreshCw size={14} />
-          </button>
-          <button 
-            type="button" 
-            onClick={handleZoomOut}
-            className="p-1.5 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors border-r border-border"
-            title="Zoom Out"
-          >
-            <ZoomOut size={16} />
-          </button>
-          <button 
-            type="button"
-            onClick={handleZoomIn}
-            className="p-1.5 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
-            title="Zoom In"
-          >
-            <ZoomIn size={16} />
-          </button>
-        </div>
+        <button 
+          type="button" 
+          onClick={handleResetZoom}
+          className="p-1.5 rounded-md bg-background/50 backdrop-blur border border-border shadow-sm hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+          title="Reset View"
+        >
+          <RefreshCw size={14} />
+        </button>
+
+        <button 
+          type="button"
+          onClick={() => setZoomMode(!zoomMode)}
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm ${
+            zoomMode
+              ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+              : 'bg-background/50 backdrop-blur text-muted-foreground border-border hover:text-foreground hover:bg-muted/50'
+          }`}
+        >
+          <Search size={14} />
+          Zoom Mode: {zoomMode ? 'ON' : 'OFF'}
+        </button>
       </div>
 
       {/* Chart */}
       <div 
-        className={`w-full h-[350px] transition-colors select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`w-full h-[350px] transition-colors select-none ${
+          !zoomMode ? 'cursor-default' : isDragging ? 'cursor-grabbing' : 'cursor-zoom-in'
+        }`}
         onWheel={handleWheel} 
         onDoubleClick={handleResetZoom}
         onMouseDown={handleMouseDown}
@@ -332,8 +335,8 @@ export default function PnlTrendChart() {
               dx={-10}
             />
             <Tooltip
-              content={<CustomTooltip isDragging={isDragging} />}
-              cursor={!isDragging ? { stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '4 4' } : false}
+              content={<CustomTooltip />}
+              cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '4 4' }}
             />
             <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="3 3" opacity={0.5} />
             <Area
@@ -342,7 +345,7 @@ export default function PnlTrendChart() {
               stroke="url(#splitColor)"
               strokeWidth={3}
               fill="url(#splitFill)"
-              isAnimationActive={!isDragging} // Disable animation during drag for immediate responsiveness
+              isAnimationActive={!isDragging && !zoomMode} // Disable animation when interacting for snappy responsiveness
               animationDuration={500}
               animationEasing="ease-in-out"
               dot={{
@@ -350,12 +353,12 @@ export default function PnlTrendChart() {
                 fill: 'var(--background)',
                 strokeWidth: 2,
               }}
-              activeDot={!isDragging ? {
+              activeDot={{
                 r: 6,
                 fill: 'var(--background)',
                 stroke: 'var(--foreground)',
                 strokeWidth: 2,
-              } : false}
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>
