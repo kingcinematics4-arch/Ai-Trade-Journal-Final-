@@ -55,6 +55,7 @@ export type PnlTrendPoint = {
   pnl: number;
   cumulative: number;
   tradeNumber: number;
+  asset: string;
 };
 
 export interface MarketDistributionPoint {

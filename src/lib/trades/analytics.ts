@@ -90,16 +90,19 @@ export function buildEquity(trades: any[]): PnlTrendPoint[] {
       ? parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
       : `Trade ${index + 1}`;
 
+    const asset = String(t.asset_name ?? t.asset ?? 'Unknown');
+
     return {
       date: dateLabel,
       pnl,
       cumulative: runningTotal,
       tradeNumber: index + 1,
+      asset,
     };
   });
 
   // Prepend the zero-origin point
-  return [{ date: 'Start', pnl: 0, cumulative: 0, tradeNumber: 0 }, ...curve];
+  return [{ date: 'Start', pnl: 0, cumulative: 0, tradeNumber: 0, asset: '—' }, ...curve];
 }
 
 // NORMALIZE STATUS

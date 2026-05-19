@@ -31,33 +31,38 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   const isStart = point.tradeNumber === 0;
 
   return (
-    <div className="card-elevated shadow-xl p-3 text-xs min-w-[160px]">
-      <p className="text-muted-foreground font-medium mb-2">
+    <div className="card-elevated shadow-xl p-3 text-xs min-w-[180px] border border-border/50 rounded-md bg-background/95 backdrop-blur">
+      <p className="text-muted-foreground font-medium mb-2 pb-2 border-b border-border/50">
         {isStart ? 'Starting Point' : `Trade #${point.tradeNumber} — ${point.date}`}
       </p>
-      <div className="space-y-1">
-        {!isStart && (
-          <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Trade P&L</span>
-            <span
-              className={`font-semibold font-tabular ${point.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
-            >
-              {point.pnl >= 0 ? '+' : ''}₹
-              {Math.abs(point.pnl).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </span>
-          </div>
-        )}
-        <div
-          className={`flex justify-between gap-4 ${!isStart ? 'border-t border-border/50 pt-1 mt-1' : ''}`}
-        >
-          <span className="text-muted-foreground">Equity</span>
+      
+      {!isStart && point.asset && point.asset !== '—' && (
+        <div className="flex justify-between gap-4 mb-1">
+          <span className="text-muted-foreground">Asset</span>
+          <span className="font-medium">{point.asset}</span>
+        </div>
+      )}
+
+      {!isStart && (
+        <div className="flex justify-between gap-4 mb-1">
+          <span className="text-muted-foreground">Trade P&L</span>
           <span
-            className={`font-semibold font-tabular ${point.cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}
+            className={`font-semibold font-tabular ${point.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}
           >
-            {point.cumulative >= 0 ? '+' : ''}₹
-            {Math.abs(point.cumulative).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            {point.pnl >= 0 ? '+' : '-'}$
+            {Math.abs(point.pnl).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
         </div>
+      )}
+
+      <div className={`flex justify-between gap-4 ${!isStart ? 'pt-1 mt-1 border-t border-border/50' : ''}`}>
+        <span className="text-muted-foreground font-medium">Running Equity</span>
+        <span
+          className={`font-bold font-tabular ${point.cumulative >= 0 ? 'text-green-500' : 'text-red-500'}`}
+        >
+          {point.cumulative >= 0 ? '+' : '-'}$
+          {Math.abs(point.cumulative).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+        </span>
       </div>
     </div>
   );
@@ -69,14 +74,18 @@ export default function PnlTrendChart() {
 
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend;
 
-  // Determine overall color: green if final equity >= 0, red if negative
-  const overallPositive = useMemo(() => {
-    if (pnlData.length === 0) return true;
-    return pnlData[pnlData.length - 1].cumulative >= 0;
-  }, [pnlData]);
+  // Calculate the split percentage for the gradient (0 is where we shift from green to red)
+  const gradientOffset = useMemo(() => {
+    if (!pnlData || pnlData.length === 0) return 0;
+    
+    const dataMax = Math.max(...pnlData.map((i) => i.cumulative));
+    const dataMin = Math.min(...pnlData.map((i) => i.cumulative));
 
-  const lineColor = overallPositive ? '#22c55e' : '#ef4444';
-  const gradientId = 'equityGradient';
+    if (dataMax <= 0) return 0;
+    if (dataMin >= 0) return 1;
+
+    return dataMax / (dataMax - dataMin);
+  }, [pnlData]);
 
   if (isLoading) {
     return <ChartSkeleton height={240} />;
@@ -95,41 +104,59 @@ export default function PnlTrendChart() {
     );
   }
 
+  const off = gradientOffset;
+
   return (
-    <ResponsiveContainer width="100%" height={240}>
-      <AreaChart data={pnlData} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
+    <ResponsiveContainer width="100%" height={260}>
+      <AreaChart data={pnlData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
         <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-            <stop offset="95%" stopColor={lineColor} stopOpacity={0.02} />
+          <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset={off} stopColor="#22c55e" stopOpacity={1} />
+            <stop offset={off} stopColor="#ef4444" stopOpacity={1} />
+          </linearGradient>
+          <linearGradient id="splitFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset={off} stopColor="#22c55e" stopOpacity={0.2} />
+            <stop offset={off} stopColor="#ef4444" stopOpacity={0.2} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
         <XAxis
           dataKey="date"
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
+          dy={10}
         />
         <YAxis
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v: number) =>
-            `₹${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
+            `$${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
           }
+          dx={-10}
         />
-        <Tooltip content={<CustomTooltip />} />
-        <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="4 4" />
+        <Tooltip
+          content={<CustomTooltip />}
+          cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '4 4' }}
+        />
+        <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="3 3" opacity={0.5} />
         <Area
           type="monotone"
           dataKey="cumulative"
-          stroke={lineColor}
-          strokeWidth={2}
-          fill={`url(#${gradientId})`}
+          stroke="url(#splitColor)"
+          strokeWidth={3}
+          fill="url(#splitFill)"
           dot={false}
-          activeDot={{ r: 4, fill: lineColor, strokeWidth: 0 }}
+          activeDot={{
+            r: 5,
+            fill: 'var(--background)',
+            stroke: 'url(#splitColor)',
+            strokeWidth: 2,
+          }}
+          animationDuration={1500}
+          animationEasing="ease-in-out"
         />
       </AreaChart>
     </ResponsiveContainer>
