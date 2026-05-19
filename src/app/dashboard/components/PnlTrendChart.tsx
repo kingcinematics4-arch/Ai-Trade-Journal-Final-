@@ -122,6 +122,7 @@ export default function PnlTrendChart() {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
         <XAxis
           dataKey="tradeNumber"
+          type="category"
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
@@ -152,11 +153,15 @@ export default function PnlTrendChart() {
           stroke="url(#splitColor)"
           strokeWidth={3}
           fill="url(#splitFill)"
-          dot={false}
-          activeDot={{
-            r: 5,
+          dot={{
+            r: 3,
             fill: 'var(--background)',
-            stroke: 'url(#splitColor)',
+            strokeWidth: 2,
+          }}
+          activeDot={{
+            r: 6,
+            fill: 'var(--background)',
+            stroke: 'var(--foreground)',
             strokeWidth: 2,
           }}
           animationDuration={1500}
