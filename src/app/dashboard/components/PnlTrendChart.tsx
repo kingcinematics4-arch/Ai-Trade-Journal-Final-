@@ -1,116 +1,62 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-} from 'recharts';
+import React, { useRef, useState } from 'react';
+import ReactECharts from 'echarts-for-react';
 import { useTrades } from '@/contexts/TradesContext';
 import type { PnlTrendPoint } from '@/lib/trades/types';
 import { ChartSkeleton } from '@/components/ui/LoadingSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
-import { LineChart } from 'lucide-react';
+import { LineChart, ZoomIn, ZoomOut, Info } from 'lucide-react';
 
-/* ── Tooltip ────────────────────────────────────────────── */
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{ payload: PnlTrendPoint }>;
-  label?: string;
-}
-
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
-  if (!active || !payload || payload.length === 0) return null;
-
-  const point = payload[0].payload;
-  const isStart = point.tradeNumber === 0;
-
-  return (
-    <div className="card-elevated shadow-xl p-3 text-xs min-w-[180px] border border-border/50 rounded-md bg-background/95 backdrop-blur">
-      <p className="text-muted-foreground font-medium mb-2 pb-2 border-b border-border/50">
-        {isStart ? 'Starting Point' : `Trade #${point.tradeNumber} — ${point.date}`}
-      </p>
-      
-      {!isStart && point.asset && point.asset !== '—' && (
-        <div className="flex justify-between gap-4 mb-1">
-          <span className="text-muted-foreground">Asset</span>
-          <span className="font-medium">{point.asset}</span>
-        </div>
-      )}
-
-      {!isStart && (
-        <div className="flex justify-between gap-4 mb-1">
-          <span className="text-muted-foreground">Trade P&L</span>
-          <span
-            className={`font-semibold font-tabular ${point.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}
-          >
-            {point.pnl >= 0 ? '+' : '-'}$
-            {Math.abs(point.pnl).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </span>
-        </div>
-      )}
-
-      <div className={`flex justify-between gap-4 ${!isStart ? 'pt-1 mt-1 border-t border-border/50' : ''}`}>
-        <span className="text-muted-foreground font-medium">Running Equity</span>
-        <span
-          className={`font-bold font-tabular ${point.cumulative >= 0 ? 'text-green-500' : 'text-red-500'}`}
-        >
-          {point.cumulative >= 0 ? '+' : '-'}$
-          {Math.abs(point.cumulative).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/* ── Chart ──────────────────────────────────────────────── */
 export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
+  const chartRef = useRef<ReactECharts>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
-  const pnlData: PnlTrendPoint[] = analytics.pnlTrend;
+  const pnlData: PnlTrendPoint[] = analytics.pnlTrend || [];
 
-  // Calculate the split percentage for the gradient (0 is where we shift from green to red)
-  const gradientOffset = useMemo(() => {
-    if (!pnlData || pnlData.length === 0) return 0;
+  const handleZoomIn = () => {
+    const chart = chartRef.current?.getEchartsInstance();
+    if (!chart) return;
+    const currentOption = chart.getOption() as any;
+    const currentZoom = currentOption.dataZoom[0];
     
-    const dataMax = Math.max(...pnlData.map((i) => i.cumulative));
-    const dataMin = Math.min(...pnlData.map((i) => i.cumulative));
+    // Zoom in by reducing the range by 20%
+    let start = currentZoom.start;
+    let end = currentZoom.end;
+    const range = end - start;
+    const newStart = Math.min(start + range * 0.1, 99);
+    const newEnd = Math.max(end - range * 0.1, 1);
 
-    if (dataMax <= 0) return 0;
-    if (dataMin >= 0) return 1;
+    chart.dispatchAction({
+      type: 'dataZoom',
+      start: newStart,
+      end: newEnd,
+    });
+  };
 
-    return dataMax / (dataMax - dataMin);
-  }, [pnlData]);
-
-  // Calculate dynamic domain with padding to prevent visual flattening
-  const { domainMin, domainMax } = useMemo(() => {
-    if (!pnlData || pnlData.length === 0) return { domainMin: 0, domainMax: 0 };
+  const handleZoomOut = () => {
+    const chart = chartRef.current?.getEchartsInstance();
+    if (!chart) return;
+    const currentOption = chart.getOption() as any;
+    const currentZoom = currentOption.dataZoom[0];
     
-    const equities = pnlData.map((d) => d.cumulative);
-    const min = Math.min(...equities);
-    const max = Math.max(...equities);
-    
-    const padding = (max - min) * 0.15;
-    
-    // Fallback padding if all trades result in the exact same equity
-    if (padding === 0) {
-       return { domainMin: min - 100, domainMax: max + 100 };
-    }
+    // Zoom out by expanding the range by 20%
+    let start = currentZoom.start;
+    let end = currentZoom.end;
+    const range = end - start;
+    const newStart = Math.max(start - range * 0.1, 0);
+    const newEnd = Math.min(end + range * 0.1, 100);
 
-    return { 
-      // Ensure we don't start the chart unnecessarily high or low, but add breathing room
-      domainMin: min - padding, 
-      domainMax: max + padding 
-    };
-  }, [pnlData]);
+    chart.dispatchAction({
+      type: 'dataZoom',
+      start: newStart,
+      end: newEnd,
+    });
+  };
 
   if (isLoading) {
-    return <ChartSkeleton height={240} />;
+    return <ChartSkeleton height={350} />;
   }
 
   if (isEmpty || pnlData.length === 0) {
@@ -126,71 +72,211 @@ export default function PnlTrendChart() {
     );
   }
 
-  const off = gradientOffset;
+  const option = {
+    grid: {
+      top: 20,
+      right: 15,
+      left: 15,
+      bottom: 25,
+      containLabel: true,
+    },
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+      padding: 0,
+      formatter: function (params: any) {
+        if (!params || !params.length) return '';
+        const dataIndex = params[0].dataIndex;
+        const point = pnlData[dataIndex];
+        const isStart = point.tradeNumber === 0;
+
+        const assetHtml = (!isStart && point.asset && point.asset !== '—') 
+          ? `<div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+              <span style="color: var(--muted-foreground);">Asset</span>
+              <span style="font-weight: 500; color: var(--foreground);">${point.asset}</span>
+             </div>`
+          : '';
+
+        const pnlHtml = !isStart
+          ? `<div style="display: flex; justify-content: space-between; gap: 16px; margin-bottom: 4px;">
+              <span style="color: var(--muted-foreground);">Trade P&L</span>
+              <span style="font-weight: 600; font-family: monospace; color: ${point.pnl >= 0 ? '#22c55e' : '#ef4444'};">
+                ${point.pnl >= 0 ? '+' : '-'}$${Math.abs(point.pnl).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </span>
+             </div>`
+          : '';
+
+        const equityHtml = `<div style="display: flex; justify-content: space-between; gap: 16px; padding-top: 4px; margin-top: 4px; border-top: 1px solid rgba(128,128,128,0.2);">
+            <span style="color: var(--muted-foreground); font-weight: 500;">Running Equity</span>
+            <span style="font-weight: 700; font-family: monospace; color: ${point.cumulative >= 0 ? '#22c55e' : '#ef4444'};">
+              ${point.cumulative >= 0 ? '+' : '-'}$${Math.abs(point.cumulative).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+          </div>`;
+
+        return `
+          <div style="background-color: var(--background); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); padding: 12px; border-radius: 6px; font-size: 12px; min-width: 180px;">
+            <p style="color: var(--muted-foreground); font-weight: 500; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(128,128,128,0.2);">
+              ${isStart ? 'Starting Point' : `Trade #${point.tradeNumber} — ${point.date}`}
+            </p>
+            ${assetHtml}
+            ${pnlHtml}
+            ${equityHtml}
+          </div>
+        `;
+      },
+    },
+    xAxis: {
+      type: 'category',
+      data: pnlData.map((d) => (d.tradeNumber === 0 ? 'Start' : d.date)),
+      boundaryGap: false,
+      axisLabel: {
+        color: 'var(--muted-foreground)',
+        fontSize: 10,
+        formatter: function (value: string, index: number) {
+          const point = pnlData[index];
+          if (!point) return value;
+          return point.tradeNumber === 0 ? '' : point.date;
+        }
+      },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        color: 'var(--muted-foreground)',
+        fontSize: 10,
+        formatter: (value: number) => {
+          return `$${Math.abs(value) >= 1000 ? (value / 1000).toFixed(1) + 'k' : value}`;
+        },
+      },
+      splitLine: {
+        lineStyle: {
+          color: 'var(--border)',
+          type: 'dashed',
+          opacity: 0.5,
+        },
+      },
+    },
+    visualMap: {
+      show: false,
+      dimension: 1, // y-axis
+      pieces: [
+        { gt: 0, color: '#22c55e' }, // Green for > 0
+        { lte: 0, color: '#ef4444' }, // Red for <= 0
+      ],
+      outOfRange: {
+        color: '#999',
+      },
+    },
+    dataZoom: [
+      {
+        type: 'inside', // Mouse scroll & drag to pan
+        start: 0,
+        end: 100,
+      }
+    ],
+    series: [
+      {
+        name: 'Equity',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        itemStyle: {
+          color: 'var(--background)',
+          borderColor: 'inherit',
+          borderWidth: 2,
+        },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: 'inherit' },
+              { offset: 1, color: 'transparent' }
+            ],
+          },
+          opacity: 0.15,
+        },
+        data: pnlData.map((d) => d.cumulative),
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          data: [{ yAxis: 0 }],
+          lineStyle: {
+            color: 'var(--muted-foreground)',
+            type: 'dashed',
+            opacity: 0.5,
+          },
+        },
+      },
+    ],
+  };
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <AreaChart data={pnlData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-        <defs>
-          <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-            <stop offset={off} stopColor="#22c55e" stopOpacity={1} />
-            <stop offset={off} stopColor="#ef4444" stopOpacity={1} />
-          </linearGradient>
-          <linearGradient id="splitFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset={off} stopColor="#22c55e" stopOpacity={0.2} />
-            <stop offset={off} stopColor="#ef4444" stopOpacity={0.2} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
-        <XAxis
-          dataKey="tradeNumber"
-          type="category"
-          tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-          tickLine={false}
-          axisLine={false}
-          interval="preserveStartEnd"
-          dy={10}
-          tickFormatter={(val) => {
-            const point = pnlData.find((p) => p.tradeNumber === val);
-            return point && point.tradeNumber !== 0 ? point.date : '';
-          }}
+    <div className="relative w-full">
+      {/* Interactive Header */}
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+        <div className="relative">
+          <button 
+            type="button" 
+            className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            <Info size={16} />
+          </button>
+          
+          {showTooltip && (
+            <div className="absolute top-8 right-0 bg-popover text-popover-foreground text-xs p-3 rounded-md shadow-xl border border-border w-56 whitespace-nowrap z-50">
+              <p className="font-semibold mb-2">Zoom Controls:</p>
+              <ul className="space-y-1 text-muted-foreground">
+                <li>• Mouse Wheel = Zoom in/out</li>
+                <li>• Drag chart = Pan left/right</li>
+                <li>• Double click = Reset zoom</li>
+              </ul>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center bg-background/50 backdrop-blur border border-border rounded-md shadow-sm">
+          <button 
+            type="button" 
+            onClick={handleZoomOut}
+            className="p-1.5 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors border-r border-border"
+            title="Zoom Out"
+          >
+            <ZoomOut size={16} />
+          </button>
+          <button 
+            type="button"
+            onClick={handleZoomIn}
+            className="p-1.5 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            title="Zoom In"
+          >
+            <ZoomIn size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div className="w-full h-[350px]">
+        <ReactECharts
+          ref={chartRef}
+          option={option}
+          style={{ height: '100%', width: '100%' }}
+          notMerge={true}
+          lazyUpdate={true}
+          // The empty object configures ReactEcharts correctly without warnings
+          opts={{ renderer: 'canvas' }}
         />
-        <YAxis
-          domain={[domainMin, domainMax]}
-          tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(v: number) =>
-            `$${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
-          }
-          dx={-10}
-        />
-        <Tooltip
-          content={<CustomTooltip />}
-          cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '4 4' }}
-        />
-        <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="3 3" opacity={0.5} />
-        <Area
-          type="monotone"
-          dataKey="cumulative"
-          stroke="url(#splitColor)"
-          strokeWidth={3}
-          fill="url(#splitFill)"
-          dot={{
-            r: 3,
-            fill: 'var(--background)',
-            strokeWidth: 2,
-          }}
-          activeDot={{
-            r: 6,
-            fill: 'var(--background)',
-            stroke: 'var(--foreground)',
-            strokeWidth: 2,
-          }}
-          animationDuration={1500}
-          animationEasing="ease-in-out"
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
