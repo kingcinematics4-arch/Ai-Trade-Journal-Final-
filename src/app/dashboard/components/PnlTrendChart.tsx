@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   AreaChart,
   Area,
@@ -72,6 +72,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
   const [showTooltip, setShowTooltip] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend || [];
   const dataLength = pnlData.length;
@@ -81,6 +82,7 @@ export default function PnlTrendChart() {
   const [zoomRange, setZoomRange] = useState({ start: 0, end: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
+  const [isZPressed, setIsZPressed] = useState(false);
 
   // Safely initialize to max data length when loaded
   useEffect(() => {
@@ -95,6 +97,82 @@ export default function PnlTrendChart() {
     const end = Math.min(dataLength - 1, Math.max(zoomRange.end, start + 1));
     return pnlData.slice(start, end + 1);
   }, [pnlData, dataLength, zoomRange]);
+
+  /* ── Keyboard Listeners (Z key) ── */
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'z') setIsZPressed(true);
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'z') setIsZPressed(false);
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  /* ── Native Wheel Listener (Non-Passive) ── */
+  // Use a ref for state to avoid stale closures inside the native event listener
+  const stateRef = useRef({ zoomMode, isZPressed, zoomRange, dataLength });
+  useEffect(() => {
+    stateRef.current = { zoomMode, isZPressed, zoomRange, dataLength };
+  }, [zoomMode, isZPressed, zoomRange, dataLength]);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      const { zoomMode, isZPressed, zoomRange, dataLength } = stateRef.current;
+      
+      if (!zoomMode || !isZPressed) {
+        // Normal page scroll
+        return;
+      }
+      
+      // Prevent browser scrolling and zooming!
+      e.preventDefault();
+      
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const focalRatio = Math.max(0, Math.min(1, x / rect.width));
+      
+      const windowSize = zoomRange.end - zoomRange.start;
+      
+      if (e.deltaY < 0) {
+        // Zoom IN
+        if (windowSize <= 2) return;
+        const shift = Math.max(1, Math.floor(windowSize * 0.15));
+        const shiftStart = Math.floor(shift * focalRatio);
+        const shiftEnd = shift - shiftStart;
+        
+        setZoomRange(prev => ({
+          start: prev.start + shiftStart,
+          end: prev.end - shiftEnd
+        }));
+      } else {
+        // Zoom OUT
+        const shift = Math.max(1, Math.floor(windowSize * 0.15));
+        const shiftStart = Math.floor(shift * focalRatio);
+        const shiftEnd = shift - shiftStart;
+        
+        setZoomRange(prev => {
+          const newStart = Math.max(0, prev.start - shiftStart);
+          const newEnd = Math.min(dataLength - 1, prev.end + shiftEnd);
+          return { start: newStart, end: newEnd };
+        });
+      }
+    };
+
+    // { passive: false } is REQUIRED to allow e.preventDefault() to work on wheel events
+    el.addEventListener('wheel', handleNativeWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleNativeWheel);
+  }, []);
 
   /* ── Pan & Drag Controls ── */
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -144,57 +222,6 @@ export default function PnlTrendChart() {
     setZoomRange({ start: 0, end: Math.max(0, dataLength - 1) });
   };
 
-  const handleWheel = (e: React.WheelEvent) => {
-    if (!zoomMode) return;
-    
-    if (e.ctrlKey || e.metaKey) {
-      // Prevent browser zoom if possible, though React synthetic events can't always do this cleanly.
-      // Zoom centered around cursor X position
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const focalRatio = Math.max(0, Math.min(1, x / rect.width));
-      
-      const windowSize = zoomRange.end - zoomRange.start;
-      
-      if (e.deltaY < 0) {
-        // Zoom IN
-        if (windowSize <= 2) return;
-        const shift = Math.max(1, Math.floor(windowSize * 0.15));
-        const shiftStart = Math.floor(shift * focalRatio);
-        const shiftEnd = shift - shiftStart;
-        
-        setZoomRange(prev => ({
-          start: prev.start + shiftStart,
-          end: prev.end - shiftEnd
-        }));
-      } else {
-        // Zoom OUT
-        const shift = Math.max(1, Math.floor(windowSize * 0.15));
-        const shiftStart = Math.floor(shift * focalRatio);
-        const shiftEnd = shift - shiftStart;
-        
-        setZoomRange(prev => {
-          const newStart = Math.max(0, prev.start - shiftStart);
-          const newEnd = Math.min(dataLength - 1, prev.end + shiftEnd);
-          return { start: newStart, end: newEnd };
-        });
-      }
-    } else if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      // Horizontal Pan
-      const shift = e.deltaX > 0 || e.deltaY > 0 ? 1 : -1;
-      setZoomRange((prev) => {
-        const windowSize = prev.end - prev.start;
-        let newStart = prev.start + shift;
-        let newEnd = prev.end + shift;
-        
-        if (newStart < 0) { newStart = 0; newEnd = windowSize; }
-        if (newEnd >= dataLength) { newEnd = dataLength - 1; newStart = Math.max(0, newEnd - windowSize); }
-        
-        return { start: newStart, end: newEnd };
-      });
-    }
-  };
-
   /* ── Chart Layout/Aesthetics ── */
   const gradientOffset = useMemo(() => {
     if (!visibleData || visibleData.length === 0) return 0;
@@ -236,9 +263,20 @@ export default function PnlTrendChart() {
   }
 
   const off = gradientOffset;
+  const isZoomActive = zoomMode && isZPressed;
 
   return (
     <div className="relative w-full">
+      {/* Zoom Active Indicator Overlay */}
+      {isZoomActive && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <div className="bg-blue-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
+            <Search size={14} />
+            Zoom Active
+          </div>
+        </div>
+      )}
+
       {/* Interactive Header */}
       <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
         <div className="relative">
@@ -255,7 +293,7 @@ export default function PnlTrendChart() {
             <div className="absolute top-8 right-0 bg-popover text-popover-foreground text-xs p-3 rounded-md shadow-xl border border-border w-56 whitespace-nowrap z-50">
               <p className="font-semibold mb-2">Zoom Controls:</p>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• Ctrl + Scroll = Zoom</li>
+                <li>• Hold Z + Scroll = Zoom</li>
                 <li>• Drag = Move chart</li>
                 <li>• Double click = Reset view</li>
               </ul>
@@ -288,10 +326,10 @@ export default function PnlTrendChart() {
 
       {/* Chart */}
       <div 
+        ref={wrapperRef}
         className={`w-full h-[350px] transition-colors select-none ${
-          !zoomMode ? 'cursor-default' : isDragging ? 'cursor-grabbing' : 'cursor-zoom-in'
+          !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
-        onWheel={handleWheel} 
         onDoubleClick={handleResetZoom}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
