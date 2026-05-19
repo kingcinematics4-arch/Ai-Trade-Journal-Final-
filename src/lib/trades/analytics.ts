@@ -66,11 +66,17 @@ export function buildEquity(trades: any[]): PnlTrendPoint[] {
   if (!trades || trades.length === 0) return [];
 
   // Sort chronologically: oldest first
-  const sorted = [...trades].sort(
-    (a, b) =>
-      new Date(a.trade_date ?? a.created_at ?? 0).getTime() -
-      new Date(b.trade_date ?? b.created_at ?? 0).getTime()
-  );
+  // Primary sort: trade_date. Tiebreaker: created_at (has full timestamp precision)
+  const sorted = [...trades].sort((a, b) => {
+    const dateA = new Date(a.trade_date ?? a.created_at ?? 0).getTime();
+    const dateB = new Date(b.trade_date ?? b.created_at ?? 0).getTime();
+    if (dateA !== dateB) return dateA - dateB;
+    // Same trade_date → use created_at as tiebreaker (oldest entry first)
+    return (
+      new Date(a.created_at ?? 0).getTime() -
+      new Date(b.created_at ?? 0).getTime()
+    );
+  });
 
   let runningTotal = 0;
 
@@ -150,8 +156,12 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
 
   // STREAK
   const getTime = (t: any) => new Date(t.trade_date ?? t.created_at ?? 0).getTime();
+  const getCreatedTime = (t: any) => new Date(t.created_at ?? 0).getTime();
 
-  const sortedDesc = [...trades].sort((a, b) => getTime(b) - getTime(a));
+  const sortedDesc = [...trades].sort((a, b) => {
+    const diff = getTime(b) - getTime(a);
+    return diff !== 0 ? diff : getCreatedTime(b) - getCreatedTime(a);
+  });
 
   let streakType: 'win' | 'loss' | 'none' = 'none';
   let streakCount = 0;
