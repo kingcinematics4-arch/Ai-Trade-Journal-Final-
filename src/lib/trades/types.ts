@@ -52,7 +52,9 @@ export interface TradeRow {
 
 export type PnlTrendPoint = {
   date: string;
+  pnl: number;
   cumulative: number;
+  tradeNumber: number;
 };
 
 export interface MarketDistributionPoint {

@@ -38,7 +38,7 @@ export function parseSafeNumber(value: any): number {
   return isNaN(num) ? 0 : num;
 }
 
-// PNL CALCULATION (ONLY RAW DATA)
+// PNL CALCULATION FROM PRICES (FALLBACK ONLY)
 export function calculatePnL(t: any): number {
   const entry = Number(t.entry_price);
   const exit = Number(t.exit_price);
@@ -51,32 +51,49 @@ export function calculatePnL(t: any): number {
   return Number((diff * lots).toFixed(2));
 }
 
-// EQUITY CURVE (FIXED - NO FORMATTED DATE, NO EXTRA FIELDS)
+// GET TRADE PNL — prefers the user-entered pnl_amount, falls back to price calc
+export function getTradePnL(t: any): number {
+  // 1. Check pnl_amount first (the field users actually fill in)
+  const pnlAmount = parseSafeNumber(t.pnl_amount ?? t.pnl);
+  if (pnlAmount !== 0) return pnlAmount;
+
+  // 2. Fallback: compute from entry/exit prices
+  return calculatePnL(t);
+}
+
+// EQUITY CURVE — cumulative running total using pnl_amount
 export function buildEquity(trades: any[]): PnlTrendPoint[] {
+  if (!trades || trades.length === 0) return [];
+
+  // Sort chronologically: oldest first
   const sorted = [...trades].sort(
     (a, b) =>
       new Date(a.trade_date ?? a.created_at ?? 0).getTime() -
-      new Date(b.trade_date || b.created_at).getTime()
+      new Date(b.trade_date ?? b.created_at ?? 0).getTime()
   );
 
-  let sum = 0;
+  let runningTotal = 0;
 
-  const curve = sorted.map((t) => {
-    const pnl = calculatePnL(t);
-    sum = Number((sum + pnl).toFixed(2));
+  const curve: PnlTrendPoint[] = sorted.map((t, index) => {
+    const pnl = getTradePnL(t);
+    runningTotal = Number((runningTotal + pnl).toFixed(2));
 
-    const date = t.trade_date || t.created_at;
+    const rawDate = t.trade_date || t.created_at;
+    const parsed = rawDate ? new Date(rawDate) : null;
+    const dateLabel = parsed
+      ? parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+      : `Trade ${index + 1}`;
 
     return {
-      date,
+      date: dateLabel,
       pnl,
-      cumulative: sum,
+      cumulative: runningTotal,
+      tradeNumber: index + 1,
     };
   });
 
-  if (curve.length === 0) return [];
-
-  return [{ date: 'Start', pnl: 0, cumulative: 0 }, ...curve];
+  // Prepend the zero-origin point
+  return [{ date: 'Start', pnl: 0, cumulative: 0, tradeNumber: 0 }, ...curve];
 }
 
 // NORMALIZE STATUS
@@ -103,7 +120,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let bestTrade: TradeAnalytics['bestTrade'] = null;
 
   for (const t of trades) {
-    const pnl = calculatePnL(t);
+    const pnl = getTradePnL(t);
     const status = normalizeStatus(t.trade_status);
 
     if (status === 'win') winCount++;
@@ -161,7 +178,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     const entry = marketMap.get(market) ?? { trades: 0, pnl: 0 };
 
     entry.trades++;
-    entry.pnl += calculatePnL(t);
+    entry.pnl += getTradePnL(t);
 
     marketMap.set(market, entry);
   }
