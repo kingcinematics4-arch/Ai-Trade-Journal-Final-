@@ -121,12 +121,16 @@ export default function PnlTrendChart() {
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
         <XAxis
-          dataKey="date"
+          dataKey="tradeNumber"
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
           dy={10}
+          tickFormatter={(val) => {
+            const point = pnlData.find((p) => p.tradeNumber === val);
+            return point && point.tradeNumber !== 0 ? point.date : '';
+          }}
         />
         <YAxis
           tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
