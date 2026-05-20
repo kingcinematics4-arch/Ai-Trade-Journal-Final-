@@ -4,7 +4,6 @@ import type {
   PnlTrendPoint,
   TradeAnalytics,
   TradeInsight,
-  TradeStatus,
 } from './types';
 import { mapDbTrade } from './mapTrade';
 
@@ -107,13 +106,37 @@ export function buildEquity(trades: any[]): PnlTrendPoint[] {
 }
 
 // NORMALIZE STATUS
-function normalizeStatus(status: string | null | undefined): TradeStatus {
-  if (!status) return 'breakeven';
-  const s = status.toLowerCase();
-  if (s === 'win' || s === 'profit') return 'win';
-  if (s === 'loss') return 'loss';
-  return 'breakeven';
-}
+export const normalizeStatus = (status?: string | null) => {
+  if (!status) return 'unknown';
+
+  const value = status.toLowerCase().trim();
+
+  if (
+    value === 'win' ||
+    value === 'profit' ||
+    value === 'tp'
+  ) {
+    return 'win';
+  }
+
+  if (
+    value === 'loss' ||
+    value === 'lose' ||
+    value === 'sl'
+  ) {
+    return 'loss';
+  }
+
+  if (
+    value === 'breakeven' ||
+    value === 'break-even' ||
+    value === 'be'
+  ) {
+    return 'breakeven';
+  }
+
+  return 'unknown';
+};
 
 // MAIN ANALYTICS ENGINE
 export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
