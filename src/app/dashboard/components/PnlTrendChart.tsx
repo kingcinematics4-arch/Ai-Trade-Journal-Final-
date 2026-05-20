@@ -274,7 +274,7 @@ export default function PnlTrendChart() {
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
           <div className="bg-blue-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
             <Search size={14} />
-            Zoom Active
+            Zoom Active (Z + Scroll)
           </div>
         </div>
       )}
@@ -283,7 +283,7 @@ export default function PnlTrendChart() {
       <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
         <div className="relative">
           <button 
-            type="button" 
+            type="button" focus-visible:outline-none focus-visible:ring-0
             className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -305,7 +305,7 @@ export default function PnlTrendChart() {
         
         <button 
           type="button" 
-          onClick={handleResetZoom}
+          onClick={handleResetZoom} focus-visible:outline-none focus-visible:ring-0
           className="p-1.5 rounded-md bg-background/50 backdrop-blur border border-border shadow-sm hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
           title="Reset View"
         >
@@ -315,7 +315,7 @@ export default function PnlTrendChart() {
         <button 
           type="button"
           onClick={() => setZoomMode(!zoomMode)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm ${
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-0 ${
             zoomMode
               ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
               : 'bg-background/50 backdrop-blur text-muted-foreground border-border hover:text-foreground hover:bg-muted/50'
@@ -329,6 +329,7 @@ export default function PnlTrendChart() {
       {/* Chart */}
       <div 
         ref={wrapperRef}
+        tabIndex={-1} // Make it programmatically focusable but not via tab key
         className={`w-full h-[350px] transition-colors select-none ${
           !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
@@ -341,6 +342,8 @@ export default function PnlTrendChart() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        focus-visible:outline-none focus-visible:ring-0 // Apply to the wrapper div
+        onMouseLeave={handleMouseUp}
       >
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>

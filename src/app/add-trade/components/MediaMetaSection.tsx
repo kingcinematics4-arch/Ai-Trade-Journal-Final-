@@ -59,7 +59,7 @@ function ImageUploadZone({
           setIsDragging(false);
           handleFiles(e.dataTransfer.files);
         }}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => inputRef.current?.click()} focus-visible:outline-none focus-visible:ring-0
         className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-150 ${
           isDragging
             ? 'border-primary bg-primary/10'
@@ -104,7 +104,7 @@ function ImageUploadZone({
                 type="button"
                 onClick={() => onRemove(i)}
                 className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                aria-label={`Remove image ${i + 1}`}
+                aria-label={`Remove image ${i + 1}`} focus-visible:outline-none focus-visible:ring-0
               >
                 <X size={10} className="text-white" />
               </button>
@@ -141,7 +141,7 @@ function StarRating({
             onMouseEnter={() => setHovered(star)}
             onMouseLeave={() => setHovered(0)}
             onClick={() => onChange(star)}
-            className="text-2xl transition-all duration-100 active:scale-90"
+            className="text-2xl transition-all duration-100 active:scale-90 focus-visible:outline-none focus-visible:ring-0"
             aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
           >
             <span
@@ -210,7 +210,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
               type="button"
               onClick={() => removeTag(tag)}
               className="hover:text-red-400 transition-colors"
-              aria-label={`Remove tag ${tag}`}
+              aria-label={`Remove tag ${tag}`} focus-visible:outline-none focus-visible:ring-0
             >
               <X size={10} />
             </button>
@@ -234,12 +234,12 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
               addTag(input);
             }
           }}
-          className="form-input flex-1 text-sm"
+          className="form-input flex-1 text-sm focus-visible:outline-none focus-visible:ring-0"
           placeholder="Type tag and press Enter or comma"
           maxLength={30}
         />
         <button
-          type="button"
+          type="button" focus-visible:outline-none focus-visible:ring-0
           onClick={() => addTag(input)}
           disabled={!input.trim()}
           className="btn-secondary text-sm px-3 disabled:opacity-40"
@@ -259,7 +259,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
               key={`tag-sug-${s}`}
               type="button"
               onClick={() => onChange([...tags, s])}
-              className="text-xs text-muted-foreground hover:text-foreground border border-border hover:border-zinc-600 px-2 py-0.5 rounded-full transition-colors duration-100"
+              className="text-xs text-muted-foreground hover:text-foreground border border-border hover:border-zinc-600 px-2 py-0.5 rounded-full transition-colors duration-100 focus-visible:outline-none focus-visible:ring-0"
             >
               + {s}
             </button>
@@ -347,7 +347,7 @@ export default function MediaMetaSection({
               min={1}
               max={10}
               step={1}
-              className="w-full h-2 rounded-full appearance-none bg-muted cursor-pointer accent-primary"
+              className="w-full h-2 rounded-full appearance-none bg-muted cursor-pointer accent-primary focus-visible:outline-none focus-visible:ring-0"
               {...form.register('confidenceLevel', { valueAsNumber: true })}
             />
             <div className="flex justify-between">
