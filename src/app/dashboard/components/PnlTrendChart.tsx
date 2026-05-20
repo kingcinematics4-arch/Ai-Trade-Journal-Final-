@@ -341,7 +341,6 @@ export default function PnlTrendChart() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
       >
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>

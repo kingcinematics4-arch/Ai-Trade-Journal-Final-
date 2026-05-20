@@ -91,7 +91,7 @@ export default function RecentTradesTable() {
           </p>
         </div>
         <Link
-          href="/dashboard"
+          href="/trade-history"
           className="text-xs text-primary hover:text-blue-400 font-medium transition-colors"
         >
           View All Trades →

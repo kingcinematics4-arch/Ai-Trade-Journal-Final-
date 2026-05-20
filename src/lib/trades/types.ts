@@ -77,6 +77,7 @@ export interface TradeAnalytics {
   avgRr: number;
   currentStreak: { type: 'win' | 'loss' | 'none'; count: number };
   bestTrade: { pnl: number; asset: string; strategy: string; date: string } | null;
+  worstTrade: { pnl: number; asset: string; strategy: string; date: string } | null;
   pnlTrend: PnlTrendPoint[];
   marketDistribution: MarketDistributionPoint[];
 }

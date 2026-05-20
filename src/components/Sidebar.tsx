@@ -42,7 +42,7 @@ const primaryNavItems: NavItem[] = [
     icon: <LayoutDashboard size={18} />,
   },
   { id: 'nav-add-trade', label: 'Add Trade', href: '/add-trade', icon: <PlusCircle size={18} /> },
-  { id: 'nav-history', label: 'Trade History', href: '/dashboard', icon: <BookOpen size={18} /> },
+  { id: 'nav-history', label: 'Trade History', href: '/trade-history', icon: <BookOpen size={18} /> },
   { id: 'nav-analytics', label: 'Analytics', href: '/dashboard', icon: <BarChart3 size={18} /> },
   {
     id: 'nav-ai-coach',

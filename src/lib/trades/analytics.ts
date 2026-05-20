@@ -19,6 +19,7 @@ const EMPTY_ANALYTICS: TradeAnalytics = {
   avgRr: 0,
   currentStreak: { type: 'none', count: 0 },
   bestTrade: null,
+  worstTrade: null,
   pnlTrend: [],
   marketDistribution: [],
 };
@@ -127,6 +128,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
   let rrSum = 0;
   let rrCount = 0;
   let bestTrade: TradeAnalytics['bestTrade'] = null;
+  let worstTrade: TradeAnalytics['worstTrade'] = null;
 
   for (const t of trades) {
     const pnl = getTradePnL(t);
@@ -145,6 +147,16 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     if (!bestTrade || pnl > bestTrade.pnl) {
       const mapped = mapDbTrade(t as any);
       bestTrade = {
+        pnl,
+        asset: mapped.asset,
+        strategy: mapped.strategy,
+        date: mapped.date,
+      };
+    }
+
+    if (!worstTrade || pnl < worstTrade.pnl) {
+      const mapped = mapDbTrade(t as any);
+      worstTrade = {
         pnl,
         asset: mapped.asset,
         strategy: mapped.strategy,
@@ -217,6 +229,7 @@ export function computeTradeAnalytics(trades: DbTrade[]): TradeAnalytics {
     avgRr,
     currentStreak: { type: streakType, count: streakCount },
     bestTrade,
+    worstTrade,
     pnlTrend,
     marketDistribution,
   };
