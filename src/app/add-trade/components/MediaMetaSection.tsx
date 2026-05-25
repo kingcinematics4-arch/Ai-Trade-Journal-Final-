@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { TradeFormData } from './AddTradeForm';
 import { Upload, X, Camera, TrendingUp, TrendingDown } from 'lucide-react';
@@ -22,6 +22,22 @@ interface ImageUploadZoneProps {
   onAdd: (files: File[]) => void;
   onRemove: (index: number) => void;
   zoneId: string;
+}
+
+function FilePreview({ file }: { file: File }) {
+  const [preview, setPreview] = useState<string>('');
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  return (
+    <div className="w-16 h-16 rounded-lg overflow-hidden border border-border bg-muted">
+      {preview && <img src={preview} alt="Preview" className="w-full h-full object-cover" />}
+    </div>
+  );
 }
 
 function ImageUploadZone({
@@ -59,11 +75,11 @@ function ImageUploadZone({
           setIsDragging(false);
           handleFiles(e.dataTransfer.files);
         }}
-        onClick={() => inputRef.current?.click()} focus-visible:outline-none focus-visible:ring-0
+        onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-150 ${
           isDragging
             ? 'border-primary bg-primary/10'
-            : 'border-border hover:border-zinc-600 hover:bg-muted/30'
+            : 'border-border hover:border-zinc-600 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
         }`}
       >
         <input
@@ -93,18 +109,12 @@ function ImageUploadZone({
         <div className="flex flex-wrap gap-2 mt-2">
           {files.map((file, i) => (
             <div key={`${zoneId}-preview-${i}`} className="relative group">
-              <div className="w-16 h-16 rounded-lg overflow-hidden border border-border bg-muted">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Upload preview ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <FilePreview file={file} />
               <button
                 type="button"
                 onClick={() => onRemove(i)}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                aria-label={`Remove image ${i + 1}`} focus-visible:outline-none focus-visible:ring-0
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                aria-label={`Remove image ${i + 1}`}
               >
                 <X size={10} className="text-white" />
               </button>
@@ -141,7 +151,7 @@ function StarRating({
             onMouseEnter={() => setHovered(star)}
             onMouseLeave={() => setHovered(0)}
             onClick={() => onChange(star)}
-            className="text-2xl transition-all duration-100 active:scale-90 focus-visible:outline-none focus-visible:ring-0"
+            className="text-2xl transition-all duration-100 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-md"
             aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
           >
             <span
@@ -209,8 +219,8 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="hover:text-red-400 transition-colors"
-              aria-label={`Remove tag ${tag}`} focus-visible:outline-none focus-visible:ring-0
+              className="hover:text-red-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-400 rounded-full"
+              aria-label={`Remove tag ${tag}`}
             >
               <X size={10} />
             </button>
@@ -234,15 +244,15 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
               addTag(input);
             }
           }}
-          className="form-input flex-1 text-sm focus-visible:outline-none focus-visible:ring-0"
+          className="form-input flex-1 text-sm focus-visible:ring-2 focus-visible:ring-primary"
           placeholder="Type tag and press Enter or comma"
           maxLength={30}
         />
         <button
-          type="button" focus-visible:outline-none focus-visible:ring-0
+          type="button"
           onClick={() => addTag(input)}
           disabled={!input.trim()}
-          className="btn-secondary text-sm px-3 disabled:opacity-40"
+          className="btn-secondary text-sm px-3 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary"
         >
           Add
         </button>
@@ -259,7 +269,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
               key={`tag-sug-${s}`}
               type="button"
               onClick={() => onChange([...tags, s])}
-              className="text-xs text-muted-foreground hover:text-foreground border border-border hover:border-zinc-600 px-2 py-0.5 rounded-full transition-colors duration-100 focus-visible:outline-none focus-visible:ring-0"
+              className="text-xs text-muted-foreground hover:text-foreground border border-border hover:border-zinc-600 px-2 py-0.5 rounded-full transition-colors duration-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
             >
               + {s}
             </button>
@@ -347,7 +357,7 @@ export default function MediaMetaSection({
               min={1}
               max={10}
               step={1}
-              className="w-full h-2 rounded-full appearance-none bg-muted cursor-pointer accent-primary focus-visible:outline-none focus-visible:ring-0"
+              className="w-full h-2 rounded-full appearance-none bg-muted cursor-pointer accent-primary focus-visible:ring-2 focus-visible:ring-primary outline-none"
               {...form.register('confidenceLevel', { valueAsNumber: true })}
             />
             <div className="flex justify-between">

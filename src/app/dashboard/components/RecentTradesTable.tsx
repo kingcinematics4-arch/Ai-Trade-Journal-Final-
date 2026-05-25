@@ -216,7 +216,7 @@ export default function RecentTradesTable() {
                         <Eye size={14} />
                       </button>
                       <Link
-                        href="/add-trade"
+                        href={`/add-trade?id=${trade.id}`}
                         className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-blue-400 transition-colors"
                         title="Edit trade"
                       >

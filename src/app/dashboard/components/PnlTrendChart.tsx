@@ -191,7 +191,7 @@ export default function PnlTrendChart() {
     const windowSize = zoomRange.end - zoomRange.start;
     const sensitivity = Math.max(5, 500 / windowSize);
 
-    if (Math.abs(deltaX) > sensitivity) {
+  if (Math.abs(deltaX) > sensitivity) {
       const shift = Math.round(-deltaX / sensitivity); // negative because moving mouse right means panning left
       
       setZoomRange((prev) => {
@@ -283,8 +283,8 @@ export default function PnlTrendChart() {
       <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
         <div className="relative">
           <button 
-            type="button" focus-visible:outline-none focus-visible:ring-0
-            className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            type="button"
+            className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           >
@@ -305,8 +305,8 @@ export default function PnlTrendChart() {
         
         <button 
           type="button" 
-          onClick={handleResetZoom} focus-visible:outline-none focus-visible:ring-0
-          className="p-1.5 rounded-md bg-background/50 backdrop-blur border border-border shadow-sm hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+          onClick={handleResetZoom}
+          className="p-1.5 rounded-md bg-background/50 backdrop-blur border border-border shadow-sm hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
           title="Reset View"
         >
           <RefreshCw size={14} />
@@ -315,7 +315,7 @@ export default function PnlTrendChart() {
         <button 
           type="button"
           onClick={() => setZoomMode(!zoomMode)}
-          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-0 ${
+          className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
             zoomMode
               ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
               : 'bg-background/50 backdrop-blur text-muted-foreground border-border hover:text-foreground hover:bg-muted/50'
@@ -330,7 +330,7 @@ export default function PnlTrendChart() {
       <div 
         ref={wrapperRef}
         tabIndex={-1} // Make it programmatically focusable but not via tab key
-        className={`w-full h-[350px] transition-colors select-none ${
+        className={`w-full h-[350px] transition-colors select-none focus-visible:outline-none focus-visible:ring-0 ${
           !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         onMouseEnter={() => setIsChartHovered(true)}
@@ -342,8 +342,6 @@ export default function PnlTrendChart() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        focus-visible:outline-none focus-visible:ring-0 // Apply to the wrapper div
-        onMouseLeave={handleMouseUp}
       >
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -383,7 +381,7 @@ export default function PnlTrendChart() {
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: 'var(--muted-foreground)', strokeWidth: 1, strokeDasharray: '4 4' }}
+              cursor={false}
             />
             <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="3 3" opacity={0.5} />
             <Area

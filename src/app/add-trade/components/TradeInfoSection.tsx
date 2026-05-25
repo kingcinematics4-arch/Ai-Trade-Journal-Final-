@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
-import { useForm } from 'react-hook-form';
-type UseFormReturn<T extends Record<string, any>> = ReturnType<typeof useForm<T>>;
+import { UseFormReturn } from 'react-hook-form';
 import { TradeFormData } from './AddTradeForm';
 
 interface TradeInfoSectionProps {

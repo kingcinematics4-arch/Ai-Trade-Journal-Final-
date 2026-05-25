@@ -18,13 +18,18 @@ export default function DashboardHeader() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
 
-  const firstName = displayName.split(' ')[0] || displayName;
+  const firstName = displayName?.split(' ')[0] || displayName || 'Trader';
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetch();
-    setIsRefreshing(false);
-    toast?.success('Dashboard data refreshed');
+    try {
+      await refetch();
+      toast?.success('Dashboard data refreshed');
+    } catch (error) {
+      toast?.error('Failed to refresh dashboard data');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (

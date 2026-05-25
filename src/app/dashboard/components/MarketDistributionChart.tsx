@@ -64,7 +64,7 @@ export default function MarketDistributionChart() {
   }
 
   return (
-    <div className="focus-visible:outline-none focus-visible:ring-0"> {/* Apply to the main container */}
+    <div className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 rounded-lg outline-none">
       <ResponsiveContainer width="100%" height={180}>
         <PieChart>
           <Pie

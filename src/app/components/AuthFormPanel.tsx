@@ -298,8 +298,8 @@ export default function AuthFormPanel() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === tab}
-                aria-label={tab === 'login' ? 'Sign In' : 'Create Account'} focus-visible:outline-none focus-visible:ring-0
-                className={`relative flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 z-10 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                aria-label={tab === 'login' ? 'Sign In' : 'Create Account'}
+                className={`relative flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 z-10 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/10 ${
                   activeTab === tab ? 'text-white' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -344,8 +344,8 @@ export default function AuthFormPanel() {
                       id="login-email"
                       type="email"
                       autoComplete="email"
-                      placeholder="name@domain.com" focus-visible:outline-none focus-visible:ring-0
-                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
+                      placeholder="name@domain.com"
+                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium focus-visible:ring-2 focus-visible:ring-blue-500/40"
                       {...loginForm.register('email', {
                         required: 'Email is required',
                         pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email format' },
@@ -378,8 +378,8 @@ export default function AuthFormPanel() {
                       id="login-password"
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
-                      placeholder="Enter your security credentials" focus-visible:outline-none focus-visible:ring-0
-                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
+                      placeholder="Enter your security credentials"
+                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium focus-visible:ring-2 focus-visible:ring-blue-500/40"
                       {...loginForm.register('password', {
                         required: 'Password is required',
                         minLength: { value: 8, message: 'Must be at least 8 characters' },
@@ -387,8 +387,8 @@ export default function AuthFormPanel() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)} focus-visible:outline-none focus-visible:ring-0
-                      className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -406,8 +406,8 @@ export default function AuthFormPanel() {
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
-                      className="w-3.5 h-3.5 rounded bg-slate-950 border border-white/[0.08] checked:bg-blue-600 checked:border-blue-500 focus:ring-0 text-blue-600 transition-colors cursor-pointer"
-                      {...loginForm.register('rememberMe')} focus-visible:outline-none focus-visible:ring-0
+                      className="w-3.5 h-3.5 rounded bg-slate-950 border border-white/[0.08] checked:bg-blue-600 checked:border-blue-500 focus:ring-0 text-blue-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                      {...loginForm.register('rememberMe')}
                     />
                     <span className="text-[11px] text-slate-400 font-semibold">Remember me</span>
                   </label>
@@ -416,7 +416,7 @@ export default function AuthFormPanel() {
                     onClick={() =>
                       toast.info('Password recovery link dispatched to administrator.')
                     }
-                    className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-0"
+                    className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-sm"
                   >
                     Forgot password?
                   </button>
@@ -425,8 +425,8 @@ export default function AuthFormPanel() {
                 {/* Animated Neon Sign In CTA */}
                 <button
                   type="submit"
-                  disabled={isLoading || isGoogleLoading} focus-visible:outline-none focus-visible:ring-0
-                  className="w-full relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold tracking-wide rounded-xl py-3.5 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  disabled={isLoading || isGoogleLoading}
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold tracking-wide rounded-xl py-3.5 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2 focus-visible:ring-2 focus-visible:ring-blue-400"
                 >
                   {isLoading ? (
                     <>
@@ -496,8 +496,8 @@ export default function AuthFormPanel() {
                       <input
                         id="signup-username"
                         type="text"
-                        placeholder="trader101" focus-visible:outline-none focus-visible:ring-0
-                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-2.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
+                      placeholder="trader101"
+                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-2.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium focus-visible:ring-2 focus-visible:ring-blue-500/40"
                         {...signupForm.register('username', {
                           required: 'Required',
                           minLength: { value: 3, message: 'Min 3 chars' },
@@ -532,8 +532,8 @@ export default function AuthFormPanel() {
                     <input
                       id="signup-email"
                       type="email"
-                      placeholder="name@domain.com" focus-visible:outline-none focus-visible:ring-0
-                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
+                      placeholder="name@domain.com"
+                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium focus-visible:ring-2 focus-visible:ring-blue-500/40"
                       {...signupForm.register('email', {
                         required: 'Email is required',
                         pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid format' },
@@ -564,8 +564,8 @@ export default function AuthFormPanel() {
                       <input
                         id="signup-password"
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Min 8 chars" focus-visible:outline-none focus-visible:ring-0
-                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
+                        placeholder="Min 8 chars"
+                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium focus-visible:ring-2 focus-visible:ring-blue-500/40"
                         {...signupForm.register('password', {
                           required: 'Password is required',
                           minLength: { value: 8, message: 'Min 8 chars' },
@@ -573,8 +573,8 @@ export default function AuthFormPanel() {
                       />
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)} focus-visible:outline-none focus-visible:ring-0
-                        className="absolute right-2.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-2.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                         aria-label="Toggle password"
                       >
                         {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
@@ -601,16 +601,16 @@ export default function AuthFormPanel() {
                       <input
                         id="signup-confirm"
                         type={showConfirmPassword ? 'text' : 'password'}
-                        placeholder="Repeat pass" focus-visible:outline-none focus-visible:ring-0
-                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
+                        placeholder="Repeat pass"
+                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium focus-visible:ring-2 focus-visible:ring-blue-500/40"
                         {...signupForm.register('confirmPassword', {
                           required: 'Please confirm',
                         })}
                       />
                       <button
                         type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)} focus-visible:outline-none focus-visible:ring-0
-                        className="absolute right-2.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-2.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                         aria-label="Toggle password"
                       >
                         {showConfirmPassword ? <EyeOff size={13} /> : <Eye size={13} />}
@@ -640,10 +640,8 @@ export default function AuthFormPanel() {
                       />
                       <select
                         id="signup-exp"
-                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium appearance-none cursor-pointer"
-                        {...signupForm.register('experienceLevel', { required: 'Select level' })} focus-visible:outline-none focus-visible:ring-0
-                          required: 'Select level',
-                        })}
+                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium appearance-none cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                        {...signupForm.register('experienceLevel', { required: 'Select level' })}
                       >
                         <option value="" className="bg-[#0b0f19]">
                           Select level
@@ -679,8 +677,8 @@ export default function AuthFormPanel() {
                       />
                       <select
                         id="signup-style"
-                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-3.5 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium appearance-none cursor-pointer"
-                        {...signupForm.register('tradingStyle', { required: 'Select style' })} focus-visible:outline-none focus-visible:ring-0
+                        className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-3.5 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium appearance-none cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                        {...signupForm.register('tradingStyle', { required: 'Select style' })}
                       >
                         <option value="" className="bg-[#0b0f19]">
                           Select style
@@ -715,8 +713,8 @@ export default function AuthFormPanel() {
                     />
                     <select
                       id="signup-country"
-                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium appearance-none cursor-pointer"
-                      {...signupForm.register('country', { required: 'Select country' })} focus-visible:outline-none focus-visible:ring-0
+                      className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/15 rounded-xl pl-8 pr-8 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium appearance-none cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                      {...signupForm.register('country', { required: 'Select country' })}
                     >
                       <option value="" className="bg-[#0b0f19]">
                         Select residence
@@ -742,8 +740,8 @@ export default function AuthFormPanel() {
                 {/* Submit CTA */}
                 <button
                   type="submit"
-                  disabled={isLoading || isGoogleLoading} focus-visible:outline-none focus-visible:ring-0
-                  className="w-full relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold tracking-wide rounded-xl py-3 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  disabled={isLoading || isGoogleLoading}
+                  className="w-full relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold tracking-wide rounded-xl py-3 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2 focus-visible:ring-2 focus-visible:ring-blue-400"
                 >
                   {isLoading ? (
                     <>
@@ -764,11 +762,11 @@ export default function AuthFormPanel() {
                 <p className="text-[9px] text-slate-500 text-center font-medium leading-relaxed mt-2.5">
                   By registering, you execute agreement with our{' '}
                   <button type="button" className="text-blue-400 hover:underline">
-                    Terms of Service focus-visible:outline-none focus-visible:ring-0
+                    Terms of Service
                   </button>{' '}
                   and{' '}
                   <button type="button" className="text-blue-400 hover:underline">
-                    Privacy Policy focus-visible:outline-none focus-visible:ring-0
+                    Privacy Policy
                   </button>
                 </p>
               </motion.form>
@@ -790,8 +788,8 @@ export default function AuthFormPanel() {
             <button
               type="button"
               disabled={isLoading || isGoogleLoading}
-              onClick={() => handleSocialLogin('Google')} focus-visible:outline-none focus-visible:ring-0
-              className="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold text-slate-200"
+              onClick={() => handleSocialLogin('Google')}
+              className="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.12] hover:shadow-[0_0_10px_rgba(255,255,255,0.02)] transition-all active:scale-[0.97] group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold text-slate-200 focus-visible:ring-2 focus-visible:ring-blue-500/40"
               title="Continue with Google"
             >
               {isGoogleLoading ? (

@@ -50,7 +50,7 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
             }`}
           >
             {pnl > 0 ? '+' : ''}
-            {pnl !== 0 ? `$${Math.abs(pnl).toFixed(2)}` : '—'}
+            {isFinite(pnl) && pnl !== 0 ? `$${Math.abs(pnl).toFixed(2)}` : '—'}
           </p>
         </div>
         <div
@@ -78,7 +78,7 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
                     : 'text-muted-foreground'
             }`}
           >
-            {rr > 0 ? `${rr.toFixed(2)}R` : '—'}
+            {isFinite(rr) && rr > 0 ? `${rr.toFixed(2)}R` : '—'}
           </p>
         </div>
       </div>

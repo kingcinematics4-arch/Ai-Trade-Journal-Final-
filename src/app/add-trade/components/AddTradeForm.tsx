@@ -117,7 +117,11 @@ export default function AddTradeForm() {
     if (!isNaN(entry) && !isNaN(exit) && dir) {
       const priceDiff = dir === 'buy' ? exit - entry : entry - exit;
       const pnl = priceDiff * lots;
-      form.setValue('pnlAmount', pnl.toFixed(2));
+      if (isFinite(pnl)) {
+        form.setValue('pnlAmount', pnl.toFixed(2));
+      } else {
+        form.setValue('pnlAmount', '0.00');
+      }
       form.setValue('tradeStatus', pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven');
     }
 
@@ -128,11 +132,13 @@ export default function AddTradeForm() {
         if (!isNaN(exit)) {
           // Actual RR based on real exit
           const rewardPts = Math.abs(exit - entry);
-          form.setValue('rrRatio', (rewardPts / riskPts).toFixed(2));
+          const actualRR = rewardPts / riskPts;
+          form.setValue('rrRatio', isFinite(actualRR) ? actualRR.toFixed(2) : '0.00');
         } else if (!isNaN(tp)) {
           // Potential RR based on take profit target
           const rewardPts = Math.abs(tp - entry);
-          form.setValue('rrRatio', (rewardPts / riskPts).toFixed(2));
+          const potentialRR = rewardPts / riskPts;
+          form.setValue('rrRatio', isFinite(potentialRR) ? potentialRR.toFixed(2) : '0.00');
         }
       }
     }

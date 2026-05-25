@@ -2,43 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #18181b;
-  --secondary-foreground: #a1a1aa;
-  --accent: #22c55e;
-  --accent-foreground: #ffffff;
-  --muted: #27272a;
-  --muted-foreground: #71717a;
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #3b82f6;
-  --radius: 0.75rem;
-  --font-sans: 'DM Sans', sans-serif;
-  --profit: #22c55e;
-  --loss: #ef4444;
-  --warning: #f59e0b;
-  --info: #3b82f6;
-}
-
 @layer base {
-  * {
+  :root {
+    --background: #09090b;
+    --foreground: #fafafa;
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --secondary: #18181b;
+    --secondary-foreground: #a1a1aa;
+    --accent: #22c55e;
+    --accent-foreground: #ffffff;
+    --muted: #111114;
+    --muted-foreground: #71717a;
+    --card: #0c0c0e;
+    --card-foreground: #fafafa;
+    --border: #1d1d21;
+    --input: #0c0c0e;
+    --ring: #3b82f6;
+    --radius: 0.75rem;
+    --font-sans: 'DM Sans', sans-serif;
+    --profit: #22c55e;
+    --loss: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+  }
+
+  *, ::before, ::after {
     box-sizing: border-box;
-    border-color: var(--border);
+    border: 0 solid var(--border);
   }
 
   body {
-    background-color: #050505;
+    background-color: var(--background);
     background-image: none !important;
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    
+    /* Fixes the text-cursor line appearing on click */
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none;     /* IE/Edge */
+    user-select: none;         /* Standard */
   }
 
   html {
@@ -204,6 +209,10 @@
            text-foreground text-sm placeholder:text-muted-foreground
            focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent
            transition-all duration-150;
+    /* Re-enable text selection specifically inside inputs so users can still type/edit normally */
+    -webkit-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
 
   .form-label {
@@ -227,10 +236,12 @@
            text-muted-foreground hover:text-foreground hover:bg-muted
            transition-all duration-150 cursor-pointer;
   }
+  
   .nav-item-active {
     @apply text-primary;
     background-color: rgba(59, 130, 246, 0.1);
   }
+  
   .input-action-btn {
     @apply absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground 
            hover:text-foreground transition-all duration-150 cursor-pointer;

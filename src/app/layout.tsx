@@ -27,8 +27,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} dark`}>
-      <body className={dmSans.className}>
+    <html lang="en" className={`${dmSans.variable} dark`} style={{ colorScheme: 'dark' }}>
+      <body className={`${dmSans.className} antialiased min-h-screen bg-background text-foreground`}>
         <Providers>{children}</Providers>
       </body>
     </html>
