@@ -47,7 +47,7 @@ const primaryNavItems: NavItem[] = [
   {
     id: 'nav-ai-coach',
     label: 'AI Coach',
-    href: '/dashboard',
+    href: '/ai-coach',
     icon: <BrainCircuit size={18} />,
   },
 ];
