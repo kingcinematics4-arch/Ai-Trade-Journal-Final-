@@ -47,9 +47,9 @@ export default function AnalyticsView() {
     setIsRefreshing(true);
     try {
       await refetch();
-      toast.success('Analytics data re-synced successfully');
+      setTimeout(() => toast.success('Analytics data re-synced successfully'), 0);
     } catch (err) {
-      toast.error('Failed to sync trade records');
+      setTimeout(() => toast.error('Failed to sync trade records'), 0);
     } finally {
       setIsRefreshing(false);
     }

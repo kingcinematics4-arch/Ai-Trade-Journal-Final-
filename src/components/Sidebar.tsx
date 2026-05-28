@@ -53,7 +53,7 @@ const primaryNavItems: NavItem[] = [
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { id: 'nav-goals', label: 'Goals', href: '/dashboard', icon: <Target size={18} /> },
+  { id: 'nav-goals', label: 'Goals', href: '/goals', icon: <Target size={18} /> },
   {
     id: 'nav-notifications',
     label: 'Notifications',

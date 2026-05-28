@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { useGoalsStore } from '@/stores/useGoalsStore';
 import { TradeFormData } from './AddTradeForm';
 
 interface TradeInfoSectionProps {
@@ -40,6 +41,7 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
     setValue,
     formState: { errors },
   } = form;
+  const { goals } = useGoalsStore();
   const selectedMarket = watch('marketType');
   const selectedDirection = watch('tradeDirection');
 
@@ -280,6 +282,39 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Row 6: Goal Assignment */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-zinc-300">
+          Assign To Goal
+        </label>
+        <p className="form-helper">Link this trade's profit to a specific active goal</p>
+        <select
+          {...register('goalId')}
+          className="
+            w-full
+            rounded-xl
+            border
+            border-zinc-800
+            bg-zinc-900
+            px-3
+            py-2
+            text-white
+            outline-none
+            transition
+            focus:border-emerald-500
+          "
+        >
+          <option value="">No Goal</option>
+          {goals
+            .filter((goal) => goal.status !== 'completed')
+            .map((goal) => (
+              <option key={goal.id} value={goal.id}>
+                {goal.title}
+              </option>
+            ))}
+        </select>
       </div>
     </div>
   );

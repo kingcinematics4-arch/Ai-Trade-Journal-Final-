@@ -11,7 +11,6 @@ import AiChartsSection from '@/components/ai-coach/AiChartsSection';
 import AiInsightsFeed from '@/components/ai-coach/AiInsightsFeed';
 import AiPsychologyPanel from '@/components/ai-coach/AiPsychologyPanel';
 import AiChatWidget from '@/components/ai-coach/AiChatWidget';
-import ToastProvider from '@/components/ui/ToastProvider';
 import { Loader2 } from 'lucide-react';
 
 function AiCoachContent() {
@@ -97,7 +96,6 @@ export default function AICoachPage() {
     <AuthGuard>
       <TradesProvider>
         <AppLayout activePath="/ai-coach">
-          <ToastProvider />
           <AiCoachContent />
         </AppLayout>
       </TradesProvider>

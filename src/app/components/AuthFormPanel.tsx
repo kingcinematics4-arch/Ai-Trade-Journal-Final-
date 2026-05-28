@@ -67,6 +67,12 @@ const countries = [
   'Other',
 ];
 
+type AuthFeedback = {
+  type: 'success' | 'error' | 'info';
+  message: string;
+  redirect?: string;
+};
+
 export default function AuthFormPanel() {
   const [activeTab, setActiveTab] = useState<AuthTab>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -118,28 +124,33 @@ export default function AuthFormPanel() {
   const handleLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
 
-    const { data: authData, error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (error) {
-      loginForm.setError('email', { message: error.message });
-      toast.error(error.message || 'Failed to sign in');
-      setIsLoading(false);
-      return;
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('[auth] login success', {
-        userId: authData.user?.id,
-        email: authData.user?.email,
+    try {
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
       });
-    }
 
-    toast.success('Welcome back!');
-    router.push('/dashboard');
-    setIsLoading(false);
+      if (error) {
+        loginForm.setError('email', { message: error.message });
+        toast.error(error.message || 'Failed to sign in');
+        setIsLoading(false);
+        return;
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('[auth] login success', {
+          userId: authData.user?.id,
+          email: authData.user?.email,
+        });
+      }
+
+      toast.success('Welcome back!');
+      router.push('/dashboard');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to sign in');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignupSubmit = async (data: SignupFormData) => {
@@ -148,8 +159,9 @@ export default function AuthFormPanel() {
       toast.error('Passwords do not match');
       return;
     }
-    setIsLoading(true);
 
+    setIsLoading(true);
+    try {
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -174,7 +186,6 @@ export default function AuthFormPanel() {
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('[auth] signup success', {
-        userId: authData.user?.id,
         email: authData.user?.email,
         hasSession: Boolean(authData.session),
       });
@@ -186,9 +197,12 @@ export default function AuthFormPanel() {
     } else {
       toast.success('Account created! Check your email to confirm.');
     }
-
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to create account');
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
 
   const handleSocialLogin = async (provider: string) => {
     if (provider.toLowerCase() !== 'google') {
@@ -199,11 +213,10 @@ export default function AuthFormPanel() {
     if (isGoogleLoading) return; // Prevent double requests
 
     setIsGoogleLoading(true);
-    toast.info('Connecting to Google...');
 
     try {
       const redirectTo = `${window.location.origin}/auth/callback`;
-
+      toast.info('Connecting to Google...');
       if (process.env.NODE_ENV === 'development') {
         console.debug('[auth] Google OAuth redirect destination:', redirectTo);
       }
@@ -211,7 +224,7 @@ export default function AuthFormPanel() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://ai-trade-journal-final-yjks.vercel.app/auth/callback',
+          redirectTo,
           queryParams: { prompt: 'select_account' }
         },
       });
@@ -241,8 +254,7 @@ export default function AuthFormPanel() {
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
-            backgroundImage: `
-              linear-gradient(to right, rgba(59, 130, 246, 0.2) 1px, transparent 1px),
+            backgroundImage: ` ransparent 1px),
               linear-gradient(to bottom, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
             `,
             backgroundSize: '40px 40px',
@@ -413,9 +425,7 @@ export default function AuthFormPanel() {
                   </label>
                   <button
                     type="button"
-                    onClick={() =>
-                      toast.info('Password recovery link dispatched to administrator.')
-                    }
+                    onClick={() => toast.info('Password recovery link dispatched.')}
                     className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-sm"
                   >
                     Forgot password?

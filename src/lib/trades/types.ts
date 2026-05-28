@@ -21,6 +21,7 @@ export interface DbTrade {
   strategy_used?: string | null;
   trade_duration?: string | null;
   trade_rating?: number | null;
+  goal_id?: string | null;
   emotion_before?: string | null;
   emotion_after?: string | null;
   mistake_category?: string | null;

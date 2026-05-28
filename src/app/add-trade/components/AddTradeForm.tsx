@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import {
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrades } from '@/contexts/TradesContext';
 import { createClient } from '@/lib/supabase';
 import { parseSafeNumber } from '@/lib/trades/analytics';
 import TradeInfoSection from './TradeInfoSection';
@@ -52,6 +53,7 @@ export interface TradeFormData {
   tags: string[];
   confidenceLevel: number;
   tradeRating: number;
+  goalId?: string;
 }
 
 type SectionKey = 'tradeInfo' | 'performance' | 'psychology' | 'media';
@@ -59,6 +61,7 @@ type SectionKey = 'tradeInfo' | 'performance' | 'psychology' | 'media';
 export default function AddTradeForm() {
   const router = useRouter();
   const { user } = useAuth();
+  const { refetch } = useTrades();
   const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
     tradeInfo: true,
     performance: true,
@@ -67,6 +70,7 @@ export default function AddTradeForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [entryImages, setEntryImages] = useState<File[]>([]);
+  const loadingToastId = useRef<string | number | null>(null);
   const [exitImages, setExitImages] = useState<File[]>([]);
   const [chartImages, setChartImages] = useState<File[]>([]);
 
@@ -96,33 +100,47 @@ export default function AddTradeForm() {
       tags: [],
       confidenceLevel: 5,
       tradeRating: 3,
+      goalId: '',
     },
   });
+
+  // Stable no-op to satisfy TradeInfoSection requirements after logic migration to useEffect
+  const handlePriceChange = useCallback(() => {
+    // Intentionally empty: Calculation is now handled automatically by the watch effect
+  }, []);
 
   const toggleSection = (key: SectionKey) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Auto-calculate PnL and RR when prices change
-  const recalculate = useCallback(() => {
-    const values = form.getValues();
-    const entry = parseFloat(values.entryPrice);
-    const exit = parseFloat(values.exitPrice);
-    const sl = parseFloat(values.stopLoss);
-    const tp = parseFloat(values.takeProfit);
-    const lots = parseFloat(values.lotSize) || 1;
-    const dir = values.tradeDirection;
+  // Watch relevant fields for auto-calculation
+  // form.watch triggers a re-render only when these specific fields change
+  const entryPrice = form.watch('entryPrice');
+  const exitPrice = form.watch('exitPrice');
+  const stopLoss = form.watch('stopLoss');
+  const takeProfit = form.watch('takeProfit');
+  const lotSize = form.watch('lotSize');
+  const tradeDirection = form.watch('tradeDirection');
+
+  // Auto-calculate PnL and RR when prices or direction change
+  useEffect(() => {
+    const entry = parseFloat(entryPrice);
+    const exit = parseFloat(exitPrice);
+    const sl = parseFloat(stopLoss);
+    const tp = parseFloat(takeProfit);
+    const lots = parseFloat(lotSize) || 1;
+    const dir = tradeDirection;
+
+    let pnlAmount = '';
+    let tradeStatus = '';
+    let rrRatio = '';
 
     // 1. Calculate P&L and Outcome if entry and exit are available
     if (!isNaN(entry) && !isNaN(exit) && dir) {
       const priceDiff = dir === 'buy' ? exit - entry : entry - exit;
       const pnl = priceDiff * lots;
-      if (isFinite(pnl)) {
-        form.setValue('pnlAmount', pnl.toFixed(2));
-      } else {
-        form.setValue('pnlAmount', '0.00');
-      }
-      form.setValue('tradeStatus', pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven');
+      pnlAmount = isFinite(pnl) ? pnl.toFixed(2) : '0.00';
+      tradeStatus = pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven';
     }
 
     // 2. Calculate RR Ratio (Actual if exited, Target if open)
@@ -130,19 +148,29 @@ export default function AddTradeForm() {
       const riskPts = Math.abs(entry - sl);
       if (riskPts > 0) {
         if (!isNaN(exit)) {
-          // Actual RR based on real exit
           const rewardPts = Math.abs(exit - entry);
-          const actualRR = rewardPts / riskPts;
-          form.setValue('rrRatio', isFinite(actualRR) ? actualRR.toFixed(2) : '0.00');
+          rrRatio = isFinite(rewardPts / riskPts) ? (rewardPts / riskPts).toFixed(2) : '0.00';
         } else if (!isNaN(tp)) {
-          // Potential RR based on take profit target
           const rewardPts = Math.abs(tp - entry);
-          const potentialRR = rewardPts / riskPts;
-          form.setValue('rrRatio', isFinite(potentialRR) ? potentialRR.toFixed(2) : '0.00');
+          rrRatio = isFinite(rewardPts / riskPts) ? (rewardPts / riskPts).toFixed(2) : '0.00';
         }
       }
     }
-  }, [form]);
+
+    // Guarded setValue calls: Only update if the value has actually changed to prevent 
+    // redundant re-renders and "Update during render" clashes.
+    const currentValues = form.getValues(['pnlAmount', 'tradeStatus', 'rrRatio']);
+
+    if (currentValues[0] !== pnlAmount) {
+      form.setValue('pnlAmount', pnlAmount, { shouldDirty: true });
+    }
+    if (currentValues[1] !== tradeStatus) {
+      form.setValue('tradeStatus', (tradeStatus as 'win' | 'loss' | 'breakeven' | '') || '', { shouldDirty: true });
+    }
+    if (currentValues[2] !== rrRatio) {
+      form.setValue('rrRatio', rrRatio, { shouldDirty: true });
+    }
+  }, [entryPrice, exitPrice, stopLoss, takeProfit, lotSize, tradeDirection, form]);
 
   const uploadImages = async (supabase: any, files: File[], bucket: string, path: string) => {
     const urls: string[] = [];
@@ -176,6 +204,8 @@ export default function AddTradeForm() {
 
     setIsSubmitting(true);
     const supabase = createClient();
+    // Capture the ID to update the toast later
+    const toastId = toast.loading('Logging trade and syncing goals...');
 
     try {
       // 1. Upload Images
@@ -186,14 +216,13 @@ export default function AddTradeForm() {
       ]);
 
       // 2. Insert Trade Record
-      const { error } = await supabase.from('trades').insert({
+      const tradePayload = {
         user_id: user.id,
         trade_title: data.tradeTitle || `Trade: ${data.assetName} ${data.tradeDirection}`,
         trade_date: data.tradeDate,
         market_type: data.marketType,
         asset_name: data.assetName,
         trade_direction: data.tradeDirection,
-        // Use parseSafeNumber for all numeric fields to avoid the "0 || null" bug
         entry_price: parseSafeNumber(data.entryPrice),
         exit_price: parseSafeNumber(data.exitPrice),
         stop_loss: parseSafeNumber(data.stopLoss),
@@ -213,18 +242,26 @@ export default function AddTradeForm() {
         tags: data.tags,
         confidence_level: data.confidenceLevel,
         trade_rating: data.tradeRating,
+        // goal_id removed — column does not exist in Supabase trades table yet
+        // To re-enable: run ALTER TABLE public.trades ADD COLUMN goal_id UUID REFERENCES public.goals(id) ON DELETE SET NULL;
         entry_images: entryUrls,
         exit_images: exitUrls,
         chart_images: chartUrls,
-      });
+      };
+
+      console.log('[Supabase Insert Debug] Payload:', tradePayload);
+
+      const { error } = await supabase.from('trades').insert(tradePayload);
 
       if (error) throw error;
 
-      toast.success('Trade logged successfully.');
+      // Update the existing loading toast to success
+      toast.success('Trade logged successfully!', { id: toastId });
       router.push('/dashboard');
-      router.refresh();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to save trade.');
+      // Update the loading toast to error
+      toast.error(error.message || 'Failed to save trade.', { id: toastId });
+      setIsSubmitting(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -297,7 +334,7 @@ export default function AddTradeForm() {
           {openSections[section.key] && (
             <div className="border-t border-border px-5 py-5">
               {section.key === 'tradeInfo' && (
-                <TradeInfoSection form={form} onPriceChange={recalculate} />
+                <TradeInfoSection form={form} onPriceChange={handlePriceChange} />
               )}
               {section.key === 'performance' && <PerformanceSection form={form} />}
               {section.key === 'psychology' && <PsychologySection form={form} />}

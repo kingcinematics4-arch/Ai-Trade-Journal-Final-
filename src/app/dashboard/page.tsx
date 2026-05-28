@@ -7,7 +7,6 @@ import DashboardChartsRow from './components/DashboardChartsRow';
 import RecentTradesTable from './components/RecentTradesTable';
 import AiInsightCard from './components/AiInsightCard';
 import GoalsMiniPanel from './components/GoalsMiniPanel';
-import ToastProvider from '@/components/ui/ToastProvider';
 import { TradesProvider } from '@/contexts/TradesContext';
 
 export default function DashboardPage() {
@@ -15,7 +14,6 @@ export default function DashboardPage() {
     <AuthGuard>
       <TradesProvider>
         <AppLayout activePath="/dashboard">
-          <ToastProvider />
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6">
             <DashboardHeader />
             <KpiBentoGrid />

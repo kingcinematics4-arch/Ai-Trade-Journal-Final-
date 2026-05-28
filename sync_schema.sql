@@ -111,6 +111,10 @@ BEGIN
         ALTER TABLE public.trades ADD COLUMN trade_rating INTEGER;
     END IF;
 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trades' AND column_name='goal_id') THEN
+        ALTER TABLE public.trades ADD COLUMN goal_id UUID;
+    END IF;
+
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trades' AND column_name='entry_images') THEN
         ALTER TABLE public.trades ADD COLUMN entry_images TEXT[] DEFAULT '{}';
     END IF;
