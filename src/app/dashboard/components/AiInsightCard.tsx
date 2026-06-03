@@ -32,7 +32,7 @@ export default function AiInsightCard() {
 
   if (isLoading) {
     return (
-      <div className="card-elevated p-4 space-y-3">
+      <div className="card-elevated p-3 sm:p-4 space-y-3">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-12 w-full" />
@@ -42,7 +42,7 @@ export default function AiInsightCard() {
 
   if (isEmpty || insights.length === 0) {
     return (
-      <div className="card-elevated p-4">
+      <div className="card-elevated p-3 sm:p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-7 h-7 rounded-lg bg-violet-500/15 flex items-center justify-center">
             <BrainCircuit size={15} className="text-violet-400" />
@@ -64,7 +64,7 @@ export default function AiInsightCard() {
   }
 
   return (
-    <div className="card-elevated p-4">
+    <div className="card-elevated p-3 sm:p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-7 h-7 rounded-lg bg-violet-500/15 flex items-center justify-center">
           <BrainCircuit size={15} className="text-violet-400" />
@@ -84,8 +84,8 @@ export default function AiInsightCard() {
             key={insight.id}
             className={`flex items-start gap-2.5 p-2.5 rounded-lg ${typeStyles[insight.type]}`}
           >
-            <span className="flex-shrink-0 mt-0.5">{typeIcons[insight.type]}</span>
-            <p className="text-xs leading-relaxed">{insight.text}</p>
+            <span className="flex-shrink-0 mt-1">{typeIcons[insight.type]}</span>
+            <p className="text-xs leading-[1.6] tracking-tight">{insight.text}</p>
           </div>
         ))}
       </div>

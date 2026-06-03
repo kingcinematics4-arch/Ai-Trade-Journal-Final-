@@ -17,32 +17,31 @@ export default function EditTradeModal({ trade, onClose }: EditTradeModalProps) 
   const syncProgress = useGoalsStore(state => state.syncProgress);
   
   const [formData, setFormData] = useState({
-    pair: trade.pair || '',
-    entry_price: trade.entry_price || '',
-    exit_price: trade.exit_price || '',
-    pnl: trade.pnl || 0,
+    asset_name: trade.asset_name || '',
+    entry_price: String(trade.entry_price ?? ''),
+    exit_price: String(trade.exit_price ?? ''),
+    pnl_amount: String(trade.pnl_amount ?? 0),
     notes: trade.notes || '',
-    goalId: trade.goalId || '',
+    goal_id: (trade as any).goal_id || '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Task 5: Temporary debug logs
-    console.log('[EditTrade] Form Data Submitted:', formData);
-    console.log('[EditTrade] Original Trade State:', trade);
     
-    // Task 2: Ensure goalId is cleaned (empty string from select -> undefined)
-    const updatedData = { 
+    // Sanitize data: Ensure prices and PnL are numbers for the database
+    const updatedData = {
       ...formData,
-      goalId: formData.goalId || undefined 
+      pnl_amount: Number(formData.pnl_amount) || 0,
+      entry_price: parseFloat(formData.entry_price) || 0,
+      exit_price: parseFloat(formData.exit_price) || 0,
+      goal_id: formData.goal_id || null
     };
 
-    await updateTrade(trade.id, updatedData);
+    await updateTrade(String(trade.id), updatedData);
     
-    // Force goal recalculation with the updated trade list
+    // Optimistically update goals with the fresh trade data
     const updatedTrade = { ...trade, ...updatedData };
-    const nextTrades = trades.map(t => t.id === trade.id ? updatedTrade : t);
+    const nextTrades = trades.map(t => String(t.id) === String(trade.id) ? updatedTrade : t);
     syncProgress(nextTrades as any);
     
     onClose();
@@ -61,11 +60,11 @@ export default function EditTradeModal({ trade, onClose }: EditTradeModalProps) 
         <form onSubmit={handleSubmit} className="p-4 space-y-4 text-left">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground font-medium">Pair</label>
+              <label className="text-xs text-muted-foreground font-medium">Asset Name</label>
               <input 
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-colors"
-                value={formData.pair}
-                onChange={e => setFormData({ ...formData, pair: e.target.value })}
+                value={formData.asset_name}
+                onChange={e => setFormData({ ...formData, asset_name: e.target.value })}
               />
             </div>
             <div className="space-y-1">
@@ -73,8 +72,8 @@ export default function EditTradeModal({ trade, onClose }: EditTradeModalProps) 
               <input 
                 type="number"
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-colors"
-                value={formData.pnl}
-                onChange={e => setFormData({ ...formData, pnl: parseFloat(e.target.value) })}
+                value={formData.pnl_amount}
+                onChange={e => setFormData({ ...formData, pnl_amount: e.target.value })}
               />
             </div>
           </div>
@@ -99,8 +98,8 @@ export default function EditTradeModal({ trade, onClose }: EditTradeModalProps) 
           </div>
 
           <GoalSelector 
-            value={formData.goalId} 
-            onChange={val => setFormData({ ...formData, goalId: val })} 
+            value={formData.goal_id} 
+            onChange={val => setFormData({ ...formData, goal_id: val })} 
           />
 
           <div className="pt-2">

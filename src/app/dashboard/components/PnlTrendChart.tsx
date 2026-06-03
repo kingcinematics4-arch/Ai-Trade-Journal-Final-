@@ -11,6 +11,8 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+import type { TooltipProps } from 'recharts';
+import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { useTrades } from '@/contexts/TradesContext';
 import type { PnlTrendPoint } from '@/lib/trades/types';
 import { ChartSkeleton } from '@/components/ui/LoadingSkeleton';
@@ -18,23 +20,47 @@ import EmptyState from '@/components/ui/EmptyState';
 import { LineChart, Info, Search, RefreshCw } from 'lucide-react';
 
 /* ── Tooltip ────────────────────────────────────────────── */
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{ payload: PnlTrendPoint }>;
-  label?: string;
-}
+type TooltipPayloadItem = {
+  value?: ValueType;
+  name?: NameType;
+  color?: string;
+  fill?: string;
+  stroke?: string;
+  payload?: Record<string, unknown>;
+};
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
-  if (!active || !payload || payload.length === 0) return null;
+type CustomTooltipProps = TooltipProps<ValueType, NameType> & {
+  payload?: TooltipPayloadItem[];
+  label?: string | number;
+};
 
-  const point = payload[0].payload;
+function CustomTooltip(props: CustomTooltipProps) {
+  const { active, payload, label } = props;
+
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+
+  const item = payload[0];
+  const point = item.payload as unknown as PnlTrendPoint;
   const isStart = point.tradeNumber === 0;
+  
+  // Consistency: use label if available, fallback to point tradeNumber
+  const tradeNum = label !== undefined && label !== null && label !== '' ? label : point.tradeNumber;
+  
+  // Resolve color dynamically. Handle gradient URLs by falling back to semantic profit/loss colors.
+  const color = (item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url'))
+    ? item.stroke
+    : (point.cumulative >= 0 ? '#22c55e' : '#ef4444');
 
   return (
     <div className="card-elevated shadow-xl p-3 text-xs min-w-[180px] border border-border/50 rounded-md bg-background/95 backdrop-blur z-50">
-      <p className="text-muted-foreground font-medium mb-2 pb-2 border-b border-border/50">
-        {isStart ? 'Starting Point' : `Trade #${point.tradeNumber} — ${point.date}`}
-      </p>
+      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/50">
+        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+        <p className="text-muted-foreground font-semibold truncate font-tabular">
+          {isStart ? 'Starting Point' : `Trade #${tradeNum} — ${point.date}`}
+        </p>
+      </div>
       
       {!isStart && point.asset && point.asset !== '—' && (
         <div className="flex justify-between gap-4 mb-1">
@@ -47,7 +73,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
         <div className="flex justify-between gap-4 mb-1">
           <span className="text-muted-foreground">Trade P&L</span>
           <span
-            className={`font-semibold font-tabular ${point.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}
+            className={`font-bold font-tabular ${point.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
           >
             {point.pnl >= 0 ? '+' : '-'}$
             {Math.abs(point.pnl).toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -58,7 +84,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
       <div className={`flex justify-between gap-4 ${!isStart ? 'pt-1 mt-1 border-t border-border/50' : ''}`}>
         <span className="text-muted-foreground font-medium">Running Equity</span>
         <span
-          className={`font-bold font-tabular ${point.cumulative >= 0 ? 'text-green-500' : 'text-red-500'}`}
+          className={`font-bold font-tabular ${point.cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}
         >
           {point.cumulative >= 0 ? '+' : '-'}$
           {Math.abs(point.cumulative).toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -191,7 +217,7 @@ export default function PnlTrendChart() {
     const windowSize = zoomRange.end - zoomRange.start;
     const sensitivity = Math.max(5, 500 / windowSize);
 
-  if (Math.abs(deltaX) > sensitivity) {
+    if (Math.abs(deltaX) > sensitivity) {
       const shift = Math.round(-deltaX / sensitivity); // negative because moving mouse right means panning left
       
       setZoomRange((prev) => {
@@ -280,7 +306,7 @@ export default function PnlTrendChart() {
       )}
 
       {/* Interactive Header */}
-      <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-4 px-1">
         <div className="relative">
           <button 
             type="button"
@@ -330,7 +356,7 @@ export default function PnlTrendChart() {
       <div 
         ref={wrapperRef}
         tabIndex={-1} // Make it programmatically focusable but not via tab key
-        className={`w-full h-[350px] transition-colors select-none focus-visible:outline-none focus-visible:ring-0 ${
+        className={`w-full h-[180px] md:h-[300px] lg:h-[350px] transition-colors select-none focus-visible:outline-none focus-visible:ring-0 ${
           !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         onMouseEnter={() => setIsChartHovered(true)}
@@ -344,7 +370,7 @@ export default function PnlTrendChart() {
         onMouseUp={handleMouseUp}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={visibleData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+          <AreaChart data={visibleData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
                 <stop offset={off} stopColor="#22c55e" stopOpacity={1} />
@@ -359,11 +385,12 @@ export default function PnlTrendChart() {
             <XAxis
               dataKey="tradeNumber"
               type="category"
-              tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
+              tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
               tickLine={false}
               axisLine={false}
-              interval="preserveStartEnd"
-              dy={10}
+              interval="preserveEnd"
+              minTickGap={50} // Professional density for phone screens
+              dy={6}
               tickFormatter={(val) => {
                 const point = visibleData.find((p) => p.tradeNumber === val);
                 return point && point.tradeNumber !== 0 ? point.date : '';
@@ -371,13 +398,13 @@ export default function PnlTrendChart() {
             />
             <YAxis
               domain={[domainMin, domainMax]}
-              tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
+              tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v: number) =>
                 `$${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
               }
-              dx={-10}
+              dx={-5}
             />
             <Tooltip
               content={<CustomTooltip />}

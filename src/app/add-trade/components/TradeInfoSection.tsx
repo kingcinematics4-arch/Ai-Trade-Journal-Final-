@@ -292,19 +292,7 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
         <p className="form-helper">Link this trade's profit to a specific active goal</p>
         <select
           {...register('goalId')}
-          className="
-            w-full
-            rounded-xl
-            border
-            border-zinc-800
-            bg-zinc-900
-            px-3
-            py-2
-            text-white
-            outline-none
-            transition
-            focus:border-emerald-500
-          "
+          className="form-input mt-1.5"
         >
           <option value="">No Goal</option>
           {goals

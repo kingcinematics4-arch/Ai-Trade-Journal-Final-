@@ -16,27 +16,11 @@ export default function GoalsMiniPanel() {
     if (!isLoading) {
       syncProgress(trades);
     }
-  }, [trades, isLoading, goals.length, syncProgress]);
+  }, [trades, isLoading, syncProgress]);
 
-  // 4. Verify rerender dependencies and 5. Ensure selector updates correctly
   const activeGoals = useMemo(() => {
     return goals.filter(g => g.status === 'active').slice(0, 3);
   }, [goals]);
-
-  // 6. Add temporary debug to verify sync
-  // This log will show the values used for rendering the progress bar
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && activeGoals.length > 0) {
-      console.log('[Goal UI Sync] Progress data:', activeGoals.map(g => ({
-        title: g.title,
-        profit: g.currentValue,
-        target: g.targetValue,
-        status: g.status,
-        progress: g.progress,
-        finalWidth: `${g.status?.toLowerCase() === 'completed' ? 100 : Math.min(Math.max(Number(g.progress) || 0, 0), 100)}%`
-      })));
-    }
-  }, [activeGoals]);
 
   return (
     <div className="card-elevated p-4 flex flex-col h-full">
@@ -69,8 +53,6 @@ export default function GoalsMiniPanel() {
               : goal.targetValue > 0 
                 ? Math.min(Math.max((Number(goal.currentValue || 0) / Number(goal.targetValue)) * 100, 0), 100) 
                 : 0;
-
-            console.log(`[GoalsMiniPanel] Rendering "${goal.title}": ${progress}%`);
 
             return (
             <div key={goal.id} className="space-y-1.5">

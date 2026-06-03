@@ -144,12 +144,12 @@ export default function FilterBar({
           ))}
         </select>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
-            className="form-input py-1.5 text-sm w-auto bg-card"
+            className="form-input py-1.5 text-sm flex-1 sm:w-auto bg-card"
             placeholder="From"
           />
           <span className="text-muted-foreground text-xs">—</span>
@@ -157,7 +157,7 @@ export default function FilterBar({
             type="date"
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
-            className="form-input py-1.5 text-sm w-auto bg-card"
+            className="form-input py-1.5 text-sm flex-1 sm:w-auto bg-card"
             placeholder="To"
           />
         </div>

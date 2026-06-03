@@ -34,7 +34,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: formatCurrency(stats.totalPnl, { showSign: true }),
       icon: stats.totalPnl >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />,
       iconBg: stats.totalPnl >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
-      gradient: stats.totalPnl >= 0 ? 'gradient-profit' : 'gradient-loss',
+      gradient: stats.totalPnl >= 0 ? 'gradient-profit' : 'gradient-loss', // Keep gradient for visual distinction
       valueColor: stats.totalPnl >= 0 ? 'text-green-400' : 'text-red-400',
     },
     {
@@ -42,7 +42,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: `${stats.winRate.toFixed(1)}%`,
       icon: <Target size={18} />,
       iconBg: 'bg-green-500/15 text-green-400',
-      gradient: 'gradient-profit',
+      gradient: 'gradient-profit', // Keep gradient
       subtitle: `${stats.winCount} Wins`,
     },
     {
@@ -50,7 +50,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: `${stats.lossRate.toFixed(1)}%`,
       icon: <Target size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
-      gradient: 'gradient-loss',
+      gradient: 'gradient-loss', // Keep gradient
       subtitle: `${stats.lossCount} Losses`,
     },
     {
@@ -58,7 +58,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: stats.profitFactor >= 10 ? '10.0+' : stats.profitFactor.toFixed(2),
       icon: <Scale size={18} />,
       iconBg: stats.profitFactor >= 1.5 ? 'bg-green-500/15 text-green-400' : stats.profitFactor >= 1.0 ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400',
-      gradient: stats.profitFactor >= 1.0 ? 'gradient-profit' : 'gradient-loss',
+      gradient: stats.profitFactor >= 1.0 ? 'gradient-profit' : 'gradient-loss', // Keep gradient
       valueColor: stats.profitFactor >= 1.5 ? 'text-green-400' : stats.profitFactor >= 1.0 ? 'text-amber-400' : 'text-red-400',
     },
     {
@@ -66,14 +66,14 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: `${stats.avgRr.toFixed(2)}R`,
       icon: <Percent size={18} />,
       iconBg: 'bg-blue-500/15 text-blue-400',
-      gradient: 'gradient-primary',
+      gradient: 'gradient-primary', // Keep gradient
     },
     {
       label: 'Average Win',
       value: formatCurrency(stats.averageWin),
       icon: <TrendingUp size={18} />,
       iconBg: 'bg-green-500/15 text-green-400',
-      gradient: 'gradient-profit',
+      gradient: 'gradient-profit', // Keep gradient
       valueColor: 'text-green-400',
     },
     {
@@ -81,7 +81,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: formatCurrency(stats.averageLoss),
       icon: <TrendingDown size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
-      gradient: 'gradient-loss',
+      gradient: 'gradient-loss', // Keep gradient
       valueColor: 'text-red-400',
     },
     {
@@ -89,7 +89,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: formatCurrency(stats.bestTrade?.pnl ?? 0, { showSign: true }),
       icon: <Trophy size={18} />,
       iconBg: 'bg-green-500/15 text-green-400',
-      gradient: 'gradient-profit',
+      gradient: 'gradient-profit', // Keep gradient
       valueColor: 'text-green-400',
       subtitle: stats.bestTrade?.asset ?? '—',
     },
@@ -98,7 +98,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: formatCurrency(stats.worstTrade?.pnl ?? 0, { showSign: true }),
       icon: <AlertTriangle size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
-      gradient: 'gradient-loss',
+      gradient: 'gradient-loss', // Keep gradient
       valueColor: 'text-red-400',
       subtitle: stats.worstTrade?.asset ?? '—',
     },
@@ -107,7 +107,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: `${stats.maxWinningStreak} wins`,
       icon: <Flame size={18} />,
       iconBg: 'bg-amber-500/15 text-amber-400',
-      gradient: 'gradient-warning',
+      gradient: 'gradient-warning', // Keep gradient
       subtitle: stats.currentStreak.type === 'win' ? `Current: ${stats.currentStreak.count} active` : 'No active streak',
     },
     {
@@ -115,7 +115,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       value: `${stats.maxLosingStreak} losses`,
       icon: <Flame size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
-      gradient: 'gradient-loss',
+      gradient: 'gradient-loss', // Keep gradient
       subtitle: stats.currentStreak.type === 'loss' ? `Current: ${stats.currentStreak.count} active` : 'No active streak',
     },
   ];

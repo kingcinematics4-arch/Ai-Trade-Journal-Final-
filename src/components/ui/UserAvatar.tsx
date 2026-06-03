@@ -5,6 +5,7 @@ import { User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAvatarColorSeed, getInitials } from '@/lib/auth/profile';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 const SIZE_CLASSES = {
   xs: { box: 'h-7 w-7', text: 'text-[10px]', icon: 14 },
@@ -28,6 +29,7 @@ export default function UserAvatar({
   showLoading = true,
 }: UserAvatarProps) {
   const { profile, displayName, isLoading } = useAuth();
+  const { dbProfile } = useProfileContext();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -36,7 +38,9 @@ export default function UserAvatar({
     () => getInitials(displayName, profile?.email),
     [displayName, profile?.email]
   );
-  const avatarUrl = profile?.avatarUrl ?? null;
+
+  // DB avatar takes precedence over auth metadata avatar
+  const avatarUrl = dbProfile?.avatarUrl ?? profile?.avatarUrl ?? null;
   const hasInitials = initials.length > 0;
   const showImage = Boolean(avatarUrl) && !imageError;
 

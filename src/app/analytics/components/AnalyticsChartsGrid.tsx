@@ -18,6 +18,8 @@ import {
   Legend, 
   ReferenceLine 
 } from 'recharts';
+import type { TooltipProps } from 'recharts';
+import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { 
   BarChart3, 
   Calendar, 
@@ -27,6 +29,7 @@ import {
   Tag as TagIcon 
 } from 'lucide-react';
 import type { AdvancedAnalytics } from '@/lib/trades/analyticsEngine';
+import type { PnlTrendPoint } from '@/lib/trades/types';
 import { formatCurrency } from '@/lib/trades/analytics';
 
 interface AnalyticsChartsGridProps {
@@ -42,61 +45,152 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     { name: 'Breakevens', value: stats.breakevenCount, color: '#71717a' },
   ].filter(d => d.value > 0);
 
+  type TooltipPayloadItem = {
+    value?: ValueType;
+    name?: NameType;
+    color?: string;
+    fill?: string;
+    stroke?: string;
+    payload?: Record<string, unknown>;
+  };
+
+  type CustomTooltipProps = TooltipProps<ValueType, NameType> & {
+    payload?: TooltipPayloadItem[];
+    label?: string | number;
+  };
+
   // Custom tooltips
-  const CustomPnlTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="card-elevated shadow-xl p-3 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50">
-          <p className="text-muted-foreground font-semibold mb-1 border-b border-border/50 pb-1">
-            Trade #{data.tradeNumber} — {data.date}
-          </p>
-          <div className="flex justify-between gap-4">
+  const CustomPnlTooltip = (props: CustomTooltipProps) => {
+    const { active, payload, label } = props;
+
+    if (!active || !payload || payload.length === 0) return null;
+
+    const item = payload[0];
+    const data = item.payload as unknown as PnlTrendPoint;
+    const isStart = data.tradeNumber === 0;
+    const tradeNum = (label !== undefined && label !== null && label !== '') ? label : data.tradeNumber;
+    const title = isStart ? 'Starting Point' : `Trade #${tradeNum} — ${data.date || '—'}`;
+    const color = (item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url')) 
+      ? item.stroke 
+      : (data.cumulative >= 0 ? '#22c55e' : '#ef4444');
+
+    return (
+      <div className="card-elevated shadow-xl p-3 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50 min-w-[160px]">
+        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/50">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+          <p className="text-muted-foreground font-semibold truncate font-tabular">{title}</p>
+        </div>
+
+        {!isStart && data.asset && data.asset !== '—' && (
+          <div className="flex justify-between gap-4 mb-1">
+            <span className="text-muted-foreground">Asset</span>
+            <span className="font-semibold text-foreground">{data.asset}</span>
+          </div>
+        )}
+
+        {!isStart && (
+          <div className="flex justify-between gap-4 mb-1">
             <span className="text-muted-foreground">Trade Return</span>
-            <span className={`font-bold ${data.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <span className={`font-bold font-tabular ${(data.pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {formatCurrency(data.pnl, { showSign: true })}
             </span>
           </div>
-          <div className="flex justify-between gap-4 mt-1 border-t border-border/50 pt-1">
-            <span className="text-muted-foreground">Account P&L</span>
-            <span className={`font-black ${data.cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {formatCurrency(data.cumulative, { showSign: true })}
-            </span>
-          </div>
+        )}
+        <div className={`flex justify-between gap-4 ${!isStart ? 'border-t border-border/50 pt-1.5 mt-0.5' : ''}`}>
+          <span className="text-muted-foreground">Account P&L</span>
+          <span className={`font-black font-tabular ${(data.cumulative || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {formatCurrency(data.cumulative, { showSign: true })}
+          </span>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
-  const CustomBarTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      return (
-        <div className="card-elevated shadow-xl p-2.5 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50">
-          <p className="text-muted-foreground font-semibold mb-1 truncate">{data.name}</p>
-          <div className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Net P&L</span>
-            <span className={`font-bold ${data.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {formatCurrency(data.value, { showSign: true })}
-            </span>
-          </div>
-          {data.payload.trades && (
-            <div className="flex justify-between gap-4 mt-1">
-              <span className="text-muted-foreground">Trades Logged</span>
-              <span className="font-semibold text-foreground">{data.payload.trades}</span>
-            </div>
-          )}
+  const CustomBarTooltip = (props: CustomTooltipProps) => {
+    const { active, payload, label } = props;
+
+    if (!active || !payload || payload.length === 0) return null;
+
+    const item = payload[0];
+    const data = item.payload as {
+      day?: string;
+      month?: string;
+      pair?: string;
+      strategy?: string;
+      pnl: number;
+      trades?: number;
+      totalTrades?: number;
+      tradesCount?: number;
+    };
+    const color = item.fill || item.stroke || item.color || 'var(--primary)';
+
+    const title = (label !== undefined && label !== null && label !== '') 
+      ? String(label) 
+      : (data.day || data.month || data.pair || data.strategy || 'Performance');
+      
+    const val = typeof item.value === 'number' ? item.value : Number(item.value ?? data.pnl ?? 0);
+
+    return (
+      <div className="card-elevated shadow-xl p-3 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50 min-w-[150px]">
+        <div className="flex items-center gap-2 mb-2 border-b border-border/50 pb-1.5">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+          <p className="text-muted-foreground font-bold truncate font-tabular">{title}</p>
         </div>
-      );
-    }
-    return null;
+        <div className="flex justify-between gap-4 mb-1">
+          <span className="text-muted-foreground">Performance</span>
+          <span className={`font-bold font-tabular ${val >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {formatCurrency(val, { showSign: true })}
+          </span>
+        </div>
+        {(data.trades !== undefined || data.totalTrades !== undefined || data.tradesCount !== undefined) && (
+          <div className="flex justify-between gap-4 mt-1">
+            <span className="text-muted-foreground">Trades Logged</span>
+            <span className="font-semibold text-foreground font-tabular">{data.trades ?? data.totalTrades ?? data.tradesCount}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  interface WinLossPieData {
+    name: string;
+    value: number;
+    color: string;
+  }
+
+  const CustomPieTooltip = (props: CustomTooltipProps) => {
+    const { active, payload, label } = props;
+
+    if (!active || !payload || payload.length === 0) return null;
+
+    const item = payload[0];
+    const data = item.payload as unknown as WinLossPieData;
+    const total = stats.winCount + stats.lossCount + stats.breakevenCount;
+    const value = Number(item.value ?? data.value ?? 0);
+    const percentage = total > 0 ? (value / total) * 100 : 0;
+    
+    return (
+      <div className="card-elevated shadow-xl p-3 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50 min-w-[140px]">
+        <div className="flex items-center gap-2 mb-2 border-b border-border/50 pb-1.5">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill || item.color || item.stroke || data.color }} />
+          <p className="text-muted-foreground font-semibold">{data.name}</p>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-muted-foreground">Occurrences</span>
+          <span className="font-bold text-foreground font-tabular">{value} trades</span>
+        </div>
+        <div className="flex justify-between gap-4 mt-1">
+          <span className="text-muted-foreground">Distribution</span>
+          <span className="font-bold text-foreground font-tabular">{percentage.toFixed(1)}%</span>
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="card-elevated p-6 space-y-6">
       {/* Dynamic Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-border pb-4 gap-4">
         <div>
           <h3 className="text-base font-semibold text-foreground">Performance Charts</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -104,7 +198,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 p-1 bg-muted/30 rounded-lg border border-border self-start">
+        <div className="flex items-center gap-1.5 p-1 bg-muted/30 rounded-lg border border-border self-start overflow-x-auto max-w-full scrollbar-none no-scrollbar">
           <button
             onClick={() => setActiveTab('pnl')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
@@ -112,6 +206,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
+            style={{ whiteSpace: 'nowrap' }}
           >
             <TrendingUp size={13} />
             Equity & Distribution
@@ -123,6 +218,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
+            style={{ whiteSpace: 'nowrap' }}
           >
             <Calendar size={13} />
             Time Performance
@@ -134,6 +230,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
+            style={{ whiteSpace: 'nowrap' }}
           >
             <TagIcon size={13} />
             Assets & Strategies
@@ -154,7 +251,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               className="grid grid-cols-1 lg:grid-cols-3 gap-6"
             >
               {/* Equity curve */}
-              <div className="lg:col-span-2 space-y-2">
+              <div className="lg:col-span-2 space-y-2 order-2 lg:order-1">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Equity Growth Curve</h4>
                   <p className="text-[11px] text-muted-foreground">Cumulative running P&L across trades</p>
@@ -175,13 +272,19 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                         tickLine={false}
                         axisLine={false}
                         dy={8}
+                        tickFormatter={(val) => {
+                          const point = stats.equityCurve.find((p) => p.tradeNumber === val);
+                          return point && point.tradeNumber !== 0 ? point.date : '';
+                        }}
                       />
                       <YAxis 
                         tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                         tickLine={false}
                         axisLine={false}
                         dx={-8}
-                        tickFormatter={(v) => `$${v}`}
+                        tickFormatter={(v: number) =>
+                          `$${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(1)}k` : v}`
+                        }
                       />
                       <Tooltip content={<CustomPnlTooltip />} />
                       <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
@@ -201,7 +304,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               </div>
 
               {/* Pie distribution chart */}
-              <div className="space-y-2 flex flex-col justify-between">
+              <div className="space-y-2 flex flex-col justify-between order-1 lg:order-2">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Win / Loss Ratio</h4>
                   <p className="text-[11px] text-muted-foreground">Distribution of profit, loss, and BE trades</p>
@@ -227,7 +330,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value: number) => [`${value} trades`, 'Count']} />
+                        <Tooltip content={<CustomPieTooltip />} />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute text-center">
@@ -284,24 +387,26 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                         tickLine={false}
                         axisLine={false}
                         dy={8}
-                        tickFormatter={(val) => val.slice(0, 3)}
+                        tickFormatter={(val: string) => val.slice(0, 3)}
                       />
                       <YAxis 
                         tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                         tickLine={false}
                         axisLine={false}
                         dx={-8}
-                        tickFormatter={(v) => `$${v}`}
+                        tickFormatter={(v: number) => `$${v}`}
                       />
                       <Tooltip content={<CustomBarTooltip />} />
                       <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                      <Bar dataKey="pnl">
+                      <Bar 
+                        dataKey="pnl" 
+                        radius={[4, 4, 0, 0] as any}
+                      >
                         {stats.dailyPerformance.map((entry, idx) => (
                           <Cell 
                             key={`daily-bar-${idx}`} 
                             fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} 
                             fillOpacity={0.85}
-                            radius={entry.pnl >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4]}
                           />
                         ))}
                       </Bar>
@@ -337,17 +442,19 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                           tickLine={false}
                           axisLine={false}
                           dx={-8}
-                          tickFormatter={(v) => `$${v}`}
+                          tickFormatter={(v: number) => `$${v}`}
                         />
                         <Tooltip content={<CustomBarTooltip />} />
                         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                        <Bar dataKey="pnl">
+                        <Bar 
+                          dataKey="pnl" 
+                          radius={[4, 4, 0, 0] as any}
+                        >
                           {stats.monthlyPerformance.map((entry, idx) => (
                             <Cell 
                               key={`monthly-bar-${idx}`} 
                               fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'} 
                               fillOpacity={0.85}
-                              radius={entry.pnl >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4]}
                             />
                           ))}
                         </Bar>
@@ -395,17 +502,19 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                           tickLine={false}
                           axisLine={false}
                           dx={-8}
-                          tickFormatter={(v) => `$${v}`}
+                          tickFormatter={(v: number) => `$${v}`}
                         />
                         <Tooltip content={<CustomBarTooltip />} />
                         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                        <Bar dataKey="pnl">
+                        <Bar 
+                          dataKey="pnl" 
+                          radius={[4, 4, 0, 0] as any}
+                        >
                           {stats.pairPerformance.map((entry, idx) => (
                             <Cell 
                               key={`pair-bar-${idx}`} 
                               fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} 
                               fillOpacity={0.85}
-                              radius={entry.pnl >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4]}
                             />
                           ))}
                         </Bar>
@@ -436,24 +545,26 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                           tickLine={false}
                           axisLine={false}
                           dy={8}
-                          tickFormatter={(val) => val.length > 8 ? `${val.slice(0, 8)}…` : val}
+                          tickFormatter={(val: string) => val.length > 8 ? `${val.slice(0, 8)}…` : val}
                         />
                         <YAxis 
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
                           dx={-8}
-                          tickFormatter={(v) => `$${v}`}
+                          tickFormatter={(v: number) => `$${v}`}
                         />
                         <Tooltip content={<CustomBarTooltip />} />
                         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                        <Bar dataKey="pnl">
+                        <Bar 
+                          dataKey="pnl" 
+                          radius={[4, 4, 0, 0] as any}
+                        >
                           {stats.strategyPerformance.map((entry, idx) => (
                             <Cell 
                               key={`strategy-bar-${idx}`} 
                               fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'} 
                               fillOpacity={0.85}
-                              radius={entry.pnl >= 0 ? [4, 4, 0, 0] : [0, 0, 4, 4]}
                             />
                           ))}
                         </Bar>

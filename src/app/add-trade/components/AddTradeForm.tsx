@@ -242,8 +242,7 @@ export default function AddTradeForm() {
         tags: data.tags,
         confidence_level: data.confidenceLevel,
         trade_rating: data.tradeRating,
-        // goal_id removed — column does not exist in Supabase trades table yet
-        // To re-enable: run ALTER TABLE public.trades ADD COLUMN goal_id UUID REFERENCES public.goals(id) ON DELETE SET NULL;
+        goal_id: data.goalId || null,
         entry_images: entryUrls,
         exit_images: exitUrls,
         chart_images: chartUrls,
@@ -305,22 +304,22 @@ export default function AddTradeForm() {
   ];
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       {sections.map((section) => (
-        <div key={`section-${section.key}`} className="card-elevated overflow-hidden">
+        <div key={`section-${section.key}`} className="card-premium overflow-hidden">
           {/* Section Header */}
           <button
             type="button"
             onClick={() => toggleSection(section.key)}
-            className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors duration-150"
+            className="w-full flex items-center justify-between px-7 py-6 hover:bg-white/[0.02] transition-colors duration-200"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center text-white border border-white/[0.05] shadow-inner">
                 {section.icon}
               </div>
               <div className="text-left">
-                <p className="text-sm font-semibold text-foreground">{section.label}</p>
-                <p className="text-xs text-muted-foreground">{section.desc}</p>
+                <p className="text-[17px] font-bold text-white tracking-tight">{section.label}</p>
+                <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mt-1">{section.desc}</p>
               </div>
             </div>
             {openSections[section.key] ? (
@@ -354,26 +353,26 @@ export default function AddTradeForm() {
         </div>
       ))}
 
-      {/* Sticky Save Bar */}
-      <div className="sticky bottom-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border -mx-6 lg:-mx-8 xl:-mx-10 2xl:-mx-12 px-6 lg:px-8 xl:px-10 2xl:px-12 py-4">
+      {/* Sticky Save Bar - Premium Mobile Safe Area */}
+      <div className="sticky bottom-0 z-40 bg-background/90 backdrop-blur-2xl border-t border-white/[0.08] -mx-4 sm:-mx-6 px-5 py-5 pb-10 md:pb-5 md:px-6 shadow-[0_-15px_50px_rgba(0,0,0,0.6)]">
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
             <Info size={13} />
             <span>AI insights will be generated automatically after saving</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleCancel}
-              className="btn-secondary flex items-center gap-2 text-sm"
+              className="btn-secondary flex-1 md:flex-none flex items-center justify-center gap-2 text-sm font-black h-14 md:h-10 md:px-8 rounded-2xl md:rounded-xl active:scale-[0.96] transition-transform"
             >
-              <X size={14} />
+              <X size={16} />
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary flex items-center gap-2 text-sm min-w-[140px] justify-center"
+              className="btn-primary flex-[2] md:flex-none flex items-center justify-center gap-3 text-sm font-black h-14 md:h-10 md:px-10 rounded-2xl md:rounded-xl shadow-2xl shadow-blue-500/30 active:scale-[0.96] transition-transform"
             >
               {isSubmitting ? (
                 <>

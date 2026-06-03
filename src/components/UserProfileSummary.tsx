@@ -3,6 +3,7 @@
 import UserAvatar, { type UserAvatarSize } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
+import { cn } from '@/lib/utils';
 
 interface UserProfileSummaryProps {
   size?: UserAvatarSize;
@@ -59,13 +60,13 @@ export default function UserProfileSummary({
 
   return (
     <div
-      className={[
-        'min-w-0',
+      className={cn(
+        'min-w-0 flex items-center gap-2.5 sm:gap-3',
         isStacked
-          ? 'flex flex-col items-center gap-2 text-center'
-          : 'flex items-center gap-2.5 sm:gap-3',
-        className,
-      ].join(' ')}
+        ? 'flex-col items-center gap-2 text-center'
+        : '',
+        className
+      )}
     >
       <UserAvatar size={size} showLoading={false} />
       <div className={`min-w-0 ${isStacked ? 'w-full' : 'flex-1'}`}>

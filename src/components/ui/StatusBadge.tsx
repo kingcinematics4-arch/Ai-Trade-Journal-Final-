@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 type BadgeVariant =
   | 'win'
@@ -11,7 +12,7 @@ type BadgeVariant =
   | 'warning'
   | 'info';
 
-interface StatusBadgeProps {
+interface StatusBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant: BadgeVariant;
   label?: string;
   size?: 'sm' | 'md';
@@ -41,10 +42,24 @@ const defaultLabels: Record<BadgeVariant, string> = {
   info: 'Info',
 };
 
-export default function StatusBadge({ variant, label, size = 'sm' }: StatusBadgeProps) {
+export default function StatusBadge({ 
+  variant, 
+  label, 
+  size = 'sm', 
+  className, 
+  ...props 
+}: StatusBadgeProps) {
   const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm';
   return (
-    <span className={`status-badge ${variantMap[variant]} ${sizeClass} font-medium rounded-full`}>
+    <span 
+      className={cn(
+        'status-badge font-medium rounded-full', 
+        variantMap[variant], 
+        sizeClass, 
+        className
+      )}
+      {...props}
+    >
       {label ?? defaultLabels[variant]}
     </span>
   );

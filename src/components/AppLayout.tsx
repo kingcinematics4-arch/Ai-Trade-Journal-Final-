@@ -8,9 +8,11 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, activePath }: AppLayoutProps) {
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden w-full relative">
       <Sidebar activePath={activePath} />
-      <main className="flex-1 overflow-y-auto scrollbar-thin">{children}</main>
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-thin pt-16 lg:pt-0">
+        {children}
+      </main>
     </div>
   );
 }

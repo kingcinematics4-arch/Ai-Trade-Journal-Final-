@@ -79,9 +79,89 @@ export default function RecentTradesTable() {
     );
   };
 
+  // Mobile specific skeleton to prevent hydration errors (div-based vs tr-based)
+  const MobileTradeSkeleton = () => (
+    <div className="p-3 border-b border-border/40 animate-pulse">
+      <div className="flex justify-between items-center mb-2">
+        <div className="flex flex-col gap-1.5">
+          <div className="h-4 w-20 bg-muted rounded" />
+          <div className="h-2.5 w-24 bg-muted rounded" />
+        </div>
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="h-4 w-14 bg-muted rounded" />
+          <div className="h-2.5 w-12 bg-muted rounded" />
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <div className="h-6 w-14 bg-muted rounded" />
+          <div className="h-6 w-14 bg-muted rounded" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-7 w-7 bg-muted/50 rounded" />
+          <div className="h-7 w-7 bg-muted/50 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+
+  // Mobile specific card component
+  const MobileTradeCard = ({ trade }: { trade: TradeRow }) => (
+    <div
+      className="mx-4 mb-4 p-7 card-premium active:scale-[0.98] cursor-pointer"
+      onClick={() => setSelectedTradeId(trade.id)}
+    >
+      <div className="flex justify-between items-start mb-7">
+        <div className="flex items-center gap-3">
+          <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center font-bold text-[11px] shadow-inner border border-white/[0.03] ${trade.direction === 'buy' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+            <span className="opacity-40 uppercase tracking-tight">{trade.direction === 'buy' ? 'Long' : 'Short'}</span>
+            <span className="text-sm mt-1">{trade.direction === 'buy' ? '▲' : '▼'}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-white text-xl tracking-tight leading-none">{trade.asset}</span>
+            <span className="text-[12px] font-bold text-muted-foreground/40 mt-2 uppercase tracking-[0.2em]">{trade.market} • {trade.date}</span>
+          </div>
+        </div>
+        <div className="text-right">
+          <span className={`block text-2xl font-bold tabular-nums leading-none tracking-[-0.03em] ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {trade.pnl >= 0 ? '+' : ''}{formatCurrency(trade.pnl, { showSign: false })}
+          </span>
+          <span className="inline-block text-[11px] font-black text-muted-foreground/30 mt-2 uppercase tracking-[0.25em]">{trade.rr.toFixed(2)}R Ratio</span>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between pt-7 border-t border-white/[0.03]">
+        <div className="flex items-center gap-4">
+          <StatusBadge variant={trade.status} size="sm" className="rounded-full px-4 py-1" />
+          <div className="h-4 w-[1px] bg-white/10" />
+          <span className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{trade.strategy}</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/add-trade?id=${trade.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="p-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl text-muted-foreground active:text-white transition-all hover:bg-white/[0.06]"
+          >
+            <Pencil size={18} />
+          </Link>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteTarget(trade.id);
+            }}
+            className="p-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl text-muted-foreground active:text-red-400 transition-all hover:bg-red-500/10"
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="card-elevated">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+    <div className="card-premium">
+      <div className="flex items-center justify-between px-5 py-4 md:px-6 md:py-5 border-b border-white/[0.05]">
         <div>
           <h3 className="text-base font-semibold text-foreground">Recent Trades</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -98,10 +178,11 @@ export default function RecentTradesTable() {
         </Link>
       </div>
 
-      <div className="overflow-x-auto scrollbar-thin">
+      {/* Desktop View: Table */}
+      <div className="hidden md:block overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border">
+            <tr className="border-b border-white/[0.05]">
               {[
                 { key: null, label: 'Asset' },
                 { key: null, label: 'Direction' },
@@ -147,7 +228,7 @@ export default function RecentTradesTable() {
               trades.map((trade) => (
                 <tr
                   key={trade.id}
-                  className={`border-b border-border/50 transition-colors duration-100 ${
+                  className={`border-b border-white/[0.03] transition-colors duration-200 ${
                     hoveredRow === trade.id ? 'bg-muted/30' : ''
                   }`}
                   onMouseEnter={() => setHoveredRow(trade.id)}
@@ -235,6 +316,22 @@ export default function RecentTradesTable() {
               ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile View: Cards */}
+      <div className="md:hidden flex flex-col w-full overflow-hidden">
+        {isLoadingTrades && (
+          Array.from({ length: 3 }).map((_, i) => (
+            <MobileTradeSkeleton key={`mob-skel-${i}`} />
+          ))
+        )}
+        {!isLoadingTrades && trades.length === 0 && (
+          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+            No trades yet.
+          </div>
+        )}
+        {!isLoadingTrades &&
+          trades.map((trade) => <MobileTradeCard key={trade.id} trade={trade} />)}
       </div>
 
       {/* Delete Confirm Modal */}

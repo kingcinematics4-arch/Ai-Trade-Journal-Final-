@@ -13,9 +13,9 @@ export default function KpiBentoGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 lg:gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={`kpi-skel-${i}`} className={i === 0 ? 'sm:col-span-2' : ''}>
+          <div key={`kpi-skel-${i}`} className={(i === 0 || i === 5) ? 'col-span-2' : 'col-span-1'}>
             <KpiCardSkeleton />
           </div>
         ))}
@@ -25,7 +25,7 @@ export default function KpiBentoGrid() {
 
   if (isEmpty) {
     return (
-      <div className="card-elevated p-6">
+      <div className="card-premium p-8">
         <EmptyState
           icon={<Inbox size={28} />}
           title="No performance data yet"
@@ -52,8 +52,8 @@ export default function KpiBentoGrid() {
       : `${currentStreak.count} consecutive ${currentStreak.type === 'win' ? 'wins' : 'losses'}`;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-      <div className="sm:col-span-2 lg:col-span-2">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 lg:gap-6 w-full min-w-0">
+      <div className="col-span-2 lg:col-span-2">
         <KpiCard
           id="kpi-total-pnl"
           label="Total P&L"
@@ -67,7 +67,7 @@ export default function KpiBentoGrid() {
         />
       </div>
 
-      <div>
+      <div className="col-span-1">
         <KpiCard
           id="kpi-win-rate"
           label="Win Rate"
@@ -80,7 +80,7 @@ export default function KpiBentoGrid() {
         />
       </div>
 
-      <div>
+      <div className="col-span-1">
         <KpiCard
           id="kpi-rr-ratio"
           label="Avg RR Ratio"
@@ -93,7 +93,7 @@ export default function KpiBentoGrid() {
         />
       </div>
 
-      <div>
+      <div className="col-span-1">
         <KpiCard
           id="kpi-streak"
           label="Current Streak"
@@ -114,7 +114,7 @@ export default function KpiBentoGrid() {
         />
       </div>
 
-      <div>
+      <div className="col-span-1">
         <KpiCard
           id="kpi-best-trade"
           label="Best Trade"
@@ -123,11 +123,11 @@ export default function KpiBentoGrid() {
           trend={bestTrade && bestTrade.pnl > 0 ? 'up' : 'neutral'}
           trendValue={bestTrade?.date ?? '—'}
           icon={<Trophy size={18} />}
-          variant="profit"
+          variant={bestTrade && bestTrade.pnl > 0 ? 'profit' : 'neutral'}
         />
       </div>
 
-      <div className="sm:col-span-2">
+      <div className="col-span-2 lg:col-span-2">
         <KpiCard
           id="kpi-discipline"
           label="Journal Activity"

@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import {
   computeTradeAnalytics,
   generateTradeInsights,
@@ -20,6 +21,7 @@ type TradesContextValue = {
   isEmpty: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  updateTrade: (id: string, updates: any) => Promise<void>;
 };
 
 const TradesContext = createContext<TradesContextValue | null>(null);
@@ -72,6 +74,22 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
+  const updateTrade = useCallback(async (id: string, updates: any) => {
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from('trades')
+        .update(updates)
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+      await fetchTrades();
+    } catch (err: any) {
+      console.error('Error updating trade:', err);
+      toast.error('Failed to update trade record');
+    }
+  }, [fetchTrades]);
+
   useEffect(() => {
     if (authLoading) return;
     void fetchTrades();
@@ -94,8 +112,9 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
       isEmpty: !authLoading && !isLoading && trades.length === 0,
       error,
       refetch: fetchTrades,
+      updateTrade,
     }),
-    [trades, tradeRows, analytics, insights, authLoading, isLoading, error, fetchTrades]
+    [trades, tradeRows, analytics, insights, authLoading, isLoading, error, fetchTrades, updateTrade]
   );
 
   return <TradesContext.Provider value={value}>{children}</TradesContext.Provider>;
