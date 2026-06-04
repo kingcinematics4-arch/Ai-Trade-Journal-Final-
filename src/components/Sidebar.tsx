@@ -73,7 +73,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
     {
       id: 'nav-notifications',
       label: 'Notifications',
-      href: '/dashboard',
+      href: '/dashboard/notifications',
       icon: <Bell size={18} />,
       badge: unreadCount > 0 ? unreadCount : undefined,
     },

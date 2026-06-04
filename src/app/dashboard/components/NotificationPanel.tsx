@@ -23,10 +23,10 @@ export default function NotificationPanel() {
     markAsRead,
     markAllAsRead,
     clearAllNotifications,
-    popupEnabled,
-    soundEnabled,
-    togglePopup,
-    toggleSound,
+    settings,
+    updateSettings,
+    requestBrowserPermission,
+    triggerTest,
   } = useNotifications();
 
   const router = useRouter();
@@ -82,7 +82,7 @@ export default function NotificationPanel() {
           {showSettings && (
             <button
               onClick={() => setShowSettings(false)}
-              className="text-muted-foreground hover:text-white transition-colors"
+              className="p-1 -ml-1 text-muted-foreground hover:text-white transition-colors rounded-lg hover:bg-white/5"
               aria-label="Back to notifications"
             >
               <ArrowLeft size={16} />
@@ -118,10 +118,10 @@ export default function NotificationPanel() {
           /* Settings View */
           <div className="flex flex-col text-xs">
             {/* Popup Toggle Row */}
-            <div className="flex items-center justify-between p-4 border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 text-muted-foreground">
-                  {popupEnabled ? (
+                  {settings?.floating_enabled ? (
                     <BellRing size={16} className="text-primary" />
                   ) : (
                     <BellOff size={16} />
@@ -136,24 +136,22 @@ export default function NotificationPanel() {
               </div>
               <button
                 type="button"
-                onClick={() => togglePopup(!popupEnabled)}
-                className={`w-9 h-5 rounded-full p-0.5 transition-colors relative focus:outline-none ${
-                  popupEnabled ? 'bg-primary' : 'bg-white/10'
+                onClick={() => updateSettings({ floating_enabled: !settings?.floating_enabled })}
+                className={`w-9 h-5 rounded-full p-0.5 transition-all relative focus:outline-none ${
+                  settings?.floating_enabled ? 'bg-primary' : 'bg-white/10'
                 }`}
               >
                 <span
-                  className={`block w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                    popupEnabled ? 'translate-x-4' : 'translate-x-0'
-                  }`}
+                  className={`block w-4 h-4 rounded-full bg-white transition-transform duration-200 ${settings?.floating_enabled ? 'translate-x-4' : 'translate-x-0'}`}
                 />
               </button>
             </div>
 
             {/* Sound Toggle Row */}
-            <div className="flex items-center justify-between p-4 border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 text-muted-foreground">
-                  {soundEnabled ? (
+                  {settings?.sound_enabled ? (
                     <Volume2 size={16} className="text-primary" />
                   ) : (
                     <VolumeX size={16} />
@@ -168,21 +166,44 @@ export default function NotificationPanel() {
               </div>
               <button
                 type="button"
-                onClick={() => toggleSound(!soundEnabled)}
-                className={`w-9 h-5 rounded-full p-0.5 transition-colors relative focus:outline-none ${
-                  soundEnabled ? 'bg-primary' : 'bg-white/10'
+                onClick={() => updateSettings({ sound_enabled: !settings?.sound_enabled })}
+                className={`w-9 h-5 rounded-full p-0.5 transition-all relative focus:outline-none ${
+                  settings?.sound_enabled ? 'bg-primary' : 'bg-white/10'
                 }`}
               >
                 <span
-                  className={`block w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
-                    soundEnabled ? 'translate-x-4' : 'translate-x-0'
-                  }`}
+                  className={`block w-4 h-4 rounded-full bg-white transition-transform duration-200 ${settings?.sound_enabled ? 'translate-x-4' : 'translate-x-0'}`}
                 />
               </button>
             </div>
 
+            {/* Volume Slider */}
+            <div className="p-4 border-b border-white/[0.03]">
+               <div className="flex justify-between items-center mb-2">
+                  <p className="font-bold text-white">Alert Volume</p>
+                  <span className="text-[10px] text-muted-foreground">{Math.round((settings?.volume || 0) * 100)}%</span>
+               </div>
+               <input 
+                 type="range" 
+                 min="0" 
+                 max="1" 
+                 step="0.1" 
+                 value={settings?.volume || 0.5}
+                 onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
+                 className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+               />
+            </div>
+
             {/* Actions Row */}
             <div className="p-4 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={triggerTest}
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/30 text-primary rounded-xl font-bold transition-all mb-1"
+              >
+                <BellRing size={14} />
+                Trigger Test Notification
+              </button>
               <button
                 type="button"
                 onClick={async () => {

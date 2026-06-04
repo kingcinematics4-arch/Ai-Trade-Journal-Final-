@@ -17,6 +17,7 @@ export interface DbNotification {
   type: NotificationType;
   is_read: boolean;
   link?: string;
+  metadata?: Record<string, any>;
   created_at: string;
 }
 
@@ -26,7 +27,8 @@ interface DbNotificationInsert {
   message: string;
   type: NotificationType;
   is_read: boolean;
-  link: string | null;
+  link?: string | null;
+  metadata?: Record<string, any>;
 }
 
 interface CreateNotificationParams {
@@ -35,6 +37,7 @@ interface CreateNotificationParams {
   message: string;
   type: NotificationType;
   link?: string;
+  metadata?: Record<string, any>;
 }
 
 export async function createNotification(params: CreateNotificationParams) {
@@ -47,11 +50,18 @@ export async function createNotification(params: CreateNotificationParams) {
     type: params.type,
     is_read: false,
     link: params.link ?? null,
+    metadata: params.metadata ?? {},
   };
 
-  const { data, error } = await supabase
-    .from('notifications')
-    .insert([insertData]);
+  try {
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert([insertData])
+      .select()
+      .single();
 
-  return { data, error };
+    return { data: data as DbNotification, error };
+  } catch (error) {
+    return { data: null, error };
+  }
 }

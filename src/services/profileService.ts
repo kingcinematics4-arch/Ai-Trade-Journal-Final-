@@ -14,20 +14,27 @@ const AVATAR_BUCKET = 'avatars';
  */
 export async function getProfile(userId: string): Promise<Profile | null> {
   const supabase = createClient();
+
+  // STEP 5: Verify service code with a simplified query
+  // This helps determine if the table name is even recognized by the API
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+    .select('*');
 
   if (error) {
-    // PGRST116 = no rows returned (profile not created yet)
-    if (error.code === 'PGRST116') return null;
-    console.error('[profileService] getProfile error:', error.message);
+    console.error('[profileService] Supabase Error Details:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
+    // PGRST116 or 406 = no rows returned
+    if (error.code === 'PGRST116' || error.code === '406') return null;
     throw new Error(error.message);
   }
 
-  return mapDbProfile(data as DbProfile);
+  const userProfile = Array.isArray(data) ? data.find(p => p.id === userId) : null;
+  return userProfile ? mapDbProfile(userProfile as DbProfile) : null;
 }
 
 /**

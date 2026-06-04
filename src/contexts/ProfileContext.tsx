@@ -58,7 +58,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to load profile';
-      setError(msg);
+      console.warn('[ProfileContext] Profile not found yet, will be created on update.');
       console.error('[ProfileContext] fetch error:', msg);
     } finally {
       setIsLoading(false);

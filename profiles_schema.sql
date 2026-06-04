@@ -1,30 +1,24 @@
 -- ============================================================
 -- PROFILES TABLE MIGRATION
--- Run this in your Supabase SQL Editor
 -- ============================================================
+
+-- Enable extension
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 1. Create profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
   id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  username    TEXT UNIQUE,
+  username    TEXT,
   full_name   TEXT,
-  bio         TEXT,
   avatar_url  TEXT,
-  phone       TEXT,
-  country     TEXT,
-  website     TEXT,
-  twitter     TEXT,
-  instagram   TEXT,
-  linkedin    TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. Index for fast lookups
-CREATE INDEX IF NOT EXISTS idx_profiles_username ON public.profiles(username);
+-- Index for fast lookups
 CREATE INDEX IF NOT EXISTS idx_profiles_updated_at ON public.profiles(updated_at DESC);
 
--- 3. updated_at trigger function
+-- updated_at trigger function
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -35,14 +29,14 @@ BEGIN
 END;
 $$;
 
--- 4. Attach trigger to profiles
+-- Attach trigger to profiles
 DROP TRIGGER IF EXISTS set_profiles_updated_at ON public.profiles;
 CREATE TRIGGER set_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
--- 5. Auto-create profile on new auth user signup
+-- Auto-create profile on new auth user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -69,38 +63,23 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
--- 6. Enable Row Level Security
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- 7. RLS Policies
--- Allow anyone logged in to read any profile (useful for public profiles)
-DROP POLICY IF EXISTS "Profiles are viewable by authenticated users" ON public.profiles;
 CREATE POLICY "Profiles are viewable by authenticated users"
   ON public.profiles FOR SELECT
   TO authenticated
-  USING (true);
+  USING (auth.uid() = id);
 
--- Allow users to insert their own profile
-DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = id);
 
--- Allow users to update only their own profile
-DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   TO authenticated
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
-
--- Allow users to delete their own profile (cascades from auth.users)
-DROP POLICY IF EXISTS "Users can delete own profile" ON public.profiles;
-CREATE POLICY "Users can delete own profile"
-  ON public.profiles FOR DELETE
-  TO authenticated
-  USING (auth.uid() = id);
 
 -- ============================================================
 -- AVATARS STORAGE BUCKET

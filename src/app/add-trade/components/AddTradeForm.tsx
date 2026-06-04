@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
 import { createClient } from '@/lib/supabase';
+import { notificationService } from '@/services/notificationService'; // Ensure this points to src/services/
 import { parseSafeNumber } from '@/lib/trades/analytics';
 import TradeInfoSection from './TradeInfoSection';
 import PerformanceSection from './PerformanceSection';
@@ -255,6 +256,15 @@ export default function AddTradeForm() {
       const { error } = await supabase.from('trades').insert(tradePayload);
 
       if (error) throw error;
+
+      // 3. Create Notification
+      await notificationService.createNotification({
+        userId: user.id,
+        title: 'Trade Logged',
+        message: `Successfully recorded ${data.tradeDirection} on ${data.assetName}`,
+        type: 'trade',
+        link: '/dashboard',
+      });
 
       // Update the existing loading toast to success
       toast.success('Trade logged successfully!', { id: toastId });
