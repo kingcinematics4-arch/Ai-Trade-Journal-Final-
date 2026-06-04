@@ -159,15 +159,17 @@ export default function AddTradeForm() {
 
     // Guarded setValue calls: Only update if the value has actually changed to prevent 
     // redundant re-renders and "Update during render" clashes.
-    const currentValues = form.getValues(['pnlAmount', 'tradeStatus', 'rrRatio']);
+    const { pnlAmount: curPnl, tradeStatus: curStatus, rrRatio: curRr } = form.getValues();
+    const dirtyFields = form.formState.dirtyFields;
 
-    if (currentValues[0] !== pnlAmount) {
+    // Only auto-update if the user hasn't manually touched (dirtied) these fields
+    if (!dirtyFields.pnlAmount && curPnl !== pnlAmount) {
       form.setValue('pnlAmount', pnlAmount, { shouldDirty: true });
     }
-    if (currentValues[1] !== tradeStatus) {
+    if (!dirtyFields.tradeStatus && curStatus !== tradeStatus) {
       form.setValue('tradeStatus', (tradeStatus as 'win' | 'loss' | 'breakeven' | '') || '', { shouldDirty: true });
     }
-    if (currentValues[2] !== rrRatio) {
+    if (!dirtyFields.rrRatio && curRr !== rrRatio) {
       form.setValue('rrRatio', rrRatio, { shouldDirty: true });
     }
   }, [entryPrice, exitPrice, stopLoss, takeProfit, lotSize, tradeDirection, form]);

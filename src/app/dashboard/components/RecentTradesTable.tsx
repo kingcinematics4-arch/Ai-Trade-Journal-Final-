@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Eye, Pencil, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -27,6 +27,11 @@ export default function RecentTradesTable() {
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const trades = useMemo(() => {
     const sorted = [...tradeRows].sort((a, b) => {
@@ -158,6 +163,8 @@ export default function RecentTradesTable() {
       </div>
     </div>
   );
+
+  if (!mounted) return <div className="card-premium p-10 h-64 flex items-center justify-center text-muted-foreground">Loading trade history...</div>;
 
   return (
     <div className="card-premium">

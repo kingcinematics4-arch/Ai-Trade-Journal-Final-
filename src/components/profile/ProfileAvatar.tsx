@@ -79,8 +79,8 @@ export default function ProfileAvatar({ editable = false, size = 'xl' }: Profile
   const avatarBody = (
     <div
       className={[
-        'relative inline-flex flex-shrink-0 items-center justify-center rounded-full overflow-hidden',
-        'ring-2 ring-border/60',
+        'relative flex shrink-0 items-center justify-center rounded-full overflow-hidden aspect-square',
+        'ring-2 ring-border/60 bg-muted',
         sizeConfig.box,
         dragOver && editable ? 'ring-primary ring-offset-2 ring-offset-background' : '',
       ].join(' ')}
@@ -92,7 +92,7 @@ export default function ProfileAvatar({ editable = false, size = 'xl' }: Profile
           src={avatarUrl}
           alt={displayName ? `${displayName} avatar` : 'Profile photo'}
           referrerPolicy="no-referrer"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover rounded-full"
           onError={() => setImageError(true)}
         />
       )}
@@ -100,7 +100,7 @@ export default function ProfileAvatar({ editable = false, size = 'xl' }: Profile
       {/* Initials fallback */}
       {!showImage && initials && (
         <span
-          className={`font-bold ${sizeConfig.text} text-white select-none`}
+          className={`flex items-center justify-center h-full w-full rounded-full font-bold ${sizeConfig.text} text-white select-none`}
           style={{ backgroundColor: `hsl(${hue} 55% 42%)` }}
         >
           {initials}

@@ -29,7 +29,8 @@ export default function UserAvatar({
   showLoading = true,
 }: UserAvatarProps) {
   const { profile, displayName, isLoading } = useAuth();
-  const { dbProfile } = useProfileContext();
+  const profileCtx = useProfileContext();
+  const dbProfile = profileCtx?.dbProfile;
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -59,22 +60,24 @@ export default function UserAvatar({
   }
 
   const baseClass = [
-    'relative inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full',
-    'ring-2 ring-border/60 bg-muted',
+    'relative flex shrink-0 items-center justify-center rounded-full overflow-hidden aspect-square',
+    'ring-2 ring-blue-500 select-none bg-muted',
     sizeConfig.box,
     className,
   ].join(' ');
 
   if (showImage && avatarUrl) {
     return (
-      <span className={baseClass} title={displayName}>
-        {!imageLoaded && <span className="absolute inset-0 animate-pulse bg-muted" aria-hidden />}
+      <div className={baseClass} title={displayName}>
+        {!imageLoaded && (
+          <div className="absolute inset-0 rounded-full animate-pulse bg-muted" aria-hidden />
+        )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={avatarUrl}
           alt={displayName ? `${displayName} profile photo` : 'Profile photo'}
           referrerPolicy="no-referrer"
-          className={`h-full w-full object-cover transition-opacity duration-200 ${
+          className={`h-full w-full object-cover rounded-full transition-opacity duration-200 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
@@ -83,7 +86,7 @@ export default function UserAvatar({
             setImageLoaded(false);
           }}
         />
-      </span>
+      </div>
     );
   }
 
@@ -91,24 +94,20 @@ export default function UserAvatar({
     const hue = getAvatarColorSeed(profile.id) % 360;
 
     return (
-      <span
-        className={`${baseClass} font-semibold ${sizeConfig.text} text-white`}
+      <div
+        className={`${baseClass} flex items-center justify-center rounded-full font-semibold ${sizeConfig.text} text-white`}
         style={{ backgroundColor: `hsl(${hue} 55% 42%)` }}
         title={displayName}
         aria-label={displayName}
       >
         {initials}
-      </span>
+      </div>
     );
   }
 
   return (
-    <span
-      className={`${baseClass} bg-primary/15 text-primary`}
-      title={displayName}
-      aria-label={displayName || 'User'}
-    >
-      <User size={sizeConfig.icon} strokeWidth={2} aria-hidden />
-    </span>
+    <div className={baseClass} title={displayName}>
+      <User size={sizeConfig.icon} className="text-muted-foreground" />
+    </div>
   );
 }
