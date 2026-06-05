@@ -92,7 +92,7 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
           <button
             type="button"
             onClick={() => setIsStrategyOpen(!isStrategyOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all bg-zinc-950 border-zinc-800 text-white ${
+            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all ${
               isStrategyOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
             }`}
           >
@@ -139,7 +139,7 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
           <button
             type="button"
             onClick={() => setIsMistakeOpen(!isMistakeOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all bg-zinc-950 border-zinc-800 text-white ${
+            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all ${
               isMistakeOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
             }`}
           >
@@ -248,7 +248,7 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
         <textarea
           id="lessons-learned"
           rows={3}
-          className="form-input mt-1.5 resize-none bg-zinc-950 border-zinc-800 text-white"
+          className="form-input mt-1.5 resize-none transition-all"
           placeholder="e.g. I should have waited for a confirmed close above resistance before entering. The volume wasn't supporting the breakout."
           {...register('lessonsLearned')}
         />
@@ -263,7 +263,7 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
         <textarea
           id="trade-notes"
           rows={2}
-          className="form-input mt-1.5 resize-none bg-zinc-950 border-zinc-800 text-white"
+          className="form-input mt-1.5 resize-none transition-all"
           placeholder="e.g. Fed announcement at 2PM caused unexpected volatility. News-driven move, not pure technical."
           {...register('notes')}
         />

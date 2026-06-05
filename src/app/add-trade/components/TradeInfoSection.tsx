@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useGoalsStore } from '@/stores/useGoalsStore';
 import { TradeFormData } from './AddTradeForm';
@@ -48,12 +48,15 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
   const selectedDirection = watch('tradeDirection');
   const selectedDuration = watch('tradeDuration');
   const selectedGoalId = watch('goalId');
+  const watchedAssetName = watch('assetName');
 
   const [isMarketOpen, setIsMarketOpen] = useState(false);
+  const [isAssetOpen, setIsAssetOpen] = useState(false);
   const [isDurationOpen, setIsDurationOpen] = useState(false);
   const [isGoalOpen, setIsGoalOpen] = useState(false);
 
   const marketRef = useRef<HTMLDivElement>(null);
+  const assetRef = useRef<HTMLDivElement>(null);
   const durationRef = useRef<HTMLDivElement>(null);
   const goalRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +64,9 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
     const handleClickOutside = (event: MouseEvent) => {
       if (marketRef.current && !marketRef.current.contains(event.target as Node)) {
         setIsMarketOpen(false);
+      }
+      if (assetRef.current && !assetRef.current.contains(event.target as Node)) {
+        setIsAssetOpen(false);
       }
       if (durationRef.current && !durationRef.current.contains(event.target as Node)) {
         setIsDurationOpen(false);
@@ -73,6 +79,14 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const assetSuggestions = useMemo(() => {
+    if (!selectedMarket || !popularAssets[selectedMarket]) return [];
+    if (!watchedAssetName) return popularAssets[selectedMarket];
+    return popularAssets[selectedMarket].filter((a) =>
+      a.toLowerCase().includes(watchedAssetName.toLowerCase())
+    );
+  }, [selectedMarket, watchedAssetName]);
 
   return (
     <div className="space-y-5">
@@ -143,7 +157,13 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
                       key={`mkt-${m}`}
                       type="button"
                       onClick={() => {
+                        console.log(`[Market Change] Switching to: ${m}`);
                         setValue('marketType', m, { shouldDirty: true, shouldValidate: true });
+
+                        // Atomic reset of Stock Name and dependent autocomplete states
+                        console.log(`[Market Change] Resetting dependent assetName and UI state`);
+                        form.resetField('assetName', { defaultValue: '' });
+
                         setIsMarketOpen(false);
                       }}
                       className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
@@ -162,7 +182,7 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           <input type="hidden" {...register('marketType', { required: 'Market type is required' })} />
           {errors.marketType && <p className="form-error">{errors.marketType.message}</p>}
         </div>
-        <div>
+        <div className="relative" ref={assetRef}>
           <label className="form-label" htmlFor="asset-name">
             Asset Name / Symbol
           </label>
@@ -174,22 +194,50 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           <input
             id="asset-name"
             type="text"
-            className="form-input mt-1.5"
+            autoComplete="off"
+            className={`form-input mt-1.5 w-full transition-all focus:ring-2 focus:ring-blue-500/20 ${
+              isAssetOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
+            }`}
             placeholder={
               selectedMarket && popularAssets[selectedMarket]
                 ? popularAssets[selectedMarket][0]
                 : 'Enter symbol'
             }
-            list="asset-suggestions"
             {...register('assetName', { required: 'Asset name is required' })}
+            onFocus={() => setIsAssetOpen(true)}
+            value={watchedAssetName || ''}
           />
-          {selectedMarket && popularAssets[selectedMarket] && (
-            <datalist id="asset-suggestions">
-              {popularAssets[selectedMarket].map((a) => (
-                <option key={`asset-opt-${a}`} value={a} />
-              ))}
-            </datalist>
-          )}
+          <AnimatePresence>
+            {isAssetOpen && assetSuggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
+              >
+                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
+                  {assetSuggestions.map((a) => (
+                    <button
+                      key={`asset-opt-${a}`}
+                      type="button"
+                      onClick={() => {
+                        setValue('assetName', a, { shouldDirty: true, shouldValidate: true });
+                        setIsAssetOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                        watchedAssetName === a
+                          ? 'bg-zinc-800 text-white'
+                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                      }`}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           {errors.assetName && <p className="form-error">{errors.assetName.message}</p>}
         </div>
       </div>
@@ -388,7 +436,7 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
       </div>
 
       {/* Row 6: Goal Assignment */}
-      <div className="space-y-2 relative" ref={goalRef}>
+      <div className={`space-y-2 relative ${isGoalOpen ? 'z-30' : 'z-0'}`} ref={goalRef}>
         <label className="text-sm font-medium text-zinc-300">Assign To Goal</label>
         <p className="form-helper">Link this trade's profit to a specific active goal</p>
         

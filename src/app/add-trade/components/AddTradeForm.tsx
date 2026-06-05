@@ -317,8 +317,12 @@ export default function AddTradeForm() {
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-      {sections.map((section) => (
-        <div key={`section-${section.key}`} className="card-premium overflow-hidden">
+      {sections.map((section, index) => (
+        <div 
+          key={`section-${section.key}`} 
+          className={`card-premium relative ${openSections[section.key] ? 'overflow-visible' : 'overflow-hidden'}`}
+          style={{ zIndex: openSections[section.key] ? 40 - index : 0 }}
+        >
           {/* Section Header */}
           <button
             type="button"
