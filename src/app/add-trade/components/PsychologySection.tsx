@@ -1,8 +1,8 @@
 'use client';
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { TradeFormData } from './AddTradeForm';
-import SearchableSelect from './SearchableSelect'; // Verified PascalCase relative import
+import SearchableSelect from './SearchableSelect';
 
 interface PsychologySectionProps {
   form: UseFormReturn<TradeFormData>;
@@ -65,88 +65,46 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
   const selectedEmotionAfter = watch('emotionAfter');
   const selectedMistake = watch('mistakeCategory');
 
-  const [customStrategies, setCustomStrategies] = useState<any[]>([]);
-  const [customMistakes, setCustomMistakes] = useState<any[]>([]);
-  const [customEmotions, setCustomEmotions] = useState<any[]>([]);
+  const [strategies, setStrategies] = useState<any[]>([]);
+  const [mistakes, setMistakes] = useState<any[]>([]);
+  const [emotions, setEmotions] = useState<any[]>([]);
 
   useEffect(() => {
-    const s = localStorage.getItem('custom-strategies');
-    if (s) setCustomStrategies(JSON.parse(s));
-    const p = localStorage.getItem('custom-psychology');
-    if (p) setCustomMistakes(JSON.parse(p));
-    const e = localStorage.getItem('custom-emotions');
-    if (e) setCustomEmotions(JSON.parse(e));
+    const s = localStorage.getItem('v2-strategies');
+    setStrategies(s ? JSON.parse(s) : defaultStrategies.map(x => ({ id: x, label: x, value: x })));
+    
+    const m = localStorage.getItem('v2-mistakes');
+    setMistakes(m ? JSON.parse(m) : defaultMistakes.map(x => ({ id: x, label: x, value: x })));
+    
+    const e = localStorage.getItem('v2-emotions');
+    setEmotions(e ? JSON.parse(e) : defaultEmotions.map(x => ({ id: x, label: x, value: x })));
   }, []);
 
-  const onDeleteStrategy = (item: any) => {
-    const updated = customStrategies.filter((x) => x.id !== item.id);
-    setCustomStrategies(updated);
-    localStorage.setItem('custom-strategies', JSON.stringify(updated));
-    if (selectedStrategy === (item.value || item.id)) {
-      setValue('strategyUsed', '', { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const onDeletePsychology = (item: any) => {
-    const updated = customMistakes.filter((x) => x.id !== item.id);
-    setCustomMistakes(updated);
-    localStorage.setItem('custom-psychology', JSON.stringify(updated));
-    if (selectedMistake === (item.value || item.id)) {
-      setValue('mistakeCategory', '', { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const onDeleteEmotion = (item: any) => {
-    const updated = customEmotions.filter((x) => x.id !== item.id);
-    setCustomEmotions(updated);
-    localStorage.setItem('custom-emotions', JSON.stringify(updated));
-    if (selectedEmotionBefore === (item.value || item.id)) {
-      setValue('emotionBefore', '', { shouldDirty: true, shouldValidate: true });
-    }
-    if (selectedEmotionAfter === (item.value || item.id)) {
-      setValue('emotionAfter', '', { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const allStrategies = useMemo(() => {
-    const defaults = defaultStrategies.map((s) => ({ id: s, label: s, value: s, isCustom: false }));
-    const customs = customStrategies.map((s) => ({ ...s, isCustom: true }));
-    return [...customs, ...defaults];
-  }, [customStrategies]);
-
-  const allMistakes = useMemo(() => {
-    const defaults = defaultMistakes.map((m) => ({ id: m, label: m, value: m, isCustom: false }));
-    const customs = customMistakes.map((m) => ({ ...m, isCustom: true }));
-    return [...customs, ...defaults];
-  }, [customMistakes]);
-
-  const allEmotions = useMemo(() => {
-    const defaults = defaultEmotions.map((e) => ({ id: e, label: e, value: e, isCustom: false }));
-    const customs = customEmotions.map((e) => ({ ...e, isCustom: true }));
-    return [...customs, ...defaults];
-  }, [customEmotions]);
-
-  const handleAddCustom = (val: string, setter: any, storageKey: string, setValueKey: keyof TradeFormData) => {
+  const handleAdd = (val: string, setter: any, storageKey: string, setValueKey: keyof TradeFormData) => {
     const name = val?.trim();
     if (!name) return;
-
-    const newItem = {
-      id: crypto.randomUUID(),
-      label: name,
-      value: name,
-      isCustom: true
-    };
-
+    const newItem = { id: crypto.randomUUID(), label: name, value: name };
     setter((prev: any) => {
-      // Prevent duplicates in custom list
       if (prev.some((item: any) => item.value === name)) return prev;
-      
       const updated = [newItem, ...prev];
       localStorage.setItem(storageKey, JSON.stringify(updated));
       return updated;
     });
-
     setValue(setValueKey, name, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const handleDelete = (item: any, setter: any, storageKey: string, setValueKeys: (keyof TradeFormData)[]) => {
+    if (!window.confirm(`Remove "${item.label}" from options?`)) return;
+    setter((prev: any) => {
+      const updated = prev.filter((x: any) => x.id !== item.id);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      return updated;
+    });
+    setValueKeys.forEach(key => {
+      if (watch(key) === item.value) {
+        setValue(key, '', { shouldDirty: true, shouldValidate: true });
+      }
+    });
   };
 
   return (
@@ -155,22 +113,22 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
         <SearchableSelect
           label="Strategy Used"
           helperText="Which trading strategy was applied"
-          items={allStrategies}
+          items={strategies}
           value={selectedStrategy}
-          onSelect={(val) => setValue('strategyUsed', val, { shouldDirty: true, shouldValidate: true })}
-          onDelete={onDeleteStrategy}
-          onAddCustom={(val) => handleAddCustom(val, setCustomStrategies, 'custom-strategies', 'strategyUsed')}
+          onSelect={(val) => setValue('strategyUsed', val, { shouldDirty: true })}
+          onDelete={(item) => handleDelete(item, setStrategies, 'v2-strategies', ['strategyUsed'])}
+          onAddCustom={(val) => handleAdd(val, setStrategies, 'v2-strategies', 'strategyUsed')}
           error={errors.strategyUsed?.message}
         />
 
         <SearchableSelect
           label="Mistake Category"
           helperText="Identify what went wrong (if anything)"
-          items={allMistakes}
+          items={mistakes}
           value={selectedMistake}
-          onSelect={(val) => setValue('mistakeCategory', val, { shouldDirty: true, shouldValidate: true })}
-          onDelete={onDeletePsychology}
-          onAddCustom={(val) => handleAddCustom(val, setCustomMistakes, 'custom-psychology', 'mistakeCategory')}
+          onSelect={(val) => setValue('mistakeCategory', val, { shouldDirty: true })}
+          onDelete={(item) => handleDelete(item, setMistakes, 'v2-mistakes', ['mistakeCategory'])}
+          onAddCustom={(val) => handleAdd(val, setMistakes, 'v2-mistakes', 'mistakeCategory')}
           error={errors.mistakeCategory?.message}
         />
       </div>
@@ -180,22 +138,22 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
         <SearchableSelect
           label="Emotion Before Trade"
           helperText="How were you feeling when you entered?"
-          items={allEmotions}
+          items={emotions}
           value={selectedEmotionBefore}
-          onSelect={(val) => setValue('emotionBefore', val, { shouldDirty: true, shouldValidate: true })}
-          onDelete={onDeleteEmotion}
-          onAddCustom={(val) => handleAddCustom(val, setCustomEmotions, 'custom-emotions', 'emotionBefore')}
+          onSelect={(val) => setValue('emotionBefore', val, { shouldDirty: true })}
+          onDelete={(item) => handleDelete(item, setEmotions, 'v2-emotions', ['emotionBefore', 'emotionAfter'])}
+          onAddCustom={(val) => handleAdd(val, setEmotions, 'v2-emotions', 'emotionBefore')}
           error={errors.emotionBefore?.message}
         />
 
         <SearchableSelect
           label="Emotion After Trade"
           helperText="How did you feel after closing?"
-          items={allEmotions}
+          items={emotions}
           value={selectedEmotionAfter}
-          onSelect={(val) => setValue('emotionAfter', val, { shouldDirty: true, shouldValidate: true })}
-          onDelete={onDeleteEmotion}
-          onAddCustom={(val) => handleAddCustom(val, setCustomEmotions, 'custom-emotions', 'emotionAfter')}
+          onSelect={(val) => setValue('emotionAfter', val, { shouldDirty: true })}
+          onDelete={(item) => handleDelete(item, setEmotions, 'v2-emotions', ['emotionBefore', 'emotionAfter'])}
+          onAddCustom={(val) => handleAdd(val, setEmotions, 'v2-emotions', 'emotionAfter')}
           error={errors.emotionAfter?.message}
         />
       </div>

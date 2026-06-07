@@ -43,10 +43,10 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
   } = form;
   const { goals } = useGoalsStore();
 
-  const [customStocks, setCustomStocks] = useState<any[]>([]);
-  const [customGoals, setCustomGoals] = useState<any[]>([]);
-  const [customMarkets, setCustomMarkets] = useState<any[]>([]);
-  const [customDurations, setCustomDurations] = useState<any[]>([]);
+  const [markets, setMarkets] = useState<any[]>([]);
+  const [assets, setAssets] = useState<any[]>([]);
+  const [durationsList, setDurationsList] = useState<any[]>([]);
+  const [hiddenGoalIds, setHiddenGoalIds] = useState<string[]>([]);
 
   const selectedMarket = watch('marketType');
   const selectedDirection = watch('tradeDirection');
@@ -55,166 +55,67 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
   const watchedAssetName = watch('assetName');
 
   useEffect(() => {
-    const m = localStorage.getItem('custom-markets');
-    if (m) setCustomMarkets(JSON.parse(m));
-    const s = localStorage.getItem('custom-stocks');
-    if (s) setCustomStocks(JSON.parse(s));
-    const g = localStorage.getItem('custom-goals');
-    if (g) setCustomGoals(JSON.parse(g));
-    const d = localStorage.getItem('custom-durations');
-    if (d) setCustomDurations(JSON.parse(d));
+    const m = localStorage.getItem('v2-markets');
+    setMarkets(m ? JSON.parse(m) : marketTypes.map(x => ({ id: x, label: x, value: x })));
+    
+    const a = localStorage.getItem('v2-assets');
+    setAssets(a ? JSON.parse(a) : []);
+
+    const d = localStorage.getItem('v2-durations');
+    setDurationsList(d ? JSON.parse(d) : durations.map(x => ({ id: x, label: x, value: x })));
+
+    const hg = localStorage.getItem('v2-hidden-goals');
+    if (hg) setHiddenGoalIds(JSON.parse(hg));
   }, []);
 
-  const onDeleteStock = (item: any) => {
-    setCustomStocks((prev) => {
-      const updated = prev.filter((x) => x.id !== item.id);
-      localStorage.setItem('custom-stocks', JSON.stringify(updated));
+  const handleAdd = (val: string, setter: any, storageKey: string, setValueKey: keyof TradeFormData, extraProps = {}) => {
+    const name = val?.trim();
+    if (!name) return;
+    const newItem = { id: crypto.randomUUID(), label: name, value: name, ...extraProps };
+    setter((prev: any) => {
+      if (prev.some((x: any) => x.value === name && (!extraProps || (x as any).market === (extraProps as any).market))) return prev;
+      const updated = [newItem, ...prev];
+      localStorage.setItem(storageKey, JSON.stringify(updated));
       return updated;
     });
+    setValue(setValueKey, name, { shouldDirty: true });
+  };
 
-    if (watchedAssetName === (item.value || item.id)) {
-      setValue('assetName', '', { shouldDirty: true, shouldValidate: true });
+  const handleDelete = (item: any, setter: any, storageKey: string, setValueKey: keyof TradeFormData) => {
+    if (!window.confirm(`Remove "${item.label}" from list?`)) return;
+    setter((prev: any) => {
+      const updated = prev.filter((x) => x.id !== item.id);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      return updated;
+    });
+    if (watch(setValueKey) === item.value || watch(setValueKey) === item.id) {
+      setValue(setValueKey, '', { shouldDirty: true });
     }
   };
 
   const onDeleteGoal = (item: any) => {
-    setCustomGoals((prev) => {
-      const updated = prev.filter((x) => x.id !== item.id);
-      localStorage.setItem('custom-goals', JSON.stringify(updated));
-      return updated;
-    });
-
-    if (selectedGoalId === item.id) {
-      setValue('goalId', '', { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const onDeleteMarket = (item: any) => {
-    setCustomMarkets((prev) => {
-      const updated = prev.filter((x) => x.id !== item.id);
-      localStorage.setItem('custom-markets', JSON.stringify(updated));
-      return updated;
-    });
-
-    if (selectedMarket === (item.value || item.id)) {
-      setValue('marketType', '', { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const handleAddCustomMarket = (val: string) => {
-    const name = val?.trim();
-    if (!name) return;
-
-    const newItem = {
-      id: crypto.randomUUID(),
-      label: name,
-      value: name,
-      isCustom: true,
-    };
-
-    setCustomMarkets((prev) => {
-      if (prev.some((m) => m.value === name)) return prev;
-      const updated = [newItem, ...prev];
-      localStorage.setItem('custom-markets', JSON.stringify(updated));
-      return updated;
-    });
-
-    setValue('marketType', name, { shouldDirty: true, shouldValidate: true });
-  };
-
-  const onDeleteDuration = (item: any) => {
-    setCustomDurations((prev) => {
-      const updated = prev.filter((x) => x.id !== item.id);
-      localStorage.setItem('custom-durations', JSON.stringify(updated));
-      return updated;
-    });
-
-    if (selectedDuration === (item.value || item.id)) {
-      setValue('tradeDuration', '', { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const handleAddCustomDuration = (val: string) => {
-    const name = val?.trim();
-    if (!name) return;
-
-    const newItem = {
-      id: crypto.randomUUID(),
-      label: name,
-      value: name,
-      isCustom: true,
-    };
-
-    setCustomDurations((prev) => {
-      if (prev.some((d) => d.value === name)) return prev;
-      const updated = [newItem, ...prev];
-      localStorage.setItem('custom-durations', JSON.stringify(updated));
-      return updated;
-    });
-
-    setValue('tradeDuration', name, { shouldDirty: true, shouldValidate: true });
-  };
-
-  const handleAddCustomStock = (val: string) => {
-    const name = val?.trim();
-    if (!name) return;
-
-    const newItem = {
-      id: crypto.randomUUID(),
-      label: name,
-      value: name,
-      market: selectedMarket,
-      isCustom: true,
-    };
-
-    setCustomStocks((prev) => {
-      if (prev.some((s) => s.value === name && s.market === selectedMarket)) return prev;
-      const updated = [newItem, ...prev];
-      localStorage.setItem('custom-stocks', JSON.stringify(updated));
-      return updated;
-    });
-
-    setValue('assetName', name, { shouldDirty: true, shouldValidate: true });
+    if (!window.confirm(`Hide goal "${item.label}" from this list?`)) return;
+    const updated = [...hiddenGoalIds, item.id];
+    setHiddenGoalIds(updated);
+    localStorage.setItem('v2-hidden-goals', JSON.stringify(updated));
+    if (selectedGoalId === item.id) setValue('goalId', '', { shouldDirty: true });
   };
 
   const assetSuggestions = useMemo(() => {
-    const customs = customStocks
-      .filter((s) => s.market === selectedMarket)
-      .map((s) => ({ ...s, name: s.label || s.name || s.symbol, isCustom: true }));
-
-    const defaults =
-      selectedMarket && popularAssets[selectedMarket]
-        ? popularAssets[selectedMarket]
-            .filter((s) => !customs.some((c) => (c.value || c.name) === s))
-            .map((s) => ({ id: s, label: s, value: s, isCustom: false }))
-        : [];
-
-    return [...customs, ...defaults];
-  }, [selectedMarket, customStocks]);
-
-  const marketOptions = useMemo(() => {
-    const defaults = marketTypes.map(m => ({ id: m, label: m, value: m, isCustom: false }));
-    const customs = customMarkets.map(m => ({ ...m, isCustom: true }));
-    return [...customs, ...defaults];
-  }, [customMarkets]);
-
-  const durationOptions = useMemo(() => {
-    const defaults = durations.map(d => ({ id: d, label: d, value: d, isCustom: false }));
-    const customs = customDurations.map(d => ({ ...d, isCustom: true }));
-    return [...customs, ...defaults];
-  }, [customDurations]);
+    const customs = assets.filter((s) => s.market === selectedMarket);
+    const defaults = selectedMarket && popularAssets[selectedMarket]
+      ? popularAssets[selectedMarket].map(s => ({ id: s, label: s, value: s, market: selectedMarket }))
+      : [];
+    
+    // Filter out items that are logically deleted (if you wanted to support deleting defaults)
+    return [...customs, ...defaults].filter((v, i, a) => a.findIndex(t => t.value === v.value) === i);
+  }, [selectedMarket, assets]);
 
   const filteredGoals = useMemo(() => {
-    const activeGoals = goals
-      .filter((g) => g.status !== 'completed')
-      .map((g) => ({
-        id: g.id, // Database UUID
-        name: g.title,
-        isCustom: false,
-      }));
-    const customs = customGoals.map(g => ({ ...g, isCustom: true })); // Ensure isCustom is set
-    return [...customs, ...activeGoals];
-  }, [goals, customGoals]);
+    return goals
+      .filter((g) => g.status !== 'completed' && !hiddenGoalIds.includes(g.id))
+      .map((g) => ({ id: g.id, label: g.title, value: g.id }));
+  }, [goals, hiddenGoalIds]);
 
   return (
     <div className="space-y-5">
@@ -253,26 +154,26 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
         <SearchableSelect
           label="Market Type"
           helperText="Asset class of this trade"
-          items={marketOptions}
+          items={markets}
           value={selectedMarket || ''}
           onSelect={(val) => {
             setValue('marketType', val, { shouldDirty: true, shouldValidate: true });
             setValue('assetName', '', { shouldDirty: true, shouldValidate: true });
           }}
-          onDelete={onDeleteMarket}
-          onAddCustom={handleAddCustomMarket}
+          onDelete={(item) => handleDelete(item, setMarkets, 'v2-markets', 'marketType')}
+          onAddCustom={(val) => handleAdd(val, setMarkets, 'v2-markets', 'marketType')}
           error={errors.marketType?.message}
         />
 
         <SearchableSelect
-          label="Asset Name / Symbol"
+          label="Asset Symbol"
           helperText={selectedMarket && popularAssets[selectedMarket] ? `Quick: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...` : 'e.g. BTC/USDT'}
           placeholder="Enter symbol"
           items={assetSuggestions}
           value={watchedAssetName || ''}
-          onSelect={(val) => setValue('assetName', val, { shouldDirty: true, shouldValidate: true })}
-          onDelete={onDeleteStock}
-          onAddCustom={handleAddCustomStock}
+          onSelect={(val) => setValue('assetName', val, { shouldDirty: true })}
+          onDelete={(item) => handleDelete(item, setAssets, 'v2-assets', 'assetName')}
+          onAddCustom={(val) => handleAdd(val, setAssets, 'v2-assets', 'assetName', { market: selectedMarket })}
           error={errors.assetName?.message}
         />
       </div>
@@ -412,11 +313,11 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
         <SearchableSelect
           label="Trade Duration"
           helperText="How long the trade was held"
-          items={durationOptions}
+          items={durationsList}
           value={selectedDuration || ''}
-          onSelect={(val) => setValue('tradeDuration', val, { shouldDirty: true, shouldValidate: true })}
-          onDelete={onDeleteDuration}
-          onAddCustom={handleAddCustomDuration}
+          onSelect={(val) => setValue('tradeDuration', val, { shouldDirty: true })}
+          onDelete={(item) => handleDelete(item, setDurationsList, 'v2-durations', 'tradeDuration')}
+          onAddCustom={(val) => handleAdd(val, setDurationsList, 'v2-durations', 'tradeDuration')}
         />
       </div>
 
@@ -424,7 +325,7 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
       <SearchableSelect
         label="Assign To Goal"
         helperText="Link this trade's profit to a specific active goal"
-        items={[{ id: '', name: 'No Goal' }, ...filteredGoals]}
+        items={[{ id: '', label: 'No Goal', value: '' }, ...filteredGoals]}
         value={selectedGoalId || ''}
         onSelect={(val) => setValue('goalId', val, { shouldDirty: true, shouldValidate: true })}
         onDelete={onDeleteGoal}
