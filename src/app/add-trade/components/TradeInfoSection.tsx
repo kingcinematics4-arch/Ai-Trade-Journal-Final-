@@ -45,6 +45,8 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
 
   const [customStocks, setCustomStocks] = useState<any[]>([]);
   const [customGoals, setCustomGoals] = useState<any[]>([]);
+  const [customMarkets, setCustomMarkets] = useState<any[]>([]);
+  const [customDurations, setCustomDurations] = useState<any[]>([]);
 
   const selectedMarket = watch('marketType');
   const selectedDirection = watch('tradeDirection');
@@ -53,10 +55,14 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
   const watchedAssetName = watch('assetName');
 
   useEffect(() => {
+    const m = localStorage.getItem('custom-markets');
+    if (m) setCustomMarkets(JSON.parse(m));
     const s = localStorage.getItem('custom-stocks');
     if (s) setCustomStocks(JSON.parse(s));
     const g = localStorage.getItem('custom-goals');
     if (g) setCustomGoals(JSON.parse(g));
+    const d = localStorage.getItem('custom-durations');
+    if (d) setCustomDurations(JSON.parse(d));
   }, []);
 
   const onDeleteStock = (item: any) => {
@@ -66,7 +72,7 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
       return updated;
     });
 
-    if (watchedAssetName === item.id) {
+    if (watchedAssetName === (item.value || item.id)) {
       setValue('assetName', '', { shouldDirty: true, shouldValidate: true });
     }
   };
@@ -83,19 +89,86 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
     }
   };
 
+  const onDeleteMarket = (item: any) => {
+    setCustomMarkets((prev) => {
+      const updated = prev.filter((x) => x.id !== item.id);
+      localStorage.setItem('custom-markets', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (selectedMarket === (item.value || item.id)) {
+      setValue('marketType', '', { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
+  const handleAddCustomMarket = (val: string) => {
+    const name = val?.trim();
+    if (!name) return;
+
+    const newItem = {
+      id: crypto.randomUUID(),
+      label: name,
+      value: name,
+      isCustom: true,
+    };
+
+    setCustomMarkets((prev) => {
+      if (prev.some((m) => m.value === name)) return prev;
+      const updated = [newItem, ...prev];
+      localStorage.setItem('custom-markets', JSON.stringify(updated));
+      return updated;
+    });
+
+    setValue('marketType', name, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const onDeleteDuration = (item: any) => {
+    setCustomDurations((prev) => {
+      const updated = prev.filter((x) => x.id !== item.id);
+      localStorage.setItem('custom-durations', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (selectedDuration === (item.value || item.id)) {
+      setValue('tradeDuration', '', { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
+  const handleAddCustomDuration = (val: string) => {
+    const name = val?.trim();
+    if (!name) return;
+
+    const newItem = {
+      id: crypto.randomUUID(),
+      label: name,
+      value: name,
+      isCustom: true,
+    };
+
+    setCustomDurations((prev) => {
+      if (prev.some((d) => d.value === name)) return prev;
+      const updated = [newItem, ...prev];
+      localStorage.setItem('custom-durations', JSON.stringify(updated));
+      return updated;
+    });
+
+    setValue('tradeDuration', name, { shouldDirty: true, shouldValidate: true });
+  };
+
   const handleAddCustomStock = (val: string) => {
     const name = val?.trim();
     if (!name) return;
 
     const newItem = {
-      id: name,
-      name: name,
+      id: crypto.randomUUID(),
+      label: name,
+      value: name,
       market: selectedMarket,
       isCustom: true,
     };
 
     setCustomStocks((prev) => {
-      if (prev.some((s) => s.id === name && s.market === selectedMarket)) return prev;
+      if (prev.some((s) => s.value === name && s.market === selectedMarket)) return prev;
       const updated = [newItem, ...prev];
       localStorage.setItem('custom-stocks', JSON.stringify(updated));
       return updated;
@@ -107,25 +180,29 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
   const assetSuggestions = useMemo(() => {
     const customs = customStocks
       .filter((s) => s.market === selectedMarket)
-      .map((s) => ({ ...s, name: s.name || s.symbol })); // Support legacy 'symbol' property
+      .map((s) => ({ ...s, name: s.label || s.name || s.symbol, isCustom: true }));
 
     const defaults =
       selectedMarket && popularAssets[selectedMarket]
         ? popularAssets[selectedMarket]
-            .filter((s) => !customs.some((c) => c.name === s))
-            .map((s) => ({ id: s, name: s, isCustom: false }))
+            .filter((s) => !customs.some((c) => (c.value || c.name) === s))
+            .map((s) => ({ id: s, label: s, value: s, isCustom: false }))
         : [];
 
     return [...customs, ...defaults];
   }, [selectedMarket, customStocks]);
 
   const marketOptions = useMemo(() => {
-    return marketTypes.map(m => ({ id: m, name: m }));
-  }, []);
+    const defaults = marketTypes.map(m => ({ id: m, label: m, value: m, isCustom: false }));
+    const customs = customMarkets.map(m => ({ ...m, isCustom: true }));
+    return [...customs, ...defaults];
+  }, [customMarkets]);
 
   const durationOptions = useMemo(() => {
-    return durations.map(d => ({ id: d, name: d }));
-  }, []);
+    const defaults = durations.map(d => ({ id: d, label: d, value: d, isCustom: false }));
+    const customs = customDurations.map(d => ({ ...d, isCustom: true }));
+    return [...customs, ...defaults];
+  }, [customDurations]);
 
   const filteredGoals = useMemo(() => {
     const activeGoals = goals
@@ -135,7 +212,8 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
         name: g.title,
         isCustom: false,
       }));
-    return [...customGoals, ...activeGoals];
+    const customs = customGoals.map(g => ({ ...g, isCustom: true })); // Ensure isCustom is set
+    return [...customs, ...activeGoals];
   }, [goals, customGoals]);
 
   return (
@@ -176,11 +254,13 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
           label="Market Type"
           helperText="Asset class of this trade"
           items={marketOptions}
-          value={selectedMarket}
+          value={selectedMarket || ''}
           onSelect={(val) => {
             setValue('marketType', val, { shouldDirty: true, shouldValidate: true });
             setValue('assetName', '', { shouldDirty: true, shouldValidate: true });
           }}
+          onDelete={onDeleteMarket}
+          onAddCustom={handleAddCustomMarket}
           error={errors.marketType?.message}
         />
 
@@ -189,7 +269,7 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
           helperText={selectedMarket && popularAssets[selectedMarket] ? `Quick: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...` : 'e.g. BTC/USDT'}
           placeholder="Enter symbol"
           items={assetSuggestions}
-          value={watchedAssetName}
+          value={watchedAssetName || ''}
           onSelect={(val) => setValue('assetName', val, { shouldDirty: true, shouldValidate: true })}
           onDelete={onDeleteStock}
           onAddCustom={handleAddCustomStock}
@@ -333,8 +413,10 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
           label="Trade Duration"
           helperText="How long the trade was held"
           items={durationOptions}
-          value={selectedDuration}
+          value={selectedDuration || ''}
           onSelect={(val) => setValue('tradeDuration', val, { shouldDirty: true, shouldValidate: true })}
+          onDelete={onDeleteDuration}
+          onAddCustom={handleAddCustomDuration}
         />
       </div>
 
@@ -343,7 +425,7 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
         label="Assign To Goal"
         helperText="Link this trade's profit to a specific active goal"
         items={[{ id: '', name: 'No Goal' }, ...filteredGoals]}
-        value={selectedGoalId}
+        value={selectedGoalId || ''}
         onSelect={(val) => setValue('goalId', val, { shouldDirty: true, shouldValidate: true })}
         onDelete={onDeleteGoal}
       />

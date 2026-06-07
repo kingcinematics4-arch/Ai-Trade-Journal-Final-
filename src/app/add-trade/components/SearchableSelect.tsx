@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ChevronDown, Search, PlusCircle } from 'lucide-react';
+import { ChevronDown, Search, PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SearchableSelectProps {
@@ -8,7 +8,7 @@ interface SearchableSelectProps {
   helperText?: string;
   placeholder?: string;
   items: any[];
-  value: string;
+  value?: string | null;
   onSelect: (value: string) => void;
   onDelete?: (item: any) => void;
   onAddCustom?: (searchValue: string) => void;
@@ -43,11 +43,14 @@ export default function SearchableSelect({
   }, []);
 
   const selectedItem = useMemo(() =>
-    items.find(i => (i.value !== undefined ? i.value : (i.id || i.symbol || i.name)) === value),
+    items.find(i => {
+      const itemValue = i.value !== undefined ? i.value : (i.id || i.symbol || i.name);
+      return itemValue === value;
+    }),
     [items, value]
   );
 
-  const displayValue = selectedItem?.label || selectedItem?.name || (value === '' ? '' : value) || placeholder;
+  const displayValue = selectedItem?.label || selectedItem?.name || (value === '' ? '' : value) || placeholder || '';
 
   const filteredItems = items.filter((item) =>
     (item.label || item.symbol || item.name || '').toLowerCase().includes(search.toLowerCase())
@@ -98,10 +101,36 @@ export default function SearchableSelect({
               {filteredItems.map((item) => (
                 <div
                   key={item.id || item.symbol || item.name || item.value}
-                  onClick={() => { onSelect(item.id || item.value || item.symbol); setIsOpen(false); setSearch(''); }}
-                  className="flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer hover:bg-zinc-800 hover:text-white"
+                  onClick={() => {
+                    const val = item.value !== undefined ? item.value : (item.id || item.symbol || item.name || '');
+                    onSelect(String(val));
+                    setIsOpen(false);
+                    setSearch('');
+                  }}
+                  className="group flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer hover:bg-zinc-800 hover:text-white"
                 >
-                  <span>{item.label || item.symbol || item.name}</span>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="truncate flex-1">
+                      {item.label || item.name || item.symbol || item.value}
+                    </span>
+
+                    {item.isCustom && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (window.confirm(`Are you sure you want to delete "${item.label || item.name || item.value}"?`)) {
+                            onDelete?.(item);
+                          }
+                        }}
+                        className="ml-2 p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all shrink-0"
+                        title="Delete custom item"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
               {showAddCustom && (

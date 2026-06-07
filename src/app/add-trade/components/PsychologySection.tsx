@@ -82,7 +82,7 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
     const updated = customStrategies.filter((x) => x.id !== item.id);
     setCustomStrategies(updated);
     localStorage.setItem('custom-strategies', JSON.stringify(updated));
-    if (selectedStrategy === item.id) {
+    if (selectedStrategy === (item.value || item.id)) {
       setValue('strategyUsed', '', { shouldDirty: true, shouldValidate: true });
     }
   };
@@ -91,7 +91,7 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
     const updated = customMistakes.filter((x) => x.id !== item.id);
     setCustomMistakes(updated);
     localStorage.setItem('custom-psychology', JSON.stringify(updated));
-    if (selectedMistake === item.id) {
+    if (selectedMistake === (item.value || item.id)) {
       setValue('mistakeCategory', '', { shouldDirty: true, shouldValidate: true });
     }
   };
@@ -100,24 +100,28 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
     const updated = customEmotions.filter((x) => x.id !== item.id);
     setCustomEmotions(updated);
     localStorage.setItem('custom-emotions', JSON.stringify(updated));
-    if (selectedEmotionBefore === item.id) setValue('emotionBefore', '', { shouldDirty: true, shouldValidate: true });
-    if (selectedEmotionAfter === item.id) setValue('emotionAfter', '', { shouldDirty: true, shouldValidate: true });
+    if (selectedEmotionBefore === (item.value || item.id)) {
+      setValue('emotionBefore', '', { shouldDirty: true, shouldValidate: true });
+    }
+    if (selectedEmotionAfter === (item.value || item.id)) {
+      setValue('emotionAfter', '', { shouldDirty: true, shouldValidate: true });
+    }
   };
 
   const allStrategies = useMemo(() => {
-    const defaults = defaultStrategies.map((s) => ({ id: s, name: s, isCustom: false }));
+    const defaults = defaultStrategies.map((s) => ({ id: s, label: s, value: s, isCustom: false }));
     const customs = customStrategies.map((s) => ({ ...s, isCustom: true }));
     return [...customs, ...defaults];
   }, [customStrategies]);
 
   const allMistakes = useMemo(() => {
-    const defaults = defaultMistakes.map((m) => ({ id: m, name: m, isCustom: false }));
+    const defaults = defaultMistakes.map((m) => ({ id: m, label: m, value: m, isCustom: false }));
     const customs = customMistakes.map((m) => ({ ...m, isCustom: true }));
     return [...customs, ...defaults];
   }, [customMistakes]);
 
   const allEmotions = useMemo(() => {
-    const defaults = defaultEmotions.map((e) => ({ id: e, name: e, isCustom: false }));
+    const defaults = defaultEmotions.map((e) => ({ id: e, label: e, value: e, isCustom: false }));
     const customs = customEmotions.map((e) => ({ ...e, isCustom: true }));
     return [...customs, ...defaults];
   }, [customEmotions]);
@@ -126,15 +130,16 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
     const name = val?.trim();
     if (!name) return;
 
-    const newItem = { 
-      id: name, // Use the name as the ID so onSelect returns the text value
-      name, 
-      isCustom: true 
+    const newItem = {
+      id: crypto.randomUUID(),
+      label: name,
+      value: name,
+      isCustom: true
     };
 
     setter((prev: any) => {
       // Prevent duplicates in custom list
-      if (prev.some((item: any) => item.id === name)) return prev;
+      if (prev.some((item: any) => item.value === name)) return prev;
       
       const updated = [newItem, ...prev];
       localStorage.setItem(storageKey, JSON.stringify(updated));

@@ -1,254 +1,266 @@
 'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { TradeFormData } from './AddTradeForm';
-import { ChevronDown } from 'lucide-react';
+import { TradeFormData } from './src/app/add-trade/components/AddTradeForm';
+import { ChevronDown, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PsychologySectionProps {
   form: UseFormReturn<TradeFormData>;
 }
 
-const strategies = ['Breakout', 'Retest', 'Scalp', 'Swing', 'Trend Following', 'Counter-trend', 'News', 'Arbitrage', 'Other'];
-const emotions = ['Neutral', 'Calm', 'Anxious', 'Greedy', 'Fearful', 'Excitement', 'Revenge', 'Disappointed', 'Confident'];
-const mistakes = ['None', 'FOMO', 'Chasing', 'Over-leveraged', 'Early Exit', 'Stop-loss Moved', 'Ignored Plan', 'Hesitation', 'Other'];
+interface DropdownState {
+  strategy: boolean;
+  emotionBefore: boolean;
+  emotionAfter: boolean;
+  mistake: boolean;
+}
+
+const DEFAULT_STRATEGIES = [
+  'Breakout', 'Retest', 'Scalp', 'Swing',
+  'Trend Following', 'Counter-trend', 'News', 'Arbitrage', 'Other'
+];
+
+const DEFAULT_EMOTIONS = [
+  'Neutral', 'Calm', 'Anxious', 'Greedy',
+  'Fearful', 'Excitement', 'Revenge', 'Disappointed', 'Confident'
+];
+
+const DEFAULT_MISTAKES = [
+  'None', 'FOMO', 'Chasing', 'Over-leveraged',
+  'Early Exit', 'Stop-loss Moved', 'Ignored Plan', 'Hesitation', 'Other'
+];
 
 export default function PsychologySection({ form }: PsychologySectionProps) {
-  const {
-    register,
-    watch,
-    setValue,
-    formState: { errors },
-  } = form;
+  const { register, watch, setValue } = form;
 
   const selectedStrategy = watch('strategyUsed');
   const selectedEmotionBefore = watch('emotionBefore');
   const selectedEmotionAfter = watch('emotionAfter');
   const selectedMistake = watch('mistakeCategory');
 
-  const [isStrategyOpen, setIsStrategyOpen] = useState(false);
-  const [isEmotionBeforeOpen, setIsEmotionBeforeOpen] = useState(false);
-  const [isEmotionAfterOpen, setIsEmotionAfterOpen] = useState(false);
-  const [isMistakeOpen, setIsMistakeOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<DropdownState>({
+    strategy: false,
+    emotionBefore: false,
+    emotionAfter: false,
+    mistake: false,
+  });
 
-  const strategyRef = useRef<HTMLDivElement>(null);
-  const emotionBeforeRef = useRef<HTMLDivElement>(null);
-  const emotionAfterRef = useRef<HTMLDivElement>(null);
-  const mistakeRef = useRef<HTMLDivElement>(null);
+  const [strategies, setStrategies] = useState(DEFAULT_STRATEGIES);
+  const [emotionsBefore, setEmotionsBefore] = useState(DEFAULT_EMOTIONS);
+  const [emotionsAfter, setEmotionsAfter] = useState(DEFAULT_EMOTIONS);
+  const [mistakes, setMistakes] = useState(DEFAULT_MISTAKES);
 
+  const refs = {
+    strategy: useRef<HTMLDivElement>(null),
+    emotionBefore: useRef<HTMLDivElement>(null),
+    emotionAfter: useRef<HTMLDivElement>(null),
+    mistake: useRef<HTMLDivElement>(null),
+  };
+
+  // Load saved data
+  useEffect(() => {
+    const s = localStorage.getItem('strategies');
+    const eb = localStorage.getItem('emotionsBefore');
+    const ea = localStorage.getItem('emotionsAfter');
+    const m = localStorage.getItem('mistakes');
+
+    if (s) setStrategies(JSON.parse(s));
+    if (eb) setEmotionsBefore(JSON.parse(eb));
+    if (ea) setEmotionsAfter(JSON.parse(ea));
+    if (m) setMistakes(JSON.parse(m));
+  }, []);
+
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (strategyRef.current && !strategyRef.current.contains(event.target as Node)) setIsStrategyOpen(false);
-      if (emotionBeforeRef.current && !emotionBeforeRef.current.contains(event.target as Node)) setIsEmotionBeforeOpen(false);
-      if (emotionAfterRef.current && !emotionAfterRef.current.contains(event.target as Node)) setIsEmotionAfterOpen(false);
-      if (mistakeRef.current && !mistakeRef.current.contains(event.target as Node)) setIsMistakeOpen(false);
+      (Object.keys(refs) as Array<keyof typeof refs>).forEach((key) => {
+        const ref = refs[key];
+        if (ref.current && !ref.current.contains(event.target as Node)) {
+          setIsOpen(prev => ({ ...prev, [key]: false }));
+        }
+      });
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const deleteItem = (type: keyof TradeFormData, item: string) => {
+    const ok = window.confirm(`Delete "${item}"?`);
+    if (!ok) return;
+
+    if (type === 'strategyUsed') {
+      const updated = strategies.filter(i => i !== item);
+      setStrategies(updated);
+      localStorage.setItem('strategies', JSON.stringify(updated));
+
+      if (selectedStrategy === item) setValue('strategyUsed', '' as any);
+    }
+
+    if (type === 'emotionBefore') {
+      const updated = emotionsBefore.filter(i => i !== item);
+      setEmotionsBefore(updated);
+      localStorage.setItem('emotionsBefore', JSON.stringify(updated));
+
+      if (selectedEmotionBefore === item) setValue('emotionBefore', '' as any);
+    }
+
+    if (type === 'emotionAfter') {
+      const updated = emotionsAfter.filter(i => i !== item);
+      setEmotionsAfter(updated);
+      localStorage.setItem('emotionsAfter', JSON.stringify(updated));
+
+      if (selectedEmotionAfter === item) setValue('emotionAfter', '' as any);
+    }
+
+    if (type === 'mistakeCategory') {
+      const updated = mistakes.filter(i => i !== item);
+      setMistakes(updated);
+      localStorage.setItem('mistakes', JSON.stringify(updated));
+
+      if (selectedMistake === item) setValue('mistakeCategory', '' as any);
+    }
+  };
+
+  const renderDropdown = (
+    label: string,
+    helper: string,
+    value: string,
+    setValueFn: (v: string) => void,
+    list: string[],
+    isDropdownOpen: boolean,
+    toggleKey: keyof DropdownState,
+    type: keyof TradeFormData,
+    ref: React.RefObject<HTMLDivElement | null>
+  ) => (
+    <div className="relative" ref={ref}>
+      <label className="form-label text-white">{label}</label>
+      <p className="form-helper text-zinc-500">{helper}</p>
+
+      <button
+        type="button"
+        onClick={() =>
+          setIsOpen(prev => ({ ...prev, [toggleKey]: !prev[toggleKey] }))
+        }
+        className="w-full flex items-center justify-between form-input mt-1.5 bg-zinc-950 border-zinc-800 text-white rounded-xl py-3 px-4"
+      >
+        <span className={value ? 'text-white' : 'text-zinc-500'}>
+          {value || 'Select'}
+        </span>
+        <ChevronDown size={14} />
+      </button>
+
+      <AnimatePresence>
+        {isDropdownOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"
+          >
+            <div className="max-h-60 overflow-y-auto p-2 space-y-1">
+              {list.map(opt => (
+                <div
+                  key={opt}
+                  className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-zinc-800 cursor-pointer"
+                  onClick={() => {
+                    setValueFn(opt);
+                    setValue(type as any, opt as any, { shouldDirty: true });
+                    setIsOpen(prev => ({ ...prev, [toggleKey]: false }));
+                  }}
+                >
+                  <span>{opt}</span>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteItem(type, opt);
+                    }}
+                    className="text-red-400"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <input type="hidden" {...register(type as any)} />
+    </div>
+  );
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Strategy Dropdown */}
-        <div className="relative" ref={strategyRef}>
-          <label className="form-label text-white">Strategy Used</label>
-          <p className="form-helper text-zinc-500">Which setup did you follow?</p>
-          <button
-            type="button"
-            onClick={() => setIsStrategyOpen(!isStrategyOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all bg-zinc-950 border-zinc-800 text-white rounded-xl py-3 px-4 ${
-              isStrategyOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50 shadow-lg' : ''
-            }`}
-          >
-            <span className={selectedStrategy ? 'text-white' : 'text-zinc-500'}>
-              {selectedStrategy || 'Select strategy'}
-            </span>
-            <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-300 ${isStrategyOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <AnimatePresence>
-            {isStrategyOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {strategies.map((opt) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => { setValue('strategyUsed', opt, { shouldDirty: true }); setIsStrategyOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedStrategy === opt ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <input type="hidden" {...register('strategyUsed')} />
-        </div>
 
-        {/* Mistake Dropdown */}
-        <div className="relative" ref={mistakeRef}>
-          <label className="form-label text-white">Mistake Category</label>
-          <p className="form-helper text-zinc-500">Did you break any rules?</p>
-          <button
-            type="button"
-            onClick={() => setIsMistakeOpen(!isMistakeOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all bg-zinc-950 border-zinc-800 text-white rounded-xl py-3 px-4 ${
-              isMistakeOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50 shadow-lg' : ''
-            }`}
-          >
-            <span className={selectedMistake ? 'text-white' : 'text-zinc-500'}>
-              {selectedMistake || 'Select mistake'}
-            </span>
-            <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-300 ${isMistakeOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <AnimatePresence>
-            {isMistakeOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {mistakes.map((opt) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => { setValue('mistakeCategory', opt, { shouldDirty: true }); setIsMistakeOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedMistake === opt ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <input type="hidden" {...register('mistakeCategory')} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {renderDropdown(
+          'Strategy Used',
+          'Which setup did you follow?',
+          selectedStrategy,
+          v => setValue('strategyUsed', v),
+          strategies,
+          isOpen.strategy,
+          'strategy',
+          'strategyUsed',
+          refs.strategy
+        )}
+
+        {renderDropdown(
+          'Mistake Category',
+          'Did you break any rules?',
+          selectedMistake,
+          v => setValue('mistakeCategory', v),
+          mistakes,
+          isOpen.mistake,
+          'mistake',
+          'mistakeCategory',
+          refs.mistake
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Emotion Before Dropdown */}
-        <div className="relative" ref={emotionBeforeRef}>
-          <label className="form-label text-white">Emotion Before</label>
-          <p className="form-helper text-zinc-500">Your mindset before entry</p>
-          <button
-            type="button"
-            onClick={() => setIsEmotionBeforeOpen(!isEmotionBeforeOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all bg-zinc-950 border-zinc-800 text-white rounded-xl py-3 px-4 ${
-              isEmotionBeforeOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50 shadow-lg' : ''
-            }`}
-          >
-            <span className={selectedEmotionBefore ? 'text-white' : 'text-zinc-500'}>
-              {selectedEmotionBefore || 'Select emotion'}
-            </span>
-            <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-300 ${isEmotionBeforeOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <AnimatePresence>
-            {isEmotionBeforeOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {emotions.map((opt) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => { setValue('emotionBefore', opt, { shouldDirty: true }); setIsEmotionBeforeOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedEmotionBefore === opt ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <input type="hidden" {...register('emotionBefore')} />
-        </div>
+        {renderDropdown(
+          'Emotion Before',
+          'Your mindset before entry',
+          selectedEmotionBefore,
+          v => setValue('emotionBefore', v),
+          emotionsBefore,
+          isOpen.emotionBefore,
+          'emotionBefore',
+          'emotionBefore',
+          refs.emotionBefore
+        )}
 
-        {/* Emotion After Dropdown */}
-        <div className="relative" ref={emotionAfterRef}>
-          <label className="form-label text-white">Emotion After</label>
-          <p className="form-helper text-zinc-500">How did you feel after exit?</p>
-          <button
-            type="button"
-            onClick={() => setIsEmotionAfterOpen(!isEmotionAfterOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all bg-zinc-950 border-zinc-800 text-white rounded-xl py-3 px-4 ${
-              isEmotionAfterOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50 shadow-lg' : ''
-            }`}
-          >
-            <span className={selectedEmotionAfter ? 'text-white' : 'text-zinc-500'}>
-              {selectedEmotionAfter || 'Select emotion'}
-            </span>
-            <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-300 ${isEmotionAfterOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <AnimatePresence>
-            {isEmotionAfterOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {emotions.map((opt) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => { setValue('emotionAfter', opt, { shouldDirty: true }); setIsEmotionAfterOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedEmotionAfter === opt ? 'bg-zinc-800 text-white' : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <input type="hidden" {...register('emotionAfter')} />
-        </div>
+        {renderDropdown(
+          'Emotion After',
+          'How did you feel after exit?',
+          selectedEmotionAfter,
+          v => setValue('emotionAfter', v),
+          emotionsAfter,
+          isOpen.emotionAfter,
+          'emotionAfter',
+          'emotionAfter',
+          refs.emotionAfter
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="form-label text-white">Lessons Learned</label>
-          <p className="form-helper text-zinc-500">Key takeaway from this specific trade</p>
           <textarea
-            className="form-input mt-1.5 w-full h-24 resize-none bg-zinc-950 border-zinc-800 text-white rounded-xl p-4 focus:ring-1 focus:ring-zinc-700 outline-none transition-all placeholder:text-zinc-600"
-            placeholder="What will you do differently next time?"
+            className="form-input mt-1.5 w-full h-24 bg-zinc-950 border-zinc-800 text-white rounded-xl p-4"
             {...register('lessonsLearned')}
           />
         </div>
+
         <div>
           <label className="form-label text-white">Notes & Details</label>
-          <p className="form-helper text-zinc-500">Additional context or journal entry</p>
           <textarea
-            className="form-input mt-1.5 w-full h-32 resize-none bg-zinc-950 border-zinc-800 text-white rounded-xl p-4 focus:ring-1 focus:ring-zinc-700 outline-none transition-all placeholder:text-zinc-600"
-            placeholder="Describe the trade context, price action, or market sentiment..."
+            className="form-input mt-1.5 w-full h-32 bg-zinc-950 border-zinc-800 text-white rounded-xl p-4"
             {...register('notes')}
           />
         </div>

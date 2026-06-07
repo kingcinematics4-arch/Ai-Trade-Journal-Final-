@@ -277,6 +277,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, [user?.id, supabase]);
 
   useEffect(() => {
+    let isMounted = true;
+
     if (!user?.id) {
       setNotifications([]);
       setUnreadCount(0);
@@ -294,14 +296,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     fetchNotifications();
     fetchSettings();
 
-    // Clean up any existing channel
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-
     // Generate a completely unique channel name to prevent collisions / cache issues
-    const uniqueChannelName = `user-notifications:${user.id}:${Math.random().toString(36).substring(2, 9)}`;
+    const uniqueChannelName = `notifs:${user.id.slice(0, 8)}:${Math.random().toString(36).substring(2, 7)}`;
 
     // Create the channel and register all event listeners BEFORE calling subscribe()
     const channel = supabase
@@ -340,6 +336,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           }
 
           setNotifications((prev: DbNotification[]): DbNotification[] => {
+            if (!isMounted) return prev;
             if (prev.some((n) => n.id === newNotif.id)) return prev;
             if (!newNotif.is_read) {
               setUnreadCount((c) => c + 1);
@@ -361,6 +358,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           console.debug('[Notifications] Realtime UPDATE received:', updatedNotif.id);
           
           setNotifications((prev: DbNotification[]) => {
+            if (!isMounted) return prev;
             const oldNotif = prev.find((n) => n.id === updatedNotif.id);
             
             if (oldNotif && oldNotif.is_read !== updatedNotif.is_read) {
@@ -384,6 +382,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           let wasUnread = false;
 
           setNotifications((prev: DbNotification[]) => {
+            if (!isMounted) return prev;
             const target = prev.find((n) => n.id === deletedId);
             if (target && !target.is_read) wasUnread = true;
             return prev.filter((n) => n.id !== deletedId);
@@ -397,22 +396,29 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
     // Call subscribe after all listeners are registered
     channel.subscribe((status) => {
+      if (!isMounted) return;
+      
       if (status === 'SUBSCRIBED') {
         console.debug('Realtime notification channel subscribed:', uniqueChannelName);
       } else if (status === 'CHANNEL_ERROR') {
-        console.error('Realtime subscription error for channel:', uniqueChannelName);
+        console.warn('Realtime channel error - retrying:', uniqueChannelName);
+      } else if (status === 'TIMED_OUT') {
+        console.warn('Realtime channel timeout - retrying:', uniqueChannelName);
       }
     });
 
     channelRef.current = channel;
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
+      isMounted = false;
+      if (channel) {
+        supabase.removeChannel(channel).catch(err => {
+          console.warn('[Notifications] Cleanup failed:', err);
+        });
+        if (channelRef.current === channel) channelRef.current = null;
       }
     };
-  }, [user?.id, fetchNotifications, supabase]);
+  }, [user?.id, fetchNotifications, fetchSettings, supabase]);
 
   const value = useMemo(
     () => ({
