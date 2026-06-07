@@ -94,6 +94,8 @@ function CustomTooltip(props: CustomTooltipProps) {
   );
 }
 
+const MIN_VISIBLE_POINTS = 2;
+
 /* ── Chart ──────────────────────────────────────────────── */
 export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
@@ -108,30 +110,30 @@ export default function PnlTrendChart() {
   const [zoomRange, setZoomRange] = useState({ start: 0, end: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
-  const [isZPressed, setIsZPressed] = useState(false);
+  const [isAPressed, setIsAPressed] = useState(false);
   const [isChartHovered, setIsChartHovered] = useState(false);
 
-  // Safely initialize to max data length when loaded
+  // Initialize viewport to full data range
   useEffect(() => {
     if (dataLength > 0 && zoomRange.end === 100 && zoomRange.start === 0) {
-      setZoomRange({ start: 0, end: dataLength - 1 });
+      setZoomRange({ start: 0, end: dataLength });
     }
-  }, [dataLength, zoomRange.start, zoomRange.end]);
+  }, [dataLength]);
 
   const visibleData = useMemo(() => {
     if (!dataLength) return [];
-    const start = Math.max(0, Math.min(zoomRange.start, dataLength - 1));
-    const end = Math.min(dataLength - 1, Math.max(zoomRange.end, start + 1));
-    return pnlData.slice(start, end + 1);
+    const start = Math.max(0, Math.min(zoomRange.start, dataLength - MIN_VISIBLE_POINTS));
+    const end = Math.max(start + MIN_VISIBLE_POINTS, Math.min(dataLength, zoomRange.end));
+    return pnlData.slice(start, end);
   }, [pnlData, dataLength, zoomRange]);
 
-  /* ── Keyboard Listeners (Z key) ── */
+  /* ── Keyboard Listeners (A key) ── */
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'z') setIsZPressed(true);
+      if (e.key.toLowerCase() === 'a') setIsAPressed(true);
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'z') setIsZPressed(false);
+      if (e.key.toLowerCase() === 'a') setIsAPressed(false);
     };
     
     window.addEventListener('keydown', handleKeyDown);
@@ -143,64 +145,88 @@ export default function PnlTrendChart() {
     };
   }, []);
 
-  /* ── Native Wheel Listener (Non-Passive) ── */
-  // Use a ref for state to avoid stale closures inside the native event listener
-  const stateRef = useRef({ zoomMode, isZPressed, isChartHovered, zoomRange, dataLength });
-  useEffect(() => {
-    stateRef.current = { zoomMode, isZPressed, isChartHovered, zoomRange, dataLength };
-  }, [zoomMode, isZPressed, isChartHovered, zoomRange, dataLength]);
+  /* ── Chart Zoom (A + Scroll) ── */
+  const handleWheel = React.useCallback((e: WheelEvent) => {
+    if (!isAPressed || !isChartHovered) return;
+
+    // Prevent page scroll when zooming
+    e.preventDefault();
+
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    // Recharts margin compensation
+    const leftMargin = -20;
+    const rightMargin = 5;
+    const chartWidth = rect.width - leftMargin - rightMargin;
+
+    const mouseX = e.clientX - rect.left - leftMargin;
+    const mouseRatio = Math.min(Math.max(mouseX / chartWidth, 0), 1);
+    const currentRange = zoomRange.end - zoomRange.start;
+
+    let newRange;
+
+    if (e.deltaY < 0) {
+      // ZOOM IN
+      newRange = Math.max(
+        MIN_VISIBLE_POINTS,
+        Math.floor(currentRange * 0.8)
+      );
+
+      // force shrink
+      if (newRange === currentRange && currentRange > MIN_VISIBLE_POINTS) {
+        newRange = currentRange - 1;
+      }
+    } else {
+      // ZOOM OUT
+      newRange = Math.min(
+        dataLength,
+        Math.ceil(currentRange * 1.25)
+      );
+
+      // force growth
+      if (newRange === currentRange && currentRange < dataLength) {
+        newRange = currentRange + 1;
+      }
+    }
+
+    const focusIndex = Math.round(
+      zoomRange.start + (currentRange - 1) * mouseRatio
+    );
+
+    // CENTER selected point in viewport
+    let newStart = Math.round(focusIndex - newRange / 2);
+
+    let newEnd = Math.round(newStart + newRange);
+
+    // left clamp
+    if (newStart < 0) {
+      newStart = 0;
+      newEnd = newRange;
+    }
+
+    // right clamp
+    if (newEnd > dataLength) {
+      newEnd = dataLength;
+      newStart = dataLength - newRange;
+    }
+
+    // final protection
+    newStart = Math.max(0, newStart);
+    newEnd = Math.min(dataLength, newEnd);
+
+    setZoomRange({
+      start: newStart,
+      end: newEnd
+    });
+  }, [isAPressed, isChartHovered, dataLength, zoomRange]);
 
   useEffect(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-
-    const handleNativeWheel = (e: WheelEvent) => {
-      const { zoomMode, isZPressed, isChartHovered, zoomRange, dataLength } = stateRef.current;
-      
-      if (!zoomMode || !isZPressed || !isChartHovered) {
-        // Normal page scroll
-        return;
-      }
-      
-      // Prevent browser scrolling and zooming!
-      e.preventDefault();
-      e.stopPropagation();
-      
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const focalRatio = Math.max(0, Math.min(1, x / rect.width));
-      
-      const windowSize = zoomRange.end - zoomRange.start;
-      
-      if (e.deltaY < 0) {
-        // Zoom IN
-        if (windowSize <= 2) return;
-        const shift = Math.max(1, Math.floor(windowSize * 0.15));
-        const shiftStart = Math.floor(shift * focalRatio);
-        const shiftEnd = shift - shiftStart;
-        
-        setZoomRange(prev => ({
-          start: prev.start + shiftStart,
-          end: prev.end - shiftEnd
-        }));
-      } else {
-        // Zoom OUT
-        const shift = Math.max(1, Math.floor(windowSize * 0.15));
-        const shiftStart = Math.floor(shift * focalRatio);
-        const shiftEnd = shift - shiftStart;
-        
-        setZoomRange(prev => {
-          const newStart = Math.max(0, prev.start - shiftStart);
-          const newEnd = Math.min(dataLength - 1, prev.end + shiftEnd);
-          return { start: newStart, end: newEnd };
-        });
-      }
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
     };
-
-    // { passive: false } is REQUIRED to allow e.preventDefault() to work on wheel events
-    el.addEventListener('wheel', handleNativeWheel, { passive: false });
-    return () => el.removeEventListener('wheel', handleNativeWheel);
-  }, []);
+  }, [handleWheel]);
 
   /* ── Pan & Drag Controls ── */
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -229,8 +255,8 @@ export default function PnlTrendChart() {
           newStart = 0;
           newEnd = windowSize;
         }
-        if (newEnd >= dataLength) {
-          newEnd = dataLength - 1;
+        if (newEnd > dataLength) {
+          newEnd = dataLength;
           newStart = Math.max(0, newEnd - windowSize);
         }
         
@@ -247,25 +273,16 @@ export default function PnlTrendChart() {
   };
 
   const handleResetZoom = () => {
-    setZoomRange({ start: 0, end: Math.max(0, dataLength - 1) });
+    setZoomRange({ start: 0, end: dataLength });
   };
 
   /* ── Chart Layout/Aesthetics ── */
-  const gradientOffset = useMemo(() => {
-    if (!visibleData || visibleData.length === 0) return 0;
-    const dataMax = Math.max(...visibleData.map((i) => i.cumulative));
-    const dataMin = Math.min(...visibleData.map((i) => i.cumulative));
-    if (dataMax <= 0) return 0;
-    if (dataMin >= 0) return 1;
-    return dataMax / (dataMax - dataMin);
-  }, [visibleData]);
-
   const { domainMin, domainMax } = useMemo(() => {
     if (!visibleData || visibleData.length === 0) return { domainMin: 0, domainMax: 0 };
     const equities = visibleData.map((d) => d.cumulative);
     const min = Math.min(...equities);
     const max = Math.max(...equities);
-    const padding = (max - min) * 0.15;
+    const padding = (max - min) * 0.1;
     
     if (padding === 0) {
        return { domainMin: min - 100, domainMax: max + 100 };
@@ -290,8 +307,7 @@ export default function PnlTrendChart() {
     );
   }
 
-  const off = gradientOffset;
-  const isZoomActive = zoomMode && isZPressed;
+  const isZoomActive = zoomMode && isAPressed;
 
   return (
     <div className="relative w-full">
@@ -300,7 +316,7 @@ export default function PnlTrendChart() {
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
           <div className="bg-blue-500/90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
             <Search size={14} />
-            Zoom Active (Z + Scroll)
+            Zoom Active (A + Scroll)
           </div>
         </div>
       )}
@@ -321,7 +337,7 @@ export default function PnlTrendChart() {
             <div className="absolute top-8 right-0 bg-popover text-popover-foreground text-xs p-3 rounded-md shadow-xl border border-border w-56 whitespace-nowrap z-50">
               <p className="font-semibold mb-2">Zoom Controls:</p>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• Hold Z + Scroll = Zoom</li>
+                <li>• Hold A + Scroll = Zoom</li>
                 <li>• Drag = Move chart</li>
                 <li>• Double click = Reset view</li>
               </ul>
@@ -356,7 +372,7 @@ export default function PnlTrendChart() {
       <div 
         ref={wrapperRef}
         tabIndex={-1} // Make it programmatically focusable but not via tab key
-        className={`w-full h-[180px] md:h-[300px] lg:h-[350px] transition-colors select-none focus-visible:outline-none focus-visible:ring-0 ${
+        className={`w-full h-[180px] md:h-[300px] lg:h-[350px] transition-colors select-none overflow-hidden focus-visible:outline-none focus-visible:ring-0 ${
           !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         onMouseEnter={() => setIsChartHovered(true)}
@@ -372,13 +388,20 @@ export default function PnlTrendChart() {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={visibleData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
             <defs>
-              <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-                <stop offset={off} stopColor="#22c55e" stopOpacity={1} />
-                <stop offset={off} stopColor="#ef4444" stopOpacity={1} />
-              </linearGradient>
-              <linearGradient id="splitFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset={off} stopColor="#22c55e" stopOpacity={0.2} />
-                <stop offset={off} stopColor="#ef4444" stopOpacity={0.2} />
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                {visibleData.map((entry, index) => {
+                  if (index === 0) return null;
+                  const isUp = entry.pnl >= 0;
+                  const color = isUp ? '#22c55e' : '#ef4444';
+                  const prevOffset = ((index - 1) / (visibleData.length - 1)) * 100;
+                  const offset = (index / (visibleData.length - 1)) * 100;
+                  return (
+                    <React.Fragment key={index}>
+                      <stop offset={`${prevOffset}%`} stopColor={color} />
+                      <stop offset={`${offset}%`} stopColor={color} />
+                    </React.Fragment>
+                  );
+                })}
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
@@ -414,16 +437,17 @@ export default function PnlTrendChart() {
             <Area
               type="monotone"
               dataKey="cumulative"
-              stroke="url(#splitColor)"
+              stroke="url(#lineGradient)"
               strokeWidth={3}
-              fill="url(#splitFill)"
+              fill="none"
               isAnimationActive={!isDragging && !zoomMode} // Disable animation when interacting for snappy responsiveness
               animationDuration={500}
               animationEasing="ease-in-out"
               dot={{
                 r: 3,
                 fill: 'var(--background)',
-                strokeWidth: 2,
+                stroke: 'var(--muted-foreground)',
+                strokeWidth: 1.5,
               }}
               activeDot={{
                 r: 6,
