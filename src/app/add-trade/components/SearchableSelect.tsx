@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ChevronDown, Search, PlusCircle } from 'lucide-react';
+import { ChevronDown, Search, PlusCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SearchableSelectProps {
@@ -32,6 +32,26 @@ export default function SearchableSelect({
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Local editable copy so items passed via props can be removed instantly in the UI.
+  const [localItems, setLocalItems] = useState<any[]>(items);
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
+
+  const getItemValue = (item: any) =>
+    item.value !== undefined ? item.value : (item.id || item.symbol || item.name);
+
+  const handleDelete = (e: React.MouseEvent, item: any) => {
+    e.stopPropagation();
+    setLocalItems((prev) => prev.filter((i) => i !== item));
+    // Safely clear the form value if the deleted item is the currently selected one.
+    if (getItemValue(item) === value) {
+      onSelect('');
+    }
+    // Keep the parent/source state (and any persisted storage) in sync.
+    onDelete?.(item);
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -43,17 +63,17 @@ export default function SearchableSelect({
   }, []);
 
   const selectedItem = useMemo(() =>
-    items.find(i => (i.value !== undefined ? i.value : (i.id || i.symbol || i.name)) === value),
-    [items, value]
+    localItems.find(i => (i.value !== undefined ? i.value : (i.id || i.symbol || i.name)) === value),
+    [localItems, value]
   );
 
   const displayValue = selectedItem?.label || selectedItem?.name || (value === '' ? '' : value) || placeholder;
 
-  const filteredItems = items.filter((item) =>
+  const filteredItems = localItems.filter((item) =>
     (item.label || item.symbol || item.name || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const showAddCustom = onAddCustom && search.trim() && !items.some(
+  const showAddCustom = onAddCustom && search.trim() && !localItems.some(
     (item) => (item.label || item.symbol || item.name || '').toLowerCase() === search.trim().toLowerCase()
   );
 
@@ -99,9 +119,17 @@ export default function SearchableSelect({
                 <div
                   key={item.id || item.symbol || item.name || item.value}
                   onClick={() => { onSelect(item.id || item.value || item.symbol); setIsOpen(false); setSearch(''); }}
-                  className="flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer hover:bg-zinc-800 hover:text-white"
+                  className="group flex items-center justify-between gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all cursor-pointer hover:bg-zinc-800 hover:text-white"
                 >
-                  <span>{item.label || item.symbol || item.name}</span>
+                  <span className="truncate">{item.label || item.symbol || item.name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${item.label || item.symbol || item.name}`}
+                    onClick={(e) => handleDelete(e, item)}
+                    className="shrink-0 p-1 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               ))}
               {showAddCustom && (
