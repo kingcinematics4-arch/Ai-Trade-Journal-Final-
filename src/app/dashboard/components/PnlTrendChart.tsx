@@ -359,7 +359,7 @@ export default function PnlTrendChart() {
           onClick={() => setZoomMode(!zoomMode)}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
             zoomMode
-              ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+              ? 'text-blue-500 border-blue-500/20'
               : 'bg-background/50 backdrop-blur text-muted-foreground border-border hover:text-foreground hover:bg-muted/50'
           }`}
         >

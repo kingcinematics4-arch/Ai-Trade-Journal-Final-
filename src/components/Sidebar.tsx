@@ -176,7 +176,7 @@ interface SidebarContentProps {
 function SidebarContent({
   collapsed,
   onLogout,
-  activePath,
+  activePath: effectivePath = '',
   isLoading,
   profile,
   displayName,
@@ -213,12 +213,18 @@ function SidebarContent({
           </p>
         )}
         {primaryNavItems.map((item) => {
-          const isActive = activePath === item.href || (item.href === '/dashboard' && activePath === '/');
+          // Robust comparison: Exact for dashboard, startsWith for deep routes (history, analytics, etc)
+          const isActive = item.href === '/dashboard' 
+            ? (effectivePath === '/dashboard' || effectivePath === '/')
+            : effectivePath.startsWith(item.href);
+
           return (
             <Link
               key={item.id}
               href={item.href}
-              className={`nav-item ${isActive ? 'nav-item-active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
+              className={`nav-item transition-all duration-200 ${
+                isActive ? 'text-blue-500' : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
+              } ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? item.label : undefined}
             >
               <span className="flex-shrink-0">{item.icon}</span>
@@ -247,12 +253,14 @@ function SidebarContent({
           </p>
         )}
         {secondaryNavItems.map((item: NavItem) => {
-          const isActive = activePath === item.href;
+          const isActive = effectivePath.startsWith(item.href);
           return (
             <Link
               key={item.id}
               href={item.href}
-              className={`nav-item py-3 px-3 rounded-xl transition-all hover:bg-white/[0.03] ${isActive ? 'text-primary' : 'text-slate-400'} ${collapsed ? 'justify-center px-2' : ''}`}
+              className={`nav-item py-3 px-3 rounded-xl transition-all duration-200 ${
+                isActive ? 'text-blue-500' : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
+              } ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? item.label : undefined}
             >
               <span className="flex-shrink-0">{item.icon}</span>

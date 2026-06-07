@@ -39,6 +39,12 @@ interface AnalyticsChartsGridProps {
 export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps) {
   const [activeTab, setActiveTab] = useState<'pnl' | 'time' | 'market'>('pnl');
 
+  const tabOptions = [
+    { id: 'pnl', label: 'Equity & Distribution', icon: <TrendingUp size={13} /> },
+    { id: 'time', label: 'Time Performance', icon: <Calendar size={13} /> },
+    { id: 'market', label: 'Assets & Strategies', icon: <TagIcon size={13} /> },
+  ] as const;
+
   const winLossData = [
     { name: 'Wins', value: stats.winCount, color: '#22c55e' },
     { name: 'Losses', value: stats.lossCount, color: '#ef4444' },
@@ -199,42 +205,20 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
         </div>
 
         <div className="flex items-center gap-1.5 p-1 bg-muted/30 rounded-lg border border-border self-start overflow-x-auto max-w-full scrollbar-none no-scrollbar">
-          <button
-            onClick={() => setActiveTab('pnl')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activeTab === 'pnl'
-                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            <TrendingUp size={13} />
-            Equity & Distribution
-          </button>
-          <button
-            onClick={() => setActiveTab('time')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activeTab === 'time'
-                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            <Calendar size={13} />
-            Time Performance
-          </button>
-          <button
-            onClick={() => setActiveTab('market')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activeTab === 'market'
-                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            <TagIcon size={13} />
-            Assets & Strategies
-          </button>
+          {tabOptions.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'text-blue-500'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
