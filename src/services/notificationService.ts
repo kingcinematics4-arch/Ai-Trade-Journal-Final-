@@ -12,6 +12,11 @@ export interface NotificationSettings {
   volume: number;
   trade_alerts: boolean;
   pnl_alerts: boolean;
+  theme: string;
+  profile_public: boolean;
+  show_stats: boolean;
+  timezone: string;
+  language: string;
   security_alerts: boolean;
   system_updates: boolean;
   message_alerts: boolean;
@@ -28,6 +33,11 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   do_not_disturb: false,
   volume: 1.0,
   trade_alerts: true,
+  theme: 'dark',
+  profile_public: false,
+  show_stats: true,
+  timezone: 'UTC',
+  language: 'en',
   pnl_alerts: true,
   security_alerts: true,
   system_updates: true,
@@ -107,7 +117,9 @@ export const notificationService = {
     const validColumns = [
       'notifications_enabled', 'sound_enabled', 'vibration_enabled', 
       'floating_enabled', 'desktop_enabled', 'popup_preview_enabled', 
-      'do_not_disturb', 'volume'
+      'do_not_disturb', 'volume', 'theme', 'trade_alerts', 'pnl_alerts',
+      'security_alerts', 'system_updates', 'message_alerts', 'activity_alerts',
+      'profile_public', 'show_stats', 'timezone', 'language'
     ];
 
     const filteredSettings = Object.entries(settings).reduce((acc, [key, value]) => {

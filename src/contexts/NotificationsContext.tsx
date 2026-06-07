@@ -160,6 +160,20 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
   }, [user?.id, fetchSettings]);
 
+  // Theme persistence & application
+  useEffect(() => {
+    if (settings?.theme) {
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark');
+      if (settings.theme === 'system') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        root.classList.add(systemTheme);
+      } else {
+        root.classList.add(settings.theme);
+      }
+    }
+  }, [settings?.theme]);
+
   const playNotificationSound = useCallback((currentSettings: NotificationSettings | null) => {
     if (!currentSettings?.sound_enabled || currentSettings?.do_not_disturb) return;
     soundService.play('notification', currentSettings?.volume);
