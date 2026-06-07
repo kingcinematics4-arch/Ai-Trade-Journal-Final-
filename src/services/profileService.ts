@@ -15,11 +15,11 @@ const AVATAR_BUCKET = 'avatars';
 export async function getProfile(userId: string): Promise<Profile | null> {
   const supabase = createClient();
 
-  // STEP 5: Verify service code with a simplified query
-  // This helps determine if the table name is even recognized by the API
   const { data, error } = await supabase
     .from('profiles')
-    .select('*');
+    .select('*')
+    .eq('id', userId)
+    .single();
 
   if (error) {
     console.error('[profileService] Supabase Error Details:', {
@@ -33,8 +33,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
     throw new Error(error.message);
   }
 
-  const userProfile = Array.isArray(data) ? data.find(p => p.id === userId) : null;
-  return userProfile ? mapDbProfile(userProfile as DbProfile) : null;
+  return data ? mapDbProfile(data as DbProfile) : null;
 }
 
 /**

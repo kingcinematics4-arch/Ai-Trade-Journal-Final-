@@ -3,8 +3,6 @@ import AuthGuard from '@/components/AuthGuard';
 import AppLayout from '@/components/AppLayout';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import SocialLinks from '@/components/profile/SocialLinks';
-import AccountSettings from '@/components/profile/AccountSettings';
-import DangerZone from '@/components/profile/DangerZone';
 import { ProfilePageSkeleton } from '@/components/profile/ProfileSkeleton';
 import { TradesProvider } from '@/contexts/TradesContext';
 
@@ -40,18 +38,6 @@ export default function ProfilePage() {
                 <SocialLinks />
               </div>
             </div>
-
-            {/* Account settings */}
-            <div>
-              <div className="mb-4">
-                <h2 className="text-base font-bold text-foreground">Account Settings</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Security, notifications and preferences</p>
-              </div>
-              <AccountSettings />
-            </div>
-
-            {/* Danger zone */}
-            <DangerZone />
           </div>
         </AppLayout>
       </TradesProvider>

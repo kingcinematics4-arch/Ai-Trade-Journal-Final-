@@ -376,7 +376,7 @@ export default function MediaMetaSection({
         {/* Trade Rating */}
         <StarRating
           value={tradeRating}
-          onChange={(v) => setValue('tradeRating', v)}
+          onChange={(v) => setValue('tradeRating', v, { shouldDirty: true })}
           label="Trade Quality Rating"
           description="Rate the overall quality of your trade execution"
         />

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import {
@@ -71,7 +71,6 @@ export default function AddTradeForm() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [entryImages, setEntryImages] = useState<File[]>([]);
-  const loadingToastId = useRef<string | number | null>(null);
   const [exitImages, setExitImages] = useState<File[]>([]);
   const [chartImages, setChartImages] = useState<File[]>([]);
 
@@ -104,11 +103,6 @@ export default function AddTradeForm() {
       goalId: '',
     },
   });
-
-  // Stable no-op to satisfy TradeInfoSection requirements after logic migration to useEffect
-  const handlePriceChange = useCallback(() => {
-    // Intentionally empty: Calculation is now handled automatically by the watch effect
-  }, []);
 
   const toggleSection = (key: SectionKey) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -165,13 +159,13 @@ export default function AddTradeForm() {
 
     // Only auto-update if the user hasn't manually touched (dirtied) these fields
     if (!dirtyFields.pnlAmount && curPnl !== pnlAmount) {
-      form.setValue('pnlAmount', pnlAmount, { shouldDirty: true });
+      form.setValue('pnlAmount', pnlAmount, { shouldValidate: true });
     }
     if (!dirtyFields.tradeStatus && curStatus !== tradeStatus) {
-      form.setValue('tradeStatus', (tradeStatus as 'win' | 'loss' | 'breakeven' | '') || '', { shouldDirty: true });
+      form.setValue('tradeStatus', (tradeStatus as 'win' | 'loss' | 'breakeven' | '') || '', { shouldValidate: true });
     }
     if (!dirtyFields.rrRatio && curRr !== rrRatio) {
-      form.setValue('rrRatio', rrRatio, { shouldDirty: true });
+      form.setValue('rrRatio', rrRatio, { shouldValidate: true });
     }
   }, [entryPrice, exitPrice, stopLoss, takeProfit, lotSize, tradeDirection, form]);
 
@@ -256,6 +250,8 @@ export default function AddTradeForm() {
       const { error } = await supabase.from('trades').insert(tradePayload);
 
       if (error) throw error;
+
+      await refetch();
 
       // 3. Create Notification
       await notificationService.createNotification({
@@ -349,7 +345,7 @@ export default function AddTradeForm() {
           {openSections[section.key] && (
             <div className="border-t border-border px-5 py-5">
               {section.key === 'tradeInfo' && (
-                <TradeInfoSection form={form} onPriceChange={handlePriceChange} />
+                <TradeInfoSection form={form} />
               )}
               {section.key === 'performance' && <PerformanceSection form={form} />}
               {section.key === 'psychology' && <PsychologySection form={form} />}

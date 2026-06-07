@@ -15,8 +15,10 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
     setValue,
     formState: { errors },
   } = form;
-  const pnl = parseFloat(watch('pnlAmount') || '0');
-  const rr = parseFloat(watch('rrRatio') || '0');
+  const pnlValue = watch('pnlAmount');
+  const rrValue = watch('rrRatio');
+  const pnl = pnlValue ? parseFloat(pnlValue) : 0;
+  const rr = rrValue ? parseFloat(rrValue) : 0;
   const tradeStatus = watch('tradeStatus');
 
   return (
@@ -49,8 +51,8 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
               pnl > 0 ? 'text-green-400' : pnl < 0 ? 'text-red-400' : 'text-muted-foreground'
             }`}
           >
-            {pnl > 0 ? '+' : ''}
-            {isFinite(pnl) && pnl !== 0 ? `$${Math.abs(pnl).toFixed(2)}` : '—'}
+            {pnl > 0 ? '+$' : pnl < 0 ? '-$' : '$'}
+            {isFinite(pnl) ? Math.abs(pnl).toFixed(2) : '0.00'}
           </p>
         </div>
         <div
@@ -114,7 +116,7 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
             className="form-input mt-1.5"
             placeholder="Auto-calculated"
             {...register('rrRatio', {
-              validate: (v: string) => v === '' || parseFloat(v) >= 0 || 'RRmust be positive',
+              validate: (v: string) => v === '' || parseFloat(v) >= 0 || 'RR must be positive',
             })}
           />
           {errors.rrRatio && <p className="form-error">{errors.rrRatio.message}</p>}
@@ -129,7 +131,7 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
               <button
                 key={`status-${s}`}
                 type="button"
-                onClick={() => setValue('tradeStatus', s)}
+                onClick={() => setValue('tradeStatus', s, { shouldDirty: true, shouldValidate: true })}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition-all duration-150 ${
                   tradeStatus === s
                     ? s === 'win'

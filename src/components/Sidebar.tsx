@@ -22,7 +22,6 @@ import {
   ChevronRight,
   Menu,
   X,
-  ShieldCheck,
 } from 'lucide-react';
 
 interface NavItem {
@@ -87,6 +86,9 @@ export default function Sidebar({ activePath }: SidebarProps) {
     router.refresh();
   };
 
+  // Ensure activePath falls back to the current pathname if not provided by parent
+  const effectivePath = activePath || pathname;
+
   return (
     <>
       {/* Mobile Header Top Bar */}
@@ -122,7 +124,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
           <SidebarContent
             collapsed={false}
             onLogout={handleLogout}
-            activePath={activePath}
+            activePath={effectivePath}
             isLoading={isLoading}
             profile={profile}
             displayName={displayName}
@@ -150,7 +152,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
         <SidebarContent
           collapsed={collapsed}
           onLogout={handleLogout}
-          activePath={activePath}
+          activePath={effectivePath}
           isLoading={isLoading}
           profile={profile}
           displayName={displayName}
@@ -270,14 +272,6 @@ function SidebarContent({
       </nav>
 
       <div className="px-3 py-4 border-t border-white/[0.03] space-y-1">
-        <Link
-          href="/dashboard"
-          className={`nav-item py-3 px-3 rounded-xl hover:bg-white/[0.03] ${collapsed ? 'justify-center px-2' : ''}`}
-          title={collapsed ? 'Admin Panel' : undefined}
-        >
-          <ShieldCheck size={18} className="flex-shrink-0 text-amber-400" />
-          {!collapsed && <span className="text-amber-400 font-medium">Admin Panel</span>}
-        </Link>
         <button
           onClick={onLogout}
           className={`nav-item py-3 px-3 rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-colors w-full ${collapsed ? 'justify-center px-2' : ''}`}

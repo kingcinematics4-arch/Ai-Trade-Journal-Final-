@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Mail, Lock, Bell, Shield, Moon, Sun, Monitor, ChevronRight, Loader2, Check } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Mail, Lock, Bell, Shield, Moon, Sun, Monitor, ChevronRight, Loader2, Check, Globe, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationsContext';
 import { sendPasswordReset, updateEmail } from '@/services/profileService';
+import { NotificationSettings } from '@/services/notificationService';
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
 
@@ -76,8 +78,24 @@ const THEMES: { value: Theme; label: string; icon: React.ReactNode }[] = [
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+const TIMEZONES = [
+  { value: 'UTC', label: 'UTC (GMT+0)' },
+  { value: 'America/New_York', label: 'Eastern Time (EST/EDT)' },
+  { value: 'Europe/London', label: 'London (GMT/BST)' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+  { value: 'Asia/Dubai', label: 'Dubai (GST)' },
+];
+
+const LANGUAGES = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+];
+
 export default function AccountSettings() {
   const { user } = useAuth();
+  const { settings, updateSettings } = useNotifications();
 
   // Email change
   const [newEmail, setNewEmail] = useState('');
@@ -88,19 +106,9 @@ export default function AccountSettings() {
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
 
-  // Notification prefs (localStorage-backed)
-  const [notifEmail, setNotifEmail] = useState(true);
-  const [notifTrade, setNotifTrade] = useState(true);
-  const [notifGoals, setNotifGoals] = useState(true);
-  const [notifAI, setNotifAI] = useState(false);
-  const [notifWeekly, setNotifWeekly] = useState(true);
-
-  // Privacy
-  const [profilePublic, setProfilePublic] = useState(false);
-  const [showStats, setShowStats] = useState(true);
-
-  // Theme
-  const [theme, setTheme] = useState<Theme>('dark');
+  const handleToggle = (key: keyof NotificationSettings, value: boolean) => {
+    updateSettings({ [key]: value });
+  };
 
   const handleEmailUpdate = async () => {
     if (!newEmail || !newEmail.includes('@')) {
@@ -204,17 +212,17 @@ export default function AccountSettings() {
 
       {/* Notifications */}
       <Section title="Notifications">
-        <ToggleRow id="notif-email" label="Email Notifications" description="Receive updates via email" checked={notifEmail} onChange={setNotifEmail} icon={<Bell size={14} />} />
-        <ToggleRow id="notif-trade" label="Trade Alerts" description="Get notified on trade events" checked={notifTrade} onChange={setNotifTrade} />
-        <ToggleRow id="notif-goals" label="Goal Alerts" description="Alerts when goals are reached" checked={notifGoals} onChange={setNotifGoals} />
-        <ToggleRow id="notif-ai" label="AI Insights" description="Receive AI-generated trading tips" checked={notifAI} onChange={setNotifAI} />
-        <ToggleRow id="notif-weekly" label="Weekly Report" description="Summary of weekly performance" checked={notifWeekly} onChange={setNotifWeekly} />
+        <ToggleRow id="notif-enabled" label="Push Notifications" description="Toggle all app alerts" checked={settings?.notifications_enabled ?? true} onChange={(v) => handleToggle('notifications_enabled', v)} icon={<Bell size={14} />} />
+        <ToggleRow id="notif-trade" label="Trade Alerts" description="Get notified on trade events" checked={settings?.trade_alerts ?? true} onChange={(v) => handleToggle('trade_alerts', v)} />
+        <ToggleRow id="notif-pnl" label="Performance Alerts" description="Alerts for P&L milestones" checked={settings?.pnl_alerts ?? true} onChange={(v) => handleToggle('pnl_alerts', v)} />
+        <ToggleRow id="notif-system" label="System Updates" description="Major app updates and news" checked={settings?.system_updates ?? true} onChange={(v) => handleToggle('system_updates', v)} />
+        <ToggleRow id="notif-activity" label="Activity Alerts" description="Notifications for account activity" checked={settings?.activity_alerts ?? true} onChange={(v) => handleToggle('activity_alerts', v)} />
       </Section>
 
       {/* Privacy */}
       <Section title="Privacy">
-        <ToggleRow id="privacy-public" label="Public Profile" description="Allow others to view your profile" checked={profilePublic} onChange={setProfilePublic} icon={<Shield size={14} />} />
-        <ToggleRow id="privacy-stats" label="Show Trading Stats" description="Display your stats publicly" checked={showStats} onChange={setShowStats} />
+        <ToggleRow id="privacy-public" label="Public Profile" description="Allow others to view your profile" checked={settings?.profile_public ?? false} onChange={(v) => handleToggle('profile_public', v)} icon={<Shield size={14} />} />
+        <ToggleRow id="privacy-stats" label="Show Trading Stats" description="Display your stats publicly" checked={settings?.show_stats ?? true} onChange={(v) => handleToggle('show_stats', v)} />
       </Section>
 
       {/* Theme */}
@@ -223,16 +231,54 @@ export default function AccountSettings() {
           <h2 className="text-sm font-bold text-foreground">Appearance</h2>
         </div>
         <div className="px-6 py-4">
-          <p className="text-xs text-muted-foreground mb-3">Theme Preference</p>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Language Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                <Globe size={13} /> Language
+              </label>
+              <select
+                value={settings?.language || 'en'}
+                onChange={(e) => updateSettings({ language: e.target.value })}
+                className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
+              >
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.value} value={lang.value} className="bg-neutral-900">
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Timezone Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+                <Clock size={13} /> Timezone
+              </label>
+              <select
+                value={settings?.timezone || 'UTC'}
+                onChange={(e) => updateSettings({ timezone: e.target.value })}
+                className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
+              >
+                {TIMEZONES.map((tz) => (
+                  <option key={tz.value} value={tz.value} className="bg-neutral-900">
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <p className="text-xs font-semibold text-muted-foreground mb-3">Theme Preference</p>
+          <div className="flex flex-wrap gap-2">
             {THEMES.map(({ value, label, icon }) => (
               <button
                 key={value}
                 type="button"
                 id={`theme-${value}`}
-                onClick={() => setTheme(value)}
+                onClick={() => updateSettings({ theme: value })}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  theme === value
+                  (settings?.theme || 'dark') === value
                     ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
                     : 'bg-white/[0.03] text-muted-foreground border-white/[0.07] hover:bg-white/[0.06]'
                 }`}
@@ -242,7 +288,7 @@ export default function AccountSettings() {
               </button>
             ))}
           </div>
-          {theme !== 'dark' && (
+          {(settings?.theme || 'dark') !== 'dark' && (
             <p className="text-xs text-amber-400/80 mt-3 flex items-center gap-1.5">
               <span>⚠</span> Light / system themes coming soon — app is currently dark-only.
             </p>

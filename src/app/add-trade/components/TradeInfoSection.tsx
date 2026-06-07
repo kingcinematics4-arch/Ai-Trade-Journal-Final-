@@ -1,14 +1,12 @@
 'use client';
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useGoalsStore } from '@/stores/useGoalsStore';
 import { TradeFormData } from './AddTradeForm';
-import { ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import SearchableSelect from './SearchableSelect';
 
 interface TradeInfoSectionProps {
   form: UseFormReturn<TradeFormData>;
-  onPriceChange: () => void;
 }
 
 const marketTypes = ['Crypto', 'Forex', 'Stocks', 'Futures', 'Options', 'Commodities', 'Indices'];
@@ -36,7 +34,7 @@ const durations = [
   '3+ days',
 ];
 
-export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSectionProps) {
+export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
   const {
     register,
     watch,
@@ -44,49 +42,101 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
     formState: { errors },
   } = form;
   const { goals } = useGoalsStore();
+
+  const [customStocks, setCustomStocks] = useState<any[]>([]);
+  const [customGoals, setCustomGoals] = useState<any[]>([]);
+
   const selectedMarket = watch('marketType');
   const selectedDirection = watch('tradeDirection');
   const selectedDuration = watch('tradeDuration');
   const selectedGoalId = watch('goalId');
   const watchedAssetName = watch('assetName');
 
-  const [isMarketOpen, setIsMarketOpen] = useState(false);
-  const [isAssetOpen, setIsAssetOpen] = useState(false);
-  const [isDurationOpen, setIsDurationOpen] = useState(false);
-  const [isGoalOpen, setIsGoalOpen] = useState(false);
-
-  const marketRef = useRef<HTMLDivElement>(null);
-  const assetRef = useRef<HTMLDivElement>(null);
-  const durationRef = useRef<HTMLDivElement>(null);
-  const goalRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (marketRef.current && !marketRef.current.contains(event.target as Node)) {
-        setIsMarketOpen(false);
-      }
-      if (assetRef.current && !assetRef.current.contains(event.target as Node)) {
-        setIsAssetOpen(false);
-      }
-      if (durationRef.current && !durationRef.current.contains(event.target as Node)) {
-        setIsDurationOpen(false);
-      }
-      if (goalRef.current && !goalRef.current.contains(event.target as Node)) {
-        setIsGoalOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    const s = localStorage.getItem('custom-stocks');
+    if (s) setCustomStocks(JSON.parse(s));
+    const g = localStorage.getItem('custom-goals');
+    if (g) setCustomGoals(JSON.parse(g));
   }, []);
 
+  const onDeleteStock = (item: any) => {
+    setCustomStocks((prev) => {
+      const updated = prev.filter((x) => x.id !== item.id);
+      localStorage.setItem('custom-stocks', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (watchedAssetName === item.id) {
+      setValue('assetName', '', { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
+  const onDeleteGoal = (item: any) => {
+    setCustomGoals((prev) => {
+      const updated = prev.filter((x) => x.id !== item.id);
+      localStorage.setItem('custom-goals', JSON.stringify(updated));
+      return updated;
+    });
+
+    if (selectedGoalId === item.id) {
+      setValue('goalId', '', { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
+  const handleAddCustomStock = (val: string) => {
+    const name = val?.trim();
+    if (!name) return;
+
+    const newItem = {
+      id: name,
+      name: name,
+      market: selectedMarket,
+      isCustom: true,
+    };
+
+    setCustomStocks((prev) => {
+      if (prev.some((s) => s.id === name && s.market === selectedMarket)) return prev;
+      const updated = [newItem, ...prev];
+      localStorage.setItem('custom-stocks', JSON.stringify(updated));
+      return updated;
+    });
+
+    setValue('assetName', name, { shouldDirty: true, shouldValidate: true });
+  };
+
   const assetSuggestions = useMemo(() => {
-    if (!selectedMarket || !popularAssets[selectedMarket]) return [];
-    if (!watchedAssetName) return popularAssets[selectedMarket];
-    return popularAssets[selectedMarket].filter((a) =>
-      a.toLowerCase().includes(watchedAssetName.toLowerCase())
-    );
-  }, [selectedMarket, watchedAssetName]);
+    const customs = customStocks
+      .filter((s) => s.market === selectedMarket)
+      .map((s) => ({ ...s, name: s.name || s.symbol })); // Support legacy 'symbol' property
+
+    const defaults =
+      selectedMarket && popularAssets[selectedMarket]
+        ? popularAssets[selectedMarket]
+            .filter((s) => !customs.some((c) => c.name === s))
+            .map((s) => ({ id: s, name: s, isCustom: false }))
+        : [];
+
+    return [...customs, ...defaults];
+  }, [selectedMarket, customStocks]);
+
+  const marketOptions = useMemo(() => {
+    return marketTypes.map(m => ({ id: m, name: m }));
+  }, []);
+
+  const durationOptions = useMemo(() => {
+    return durations.map(d => ({ id: d, name: d }));
+  }, []);
+
+  const filteredGoals = useMemo(() => {
+    const activeGoals = goals
+      .filter((g) => g.status !== 'completed')
+      .map((g) => ({
+        id: g.id, // Database UUID
+        name: g.title,
+        isCustom: false,
+      }));
+    return [...customGoals, ...activeGoals];
+  }, [goals, customGoals]);
 
   return (
     <div className="space-y-5">
@@ -122,124 +172,29 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
 
       {/* Row 2: Market + Asset */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="relative" ref={marketRef}>
-          <label className="form-label">Market Type</label>
-          <p className="form-helper">Asset class of this trade</p>
-          
-          <button
-            type="button"
-            onClick={() => setIsMarketOpen(!isMarketOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all ${
-              isMarketOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
-            }`}
-          >
-            <span className={selectedMarket ? 'text-white' : 'text-zinc-500'}>
-              {selectedMarket || 'Select market'}
-            </span>
-            <ChevronDown 
-              size={14} 
-              className={`text-zinc-500 transition-transform duration-300 ${isMarketOpen ? 'rotate-180' : ''}`} 
-            />
-          </button>
+        <SearchableSelect
+          label="Market Type"
+          helperText="Asset class of this trade"
+          items={marketOptions}
+          value={selectedMarket}
+          onSelect={(val) => {
+            setValue('marketType', val, { shouldDirty: true, shouldValidate: true });
+            setValue('assetName', '', { shouldDirty: true, shouldValidate: true });
+          }}
+          error={errors.marketType?.message}
+        />
 
-          <AnimatePresence>
-            {isMarketOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {marketTypes.map((m) => (
-                    <button
-                      key={`mkt-${m}`}
-                      type="button"
-                      onClick={() => {
-                        console.log(`[Market Change] Switching to: ${m}`);
-                        setValue('marketType', m, { shouldDirty: true, shouldValidate: true });
-
-                        // Atomic reset of Stock Name and dependent autocomplete states
-                        console.log(`[Market Change] Resetting dependent assetName and UI state`);
-                        form.resetField('assetName', { defaultValue: '' });
-
-                        setIsMarketOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedMarket === m 
-                          ? 'bg-zinc-800 text-white' 
-                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <input type="hidden" {...register('marketType', { required: 'Market type is required' })} />
-          {errors.marketType && <p className="form-error">{errors.marketType.message}</p>}
-        </div>
-        <div className="relative" ref={assetRef}>
-          <label className="form-label" htmlFor="asset-name">
-            Asset Name / Symbol
-          </label>
-          <p className="form-helper">
-            {selectedMarket && popularAssets[selectedMarket]
-              ? `Quick: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...`
-              : 'e.g. BTC/USDT, EUR/USD, AAPL'}
-          </p>
-          <input
-            id="asset-name"
-            type="text"
-            autoComplete="off"
-            className={`form-input mt-1.5 w-full transition-all focus:ring-2 focus:ring-blue-500/20 ${
-              isAssetOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
-            }`}
-            placeholder={
-              selectedMarket && popularAssets[selectedMarket]
-                ? popularAssets[selectedMarket][0]
-                : 'Enter symbol'
-            }
-            {...register('assetName', { required: 'Asset name is required' })}
-            onFocus={() => setIsAssetOpen(true)}
-            value={watchedAssetName || ''}
-          />
-          <AnimatePresence>
-            {isAssetOpen && assetSuggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {assetSuggestions.map((a) => (
-                    <button
-                      key={`asset-opt-${a}`}
-                      type="button"
-                      onClick={() => {
-                        setValue('assetName', a, { shouldDirty: true, shouldValidate: true });
-                        setIsAssetOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        watchedAssetName === a
-                          ? 'bg-zinc-800 text-white'
-                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {a}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {errors.assetName && <p className="form-error">{errors.assetName.message}</p>}
-        </div>
+        <SearchableSelect
+          label="Asset Name / Symbol"
+          helperText={selectedMarket && popularAssets[selectedMarket] ? `Quick: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...` : 'e.g. BTC/USDT'}
+          placeholder="Enter symbol"
+          items={assetSuggestions}
+          value={watchedAssetName}
+          onSelect={(val) => setValue('assetName', val, { shouldDirty: true, shouldValidate: true })}
+          onDelete={onDeleteStock}
+          onAddCustom={handleAddCustomStock}
+          error={errors.assetName?.message}
+        />
       </div>
 
       {/* Row 3: Direction */}
@@ -252,8 +207,7 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
               key={`dir-${dir}`}
               type="button"
               onClick={() => {
-                setValue('tradeDirection', dir);
-                onPriceChange();
+                setValue('tradeDirection', dir, { shouldDirty: true, shouldValidate: true });
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-medium transition-all duration-150 ${
                 selectedDirection === dir
@@ -288,7 +242,6 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
               required: 'Entry price is required',
               min: { value: 0.000001, message: 'Must be positive' },
             })}
-            onBlur={onPriceChange}
           />
           {errors.entryPrice && <p className="form-error">{errors.entryPrice.message}</p>}
         </div>
@@ -306,7 +259,6 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
               required: 'Exit price is required',
               min: { value: 0.000001, message: 'Must be positive' },
             })}
-            onBlur={onPriceChange}
           />
           {errors.exitPrice && <p className="form-error">{errors.exitPrice.message}</p>}
         </div>
@@ -321,7 +273,6 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
             className="form-input"
             placeholder="0.00"
             {...register('stopLoss', { required: 'Stop loss is required' })}
-            onBlur={onPriceChange}
           />
           {errors.stopLoss && <p className="form-error">{errors.stopLoss.message}</p>}
         </div>
@@ -336,7 +287,6 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
             className="form-input"
             placeholder="0.00"
             {...register('takeProfit')}
-            onBlur={onPriceChange}
           />
         </div>
       </div>
@@ -358,7 +308,6 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
               required: 'Lot size is required',
               min: { value: 0.01, message: 'Must be at least 0.01' },
             })}
-            onBlur={onPriceChange}
           />
           {errors.lotSize && <p className="form-error">{errors.lotSize.message}</p>}
         </div>
@@ -380,131 +329,24 @@ export default function TradeInfoSection({ form, onPriceChange }: TradeInfoSecti
           />
           {errors.riskAmount && <p className="form-error">{errors.riskAmount.message}</p>}
         </div>
-        <div className="relative" ref={durationRef}>
-          <label className="form-label">Trade Duration</label>
-          <p className="form-helper">How long the trade was held</p>
-          
-          <button
-            type="button"
-            onClick={() => setIsDurationOpen(!isDurationOpen)}
-            className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all ${
-              isDurationOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
-            }`}
-          >
-            <span className={selectedDuration ? 'text-white' : 'text-zinc-500'}>
-              {selectedDuration || 'Select duration'}
-            </span>
-            <ChevronDown 
-              size={14} 
-              className={`text-zinc-500 transition-transform duration-300 ${isDurationOpen ? 'rotate-180' : ''}`} 
-            />
-          </button>
-
-          <AnimatePresence>
-            {isDurationOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-              >
-                <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                  {durations.map((d) => (
-                    <button
-                      key={`dur-${d}`}
-                      type="button"
-                      onClick={() => {
-                        setValue('tradeDuration', d, { shouldDirty: true });
-                        setIsDurationOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedDuration === d 
-                          ? 'bg-zinc-800 text-white' 
-                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <input type="hidden" {...register('tradeDuration')} />
-        </div>
+        <SearchableSelect
+          label="Trade Duration"
+          helperText="How long the trade was held"
+          items={durationOptions}
+          value={selectedDuration}
+          onSelect={(val) => setValue('tradeDuration', val, { shouldDirty: true, shouldValidate: true })}
+        />
       </div>
 
       {/* Row 6: Goal Assignment */}
-      <div className={`space-y-2 relative ${isGoalOpen ? 'z-30' : 'z-0'}`} ref={goalRef}>
-        <label className="text-sm font-medium text-zinc-300">Assign To Goal</label>
-        <p className="form-helper">Link this trade's profit to a specific active goal</p>
-        
-        <button
-          type="button"
-          onClick={() => setIsGoalOpen(!isGoalOpen)}
-          className={`w-full flex items-center justify-between form-input mt-1.5 text-left transition-all ${
-            isGoalOpen ? 'border-zinc-700 ring-2 ring-zinc-800/50' : ''
-          }`}
-        >
-          <span className={selectedGoalId ? 'text-white' : 'text-zinc-500'}>
-            {goals.find(g => g.id === selectedGoalId)?.title || 'No Goal'}
-          </span>
-          <ChevronDown 
-            size={14} 
-            className={`text-zinc-500 transition-transform duration-300 ${isGoalOpen ? 'rotate-180' : ''}`} 
-          />
-        </button>
-
-        <AnimatePresence>
-          {isGoalOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 text-white rounded-2xl shadow-2xl backdrop-blur-3xl overflow-hidden"
-            >
-              <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('goalId', '', { shouldDirty: true });
-                    setIsGoalOpen(false);
-                  }}
-                  className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                    !selectedGoalId 
-                      ? 'bg-zinc-800 text-white' 
-                      : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                  }`}
-                >
-                  No Goal
-                </button>
-                {goals
-                  .filter((goal) => goal.status !== 'completed')
-                  .map((goal) => (
-                    <button
-                      key={`goal-${goal.id}`}
-                      type="button"
-                      onClick={() => {
-                        setValue('goalId', goal.id, { shouldDirty: true });
-                        setIsGoalOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                        selectedGoalId === goal.id 
-                          ? 'bg-zinc-800 text-white' 
-                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
-                      }`}
-                    >
-                      {goal.title}
-                    </button>
-                  ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <input type="hidden" {...register('goalId')} />
-      </div>
+      <SearchableSelect
+        label="Assign To Goal"
+        helperText="Link this trade's profit to a specific active goal"
+        items={[{ id: '', name: 'No Goal' }, ...filteredGoals]}
+        value={selectedGoalId}
+        onSelect={(val) => setValue('goalId', val, { shouldDirty: true, shouldValidate: true })}
+        onDelete={onDeleteGoal}
+      />
     </div>
   );
 }
