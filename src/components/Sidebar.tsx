@@ -12,6 +12,7 @@ import {
   PlusCircle,
   BookOpen,
   BarChart3,
+  Calendar,
   BrainCircuit,
   Target,
   Bell,
@@ -46,6 +47,12 @@ const primaryNavItems: NavItem[] = [
   { id: 'nav-add-trade', label: 'Add Trade', href: '/add-trade', icon: <PlusCircle size={18} /> },
   { id: 'nav-history', label: 'Trade History', href: '/trade-history', icon: <BookOpen size={18} /> },
   { id: 'nav-analytics', label: 'Analytics', href: '/analytics', icon: <BarChart3 size={18} /> },
+  {
+    id: 'nav-calendar',
+    label: 'Calendar',
+    href: '/dashboard/calendar',
+    icon: <Calendar size={18} />,
+  },
   {
     id: 'nav-ai-coach',
     label: 'AI Coach',
