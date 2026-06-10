@@ -34,6 +34,14 @@ import EventModal from './EventModal';
 
 import type { CalendarEvent } from '@/components/index';
 
+// Mock holidays list - can be moved to a separate config file or fetched from an API
+const HOLIDAYS = [
+  "2026-06-10",
+  "2026-06-15",
+  "2024-01-01",
+  "2024-12-25"
+];
+
 export default function CalendarView() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -163,7 +171,7 @@ export default function CalendarView() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-2 animate-in fade-in duration-200">
 
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -255,11 +263,15 @@ export default function CalendarView() {
         </div>
 
         {/* DAYS */}
-        <div className="grid grid-cols-7 auto-rows-[100px] md:auto-rows-[140px]">
+        <div className="grid grid-cols-7 auto-rows-[55px] sm:auto-rows-[65px] md:auto-rows-[75px] lg:auto-rows-[85px]">
 
           {days.map((day: Date) => {
             const dayEvents =
               getEventsForDay(day);
+
+            const dateStr = format(day, 'yyyy-MM-dd');
+            const isHoliday = HOLIDAYS.includes(dateStr);
+            const isSunday = day.getDay() === 0;
 
             const isCurrentMonth =
               isSameMonth(
@@ -308,6 +320,9 @@ export default function CalendarView() {
 
                     isSelected
                       ? 'text-white'
+
+                      : (isHoliday || isSunday)
+                      ? 'text-red-500'
 
                       : isCurrentToday
                       ? 'text-blue-400'
