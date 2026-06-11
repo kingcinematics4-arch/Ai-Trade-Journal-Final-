@@ -311,20 +311,34 @@ export default function CalendarView() {
         </div>
 
         {/* DAYS */}
-        <div className="grid grid-cols-7 auto-rows-[55px] sm:auto-rows-[65px] md:auto-rows-[75px] lg:auto-rows-[85px]">
+        <div className="grid grid-cols-7 auto-rows-auto">
 
           {days.map((day: Date) => {
             const dayEvents =
               getEventsForDay(day);
             const dayGoals =
               getGoalsForDay(day);
-            const dayTrades =
-              getTradesForDay(day);
 
-            // Trade stats calculation
-            const netPnl = dayTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
-            const pCount = dayTrades.filter(t => normalizeStatus(t.trade_status) === 'win').length;
-            const lCount = dayTrades.filter(t => normalizeStatus(t.trade_status) === 'loss').length;
+            const dayTrades = realTrades.filter(
+              trade => isSameDay(new Date(trade.trade_date || trade.date), day)
+            );
+
+            const netPnL = dayTrades.reduce(
+              (sum, trade) => sum + getTradePnL(trade),
+              0
+            );
+
+            const profitCount = dayTrades.filter(t => {
+              const status = String(t.trade_status || t.result || '').toLowerCase();
+              return status === 'win' || status === 'profit' || status === 'p' || (status === '' && getTradePnL(t) > 0);
+            }).length;
+
+            const lossCount = dayTrades.filter(t => {
+              const status = String(t.trade_status || t.result || '').toLowerCase();
+              return status === 'loss' || status === 'l' || (status === '' && getTradePnL(t) < 0);
+            }).length;
+
+            const hasContent = dayEvents.length > 0 || dayGoals.length > 0 || dayTrades.length > 0;
 
             const dateStr = format(day, 'yyyy-MM-dd');
             const isHoliday = HOLIDAYS.includes(dateStr);
@@ -353,14 +367,19 @@ export default function CalendarView() {
                   setSelectedDate(day)
                 }
                 className={cn(
-                  'relative border-r border-b border-border/40 p-1.5 overflow-hidden cursor-pointer transition-all duration-200 ease-in-out select-none outline-none ring-0 focus:outline-none focus:ring-0 active:outline-none active:ring-0 appearance-none',
+                  'relative border p-1.5 flex flex-col cursor-pointer transition-all duration-200 ease-in-out select-none outline-none appearance-none',
+                  hasContent ? 'min-h-[120px] lg:min-h-[140px]' : 'min-h-[60px] sm:min-h-[80px]',
                   !isCurrentMonth
-                    ? 'bg-muted/5 opacity-40'
+                    ? 'bg-muted/5 opacity-40 border-transparent border-r-border/40 border-b-border/40'
                     : isSelected
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                    : netPnL > 0
+                    ? 'bg-green-500/20 border-green-500'
+                    : netPnL < 0
+                    ? 'bg-red-500/20 border-red-500'
                     : isCurrentToday
-                    ? 'bg-blue-500/10 border border-blue-500/40 text-blue-400'
-                    : 'bg-transparent text-foreground hover:bg-blue-500/10 hover:text-white'
+                    ? 'bg-blue-500/10 border-blue-500/40 text-blue-400'
+                    : 'bg-transparent text-foreground border-transparent border-r-border/40 border-b-border/40 hover:bg-blue-500/10 hover:text-white'
                 )}
                 style={{
                   WebkitTapHighlightColor: 'transparent',
@@ -374,13 +393,14 @@ export default function CalendarView() {
                 <span
                   className={cn(
                     'text-xs font-bold w-6 h-6 flex items-center justify-center rounded-xl transition-colors duration-200',
-
                     isSelected
                       ? 'text-white'
-
+                      : netPnL > 0
+                      ? 'text-green-500'
+                      : netPnL < 0
+                      ? 'text-red-500'
                       : (isHoliday || isSunday)
                       ? 'text-red-500'
-
                       : isCurrentToday
                       ? 'text-blue-400'
 
@@ -390,28 +410,9 @@ export default function CalendarView() {
                   {format(day, 'd')}
                 </span>
 
-                <div className="mt-0.5 space-y-1 overflow-hidden h-[calc(100%-24px)] flex flex-col">
-                  {/* TRADE SUMMARY - Injected Directly for Visibility */}
-                  {dayTrades.length > 0 && (
-                    <div className="flex flex-col items-center justify-center py-0.5 select-none bg-background/40 rounded-lg border border-border/50 mb-1">
-                      <div className="text-[8px] font-black text-muted-foreground leading-none">
-                        {dayTrades.length} {dayTrades.length === 1 ? 'Trade' : 'Trades'}
-                      </div>
-                      <div className="text-[8px] font-black flex gap-1 leading-none mt-1">
-                        <span className="text-green-500">{pCount}P</span>
-                        <span className="text-red-500">{lCount}L</span>
-                      </div>
-                      <div className={cn(
-                        "text-[9px] font-black leading-none mt-1",
-                        netPnl > 0 ? "text-green-500" : netPnl < 0 ? "text-red-500" : "text-muted-foreground"
-                      )}>
-                        {netPnl > 0 ? '+' : ''}₹{netPnl.toLocaleString()}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* EVENTS - Moved below stats to ensure stats are always visible */}
-                  <div className="space-y-0.5">
+                <div className="flex-1 flex flex-col space-y-1 mt-0.5">
+                  {/* EVENTS SECTION */}
+                  <div className="space-y-0.5 flex-shrink-0">
                     {dayEvents.slice(0, 2).map((event: CalendarEvent) => (
                       <div
                         key={event.id}
@@ -442,6 +443,27 @@ export default function CalendarView() {
                           )}
                         />
                       ))}
+                    </div>
+                  )}
+
+                  {/* TRADE SUMMARY SECTION - Stacks below events/goals */}
+                  {dayTrades.length > 0 && (
+                    <div className="mt-auto pt-1 text-[10px] leading-tight border-t border-border/10">
+                      <div className="text-muted-foreground/50 truncate">
+                        {dayTrades.length} Trades
+                      </div>
+                      <div className="flex gap-1 mt-2 flex-wrap">
+                        {profitCount > 0 && (
+                          <span className="bg-green-500/20 text-white border border-green-500/40 rounded-md px-1.5 py-0.5 font-semibold text-[10px]">
+                            {profitCount}P
+                          </span>
+                        )}
+                        {lossCount > 0 && (
+                          <span className="bg-red-500/20 text-white border border-red-500/40 rounded-md px-1.5 py-0.5 font-semibold text-[10px]">
+                            {lossCount}L
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -589,9 +611,9 @@ export default function CalendarView() {
                 {getTradesForDay(selectedDate).length > 0 && (
                   <div className="text-xs font-bold px-2 py-1 rounded bg-muted/30">
                     Net: <span className={cn(
-                      getTradesForDay(selectedDate).reduce((s, t) => s + t.pnl, 0) >= 0 ? "text-emerald-400" : "text-red-400"
+                      getTradesForDay(selectedDate).reduce((s, t) => s + getTradePnL(t), 0) >= 0 ? "text-emerald-400" : "text-red-400"
                     )}>
-                      ₹{getTradesForDay(selectedDate).reduce((s, t) => s + t.pnl, 0).toLocaleString()}
+                      ₹{getTradesForDay(selectedDate).reduce((s, t) => s + getTradePnL(t), 0).toLocaleString()}
                     </span>
                   </div>
                 )}
@@ -611,9 +633,9 @@ export default function CalendarView() {
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black",
-                          trade.result === 'P' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                          normalizeStatus(trade.trade_status || trade.result) === 'win' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
                         )}>
-                          {trade.result}
+                          {normalizeStatus(trade.trade_status || trade.result) === 'win' ? 'P' : normalizeStatus(trade.trade_status || trade.result) === 'loss' ? 'L' : 'BE'}
                         </div>
                         <div>
                           <p className="text-sm font-bold text-foreground">
@@ -621,9 +643,9 @@ export default function CalendarView() {
                           </p>
                           <p className={cn(
                             "text-xs font-medium",
-                            trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"
+                            getTradePnL(trade) >= 0 ? "text-emerald-400" : "text-red-400"
                           )}>
-                            {trade.pnl >= 0 ? '+' : ''}₹{trade.pnl.toLocaleString()}
+                            {getTradePnL(trade) >= 0 ? '+' : ''}₹{getTradePnL(trade).toLocaleString()}
                           </p>
                         </div>
                       </div>
