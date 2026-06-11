@@ -22,6 +22,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Check,
+  ListFilter,
   Calendar as CalendarIcon,
   Info,
   Target,
@@ -40,6 +42,15 @@ import EventModal from './EventModal';
 import GoalModal from './GoalModal';
 
 import type { CalendarEvent } from '@/components/index';
+
+type CalendarFilter =
+  | 'all'
+  | 'tradeCount'
+  | 'profitTrades'
+  | 'lossTrades'
+  | 'tasks'
+  | 'dailyPnL'
+  | 'performance';
 
 // Mock holidays list - can be moved to a separate config file or fetched from an API
 const HOLIDAYS = [
@@ -60,6 +71,20 @@ export default function CalendarView() {
 
   const [editingEvent, setEditingEvent] =
     useState<CalendarEvent | null>(null);
+
+  const [activeFilters, setActiveFilters] = useState<CalendarFilter[]>(['all']);
+  const toggleFilter = (filter: CalendarFilter) => {
+    setActiveFilters((prev) => {
+      if (filter === 'all') return ['all'];
+      const newFilters = prev.filter((f) => f !== 'all');
+      if (newFilters.includes(filter)) {
+        const remaining = newFilters.filter((f) => f !== filter);
+        return remaining.length === 0 ? ['all'] : remaining;
+      }
+      return [...newFilters, filter];
+    });
+  };
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const {
     events,
@@ -218,6 +243,16 @@ export default function CalendarView() {
     }
   };
 
+  const filterOptions: { id: CalendarFilter; label: string }[] = [
+    { id: 'all', label: 'Show All' },
+    { id: 'tradeCount', label: 'Trade Count' },
+    { id: 'profitTrades', label: 'Profit Trades' },
+    { id: 'lossTrades', label: 'Loss Trades' },
+    { id: 'tasks', label: 'Tasks/Events' },
+    { id: 'dailyPnL', label: 'Daily PnL' },
+    { id: 'performance', label: 'Day Performance' },
+  ];
+
   return (
     <div className="space-y-2 animate-in fade-in duration-200">
 
@@ -271,6 +306,58 @@ export default function CalendarView() {
             >
               <ChevronRight size={16} />
             </button>
+          </div>
+
+          {/* FILTER DROPDOWN */}
+          <div className="relative">
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all",
+                (activeFilters.includes('all') && activeFilters.length === 1)
+                  ? "bg-muted/50 border-border/50 text-muted-foreground hover:text-foreground" 
+                  : "bg-blue-500/10 border-blue-500/30 text-blue-400"
+              )}
+            >
+              <ListFilter size={14} />
+              <span className="hidden sm:inline">
+                {activeFilters.includes('all') 
+                  ? 'Show All' 
+                  : activeFilters.length === 1 
+                    ? filterOptions.find(o => o.id === activeFilters[0])?.label 
+                    : 'Multiple Filters'}
+              </span>
+            </button>
+
+            <AnimatePresence>
+              {isFilterOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-xl shadow-2xl z-50 py-2 overflow-hidden"
+                  >
+                    {filterOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => toggleFilter(opt.id)}
+                        className={cn(
+                          "w-full text-left px-4 py-2 text-xs font-semibold transition-colors flex items-center justify-between",
+                          activeFilters.includes(opt.id) 
+                            ? "bg-blue-500/20 text-white border-l-2 border-blue-500/40" 
+                            : "text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        {opt.label}
+                        {activeFilters.includes(opt.id) && <Check size={12} />}
+                      </button>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
 
           <button
@@ -338,7 +425,19 @@ export default function CalendarView() {
               return status === 'loss' || status === 'l' || (status === '' && getTradePnL(t) < 0);
             }).length;
 
-            const hasContent = dayEvents.length > 0 || dayGoals.length > 0 || dayTrades.length > 0;
+            // CONDITIONAL VISIBILITY FLAGS
+            const showColors = activeFilters.includes('all') || activeFilters.includes('performance');
+            const showTasks = activeFilters.includes('all') || activeFilters.includes('tasks');
+            const showCount = activeFilters.includes('all') || activeFilters.includes('tradeCount');
+            const showProfit = activeFilters.includes('all') || activeFilters.includes('profitTrades');
+            const showLoss = activeFilters.includes('all') || activeFilters.includes('lossTrades');
+            const showPnLText = activeFilters.includes('all') || activeFilters.includes('dailyPnL');
+
+            const hasVisibleContent = 
+              (showTasks && (dayEvents.length > 0 || dayGoals.length > 0)) ||
+              (showCount && dayTrades.length > 0) ||
+              ((showProfit || showLoss) && dayTrades.length > 0) ||
+              (showPnLText && netPnL !== 0);
 
             const dateStr = format(day, 'yyyy-MM-dd');
             const isHoliday = HOLIDAYS.includes(dateStr);
@@ -368,14 +467,14 @@ export default function CalendarView() {
                 }
                 className={cn(
                   'relative border p-1.5 flex flex-col cursor-pointer transition-all duration-200 ease-in-out select-none outline-none appearance-none',
-                  hasContent ? 'min-h-[120px] lg:min-h-[140px]' : 'min-h-[60px] sm:min-h-[80px]',
+                  hasVisibleContent ? 'min-h-[120px] lg:min-h-[140px]' : 'min-h-[60px] sm:min-h-[80px]',
                   !isCurrentMonth
                     ? 'bg-muted/5 opacity-40 border-transparent border-r-border/40 border-b-border/40'
                     : isSelected
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                    : netPnL > 0
+                    : netPnL > 0 && showColors
                     ? 'bg-green-500/20 border-green-500'
-                    : netPnL < 0
+                    : netPnL < 0 && showColors
                     ? 'bg-red-500/20 border-red-500'
                     : isCurrentToday
                     ? 'bg-blue-500/10 border-blue-500/40 text-blue-400'
@@ -395,9 +494,9 @@ export default function CalendarView() {
                     'text-xs font-bold w-6 h-6 flex items-center justify-center rounded-xl transition-colors duration-200',
                     isSelected
                       ? 'text-white'
-                      : netPnL > 0
+                      : netPnL > 0 && showColors
                       ? 'text-green-500'
-                      : netPnL < 0
+                      : netPnL < 0 && showColors
                       ? 'text-red-500'
                       : (isHoliday || isSunday)
                       ? 'text-red-500'
@@ -412,7 +511,7 @@ export default function CalendarView() {
 
                 <div className="flex-1 flex flex-col space-y-1 mt-0.5">
                   {/* EVENTS SECTION */}
-                  <div className="space-y-0.5 flex-shrink-0">
+                  {showTasks && <div className="space-y-0.5 flex-shrink-0">
                     {dayEvents.slice(0, 2).map((event: CalendarEvent) => (
                       <div
                         key={event.id}
@@ -427,10 +526,10 @@ export default function CalendarView() {
                         +{dayEvents.length - 2} more
                       </div>
                     )}
-                  </div>
+                  </div>}
 
                   {/* GOAL INDICATORS */}
-                  {dayGoals.length > 0 && (
+                  {showTasks && dayGoals.length > 0 && (
                     <div className="flex flex-wrap gap-0.5 mt-1 px-0.5">
                       {dayGoals.slice(0, 5).map((g) => (
                         <div
@@ -448,17 +547,26 @@ export default function CalendarView() {
 
                   {/* TRADE SUMMARY SECTION - Stacks below events/goals */}
                   {dayTrades.length > 0 && (
-                    <div className="mt-auto pt-1 text-[10px] leading-tight border-t border-border/10">
-                      <div className="text-muted-foreground/50 truncate">
-                        {dayTrades.length} Trades
-                      </div>
+                    <div className={cn("mt-auto pt-1 text-[10px] leading-tight", (showCount || showProfit || showLoss || showPnLText) && "border-t border-border/10")}>
+                      {showCount && (
+                        <div className="text-muted-foreground/50 truncate">
+                          {dayTrades.length} Trades
+                        </div>
+                      )}
+                      
+                      {showPnLText && netPnL !== 0 && (
+                        <div className={cn("font-bold mt-1 truncate", netPnL > 0 ? "text-green-500" : "text-red-500")}>
+                          {netPnL > 0 ? '+' : ''}₹{netPnL.toLocaleString()}
+                        </div>
+                      )}
+
                       <div className="flex gap-1 mt-2 flex-wrap">
-                        {profitCount > 0 && (
+                        {showProfit && profitCount > 0 && (
                           <span className="bg-green-500/20 text-white border border-green-500/40 rounded-md px-1.5 py-0.5 font-semibold text-[10px]">
                             {profitCount}P
                           </span>
                         )}
-                        {lossCount > 0 && (
+                        {showLoss && lossCount > 0 && (
                           <span className="bg-red-500/20 text-white border border-red-500/40 rounded-md px-1.5 py-0.5 font-semibold text-[10px]">
                             {lossCount}L
                           </span>
