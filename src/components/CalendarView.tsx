@@ -314,14 +314,14 @@ export default function CalendarView() {
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all",
-                (activeFilters.includes('all') && activeFilters.length === 1)
+                (activeFilters.length === 0 || (activeFilters.includes('all') && activeFilters.length === 1))
                   ? "bg-muted/50 border-border/50 text-muted-foreground hover:text-foreground" 
                   : "bg-blue-500/10 border-blue-500/30 text-blue-400"
               )}
             >
               <ListFilter size={14} />
               <span className="hidden sm:inline">
-                {activeFilters.includes('all') 
+                {activeFilters.length === 0 || activeFilters.includes('all') 
                   ? 'Show All' 
                   : activeFilters.length === 1 
                     ? filterOptions.find(o => o.id === activeFilters[0])?.label 
@@ -354,6 +354,17 @@ export default function CalendarView() {
                         {activeFilters.includes(opt.id) && <Check size={12} />}
                       </button>
                     ))}
+
+                    <button
+                      onClick={() => {
+                        setActiveFilters([]);
+                        setIsFilterOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold transition-colors flex items-center gap-2 border-t border-white/10 text-red-400 hover:bg-red-500/10 mt-1"
+                    >
+                      <Trash2 size={12} />
+                      Clear Filters
+                    </button>
                   </motion.div>
                 </>
               )}
@@ -426,12 +437,13 @@ export default function CalendarView() {
             }).length;
 
             // CONDITIONAL VISIBILITY FLAGS
-            const showColors = activeFilters.includes('all') || activeFilters.includes('performance');
-            const showTasks = activeFilters.includes('all') || activeFilters.includes('tasks');
-            const showCount = activeFilters.includes('all') || activeFilters.includes('tradeCount');
-            const showProfit = activeFilters.includes('all') || activeFilters.includes('profitTrades');
-            const showLoss = activeFilters.includes('all') || activeFilters.includes('lossTrades');
-            const showPnLText = activeFilters.includes('all') || activeFilters.includes('dailyPnL');
+            const isDefault = activeFilters.length === 0 || activeFilters.includes('all');
+            const showColors = isDefault || activeFilters.includes('performance');
+            const showTasks = isDefault || activeFilters.includes('tasks');
+            const showCount = isDefault || activeFilters.includes('tradeCount');
+            const showProfit = isDefault || activeFilters.includes('profitTrades');
+            const showLoss = isDefault || activeFilters.includes('lossTrades');
+            const showPnLText = isDefault || activeFilters.includes('dailyPnL');
 
             const hasVisibleContent = 
               (showTasks && (dayEvents.length > 0 || dayGoals.length > 0)) ||
