@@ -24,13 +24,20 @@ import {
   Plus,
   Calendar as CalendarIcon,
   Info,
+  Target,
+  TrendingUp,
+  Trash2,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { useTrades } from '@/contexts/TradesContext';
+import { getTradePnL, normalizeStatus } from '@/lib/trades/analytics';
+import { useCalendarGoalsStore } from '@/stores/useCalendarGoalsStore';
 
 import EventModal from './EventModal';
+import GoalModal from './GoalModal';
 
 import type { CalendarEvent } from '@/components/index';
 
@@ -60,6 +67,17 @@ export default function CalendarView() {
     updateEvent,
     deleteEvent,
   } = useCalendarEvents();
+
+  const { trades: realTrades } = useTrades();
+
+  const {
+    goals,
+    addGoal: addCGoal,
+    updateGoal: updateCGoal,
+    deleteGoal: deleteCGoal,
+    toggleGoalStatus,
+    deleteTrade: deleteCTrade,
+  } = useCalendarGoalsStore();
 
   const days = useMemo(() => {
     const monthStart =
@@ -117,6 +135,21 @@ export default function CalendarView() {
     setIsModalOpen(true);
   };
 
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+
+  const onSaveGoal = (data: any) => {
+    if (editingGoal) {
+      updateCGoal(editingGoal.id, data);
+    } else {
+      const targetDate = selectedDate
+        ? format(selectedDate, 'yyyy-MM-dd')
+        : format(new Date(), 'yyyy-MM-dd');
+      addCGoal({ ...data, date: targetDate });
+    }
+    setIsGoalModalOpen(false);
+  };
+
   const onSaveEvent = (data: any) => {
     if (editingEvent) {
       updateEvent(editingEvent.id, data);
@@ -147,6 +180,21 @@ export default function CalendarView() {
             b.startTime
           )
       );
+  };
+
+  const getGoalsForDay = (day: Date) => {
+    const dateStr = format(day, 'yyyy-MM-dd');
+    return goals.filter(
+      (g) =>
+        g.date === dateStr
+    );
+  };
+
+  const getTradesForDay = (day: Date) => {
+    const dateStr = format(day, 'yyyy-MM-dd');
+    return realTrades.filter(
+      (t) => (t.trade_date || t.date) === dateStr
+    );
   };
 
   const getColorClass = (
@@ -268,6 +316,15 @@ export default function CalendarView() {
           {days.map((day: Date) => {
             const dayEvents =
               getEventsForDay(day);
+            const dayGoals =
+              getGoalsForDay(day);
+            const dayTrades =
+              getTradesForDay(day);
+
+            // Trade stats calculation
+            const netPnl = dayTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
+            const pCount = dayTrades.filter(t => normalizeStatus(t.trade_status) === 'win').length;
+            const lCount = dayTrades.filter(t => normalizeStatus(t.trade_status) === 'loss').length;
 
             const dateStr = format(day, 'yyyy-MM-dd');
             const isHoliday = HOLIDAYS.includes(dateStr);
@@ -333,41 +390,58 @@ export default function CalendarView() {
                   {format(day, 'd')}
                 </span>
 
-                <div className="mt-1.5 space-y-1 overflow-hidden h-[calc(100%-24px)]">
+                <div className="mt-0.5 space-y-1 overflow-hidden h-[calc(100%-24px)] flex flex-col">
+                  {/* TRADE SUMMARY - Injected Directly for Visibility */}
+                  {dayTrades.length > 0 && (
+                    <div className="flex flex-col items-center justify-center py-0.5 select-none bg-background/40 rounded-lg border border-border/50 mb-1">
+                      <div className="text-[8px] font-black text-muted-foreground leading-none">
+                        {dayTrades.length} {dayTrades.length === 1 ? 'Trade' : 'Trades'}
+                      </div>
+                      <div className="text-[8px] font-black flex gap-1 leading-none mt-1">
+                        <span className="text-green-500">{pCount}P</span>
+                        <span className="text-red-500">{lCount}L</span>
+                      </div>
+                      <div className={cn(
+                        "text-[9px] font-black leading-none mt-1",
+                        netPnl > 0 ? "text-green-500" : netPnl < 0 ? "text-red-500" : "text-muted-foreground"
+                      )}>
+                        {netPnl > 0 ? '+' : ''}₹{netPnl.toLocaleString()}
+                      </div>
+                    </div>
+                  )}
 
-                  {dayEvents
-                    .slice(0, 3)
-                    .map(
-                      (
-                        event: CalendarEvent
-                      ) => (
-                        <div
-                          key={event.id}
-                          onClick={(e) =>
-                            handleEditEvent(
-                              e,
-                              event
-                            )
-                          }
-                          className={`px-1.5 py-0.5 text-[9px] font-bold rounded border truncate ${getColorClass(
-                            event.color
-                          )}`}
-                        >
-                          {
-                            event.startTime
-                          }{' '}
-                          {event.title}
-                        </div>
-                      )
+                  {/* EVENTS - Moved below stats to ensure stats are always visible */}
+                  <div className="space-y-0.5">
+                    {dayEvents.slice(0, 2).map((event: CalendarEvent) => (
+                      <div
+                        key={event.id}
+                        onClick={(e) => handleEditEvent(e, event)}
+                        className={`px-1 py-0.5 text-[7px] font-bold rounded border truncate ${getColorClass(event.color)}`}
+                      >
+                        {event.title}
+                      </div>
+                    ))}
+                    {dayEvents.length > 2 && (
+                      <div className="text-[7px] text-muted-foreground font-bold px-1">
+                        +{dayEvents.length - 2} more
+                      </div>
                     )}
+                  </div>
 
-                  {dayEvents.length >
-                    3 && (
-                    <div className="text-[9px] text-muted-foreground font-bold px-1">
-                      +{' '}
-                      {dayEvents.length -
-                        3}{' '}
-                      more
+                  {/* GOAL INDICATORS */}
+                  {dayGoals.length > 0 && (
+                    <div className="flex flex-wrap gap-0.5 mt-1 px-0.5">
+                      {dayGoals.slice(0, 5).map((g) => (
+                        <div
+                          key={g.id}
+                          className={cn(
+                            'w-1 h-1 rounded-full',
+                            g.status === 'completed'
+                              ? 'bg-emerald-500'
+                              : 'bg-primary'
+                          )}
+                        />
+                      ))}
                     </div>
                   )}
                 </div>
@@ -505,6 +579,136 @@ export default function CalendarView() {
                 )
               )}
             </div>
+
+            {/* DAILY TRADES SECTION */}
+            <div className="mt-8 pt-6 border-t border-border/40">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                  <TrendingUp size={16} className="text-primary" /> Daily Trades
+                </h3>
+                {getTradesForDay(selectedDate).length > 0 && (
+                  <div className="text-xs font-bold px-2 py-1 rounded bg-muted/30">
+                    Net: <span className={cn(
+                      getTradesForDay(selectedDate).reduce((s, t) => s + t.pnl, 0) >= 0 ? "text-emerald-400" : "text-red-400"
+                    )}>
+                      ₹{getTradesForDay(selectedDate).reduce((s, t) => s + t.pnl, 0).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                {getTradesForDay(selectedDate).length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic py-2">
+                    No trades logged for this day.
+                  </p>
+                ) : (
+                  getTradesForDay(selectedDate).map((trade) => (
+                    <div
+                      key={trade.id}
+                      className="flex items-center justify-between p-3 bg-muted/20 border border-border/40 rounded-xl group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black",
+                          trade.result === 'P' ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                        )}>
+                          {trade.result}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">
+                            Trade Result
+                          </p>
+                          <p className={cn(
+                            "text-xs font-medium",
+                            trade.pnl >= 0 ? "text-emerald-400" : "text-red-400"
+                          )}>
+                            {trade.pnl >= 0 ? '+' : ''}₹{trade.pnl.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteCTrade(trade.id)}
+                        className="p-1.5 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* DAILY GOALS SECTION */}
+            <div className="mt-8 pt-6 border-t border-border/40">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                  <Target size={16} className="text-primary" /> Daily Goals
+                </h3>
+                <button
+                  onClick={() => {
+                    setEditingGoal(null);
+                    setIsGoalModalOpen(true);
+                  }}
+                  className="text-[10px] font-bold text-primary hover:bg-primary/10 px-2 py-1 rounded-lg transition-colors"
+                >
+                  + Add Goal
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {getGoalsForDay(selectedDate).length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic py-2">
+                    No goals set for this day.
+                  </p>
+                ) : (
+                  getGoalsForDay(selectedDate).map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="flex items-center justify-between p-3 bg-muted/20 border border-border/40 rounded-xl group hover:border-primary/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={goal.status === 'completed'}
+                          onChange={() => toggleGoalStatus(goal.id)}
+                          className="w-4 h-4 rounded border-border bg-background text-primary focus:ring-primary/40 cursor-pointer"
+                        />
+                        <div
+                          className="cursor-pointer flex-1"
+                          onClick={() => {
+                            setEditingGoal(goal);
+                            setIsGoalModalOpen(true);
+                          }}
+                        >
+                          <p
+                            className={cn(
+                              'text-sm font-semibold',
+                              goal.status === 'completed'
+                                ? 'line-through text-muted-foreground opacity-60'
+                                : 'text-foreground'
+                            )}
+                          >
+                            {goal.title}
+                          </p>
+                          {goal.description && (
+                            <p className="text-[10px] text-muted-foreground line-clamp-1">
+                              {goal.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteCGoal(goal.id)}
+                        className="p-1.5 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
       )}
@@ -532,6 +736,22 @@ export default function CalendarView() {
               )
         }
         editingEvent={editingEvent}
+      />
+
+      <GoalModal
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        onSave={onSaveGoal}
+        onDelete={(id) => {
+          deleteCGoal(id);
+          setIsGoalModalOpen(false);
+        }}
+        initialDate={
+          selectedDate
+            ? format(selectedDate, 'yyyy-MM-dd')
+            : format(new Date(), 'yyyy-MM-dd')
+        }
+        editingGoal={editingGoal}
       />
     </div>
   );
