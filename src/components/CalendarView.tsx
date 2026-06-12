@@ -26,6 +26,8 @@ import {
   ListFilter,
   Calendar as CalendarIcon,
   Trash2,
+  TrendingUp,
+  Target,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -38,7 +40,7 @@ import { useCalendarGoalsStore } from '@/stores/useCalendarGoalsStore';
 import EventModal from './EventModal';
 import GoalModal from './GoalModal';
 
-/** SAFE LOCAL TYPE (fixes Vercel build issues) */
+/** SAFE LOCAL TYPE */
 type CalendarEvent = {
   id: string;
   title: string;
@@ -65,23 +67,20 @@ export default function CalendarView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
 
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+
   const [activeFilters, setActiveFilters] = useState<CalendarFilter[]>(['all']);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const {
-    events,
-    addEvent,
-    updateEvent,
-    deleteEvent,
-  } = useCalendarEvents();
-
+  const { events, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
   const { trades: realTrades } = useTrades();
 
   const {
     goals,
-    addGoal: addCGoal,
-    updateGoal: updateCGoal,
-    deleteGoal: deleteCGoal,
+    addGoal,
+    updateGoal,
+    deleteGoal,
   } = useCalendarGoalsStore();
 
   const days = useMemo(() => {
@@ -91,21 +90,27 @@ export default function CalendarView() {
     });
   }, [currentMonth]);
 
-  const getEventsForDay = (day: Date) => {
-    const dateStr = format(day, 'yyyy-MM-dd');
-    return events.filter((e: CalendarEvent) => e.date === dateStr);
-  };
+  const getEventsForDay = (day: Date) =>
+    events.filter((e: CalendarEvent) => e.date === format(day, 'yyyy-MM-dd'));
 
-  const getGoalsForDay = (day: Date) => {
-    const dateStr = format(day, 'yyyy-MM-dd');
-    return goals.filter((g) => g.date === dateStr);
-  };
+  const getGoalsForDay = (day: Date) =>
+    goals.filter((g) => g.date === format(day, 'yyyy-MM-dd'));
 
-  const getTradesForDay = (day: Date) => {
-    const dateStr = format(day, 'yyyy-MM-dd');
-    return realTrades.filter(
-      (t) => (t.trade_date || t.date) === dateStr
+  const getTradesForDay = (day: Date) =>
+    realTrades.filter(
+      (t) => (t.trade_date || t.date) === format(day, 'yyyy-MM-dd')
     );
+
+  const onSaveEvent = (data: any) => {
+    if (editingEvent) updateEvent(editingEvent.id, data);
+    else addEvent(data);
+    setIsModalOpen(false);
+  };
+
+  const onSaveGoal = (data: any) => {
+    if (editingGoal) updateGoal(editingGoal.id, data);
+    else addGoal(data);
+    setIsGoalModalOpen(false);
   };
 
   return (
@@ -138,7 +143,7 @@ export default function CalendarView() {
         </button>
       </div>
 
-      {/* CALENDAR GRID */}
+      {/* CALENDAR */}
       <div className="card-elevated overflow-hidden border-border/40 bg-card">
 
         <div className="grid grid-cols-7 border-b border-border bg-muted/20">
@@ -153,7 +158,6 @@ export default function CalendarView() {
 
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
-            const dayGoals = getGoalsForDay(day);
             const dayTrades = getTradesForDay(day);
 
             const netPnL = dayTrades.reduce(
@@ -178,10 +182,7 @@ export default function CalendarView() {
                 </div>
 
                 {dayEvents.slice(0, 2).map((e) => (
-                  <div
-                    key={e.id}
-                    className="text-[9px] truncate text-blue-400"
-                  >
+                  <div key={e.id} className="text-[9px] truncate text-blue-400">
                     {e.title}
                   </div>
                 ))}
@@ -197,18 +198,15 @@ export default function CalendarView() {
               </div>
             );
           })}
+
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* EVENT MODAL */}
       <EventModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={(data) => {
-          if (editingEvent) updateEvent(editingEvent.id, data);
-          else addEvent(data);
-          setIsModalOpen(false);
-        }}
+        onSave={onSaveEvent}
         onDelete={(id) => {
           deleteEvent(id);
           setIsModalOpen(false);
@@ -217,13 +215,17 @@ export default function CalendarView() {
         editingEvent={editingEvent}
       />
 
+      {/* GOAL MODAL */}
       <GoalModal
-        isOpen={false}
-        onClose={() => {}}
-        onSave={() => {}}
-        onDelete={() => {}}
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        onSave={onSaveGoal}
+        onDelete={(id) => {
+          deleteGoal(id);
+          setIsGoalModalOpen(false);
+        }}
         initialDate={format(new Date(), 'yyyy-MM-dd')}
-        editingGoal={null}
+        editingGoal={editingGoal}
       />
     </div>
   );
