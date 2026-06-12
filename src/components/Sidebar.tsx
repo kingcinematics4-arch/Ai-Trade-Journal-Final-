@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Download,
 } from 'lucide-react';
 
 interface NavItem {
@@ -58,6 +59,12 @@ const primaryNavItems: NavItem[] = [
     label: 'AI Coach',
     href: '/ai-coach',
     icon: <BrainCircuit size={18} />,
+  },
+  {
+    id: 'nav-exports',
+    label: 'Exports',
+    href: '/exports',
+    icon: <Download size={18} />,
   },
 ];
 

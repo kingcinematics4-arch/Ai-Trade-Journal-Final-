@@ -1,8 +1,10 @@
 'use client';
 import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { format } from 'date-fns';
 import { Eye, Pencil, Trash2, ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { cn } from '@/lib/utils';
 import Modal from '@/components/ui/Modal';
 import { TableRowSkeleton } from '@/components/ui/LoadingSkeleton';
 import { toast } from 'sonner';
@@ -111,7 +113,7 @@ export default function RecentTradesTable() {
   );
 
   // Mobile specific card component
-  const MobileTradeCard = ({ trade }: { trade: TradeRow }) => (
+  const MobileTradeCard = ({ trade }: { trade: TradeRow }) => ( // This component is now replaced by a table
     <div
       className="mx-4 mb-4 p-7 card-premium active:scale-[0.98] cursor-pointer"
       onClick={() => setSelectedTradeId(trade.id)}
@@ -185,21 +187,24 @@ export default function RecentTradesTable() {
         </Link>
       </div>
 
+      {!isLoadingTrades && trades.length === 0 ? (
+        <div className="py-20 text-center">
+          <p className="text-muted-foreground text-sm font-medium mb-4">No records found</p>
+          <Link href="/add-trade" className="text-primary hover:underline text-xs font-bold">
+            Log your first trade
+          </Link>
+        </div>
+      ) : (
+        <>
       {/* Desktop View: Table */}
       <div className="hidden md:block overflow-x-auto scrollbar-thin">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/[0.05]">
               {[
-                { key: null, label: 'Asset' },
-                { key: null, label: 'Direction' },
-                { key: 'pnl' as SortKey, label: 'P&L' },
-                { key: 'rr' as SortKey, label: 'RR Ratio' },
-                { key: null, label: 'Strategy' },
-                { key: null, label: 'Status' },
+                { key: null, label: 'Name' },
                 { key: 'date' as SortKey, label: 'Date' },
-                { key: null, label: 'Rating' },
-                { key: null, label: '' },
+                { key: 'pnl' as SortKey, label: 'Profit' },
               ].map((col, i) => (
                 <th
                   key={`th-${i}`}
@@ -209,7 +214,7 @@ export default function RecentTradesTable() {
                   onClick={col.key ? () => handleSort(col.key as SortKey) : undefined}
                 >
                   <span className="flex items-center gap-1">
-                    {col.label}
+                    <span className={col.label === 'Profit' ? 'ml-auto' : ''}>{col.label}</span>
                     {col.key && <SortIcon col={col.key as SortKey} />}
                   </span>
                 </th>
@@ -243,81 +248,19 @@ export default function RecentTradesTable() {
                 >
                   <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-foreground font-tabular">{trade.asset}</p>
+                      <p className="font-semibold text-foreground font-tabular">{trade.asset}</p>
                       <p className="text-xs text-muted-foreground">{trade.market}</p>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge
-                      variant={trade.direction}
-                      label={trade.direction === 'buy' ? '▲ Long' : '▼ Short'}
-                    />
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {format(new Date(trade.date), 'dd MMM yyyy')}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-right">
                     <span
                       className={`font-tabular font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
                     >
                       {formatCurrency(trade.pnl, { showSign: true })}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`font-tabular text-sm ${trade.rr >= 2 ? 'text-green-400' : trade.rr >= 1 ? 'text-amber-400' : 'text-red-400'}`}
-                    >
-                      {trade.rr.toFixed(1)}R
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                      {trade.strategy}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge variant={trade.status} />
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {trade.date}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span
-                          key={`star-${trade.id}-${star}`}
-                          className={`text-xs ${star <= trade.rating ? 'text-amber-400' : 'text-muted'}`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div
-                      className={`flex items-center gap-1 transition-opacity duration-150 ${
-                        hoveredRow === trade.id ? 'opacity-100' : 'opacity-0'
-                      }`}
-                    >
-                      <button
-                        onClick={() => setSelectedTradeId(trade.id)}
-                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                        title="View trade details"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <Link
-                        href={`/add-trade?id=${trade.id}`}
-                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-blue-400 transition-colors"
-                        title="Edit trade"
-                      >
-                        <Pencil size={14} />
-                      </Link>
-                      <button
-                        onClick={() => setDeleteTarget(trade.id)}
-                        className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
-                        title="Delete trade — this cannot be undone"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}
@@ -326,20 +269,82 @@ export default function RecentTradesTable() {
       </div>
 
       {/* Mobile View: Cards */}
-      <div className="md:hidden flex flex-col w-full overflow-hidden">
+      <div className="md:hidden overflow-x-auto scrollbar-thin">
         {isLoadingTrades && (
           Array.from({ length: 3 }).map((_, i) => (
             <MobileTradeSkeleton key={`mob-skel-${i}`} />
           ))
         )}
-        {!isLoadingTrades && trades.length === 0 && (
-          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-            No trades yet.
-          </div>
-        )}
-        {!isLoadingTrades &&
-          trades.map((trade) => <MobileTradeCard key={trade.id} trade={trade} />)}
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/[0.05]">
+              {[
+                { key: null, label: 'Name' },
+                { key: 'date' as SortKey, label: 'Date' },
+                { key: 'pnl' as SortKey, label: 'Profit' },
+              ].map((col, i) => (
+                <th
+                  key={`th-mob-${i}`}
+                  className={cn("px-4 py-3 text-left text-xs font-bold text-muted-foreground uppercase tracking-wider whitespace-nowrap", col.label === 'Profit' ? "text-right" : "")}
+                  onClick={col.key ? () => handleSort(col.key as SortKey) : undefined}
+                >
+                  <span className="flex items-center gap-1">
+                    {col.label}
+                    {col.key && <SortIcon col={col.key as SortKey} />}
+                  </span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {isLoadingTrades &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <TableRowSkeleton key={`trade-skel-mob-${i}`} cols={4} />
+              ))}
+            {!isLoadingTrades && trades.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  No trades yet.{' '}
+                  <Link href="/add-trade" className="text-primary hover:underline">
+                    Log your first trade
+                  </Link>
+                </td>
+              </tr>
+            )}
+            {!isLoadingTrades &&
+              trades.map((trade) => (
+                <tr
+                  key={trade.id}
+                  className={`border-b border-white/[0.03] transition-colors duration-200 ${
+                    hoveredRow === trade.id ? 'bg-muted/30' : ''
+                  }`}
+                  onMouseEnter={() => setHoveredRow(trade.id)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                  onClick={() => setSelectedTradeId(trade.id)} // Make row clickable for details
+                >
+                  <td className="px-4 py-3">
+                    <div>
+                      <p className="font-semibold text-foreground font-tabular">{trade.asset}</p>
+                      <p className="text-xs text-muted-foreground">{trade.market}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {format(new Date(trade.date), 'dd MMM yyyy')}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span
+                      className={`font-tabular font-semibold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                    >
+                      {formatCurrency(trade.pnl, { showSign: true })}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
+    </>
+  )}
 
       {/* Delete Confirm Modal */}
       <Modal

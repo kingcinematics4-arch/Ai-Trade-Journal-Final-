@@ -24,7 +24,7 @@ import {
   Plus,
   Check,
   ListFilter,
-  Calendar as CalendarIcon,
+   Calendar as CalendarIcon,
   Info,
   Target,
   TrendingUp,
@@ -39,6 +39,7 @@ import { getTradePnL, normalizeStatus } from '@/lib/trades/analytics';
 import { useCalendarGoalsStore } from '@/stores/useCalendarGoalsStore';
 
 import EventModal from './EventModal';
+import StatusBadge from './ui/StatusBadge';
 import GoalModal from './GoalModal';
 
 import type { CalendarEvent } from '@/components/index';
@@ -50,15 +51,7 @@ type CalendarFilter =
   | 'lossTrades'
   | 'tasks'
   | 'dailyPnL'
-  | 'performance';
-
-// Mock holidays list - can be moved to a separate config file or fetched from an API
-const HOLIDAYS = [
-  "2026-06-10",
-  "2026-06-15",
-  "2024-01-01",
-  "2024-12-25"
-];
+  | 'performance'; // No longer using HOLIDAYS
 
 export default function CalendarView() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -452,7 +445,6 @@ export default function CalendarView() {
               (showPnLText && netPnL !== 0);
 
             const dateStr = format(day, 'yyyy-MM-dd');
-            const isHoliday = HOLIDAYS.includes(dateStr);
             const isSunday = day.getDay() === 0;
 
             const isCurrentMonth =
@@ -510,7 +502,7 @@ export default function CalendarView() {
                       ? 'text-green-500'
                       : netPnL < 0 && showColors
                       ? 'text-red-500'
-                      : (isHoliday || isSunday)
+                      : isSunday
                       ? 'text-red-500'
                       : isCurrentToday
                       ? 'text-blue-400'
@@ -638,7 +630,25 @@ export default function CalendarView() {
                 Add Event
               </button>
             </div>
+            {/* Reusable Table component for CalendarView */}
+            <CalendarTable
+              headers={[
+                { key: 'title', label: 'Name' },
+                { key: 'startTime', label: 'Date' },
+                { key: 'description', label: 'Profit' },
+              ]}
+              data={getEventsForDay(selectedDate)}
+              renderRow={(event: CalendarEvent) => (
+                <tr key={event.id} className="hover:bg-white/[0.01] transition-colors cursor-pointer" onClick={(e) => handleEditEvent(e, event)}>
+                  <td className="px-4 py-3 font-semibold text-foreground">{event.title}</td>
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{event.startTime}</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground truncate max-w-[150px]">{event.description || '-'}</td>
+                </tr>
+              )}
+              emptyMessage="No events scheduled."
+            />
 
+            {/* Original Event List (now removed)
             <div className="space-y-3">
 
               {getEventsForDay(
@@ -719,7 +729,7 @@ export default function CalendarView() {
                     </div>
                   )
                 )
-              )}
+              )} */}
             </div>
 
             {/* DAILY TRADES SECTION */}
@@ -797,7 +807,30 @@ export default function CalendarView() {
                   + Add Goal
                 </button>
               </div>
+              <CalendarTable
+                headers={[
+                  { key: 'title', label: 'Name' },
+                  { key: 'date', label: 'Date' },
+                  { key: 'status', label: 'Profit' },
+                ]}
+                data={getGoalsForDay(selectedDate)}
+                renderRow={(goal: any) => (
+                  <tr key={goal.id} className="hover:bg-white/[0.01] transition-colors cursor-pointer" onClick={() => { setEditingGoal(goal); setIsGoalModalOpen(true); }}>
+                    <td className="px-4 py-3 font-semibold text-foreground">{goal.title}</td>
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                      {format(new Date(goal.date), 'dd MMM yyyy')}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className={goal.status === 'completed' ? 'text-emerald-400' : 'text-blue-400'}>
+                        {goal.status.charAt(0).toUpperCase() + goal.status.slice(1)}
+                      </span>
+                    </td>
+                  </tr>
+                )}
+                emptyMessage="No goals set for this day."
+              />
 
+              {/* Original Daily Goals List (now removed)
               <div className="space-y-2">
                 {getGoalsForDay(selectedDate).length === 0 ? (
                   <p className="text-xs text-muted-foreground italic py-2">
@@ -850,6 +883,7 @@ export default function CalendarView() {
                   ))
                 )}
               </div>
+              */}
             </div>
           </motion.div>
         </AnimatePresence>
@@ -898,3 +932,30 @@ export default function CalendarView() {
     </div>
   );
 }
+
+// Reusable Table component for CalendarView
+const CalendarTable = ({ headers, data, renderRow, emptyMessage }: {
+  headers: { key: string; label: string }[];
+  data: any[];
+  renderRow: (item: any, index: number) => React.ReactNode;
+  emptyMessage: string;
+}) => (
+  <div className="overflow-x-auto rounded-xl border border-border/50 bg-muted/20">
+    {data.length === 0 ? (
+      <div className="text-center py-4 text-muted-foreground italic text-xs">{emptyMessage}</div>
+    ) : (
+      <table className="w-full table-auto text-left text-xs">
+        <thead>
+          <tr className="bg-muted/50 border-b border-border text-foreground font-bold uppercase tracking-widest text-[10px]">
+            {headers.map(header => (
+              <th key={header.key} className={cn("px-4 py-4", header.key === 'pnl_amount' || header.key === 'status' || header.key === 'description' ? "text-right" : "")}>{header.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/[0.04]">
+          {data.map(renderRow)}
+        </tbody>
+      </table>
+    )}
+  </div>
+);
