@@ -176,9 +176,9 @@ export default function CalendarView() {
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500 w-full max-w-6xl mx-auto px-2 sm:px-4 bg-black text-zinc-300 font-sans selection:bg-blue-500/30">
+    <div className="space-y-4 animate-in fade-in duration-500 w-full max-w-6xl mx-auto px-2 sm:px-4 min-h-screen bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.10),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.08),transparent_30%),#050816] text-[#94a3b8] font-sans selection:bg-blue-500/30">
       {/* Institutional Navigation Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.04] pb-3">
         <div className="flex items-center gap-4">
           <div className="w-8 h-8 rounded-sm bg-blue-600/10 border border-blue-500/30 flex items-center justify-center">
             <CalendarIcon size={18} className="text-blue-500" />
@@ -188,23 +188,23 @@ export default function CalendarView() {
               {format(currentMonth, 'MMMM yyyy')}
             </h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.15em]">Terminal System</span>
-              <span className="w-1 h-1 rounded-full bg-zinc-800" />
-              <span className="text-[9px] text-blue-500/70 font-bold uppercase tracking-[0.15em]">Performance Active</span>
+              <span className="text-[9px] text-[#64748b] font-bold uppercase tracking-[0.15em]">Terminal System</span>
+              <span className="w-1 h-1 rounded-full bg-white/[0.05]" />
+              <span className="text-[9px] text-blue-500/50 font-bold uppercase tracking-[0.15em]">Performance Active</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Month Controls */}
-          <div className="flex bg-zinc-950 border border-zinc-800 p-0.5 rounded-sm">
-            <button onClick={handlePrevMonth} className="p-1.5 hover:bg-zinc-900 text-zinc-500 transition-colors" title="Previous Month">
+          <div className="flex bg-[#0b0f1a] border border-white/[0.05] p-0.5 rounded-sm">
+            <button onClick={handlePrevMonth} className="p-1.5 hover:bg-white/[0.03] text-[#64748b] transition-colors" title="Previous Month">
               <ChevronLeft size={14} />
             </button>
-            <button onClick={handleToday} className="px-3 py-1 text-[10px] font-black uppercase tracking-tighter hover:bg-zinc-900 text-zinc-400 transition-colors border-x border-zinc-800/50">
+            <button onClick={handleToday} className="px-3 py-1 text-[10px] font-black uppercase tracking-tighter hover:bg-white/[0.03] text-[#94a3b8] transition-colors border-x border-white/[0.05]">
               Today
             </button>
-            <button onClick={handleNextMonth} className="p-1.5 hover:bg-zinc-900 text-zinc-500 transition-colors" title="Next Month">
+            <button onClick={handleNextMonth} className="p-1.5 hover:bg-white/[0.03] text-[#64748b] transition-colors" title="Next Month">
               <ChevronRight size={14} />
             </button>
           </div>
@@ -215,7 +215,7 @@ export default function CalendarView() {
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={cn(
                 "px-3 h-8 rounded-sm border transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight",
-                isFilterOpen ? "bg-zinc-800 border-zinc-700 text-white" : "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-zinc-300"
+                isFilterOpen ? "bg-zinc-800 border-zinc-700 text-white" : "bg-[#0b0f1a] border-white/[0.05] text-[#94a3b8] hover:text-white"
               )}
             >
               <Filter size={14} className={isFilterOpen ? "text-blue-400" : ""} />
@@ -233,10 +233,10 @@ export default function CalendarView() {
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
-                  className="absolute right-0 mt-2 w-52 bg-[#080808] border border-zinc-800 rounded-sm shadow-2xl z-[110] p-1 overflow-hidden"
+                  className="absolute right-0 mt-2 w-52 bg-[#0b0f1a] border border-white/[0.05] rounded-sm shadow-2xl z-[110] p-1 overflow-hidden backdrop-blur-xl"
                 >
-                  <div className="flex items-center justify-between px-2.5 py-2 border-b border-zinc-900 mb-1">
-                    <span className="text-[9px] font-black uppercase text-zinc-600 tracking-wider">Data Segments</span>
+                  <div className="flex items-center justify-between px-2.5 py-2 border-b border-white/[0.05] mb-1">
+                    <span className="text-[9px] font-black uppercase text-[#64748b] tracking-wider">Data Segments</span>
                     <button onClick={clearFilters} className="text-[9px] font-bold text-blue-500 hover:text-blue-400 transition-colors">Reset</button>
                   </div>
                   <div className="grid grid-cols-1 gap-0.5">
@@ -246,7 +246,7 @@ export default function CalendarView() {
                         onClick={() => toggleFilter(opt.id)}
                         className={cn(
                           "w-full text-left px-2.5 py-2 rounded-sm text-[10px] font-bold transition-all flex items-center justify-between",
-                          activeFilters.includes(opt.id) ? "bg-blue-600/10 text-blue-400" : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
+                          activeFilters.includes(opt.id) ? "bg-blue-600/10 text-blue-400" : "text-[#94a3b8] hover:bg-white/[0.03] hover:text-white"
                         )}
                       >
                         {opt.label}
@@ -270,16 +270,16 @@ export default function CalendarView() {
       </div>
 
       {/* Professional Grid Structure */}
-      <div className="w-full min-w-0 border border-zinc-900 bg-zinc-900">
-        <div className="grid grid-cols-7 bg-zinc-950">
+      <div className="w-full min-w-0 border-0 bg-transparent">
+        <div className="grid grid-cols-7 gap-4 bg-transparent mb-4">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="py-2 text-center text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600 border-r border-zinc-900 last:border-0">
+            <div key={day} className="py-2 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-[#8da2c0]">
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 w-full gap-px">
+        <div className="grid grid-cols-7 w-full gap-4 auto-rows-auto">
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
             const dayTrades = getTradesForDay(day);
@@ -303,23 +303,32 @@ export default function CalendarView() {
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={cn(
-                  'relative flex flex-col justify-between p-2 transition-all cursor-pointer select-none group',
-                  'aspect-square min-h-[70px] sm:min-h-[90px] md:min-h-[110px]',
+                  'relative flex flex-col justify-start gap-3 p-4 transition-all duration-300 ease-out cursor-pointer select-none group border border-white/[0.07] shadow-[0_15px_50px_rgba(0,0,0,0.50)] rounded-[28px] backdrop-blur-2xl bg-[linear-gradient(180deg,rgba(22,28,45,0.92)_0%,rgba(10,14,24,0.98)_100%)]',
+                  'h-auto',
+                  dayTrades.length === 0 && dayEvents.length === 0 && dayGoals.length === 0 ? 'min-h-[80px] opacity-70' : 'min-h-[110px]',
+                  'before:absolute before:inset-0 before:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_35%)] before:pointer-events-none',
+                  'after:absolute after:-top-10 after:right-[-20px] after:w-24 after:h-24 after:rounded-full after:bg-blue-400/10 after:blur-3xl after:pointer-events-none after:transition-all after:duration-500',
+                  'hover:-translate-y-[6px] hover:scale-[1.025] hover:border-cyan-400/30 hover:shadow-[0_25px_80px_rgba(59,130,246,0.20)] hover:after:bg-cyan-400/20',
                   isSelected 
-                    ? 'bg-blue-600/10 ring-1 ring-inset ring-blue-500/50 z-10' 
-                    : 'hover:bg-zinc-900/50',
+                    ? 'ring-2 ring-blue-500/50 border-cyan-400/50 z-10 shadow-[0_0_40px_rgba(59,130,246,0.3)] bg-[linear-gradient(180deg,rgba(28,35,58,0.96)_0%,rgba(15,20,35,0.98)_100%)]' 
+                    : '',
                   !isCurrentMonth
-                    ? 'bg-zinc-950 opacity-10 pointer-events-none'
+                    ? 'opacity-30 grayscale-[0.2] pointer-events-none border-transparent'
                     : isCurrentToday
-                    ? 'bg-zinc-900/20'
-                    : 'bg-zinc-950'
+                    ? 'border-cyan-400/30'
+                    : '',
+                  dayTrades.length > 0 && netPnL > 0 && 'border-l-[4px] border-l-emerald-400 shadow-[0_0_40px_rgba(16,185,129,0.10)] before:bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_60%)]',
+                  dayTrades.length > 0 && netPnL < 0 && 'border-l-[4px] border-l-red-400 shadow-[0_0_40px_rgba(239,68,68,0.10)] before:bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.18),transparent_60%)]'
                 )}
               >
+                {/* Tiny glossy top highlight */}
+                <div className="absolute top-0 left-[10%] w-[80%] h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none z-10" />
+
                 {/* Header: Date & Task Indicators */}
                 <div className="flex justify-between items-start w-full">
                   <span className={cn(
-                    "text-[10px] font-bold tabular-nums",
-                    isSelected ? "text-blue-400" : isCurrentToday ? "text-blue-500 underline underline-offset-4" : "text-zinc-700 group-hover:text-zinc-500"
+                    "text-[20px] font-black tabular-nums tracking-tight transition-colors",
+                    isSelected ? "text-white" : isCurrentToday ? "text-blue-400" : "text-zinc-500 group-hover:text-white"
                   )}>
                     {format(day, 'd')}
                   </span>
@@ -327,7 +336,7 @@ export default function CalendarView() {
                   <div className="flex gap-0.5">
                     {showTasks && dayGoals.map((g: any) => (
                       <div key={g.id} className={cn("w-1 h-1 rounded-full", 
-                        g.status === 'completed' ? "bg-green-500" : "bg-zinc-800"
+                        g.status === 'completed' ? "bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" : "bg-white/10"
                       )} />
                     ))}
                   </div>
@@ -345,25 +354,25 @@ export default function CalendarView() {
                 {/* Footer: Financial Signals */}
                 <div className="mt-auto flex flex-col items-end leading-none space-y-0.5">
                   {(showProfitLossCount || showTrades) && (dayTrades.length > 0) && (
-                    <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
                       {showTrades && (
-                        <span className="text-[7px] font-black text-zinc-500 uppercase tracking-tighter">{dayTrades.length} Trades</span>
+                        <span className="text-[9px] font-semibold text-[#9db0cf] uppercase tracking-tight">{dayTrades.length}T</span>
                       )}
                       {showProfitLossCount && (wins > 0) && (
-                        <span className="text-[7px] font-bold text-green-700">{wins}W</span>
+                        <span className="text-[9px] font-semibold text-emerald-300">{wins}W</span>
                       )}
                       {showProfitLossCount && (losses > 0) && (
-                        <span className="text-[7px] font-bold text-red-700">{losses}L</span>
+                        <span className="text-[9px] font-semibold text-red-300">{losses}L</span>
                       )}
                     </div>
                   )}
 
                   {showPnL && (dayTrades.length > 0) && (
                     <div className={cn(
-                      "text-[10px] sm:text-xs font-black font-mono tabular-nums tracking-tighter px-1 rounded-sm",
-                      netPnL >= 0 ? "text-green-600 bg-green-600/5" : "text-red-600 bg-red-600/5"
+                      "text-[12px] sm:text-[17px] font-black font-mono tabular-nums tracking-tight px-1 rounded-sm",
+                      netPnL > 0 ? "text-emerald-300" : netPnL < 0 ? "text-red-300" : "text-[#9db0cf]"
                     )}>
-                      {netPnL >= 0 ? '+' : '-'}{Math.abs(netPnL).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      {netPnL > 0 ? '+' : netPnL < 0 ? '-' : ''}{Math.abs(netPnL).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </div>
                   )}
                 </div>
@@ -379,11 +388,11 @@ export default function CalendarView() {
             key={selectedDate.toString()}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-5 bg-zinc-950 border border-zinc-900 space-y-8 shadow-2xl"
+            className="p-5 bg-[#0b0f1a] border border-white/[0.05] space-y-8 shadow-2xl rounded-2xl backdrop-blur-xl relative overflow-hidden after:absolute after:top-0 after:left-0 after:w-full after:h-px after:bg-white/10"
           >
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+            <div className="flex items-center justify-between border-b border-white/[0.04] pb-3">
               <div className="flex items-center gap-3">
-                <span className="text-[11px] font-black text-blue-500 uppercase tracking-widest leading-none">Activity Stream // {format(selectedDate, 'dd.MM.yy')}</span>
+                <span className="text-[11px] font-black text-blue-500/80 uppercase tracking-widest leading-none">Activity Stream // {format(selectedDate, 'dd.MM.yy')}</span>
                 {isToday(selectedDate) && (
                   <span className="bg-blue-600/10 text-blue-500 text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider border border-blue-500/20">Today</span>
                 )}
