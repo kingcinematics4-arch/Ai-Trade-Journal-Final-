@@ -175,37 +175,53 @@ export default function CalendarView() {
     setIsGoalModalOpen(false);
   };
 
-  return <div className="space-y-6 animate-in fade-in duration-500 w-full max-w-6xl mx-auto px-4 sm:px-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <CalendarIcon size={20} className="text-primary" />
+  return (
+    <div className="space-y-4 animate-in fade-in duration-500 w-full max-w-6xl mx-auto px-2 sm:px-4 bg-black text-zinc-300 font-sans selection:bg-blue-500/30">
+      {/* Institutional Navigation Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900 pb-3">
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-8 rounded-sm bg-blue-600/10 border border-blue-500/30 flex items-center justify-center">
+            <CalendarIcon size={18} className="text-blue-500" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-white tracking-tight leading-none sm:text-2xl">{format(currentMonth, 'MMMM yyyy')}</h1>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-1.5 opacity-50">Trading Activity</p>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-black text-white tracking-tighter leading-none uppercase">
+              {format(currentMonth, 'MMMM yyyy')}
+            </h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.15em]">Terminal System</span>
+              <span className="w-1 h-1 rounded-full bg-zinc-800" />
+              <span className="text-[9px] text-blue-500/70 font-bold uppercase tracking-[0.15em]">Performance Active</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex bg-muted/50 p-0.5 sm:p-1 rounded-xl border border-border/50">
-            <button onClick={handlePrevMonth} className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
-            <button onClick={handleToday} className="px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold hover:bg-blue-500/10 rounded-lg transition-colors">Today</button>
-            <button onClick={handleNextMonth} className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"><ChevronRight size={16} /></button>
+        <div className="flex items-center gap-3">
+          {/* Month Controls */}
+          <div className="flex bg-zinc-950 border border-zinc-800 p-0.5 rounded-sm">
+            <button onClick={handlePrevMonth} className="p-1.5 hover:bg-zinc-900 text-zinc-500 transition-colors" title="Previous Month">
+              <ChevronLeft size={14} />
+            </button>
+            <button onClick={handleToday} className="px-3 py-1 text-[10px] font-black uppercase tracking-tighter hover:bg-zinc-900 text-zinc-400 transition-colors border-x border-zinc-800/50">
+              Today
+            </button>
+            <button onClick={handleNextMonth} className="p-1.5 hover:bg-zinc-900 text-zinc-500 transition-colors" title="Next Month">
+              <ChevronRight size={14} />
+            </button>
           </div>
 
+          {/* Filters Overlay */}
           <div className="relative">
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={cn(
-                "p-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold h-[38px]",
-                isFilterOpen ? "bg-primary/10 border-primary text-primary" : "bg-muted/50 border-border/50 text-muted-foreground hover:bg-muted"
+                "px-3 h-8 rounded-sm border transition-all flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight",
+                isFilterOpen ? "bg-zinc-800 border-zinc-700 text-white" : "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-zinc-300"
               )}
             >
-              <Filter size={16} />
-              <span className="hidden md:inline">Filters</span>
+              <Filter size={14} className={isFilterOpen ? "text-blue-400" : ""} />
+              <span className="hidden md:inline">Analytics Filter</span>
               {activeFilters.length > 0 && !activeFilters.includes('all') && (
-                <span className="bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center text-[10px]">
+                <span className="bg-blue-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm ml-1">
                   {activeFilters.length}
                 </span>
               )}
@@ -214,27 +230,27 @@ export default function CalendarView() {
             <AnimatePresence>
               {isFilterOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl z-[110] p-2 overflow-hidden"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  className="absolute right-0 mt-2 w-52 bg-[#080808] border border-zinc-800 rounded-sm shadow-2xl z-[110] p-1 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between px-3 py-2 border-b border-border mb-1">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground">Select Filters</span>
-                    <button onClick={clearFilters} className="text-[10px] font-bold text-primary hover:underline">Clear All</button>
+                  <div className="flex items-center justify-between px-2.5 py-2 border-b border-zinc-900 mb-1">
+                    <span className="text-[9px] font-black uppercase text-zinc-600 tracking-wider">Data Segments</span>
+                    <button onClick={clearFilters} className="text-[9px] font-bold text-blue-500 hover:text-blue-400 transition-colors">Reset</button>
                   </div>
-                  <div className="space-y-0.5">
+                  <div className="grid grid-cols-1 gap-0.5">
                     {filterOptions.map((opt) => (
                       <button
                         key={opt.id}
                         onClick={() => toggleFilter(opt.id)}
                         className={cn(
-                          "w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-colors flex items-center justify-between",
-                          activeFilters.includes(opt.id) ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"
+                          "w-full text-left px-2.5 py-2 rounded-sm text-[10px] font-bold transition-all flex items-center justify-between",
+                          activeFilters.includes(opt.id) ? "bg-blue-600/10 text-blue-400" : "text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
                         )}
                       >
                         {opt.label}
-                        {activeFilters.includes(opt.id) && <Plus size={12} className="rotate-45 text-primary" />}
+                        {activeFilters.includes(opt.id) && <div className="w-1 h-1 rounded-full bg-blue-500" />}
                       </button>
                     ))}
                   </div>
@@ -245,22 +261,25 @@ export default function CalendarView() {
 
           <button 
             onClick={() => { setEditingEvent(null); setIsModalOpen(true); }} 
-            className="btn-primary flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl shadow-lg shadow-primary/20 h-[38px]"
+            className="bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-2 px-4 h-8 text-[10px] font-black uppercase tracking-widest rounded-sm transition-all shadow-lg shadow-blue-600/10"
           >
-            <Plus size={16} />
-            <span className="hidden sm:inline">Add Event</span>
+            <Plus size={14} />
+            <span>New Monitor</span>
           </button>
         </div>
       </div>
 
-      <div className="w-full min-w-0">
-        <div className="grid grid-cols-7 gap-1 mb-2 sm:gap-2 md:gap-3">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-            <div key={d} className="py-1 text-center text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 sm:text-[10px]">{d}</div>
+      {/* Professional Grid Structure */}
+      <div className="w-full min-w-0 border border-zinc-900 bg-zinc-900">
+        <div className="grid grid-cols-7 bg-zinc-950">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div key={day} className="py-2 text-center text-[9px] font-black uppercase tracking-[0.25em] text-zinc-600 border-r border-zinc-900 last:border-0">
+              {day}
+            </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 md:gap-3 w-full">
+        <div className="grid grid-cols-7 w-full gap-px">
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
             const dayTrades = getTradesForDay(day);
@@ -268,98 +287,83 @@ export default function CalendarView() {
             const isCurrentMonth = isSameMonth(day, currentMonth);
             const isSelected = isSameDay(day, selectedDate);
             const isCurrentToday = isToday(day);
-            const netPnL = dayTrades.reduce((s, t) => s + getTradePnL(t), 0);
+            
+            const netPnL = dayTrades.reduce((acc, t) => acc + (getTradePnL(t) || 0), 0);
             const wins = dayTrades.filter(t => normalizeStatus(t.trade_status || t.result) === 'win').length;
             const losses = dayTrades.filter(t => normalizeStatus(t.trade_status || t.result) === 'loss').length;
 
-            const showPnL = activeFilters.includes('all') || activeFilters.includes('dailyPnL') || activeFilters.includes('performance');
-            const showTrades = activeFilters.includes('all') || activeFilters.includes('tradeCount') || activeFilters.includes('performance');
-            const showProfitLossCount = activeFilters.includes('all') || activeFilters.includes('profitTrades') || activeFilters.includes('lossTrades') || activeFilters.includes('performance');
-            const showTasks = activeFilters.includes('all') || activeFilters.includes('tasks');
-
-            let dayBg = 'bg-transparent';
-            if (isCurrentMonth && !isSelected && !isCurrentToday) {
-              if (showPnL && dayTrades.length > 0) {
-                if (netPnL > 0) dayBg = 'bg-emerald-500/[0.08] hover:bg-emerald-500/[0.12]';
-                else if (netPnL < 0) dayBg = 'bg-red-500/[0.08] hover:bg-red-500/[0.12]';
-              }
-            }
+            const filterAll = activeFilters.includes('all');
+            const showPnL = filterAll || activeFilters.includes('dailyPnL') || activeFilters.includes('performance');
+            const showTrades = filterAll || activeFilters.includes('tradeCount') || activeFilters.includes('performance');
+            const showProfitLossCount = filterAll || activeFilters.includes('profitTrades') || activeFilters.includes('lossTrades') || activeFilters.includes('performance');
+            const showTasks = filterAll || activeFilters.includes('tasks');
 
             return (
               <div
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={cn(
-                  'relative flex flex-col justify-between rounded-xl border border-border/40 p-1.5 transition-all duration-200 ease-in-out cursor-pointer select-none outline-none group overflow-hidden',
-                  'min-h-[95px] sm:min-h-[110px] md:min-h-0 md:aspect-square',
+                  'relative flex flex-col justify-between p-2 transition-all cursor-pointer select-none group',
+                  'aspect-square min-h-[70px] sm:min-h-[90px] md:min-h-[110px]',
                   isSelected 
-                    ? 'z-10 ring-2 ring-primary ring-offset-2 ring-offset-background' 
-                    : 'z-0 hover:border-border/80',
+                    ? 'bg-blue-600/10 ring-1 ring-inset ring-blue-500/50 z-10' 
+                    : 'hover:bg-zinc-900/50',
                   !isCurrentMonth
-                    ? 'bg-muted/5 opacity-20'
-                    : isSelected
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                    ? 'bg-zinc-950 opacity-10 pointer-events-none'
                     : isCurrentToday
-                    ? 'bg-primary/10 border-primary/40 text-primary'
-                    : cn(dayBg, 'text-foreground hover:bg-muted/30')
+                    ? 'bg-zinc-900/20'
+                    : 'bg-zinc-950'
                 )}
               >
+                {/* Header: Date & Task Indicators */}
                 <div className="flex justify-between items-start w-full">
                   <span className={cn(
-                    "text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-lg transition-colors sm:text-xs sm:w-6 sm:h-6 md:w-7 md:h-7 md:text-sm",
-                    isSelected ? "bg-white/20 text-white" : isCurrentToday ? "text-primary bg-primary/10" : "text-muted-foreground group-hover:text-foreground"
+                    "text-[10px] font-bold tabular-nums",
+                    isSelected ? "text-blue-400" : isCurrentToday ? "text-blue-500 underline underline-offset-4" : "text-zinc-700 group-hover:text-zinc-500"
                   )}>
                     {format(day, 'd')}
                   </span>
+                  
+                  <div className="flex gap-0.5">
+                    {showTasks && dayGoals.map((g: any) => (
+                      <div key={g.id} className={cn("w-1 h-1 rounded-full", 
+                        g.status === 'completed' ? "bg-green-500" : "bg-zinc-800"
+                      )} />
+                    ))}
+                  </div>
                 </div>
 
-                <div className="mt-1 space-y-1 flex-1 overflow-hidden sm:mt-1.5">
-                  {/* Events */}
+                {/* Center: Event Micro-Labels */}
+                <div className="mt-1 flex-1 overflow-hidden pointer-events-none">
                   {dayEvents.slice(0, 1).map((e) => (
-                    <div key={e.id} className="px-1 py-0.5 text-[7px] font-bold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 truncate sm:text-[9px]">
+                    <div key={e.id} className="text-[8px] font-bold text-zinc-600 truncate leading-tight uppercase tracking-tighter group-hover:text-zinc-400 transition-colors">
                       {e.title}
                     </div>
                   ))}
-                  {(dayEvents.length > 1) && (
-                    <div className="text-[6px] font-black text-muted-foreground/50 px-1 sm:text-[8px]">
-                      + {dayEvents.length - 1} more
-                    </div>
-                  )}
                 </div>
 
-                <div className="mt-auto space-y-0.5 sm:space-y-1">
+                {/* Footer: Financial Signals */}
+                <div className="mt-auto flex flex-col items-end leading-none space-y-0.5">
                   {(showProfitLossCount || showTrades) && (dayTrades.length > 0) && (
-                    <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                    <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                       {showTrades && (
-                        <span className="text-[8px] font-black text-muted-foreground/40 sm:text-[9px]">{dayTrades.length}T</span>
+                        <span className="text-[7px] font-black text-zinc-500 uppercase tracking-tighter">{dayTrades.length} Trades</span>
                       )}
                       {showProfitLossCount && (wins > 0) && (
-                        <span className="text-[8px] font-bold text-emerald-500 sm:text-[10px]">P:{wins}</span>
+                        <span className="text-[7px] font-bold text-green-700">{wins}W</span>
                       )}
                       {showProfitLossCount && (losses > 0) && (
-                        <span className="text-[8px] font-bold text-red-500 sm:text-[10px]">L:{losses}</span>
+                        <span className="text-[7px] font-bold text-red-700">{losses}L</span>
                       )}
                     </div>
                   )}
 
-                  {/* P&L Display */}
                   {showPnL && (dayTrades.length > 0) && (
                     <div className={cn(
-                      "px-1 py-0.5 text-[8px] font-black rounded border truncate mt-1 sm:px-1.5 sm:text-[10px] md:text-[11px]",
-                      netPnL >= 0 ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" : "bg-red-500/15 text-red-500 border-red-500/30"
+                      "text-[10px] sm:text-xs font-black font-mono tabular-nums tracking-tighter px-1 rounded-sm",
+                      netPnL >= 0 ? "text-green-600 bg-green-600/5" : "text-red-600 bg-red-600/5"
                     )}>
-                      {netPnL > 0 ? '+' : ''}{netPnL.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                    </div>
-                  )}
-
-                  {/* Tasks/Goals Indicator */}
-                  {showTasks && (dayGoals.length > 0) && (
-                    <div className="flex gap-0.5 px-1 mt-1">
-                      {dayGoals.map((g: any) => (
-                        <div key={g.id} className={cn("w-1 h-1 rounded-full", 
-                          g.status === 'completed' ? "bg-emerald-400" : "bg-primary"
-                        )} />
-                      ))}
+                      {netPnL >= 0 ? '+' : '-'}{Math.abs(netPnL).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                     </div>
                   )}
                 </div>
@@ -373,15 +377,18 @@ export default function CalendarView() {
         {selectedDate && (
           <motion.div
             key={selectedDate.toString()}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            className="card-elevated p-6 bg-zinc-900/40 backdrop-blur-3xl space-y-8 border-white/[0.03]"
+            className="p-5 bg-zinc-950 border border-zinc-900 space-y-8 shadow-2xl"
           >
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold text-lg flex items-center gap-2 text-white">
-                Activity for {format(selectedDate, 'EEEE, MMMM do')}
-                {isToday(selectedDate) && <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase">Today</span>}
-              </h2>
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] font-black text-blue-500 uppercase tracking-widest leading-none">Activity Stream // {format(selectedDate, 'dd.MM.yy')}</span>
+                {isToday(selectedDate) && (
+                  <span className="bg-blue-600/10 text-blue-500 text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider border border-blue-500/20">Today</span>
+                )}
+              </div>
+              
               <div className="flex gap-2">
                 <button onClick={() => { setEditingGoal(null); setIsGoalModalOpen(true); }} className="text-xs font-bold text-primary hover:underline">+ Goal</button>
                 <span className="text-muted-foreground/30">|</span>
@@ -390,8 +397,8 @@ export default function CalendarView() {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                <CalendarIcon size={14} /> Scheduled Events
+              <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
+                <CalendarIcon size={12} /> Scheduled Events
               </h3>
               <CalendarTable
                 headers={[
@@ -401,10 +408,10 @@ export default function CalendarView() {
                 ]}
                 data={getEventsForDay(selectedDate)}
                 renderRow={(event: CalendarEvent) => (
-                  <tr key={event.id} className="hover:bg-white/[0.02] transition-colors cursor-pointer group" onClick={(e) => handleEditEvent(e, event)}>
-                    <td className="px-4 py-3 font-semibold text-foreground">{event.title}</td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{event.startTime}</td>
-                    <td className="px-4 py-3 text-right text-muted-foreground truncate max-w-[200px]">{event.description || '-'}</td>
+                  <tr key={event.id} className="hover:bg-zinc-900/50 border-b border-zinc-900/50 last:border-0 transition-colors cursor-pointer group" onClick={(e) => handleEditEvent(e, event)}>
+                    <td className="px-4 py-2 font-bold text-zinc-300">{event.title}</td>
+                    <td className="px-4 py-2 text-zinc-600 font-mono text-[11px] whitespace-nowrap tabular-nums">{event.startTime}</td>
+                    <td className="px-4 py-2 text-right text-zinc-600 truncate max-w-[200px] text-[11px]">{event.description || '-'}</td>
                   </tr>
                 )}
                 emptyMessage="No events scheduled."
@@ -412,8 +419,8 @@ export default function CalendarView() {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                <TrendingUp size={14} /> Daily Trades
+              <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
+                <TrendingUp size={12} /> Daily Trades
               </h3>
               <CalendarTable
                 headers={[
@@ -423,14 +430,14 @@ export default function CalendarView() {
                 ]}
                 data={getTradesForDay(selectedDate)}
                 renderRow={(trade: any) => (
-                  <tr key={trade.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-3 font-semibold text-foreground">{trade.asset_name}</td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {format(new Date(trade.trade_date || trade.date), 'dd MMM yyyy')}
+                  <tr key={trade.id} className="hover:bg-zinc-900/50 border-b border-zinc-900/50 last:border-0 transition-colors">
+                    <td className="px-4 py-2 font-bold text-zinc-300">{trade.asset_name}</td>
+                    <td className="px-4 py-2 text-zinc-600 font-mono text-[10px] uppercase tracking-tighter">
+                      {format(new Date(trade.trade_date || trade.date), 'dd-MM-yy')}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className={cn("font-bold", getTradePnL(trade) >= 0 ? 'text-emerald-500' : 'text-red-500')}>
-                        {getTradePnL(trade) > 0 ? '+' : getTradePnL(trade) < 0 ? '-' : ''}{Math.abs(getTradePnL(trade)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <td className="px-4 py-2 text-right">
+                      <span className={cn("font-black font-mono tracking-tight tabular-nums", getTradePnL(trade) >= 0 ? 'text-green-500' : 'text-red-500')}>
+                        {getTradePnL(trade) >= 0 ? '+' : ''}{getTradePnL(trade).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </td>
                   </tr>
@@ -440,8 +447,8 @@ export default function CalendarView() {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                <Target size={14} /> Daily Goals
+              <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Target size={12} /> Daily Goals
               </h3>
               <CalendarTable
                 headers={[
@@ -451,14 +458,14 @@ export default function CalendarView() {
                 ]}
                 data={getGoalsForDay(selectedDate)}
                 renderRow={(goal: any) => (
-                  <tr key={goal.id} className="hover:bg-white/[0.02] transition-colors cursor-pointer" onClick={() => { setEditingGoal(goal); setIsGoalModalOpen(true); }}>
-                    <td className="px-4 py-3 font-semibold text-foreground">{goal.title}</td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {format(new Date(goal.date), 'dd MMM yyyy')}
+                  <tr key={goal.id} className="hover:bg-zinc-900/50 border-b border-zinc-900/50 last:border-0 transition-colors cursor-pointer" onClick={() => { setEditingGoal(goal); setIsGoalModalOpen(true); }}>
+                    <td className="px-4 py-2 font-bold text-zinc-300">{goal.title}</td>
+                    <td className="px-4 py-2 text-zinc-600 font-mono text-[10px] uppercase tracking-tighter">
+                      {format(new Date(goal.date), 'dd-MM-yy')}
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className={cn("font-bold", goal.status === 'completed' ? 'text-emerald-500' : 'text-blue-500')}>
-                        {goal.status.charAt(0).toUpperCase() + goal.status.slice(1)}
+                    <td className="px-4 py-2 text-right">
+                      <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm tabular-nums", goal.status === 'completed' ? 'bg-green-950/40 text-green-500 border border-green-500/20' : 'bg-blue-950/40 text-blue-500 border border-blue-500/20')}>
+                        {goal.status}
                       </span>
                     </td>
                   </tr>
@@ -487,21 +494,20 @@ export default function CalendarView() {
         editingGoal={editingGoal}
       />
     </div>
-  ;
+  );
 }
 
 function CalendarTable({ headers, data, renderRow, emptyMessage }: CalendarTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-white/[0.05] bg-white/[0.02]">
+    <div className="overflow-x-auto border border-zinc-900 bg-black/50">
       {data.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground italic text-xs flex flex-col items-center gap-2">
-          <Info size={16} className="opacity-20" />
-          {emptyMessage}
+        <div className="text-center py-8 text-zinc-700 font-black uppercase tracking-widest text-[9px] flex flex-col items-center gap-2">
+          <span className="opacity-40">{emptyMessage}</span>
         </div>
       ) : (
-        <table className="w-full table-auto text-left text-xs">
+        <table className="w-full table-auto text-left text-[11px]">
           <thead>
-            <tr className="bg-white/[0.03] border-b border-white/[0.05] text-muted-foreground/60 font-black uppercase tracking-widest text-[10px]">
+            <tr className="bg-zinc-950 border-b border-zinc-900 text-zinc-600 font-black uppercase tracking-[0.15em] text-[8px]">
               {headers.map((header) => (
                 <th key={header.key} className={cn("px-4 py-4", (header.key === 'pnl_amount' || header.key === 'status' || header.key === 'description' || header.key === 'value') ? "text-right" : "")}>
                   {header.label}
@@ -509,7 +515,7 @@ function CalendarTable({ headers, data, renderRow, emptyMessage }: CalendarTable
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.02]">
+          <tbody>
             {data.map(renderRow)}
           </tbody>
         </table>
