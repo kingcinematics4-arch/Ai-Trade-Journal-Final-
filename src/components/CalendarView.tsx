@@ -32,6 +32,7 @@ import { getTradePnL, normalizeStatus } from '@/lib/trades/analytics';
 import { useCalendarGoalsStore } from '@/stores/useCalendarGoalsStore';
 import EventModal from './EventModal';
 import GoalModal from './GoalModal';
+import DayDetailsModal from "@/components/DayDetailsModal";
 
 /** TYPE DEFINITIONS */
 interface CalendarEvent {
@@ -92,6 +93,7 @@ export default function CalendarView() {
   const [editingGoal, setEditingGoal] = useState(null as any);
   const [activeFilters, setActiveFilters] = useState(['all'] as CalendarFilter[]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isDayDetailsOpen, setIsDayDetailsOpen] = useState(false);
 
   const { events, addEvent, updateEvent, deleteEvent } = useCalendarEvents();
   const { trades: realTrades } = useTrades();
@@ -116,6 +118,11 @@ export default function CalendarView() {
     const today = new Date();
     setCurrentMonth(today);
     setSelectedDate(today);
+  };
+
+  const handleDayDoubleClick = (day: Date) => {
+    setSelectedDate(day);
+    setIsDayDetailsOpen(true);
   };
 
   const toggleFilter = (filter: CalendarFilter) => {
@@ -302,6 +309,7 @@ export default function CalendarView() {
               <div
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
+                onDoubleClick={() => handleDayDoubleClick(day)}
                 className={cn(
                   'relative flex flex-col justify-start gap-3 p-4 transition-all duration-300 ease-out cursor-pointer select-none group border border-white/[0.07] shadow-[0_15px_50px_rgba(0,0,0,0.50)] rounded-[28px] backdrop-blur-2xl bg-[linear-gradient(180deg,rgba(22,28,45,0.92)_0%,rgba(10,14,24,0.98)_100%)]',
                   'h-auto',
@@ -501,6 +509,15 @@ export default function CalendarView() {
         onDelete={(id) => { deleteGoal(id); setIsGoalModalOpen(false); }}
         initialDate={format(selectedDate || new Date(), 'yyyy-MM-dd')}
         editingGoal={editingGoal}
+      />
+      
+      <DayDetailsModal
+        isOpen={isDayDetailsOpen}
+        onClose={() => setIsDayDetailsOpen(false)}
+        date={selectedDate}
+        trades={getTradesForDay(selectedDate)}
+        events={getEventsForDay(selectedDate)}
+        goals={getGoalsForDay(selectedDate)}
       />
     </div>
   );
