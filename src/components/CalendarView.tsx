@@ -24,6 +24,7 @@ import {
   Target,
   Info,
   Filter,
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
@@ -43,6 +44,7 @@ interface CalendarEvent {
   endTime: string;
   description?: string;
   color?: 'blue' | 'green' | 'red' | 'orange' | 'purple';
+  completed?: boolean;
   [key: string]: any;
 }
 
@@ -271,7 +273,7 @@ export default function CalendarView() {
             className="bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-2 px-4 h-8 text-[10px] font-black uppercase tracking-widest rounded-sm transition-all shadow-lg shadow-blue-600/10"
           >
             <Plus size={14} />
-            <span>New Monitor</span>
+            <span>New Task</span>
           </button>
         </div>
       </div>
@@ -419,16 +421,42 @@ export default function CalendarView() {
               </h3>
               <CalendarTable
                 headers={[
+                  { key: 'completed', label: '' },
                   { key: 'title', label: 'Name' },
                   { key: 'startTime', label: 'Time' },
                   { key: 'description', label: 'Description' },
                 ]}
-                data={getEventsForDay(selectedDate)}
+                data={getEventsForDay(selectedDate).sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1))}
                 renderRow={(event: CalendarEvent) => (
-                  <tr key={event.id} className="hover:bg-zinc-900/50 border-b border-zinc-900/50 last:border-0 transition-colors cursor-pointer group" onClick={(e) => handleEditEvent(e, event)}>
-                    <td className="px-4 py-2 font-bold text-zinc-300">{event.title}</td>
-                    <td className="px-4 py-2 text-zinc-600 font-mono text-[11px] whitespace-nowrap tabular-nums">{event.startTime}</td>
-                    <td className="px-4 py-2 text-right text-zinc-600 truncate max-w-[200px] text-[11px]">{event.description || '-'}</td>
+                  <tr 
+                    key={event.id} 
+                    className={cn(
+                      "hover:bg-zinc-900/50 border-b border-zinc-900/50 last:border-0 transition-all cursor-pointer group",
+                      event.completed && "opacity-40"
+                    )} 
+                    onClick={(e) => handleEditEvent(e, event)}
+                  >
+                    <td className="px-4 py-3 w-10">
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          updateEvent(event.id, { ...event, completed: !event.completed }); 
+                        }} 
+                        className={cn(
+                          "w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 hover:scale-110 active:scale-95", 
+                          event.completed 
+                            ? "bg-emerald-500 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
+                            : "bg-white/5 border-white/10 text-transparent hover:border-emerald-500/50"
+                        )}
+                      >
+                        <CheckCircle2 size={12} className={cn("transition-transform duration-300", event.completed ? "scale-100" : "scale-0")} />
+                      </button>
+                    </td>
+                    <td className={cn("px-4 py-3 font-bold text-zinc-300 transition-all", event.completed && "line-through text-zinc-500")}>
+                      {event.title}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 font-mono text-[11px] whitespace-nowrap tabular-nums">{event.startTime}</td>
+                    <td className="px-4 py-3 text-right text-zinc-600 truncate max-w-[200px] text-[11px]">{event.description || '-'}</td>
                   </tr>
                 )}
                 emptyMessage="No events scheduled."
@@ -518,6 +546,8 @@ export default function CalendarView() {
         trades={getTradesForDay(selectedDate)}
         events={getEventsForDay(selectedDate)}
         goals={getGoalsForDay(selectedDate)}
+        onUpdateTask={updateEvent}
+        onAddTask={addEvent}
       />
     </div>
   );

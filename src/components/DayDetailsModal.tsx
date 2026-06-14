@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -14,7 +14,12 @@ import {
   Calendar as CalendarIcon,
   Activity,
   CheckCircle2,
-  BarChart3
+  BarChart3,
+  Plus,
+  Flag,
+  Clock,
+  ChevronDown,
+  Filter
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -27,6 +32,8 @@ interface DayDetailsModalProps {
   trades: any[];
   events: any[];
   goals: any[];
+  onUpdateTask: (id: string, data: any) => void;
+  onAddTask: (data: any) => void;
 }
 
 const containerVariants = {
@@ -50,6 +57,12 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20 } }
 };
 
+const PRIORITY_COLORS: Record<string, string> = {
+  high: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+  medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  low: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+};
+
 export default function DayDetailsModal({
   isOpen,
   onClose,
@@ -57,7 +70,19 @@ export default function DayDetailsModal({
   trades,
   events,
   goals,
+  onUpdateTask,
+  onAddTask,
 }: DayDetailsModalProps) {
+  const [taskFilter, setTaskFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskData, setNewTaskData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    startTime: '09:00',
+    endTime: '10:00'
+  });
+
   // Prevent scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -86,6 +111,30 @@ export default function DayDetailsModal({
     ? (trades.filter(t => normalizeStatus(t.trade_status || t.result) === 'win').length / trades.length) * 100 
     : 0;
   const completedGoals = goals.filter(g => g.status === 'completed').length;
+
+  const totalTasks = events.length;
+  const completedTasksCount = events.filter(e => e.completed).length;
+  const pendingTasksCount = totalTasks - completedTasksCount;
+  const completionRate = totalTasks > 0 ? (completedTasksCount / totalTasks) * 100 : 0;
+
+  const filteredTasks = events
+    .filter(e => {
+      if (taskFilter === 'active') return !e.completed;
+      if (taskFilter === 'completed') return e.completed;
+      return true;
+    })
+    .sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1));
+
+  const handleAddTask = () => {
+    if (!newTaskData.title.trim()) return;
+    onAddTask({
+      ...newTaskData,
+      date: format(date, 'yyyy-MM-dd'),
+      completed: false
+    });
+    setNewTaskData({ title: '', description: '', priority: 'medium', startTime: '09:00', endTime: '10:00' });
+    setIsAddingTask(false);
+  };
 
   return (
     <AnimatePresence>
@@ -275,33 +324,141 @@ export default function DayDetailsModal({
               </div>
             </motion.section>
 
-            {/* Schedule & Notes */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <motion.section variants={itemVariants} className="space-y-5">
-                <div className="flex items-center gap-3 ml-2">
+            {/* Interactive Task Management Section */}
+            <motion.section variants={itemVariants} className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ml-2">
+                <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.8)]" />
-                  <h3 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">Chronology</h3>
+                  <h3 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">Task Execution</h3>
                 </div>
-                <div className="space-y-3">
-                  {events.length > 0 ? events.map(event => (
-                    <div key={event.id} className="p-5 rounded-[24px] bg-white/[0.02] border border-white/[0.05] flex items-center justify-between hover:bg-white/[0.04] transition-all group">
-                      <div className="flex items-center gap-4">
-                        <div className="w-1 h-10 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]" />
-                        <div>
-                          <p className="font-bold text-white text-sm group-hover:text-purple-400 transition-colors">{event.title}</p>
-                          <p className="text-[10px] text-muted-foreground/60 mt-1 font-black uppercase tracking-widest">{event.startTime} — {event.endTime}</p>
+
+                <div className="flex items-center gap-2 bg-white/[0.02] border border-white/[0.05] p-1 rounded-xl">
+                  {(['all', 'active', 'completed'] as const).map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setTaskFilter(filter)}
+                      className={cn(
+                        "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
+                        taskFilter === filter ? "bg-white/[0.08] text-white" : "text-muted-foreground hover:text-white"
+                      )}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                  <div className="w-px h-3 bg-white/[0.05] mx-1" />
+                  <button
+                    onClick={() => setIsAddingTask(true)}
+                    className="flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all text-[9px] font-black uppercase tracking-widest"
+                  >
+                    <Plus size={12} />
+                    New Task
+                  </button>
+                </div>
+              </div>
+
+              {/* Task Stats Row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: 'Total', value: totalTasks, color: 'blue' },
+                  { label: 'Completed', value: completedTasksCount, color: 'emerald' },
+                  { label: 'Pending', value: pendingTasksCount, color: 'rose' },
+                  { label: 'Done', value: `${completionRate.toFixed(0)}%`, color: 'amber' },
+                ].map((stat) => (
+                  <div key={stat.label} className="p-4 rounded-2xl bg-white/[0.01] border border-white/[0.03] flex flex-col items-center justify-center gap-1 group hover:bg-white/[0.03] transition-all">
+                    <span className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">{stat.label}</span>
+                    <span className={cn("text-lg font-black tracking-tighter", {
+                      'text-blue-400': stat.color === 'blue',
+                      'text-emerald-400': stat.color === 'emerald',
+                      'text-rose-400': stat.color === 'rose',
+                      'text-amber-400': stat.color === 'amber',
+                    })}>{stat.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Inline Add Task Form */}
+              <AnimatePresence>
+                {isAddingTask && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -10 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -10 }}
+                    className="p-6 rounded-[28px] bg-white/[0.03] border border-blue-500/20 shadow-[0_20px_40px_rgba(59,130,246,0.1)] space-y-4 overflow-hidden"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        autoFocus
+                        placeholder="What needs to be done?"
+                        className="bg-transparent text-white font-bold text-sm placeholder:text-muted-foreground/30 outline-none w-full"
+                        value={newTaskData.title}
+                        onChange={(e) => setNewTaskData({ ...newTaskData, title: e.target.value })}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+                      />
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 bg-white/[0.05] p-1 rounded-lg">
+                          {(['low', 'medium', 'high'] as const).map(p => (
+                            <button
+                              key={p}
+                              onClick={() => setNewTaskData({ ...newTaskData, priority: p })}
+                              className={cn(
+                                "px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border transition-all",
+                                newTaskData.priority === p ? PRIORITY_COLORS[p] : "border-transparent text-muted-foreground/40 hover:text-white"
+                              )}
+                            >
+                              {p}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/[0.05] px-2 py-1 rounded-lg text-muted-foreground">
+                          <Clock size={12} />
+                          <input type="time" className="bg-transparent text-[10px] font-bold outline-none" value={newTaskData.startTime} onChange={(e) => setNewTaskData({ ...newTaskData, startTime: e.target.value })} />
                         </div>
                       </div>
-                      <ClipboardList size={14} className="text-white/10 group-hover:text-purple-500/40" />
                     </div>
-                  )) : (
-                    <div className="py-10 text-center rounded-[24px] border border-dashed border-white/[0.06]">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">Timeline is clear</p>
+                    <textarea placeholder="Optional details..." className="bg-transparent text-xs text-muted-foreground/60 placeholder:text-muted-foreground/20 outline-none w-full resize-none h-16" value={newTaskData.description} onChange={(e) => setNewTaskData({ ...newTaskData, description: e.target.value })} />
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                      <button onClick={() => setIsAddingTask(false)} className="text-[10px] font-black text-muted-foreground uppercase tracking-widest hover:text-white">Cancel</button>
+                      <button onClick={handleAddTask} className="px-4 py-2 rounded-xl bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Save Task</button>
                     </div>
-                  )}
-                </div>
-              </motion.section>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
+              <div className="space-y-3 min-h-[100px]">
+                {filteredTasks.length > 0 ? filteredTasks.map(event => (
+                  <motion.div layout key={event.id} className={cn("p-5 rounded-[24px] bg-white/[0.02] border border-white/[0.05] flex items-center justify-between hover:bg-white/[0.04] transition-all group", event.completed && "opacity-50")}>
+                    <div className="flex items-center gap-4 flex-1">
+                      <button onClick={(e) => { e.stopPropagation(); onUpdateTask(event.id, { ...event, completed: !event.completed }); }} className={cn("w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0", event.completed ? "bg-emerald-500 border-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-white/5 border-white/10 text-transparent hover:border-emerald-500/50")}>
+                        <CheckCircle2 size={14} className={cn("transition-transform duration-300", event.completed ? "scale-100" : "scale-0")} />
+                      </button>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <p className={cn("font-bold text-white text-sm transition-all duration-300", event.completed && "line-through text-zinc-500")}>{event.title}</p>
+                          {event.priority && (
+                            <span className={cn("px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border shrink-0", PRIORITY_COLORS[event.priority])}>{event.priority}</span>
+                          )}
+                        </div>
+                        {event.description && (
+                          <p className={cn("text-[11px] text-muted-foreground/40 mt-1 line-clamp-1", event.completed && "opacity-30")}>{event.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground/30 font-black text-[10px] uppercase tracking-widest">
+                      <Clock size={12} className="group-hover:text-blue-500 transition-colors" />
+                      {event.startTime} — {event.endTime}
+                    </div>
+                  </motion.div>
+                )) : (
+                  <div className="py-12 text-center rounded-[28px] border border-dashed border-white/[0.06] bg-white/[0.01]">
+                    <Filter size={24} className="text-white/5 mb-3 mx-auto" />
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">No matching tasks found</p>
+                  </div>
+                )}
+              </div>
+            </motion.section>
+
+            {/* Schedule & Notes */}
+            <div className="grid grid-cols-1 gap-10">
               <motion.section variants={itemVariants} className="space-y-5">
                 <div className="flex items-center gap-3 ml-2">
                   <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.8)]" />
