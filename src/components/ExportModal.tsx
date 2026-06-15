@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, FileText, Check, Settings2, Loader2, Table } from 'lucide-react';
-import { exportData, logExport, ExportFormat } from '@/lib/utils/exportUtils';
+import { exportData } from '@/app/exports/exportEngine';
+import { logExport, ExportFormat } from '@/lib/utils/exportUtils';
 import { toast } from 'sonner';
 
 interface ExportModalProps {
@@ -78,23 +79,32 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
     }
 
     setIsExporting(true);
+    const loadingToast = toast.loading('Architecting professional report...');
+    
     try {
-      // Simulate prep work
-      await new Promise(r => setTimeout(r, 800));
-      
-      await exportData({
-        filename,
-        format,
-        data,
-        title: `${category.charAt(0).toUpperCase() + category.slice(1)} Report`
+      // Execute the export via the specialized export engine
+      const success = await exportData(data, {
+        fileName: filename,
+        format: format as any,
+        selectedFields: [],
+        includeHeaders: true,
+        prettyPrint: true
+      }, {
+        // Note: For a truly global report, consider passing actual store data here
+        tasks: [],
+        goals: []
       });
       
+      if (!success && format === 'xlsx') {
+        throw new Error('Excel generation engine failed');
+      }
+
       logExport(category, format);
-      toast.success(`${format.toUpperCase()} generated successfully!`);
+      toast.success(`Professional ${format.toUpperCase()} exported successfully!`, { id: loadingToast });
       onExportSuccess?.();
       onClose();
     } catch (err: any) {
-      toast.error(`Export failed: ${err.message}`);
+      toast.error(`Export failed: ${err.message}`, { id: loadingToast });
     } finally {
       setIsExporting(false);
     }

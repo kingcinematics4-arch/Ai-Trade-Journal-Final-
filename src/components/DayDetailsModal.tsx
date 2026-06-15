@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
@@ -106,26 +106,35 @@ export default function DayDetailsModal({
 
   if (!isOpen) return null;
 
-  const netPnL = trades.reduce((acc, t) => acc + (getTradePnL(t) || 0), 0);
-  const winRate = trades.length > 0 
-    ? (trades.filter(t => normalizeStatus(t.trade_status || t.result) === 'win').length / trades.length) * 100 
-    : 0;
-  const completedGoals = goals.filter(g => g.status === 'completed').length;
+  const { netPnL, winRate } = useMemo(() => {
+    const pnl = trades.reduce((acc, t) => acc + (getTradePnL(t) || 0), 0);
+    const wr = trades.length > 0 
+      ? (trades.filter(t => normalizeStatus(t.trade_status || t.result) === 'win').length / trades.length) * 100 
+      : 0;
+    return { netPnL: pnl, winRate: wr };
+  }, [trades]);
 
-  const totalTasks = events.length;
-  const completedTasksCount = events.filter(e => e.completed).length;
-  const pendingTasksCount = totalTasks - completedTasksCount;
-  const completionRate = totalTasks > 0 ? (completedTasksCount / totalTasks) * 100 : 0;
+  const completedGoals = useMemo(() => goals.filter(g => g.status === 'completed').length, [goals]);
 
-  const filteredTasks = events
-    .filter(e => {
-      if (taskFilter === 'active') return !e.completed;
-      if (taskFilter === 'completed') return e.completed;
-      return true;
-    })
-    .sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1));
+  const taskStats = useMemo(() => {
+    const total = events.length;
+    const completed = events.filter(e => e.completed).length;
+    const pending = total - completed;
+    const rate = total > 0 ? (completed / total) * 100 : 0;
+    return { total, completed, pending, rate };
+  }, [events]);
 
-  const handleAddTask = () => {
+  const filteredTasks = useMemo(() => 
+    events
+      .filter(e => {
+        if (taskFilter === 'active') return !e.completed;
+        if (taskFilter === 'completed') return e.completed;
+        return true;
+      })
+      .sort((a, b) => (a.completed === b.completed ? 0 : a.completed ? 1 : -1))
+  , [events, taskFilter]);
+
+  const handleAddTask = useCallback(() => {
     if (!newTaskData.title.trim()) return;
     onAddTask({
       ...newTaskData,
@@ -134,7 +143,7 @@ export default function DayDetailsModal({
     });
     setNewTaskData({ title: '', description: '', priority: 'medium', startTime: '09:00', endTime: '10:00' });
     setIsAddingTask(false);
-  };
+  }, [newTaskData, date, onAddTask]);
 
   return (
     <AnimatePresence>
@@ -359,10 +368,10 @@ export default function DayDetailsModal({
               {/* Task Stats Row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: 'Total', value: totalTasks, color: 'blue' },
-                  { label: 'Completed', value: completedTasksCount, color: 'emerald' },
-                  { label: 'Pending', value: pendingTasksCount, color: 'rose' },
-                  { label: 'Done', value: `${completionRate.toFixed(0)}%`, color: 'amber' },
+                  { label: 'Total', value: taskStats.total, color: 'blue' },
+                  { label: 'Completed', value: taskStats.completed, color: 'emerald' },
+                  { label: 'Pending', value: taskStats.pending, color: 'rose' },
+                  { label: 'Done', value: `${taskStats.rate.toFixed(0)}%`, color: 'amber' },
                 ].map((stat) => (
                   <div key={stat.label} className="p-4 rounded-2xl bg-white/[0.01] border border-white/[0.03] flex flex-col items-center justify-center gap-1 group hover:bg-white/[0.03] transition-all">
                     <span className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest">{stat.label}</span>

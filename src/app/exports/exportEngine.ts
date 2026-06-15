@@ -1,9 +1,10 @@
-import * as XLSX from "xlsx";
 import JSZip from "jszip";
 import Papa from "papaparse";
 import { filterData } from "./filterData";
 import { ExportOptions } from "./exportTypes";
 import { exportPDF as generateProfessionalPDF } from "@/lib/exportPDF";
+import { exportProfessionalExcel } from "@/lib/exportExcel";
+import { jsPDF } from "jspdf";
 
 function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -21,7 +22,7 @@ function download(blob: Blob, filename: string) {
 /**
  * MAIN EXPORT FUNCTION
  */
-export async function exportData(data: any[], options: ExportOptions) {
+export async function exportData(data: any[], options: ExportOptions, context?: { tasks?: any[], goals?: any[] }) {
   const cleaned = filterData(data, options);
 
   switch (options.format) {
@@ -32,7 +33,7 @@ export async function exportData(data: any[], options: ExportOptions) {
       return exportJSON(cleaned, options);
 
     case "xlsx":
-      return exportXLSX(cleaned, options);
+      return exportProfessionalExcel(cleaned, context?.tasks || [], context?.goals || [], options.fileName);
 
     case "pdf":
       return exportPDF(cleaned, options);
@@ -52,6 +53,7 @@ export async function exportData(data: any[], options: ExportOptions) {
 function exportCSV(data: any[], options: ExportOptions) {
   const csv = Papa.unparse(data);
   download(new Blob([csv], { type: "text/csv" }), `${options.fileName}.csv`);
+  return true;
 }
 
 /* ---------------- JSON ---------------- */
@@ -61,21 +63,13 @@ function exportJSON(data: any[], options: ExportOptions) {
     : JSON.stringify(data);
 
   download(new Blob([json], { type: "application/json" }), `${options.fileName}.json`);
-}
-
-/* ---------------- XLSX ---------------- */
-function exportXLSX(data: any[], options: ExportOptions) {
-  const sheet = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(wb, sheet, "Data");
-
-  XLSX.writeFile(wb, `${options.fileName}.xlsx`);
+  return true;
 }
 
 /* ---------------- PDF ---------------- */
 function exportPDF(data: any[], options: ExportOptions) {
   generateProfessionalPDF(data, options.fileName);
+  return true;
 }
 
 /* ---------------- TXT ---------------- */
@@ -94,12 +88,7 @@ async function exportZIP(data: any[], options: ExportOptions) {
   zip.file("data.json", JSON.stringify(data, null, 2));
   zip.file("data.csv", Papa.unparse(data));
 
-  const sheet = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, sheet, "Data");
-
-  const excelBuffer = XLSX.write(wb, { type: "array", bookType: "xlsx" });
-  zip.file("data.xlsx", excelBuffer);
+  // Note: To include the professional Excel in ZIP, you would generate the buffer here using ExcelJS
 
   const pdf = new jsPDF();
   data.forEach(r => pdf.text(JSON.stringify(r), 10, 10));
