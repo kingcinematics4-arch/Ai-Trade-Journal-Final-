@@ -315,7 +315,7 @@ export default function CalendarView() {
                 className={cn(
                   'relative flex flex-col justify-start gap-3 p-4 transition-all duration-300 ease-out cursor-pointer select-none group border border-white/[0.07] shadow-[0_15px_50px_rgba(0,0,0,0.50)] rounded-[28px] backdrop-blur-2xl bg-[linear-gradient(180deg,rgba(22,28,45,0.92)_0%,rgba(10,14,24,0.98)_100%)]',
                   'h-auto',
-                  dayTrades.length === 0 && dayEvents.length === 0 && dayGoals.length === 0 ? 'min-h-[80px] opacity-70' : 'min-h-[110px]',
+                  dayTrades.length === 0 && dayEvents.length === 0 && dayGoals.length === 0 ? 'min-h-[80px] opacity-70 hover:opacity-100' : 'min-h-[110px]',
                   'before:absolute before:inset-0 before:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_35%)] before:pointer-events-none',
                   'after:absolute after:-top-10 after:right-[-20px] after:w-24 after:h-24 after:rounded-full after:bg-blue-400/10 after:blur-3xl after:pointer-events-none after:transition-all after:duration-500',
                   'hover:-translate-y-[6px] hover:scale-[1.025] hover:border-cyan-400/30 hover:shadow-[0_25px_80px_rgba(59,130,246,0.20)] hover:after:bg-cyan-400/20',

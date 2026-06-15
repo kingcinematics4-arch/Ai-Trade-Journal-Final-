@@ -236,7 +236,7 @@ function SidebarContent({
             <Link
               key={item.id}
               href={item.href}
-              className={`nav-item transition-all duration-200 ${
+              className={`nav-item transition-all duration-200 motion-safe:hover:translate-x-1 active:scale-95 ${
                 isActive ? 'text-blue-500' : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
               } ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? item.label : undefined}
@@ -272,7 +272,7 @@ function SidebarContent({
             <Link
               key={item.id}
               href={item.href}
-              className={`nav-item py-3 px-3 rounded-xl transition-all duration-200 ${
+              className={`nav-item py-3 px-3 rounded-xl transition-all duration-200 motion-safe:hover:translate-x-1 active:scale-95 ${
                 isActive ? 'text-blue-500' : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
               } ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? item.label : undefined}

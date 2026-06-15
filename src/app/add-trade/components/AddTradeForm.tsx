@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import {
   ChevronDown,
@@ -14,6 +14,7 @@ import {
   Brain,
   Camera,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
@@ -110,12 +111,12 @@ export default function AddTradeForm() {
 
   // Watch relevant fields for auto-calculation
   // form.watch triggers a re-render only when these specific fields change
-  const entryPrice = form.watch('entryPrice');
-  const exitPrice = form.watch('exitPrice');
-  const stopLoss = form.watch('stopLoss');
-  const takeProfit = form.watch('takeProfit');
-  const lotSize = form.watch('lotSize');
-  const tradeDirection = form.watch('tradeDirection');
+  const entryPrice = useWatch({ control: form.control, name: 'entryPrice' });
+  const exitPrice = useWatch({ control: form.control, name: 'exitPrice' });
+  const stopLoss = useWatch({ control: form.control, name: 'stopLoss' });
+  const takeProfit = useWatch({ control: form.control, name: 'takeProfit' });
+  const lotSize = useWatch({ control: form.control, name: 'lotSize' });
+  const tradeDirection = useWatch({ control: form.control, name: 'tradeDirection' });
 
   // Auto-calculate PnL and RR when prices or direction change
   useEffect(() => {
@@ -316,17 +317,17 @@ export default function AddTradeForm() {
       {sections.map((section, index) => (
         <div 
           key={`section-${section.key}`} 
-          className={`card-premium relative ${openSections[section.key] ? 'overflow-visible' : 'overflow-hidden'}`}
+          className={`card-premium relative transition-all duration-300 ${openSections[section.key] ? 'overflow-visible' : 'overflow-hidden hover:scale-[1.005] hover:shadow-xl'}`}
           style={{ zIndex: openSections[section.key] ? 40 - index : 0 }}
         >
           {/* Section Header */}
           <button
             type="button"
             onClick={() => toggleSection(section.key)}
-            className="w-full flex items-center justify-between px-7 py-6 hover:bg-white/[0.02] transition-colors duration-200"
+            className="w-full flex items-center justify-between px-7 py-6 hover:bg-white/[0.02] transition-all duration-200 group"
           >
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center text-white border border-white/[0.05] shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center text-white border border-white/[0.05] shadow-inner transition-transform duration-300 group-hover:scale-110 group-hover:shadow-primary/20">
                 {section.icon}
               </div>
               <div className="text-left">
@@ -334,39 +335,46 @@ export default function AddTradeForm() {
                 <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mt-1">{section.desc}</p>
               </div>
             </div>
-            {openSections[section.key] ? (
-              <ChevronUp size={16} className="text-muted-foreground" />
-            ) : (
+            <motion.div animate={{ rotate: openSections[section.key] ? 0 : 180 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}>
               <ChevronDown size={16} className="text-muted-foreground" />
-            )}
+            </motion.div>
           </button>
 
           {/* Section Content */}
-          {openSections[section.key] && (
-            <div className="border-t border-border px-5 py-5">
-              {section.key === 'tradeInfo' && (
-                <TradeInfoSection form={form} />
-              )}
-              {section.key === 'performance' && <PerformanceSection form={form} />}
-              {section.key === 'psychology' && <PsychologySection form={form} />}
-              {section.key === 'media' && (
-                <MediaMetaSection
-                  form={form}
-                  entryImages={entryImages}
-                  setEntryImages={setEntryImages}
-                  exitImages={exitImages}
-                  setExitImages={setExitImages}
-                  chartImages={chartImages}
-                  setChartImages={setChartImages}
-                />
-              )}
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {openSections[section.key] && (
+              <motion.div
+                key="content"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                className="border-t border-border px-5 py-5 overflow-hidden"
+              >
+                {section.key === 'tradeInfo' && (
+                  <TradeInfoSection form={form} />
+                )}
+                {section.key === 'performance' && <PerformanceSection form={form} />}
+                {section.key === 'psychology' && <PsychologySection form={form} />}
+                {section.key === 'media' && (
+                  <MediaMetaSection
+                    form={form}
+                    entryImages={entryImages}
+                    setEntryImages={setEntryImages}
+                    exitImages={exitImages}
+                    setExitImages={setExitImages}
+                    chartImages={chartImages}
+                    setChartImages={setChartImages}
+                  />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ))}
 
       {/* Sticky Save Bar - Premium Mobile Safe Area */}
-      <div className="sticky bottom-0 z-40 bg-background/90 backdrop-blur-2xl border-t border-white/[0.08] -mx-4 sm:-mx-6 px-5 py-5 pb-10 md:pb-5 md:px-6 shadow-[0_-15px_50px_rgba(0,0,0,0.6)]">
+      <div className="sticky bottom-0 z-40 bg-background/90 backdrop-blur-2xl border-t border-white/[0.08] -mx-4 sm:-mx-6 px-5 py-5 pb-10 md:pb-5 md:px-6 shadow-[0_-15px_50px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom duration-500">
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-4">
           <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
             <Info size={13} />
@@ -376,7 +384,7 @@ export default function AddTradeForm() {
             <button
               type="button"
               onClick={handleCancel}
-              className="btn-secondary flex-1 md:flex-none flex items-center justify-center gap-2 text-sm font-black h-14 md:h-10 md:px-8 rounded-2xl md:rounded-xl active:scale-[0.96] transition-transform"
+              className="btn-secondary flex-1 md:flex-none flex items-center justify-center gap-2 text-sm font-black h-14 md:h-10 md:px-8 rounded-2xl md:rounded-xl transition-all duration-200 active:scale-95"
             >
               <X size={16} />
               Cancel
@@ -384,7 +392,7 @@ export default function AddTradeForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary flex-[2] md:flex-none flex items-center justify-center gap-3 text-sm font-black h-14 md:h-10 md:px-10 rounded-2xl md:rounded-xl shadow-2xl shadow-blue-500/30 active:scale-[0.96] transition-transform"
+              className="btn-primary flex-[2] md:flex-none flex items-center justify-center gap-3 text-sm font-black h-14 md:h-10 md:px-10 rounded-2xl md:rounded-xl shadow-2xl shadow-blue-500/30 transition-all duration-300 hover:brightness-110 active:scale-95"
             >
               {isSubmitting ? (
                 <>

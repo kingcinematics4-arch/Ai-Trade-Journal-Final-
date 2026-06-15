@@ -25,6 +25,19 @@ const FORMATS: { value: ExportFormat; label: string; icon: string }[] = [
   { value: 'zip', label: 'Archive (.zip)', icon: '📦' },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.04, ease: [0.2, 0.8, 0.2, 1] }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.2, 0.8, 0.2, 1] } }
+};
+
 const getPreviewColumns = (category: string, data: any[]) => {
   if (data.length === 0) return [];
   const firstItem = data[0];
@@ -111,11 +124,12 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-background/40 backdrop-blur-md transition-all duration-300 ease-out animate-in fade-in">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
         className="w-full max-w-lg bg-card border border-border rounded-3xl shadow-2xl overflow-hidden"
       >
         <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/30">
@@ -123,7 +137,7 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
             <Settings2 size={18} className="text-primary" />
             <h3 className="font-bold text-lg text-foreground">Export Configuration</h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground">
+          <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-all duration-200 text-muted-foreground hover:scale-110 active:scale-95">
             <X size={20} />
           </button>
         </div>
@@ -135,18 +149,26 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
               type="text"
               value={filename}
               onChange={(e) => setFilename(e.target.value)}
-              className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors"
+              className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all duration-200"
             />
           </div>
 
           <div className="space-y-3">
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Output Format</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-2 sm:grid-cols-3 gap-2"
+            >
               {FORMATS.map((f) => (
-                <button
+                <motion.button
                   key={f.value}
+                  variants={itemVariants}
                   onClick={() => setFormat(f.value)}
-                  className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex items-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
                     format === f.value 
                       ? 'bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
                       : 'bg-muted/20 border-border text-muted-foreground hover:bg-muted/40'
@@ -154,14 +176,14 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                 >
                   <span className="text-base">{f.icon}</span>
                   {f.label.split(' ')[0]}
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-white/[0.03]">
+          <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-white/[0.03] transition-all duration-300 hover:border-primary/50 group">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-white/[0.05]">
+              <div className="p-2 rounded-lg bg-white/[0.05] transition-transform duration-300 group-hover:scale-110">
                 <FileText size={16} className="text-muted-foreground" />
               </div>
               <div>
@@ -179,14 +201,14 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
         <div className="p-6 bg-muted/10 border-t border-border flex items-center gap-3">
           <button 
             onClick={onClose}
-            className="flex-1 py-3 text-xs font-bold text-muted-foreground hover:bg-muted rounded-xl transition-colors"
+            className="flex-1 py-3 text-xs font-bold text-muted-foreground hover:bg-muted rounded-xl transition-all duration-200 active:scale-95"
           >
             Cancel
           </button>
           <button 
             disabled={isExporting}
             onClick={handleExport}
-            className="flex-[2] btn-primary flex items-center justify-center gap-2 py-3 text-xs font-black rounded-xl shadow-xl shadow-primary/20"
+            className="flex-[2] btn-primary flex items-center justify-center gap-2 py-3 text-xs font-black rounded-xl shadow-xl shadow-primary/20 transition-all duration-200 hover:brightness-110 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isExporting ? (
               <><Loader2 size={16} className="animate-spin" /> Generating...</>

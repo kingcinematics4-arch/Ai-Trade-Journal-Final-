@@ -151,7 +151,7 @@ function StarRating({
             onMouseEnter={() => setHovered(star)}
             onMouseLeave={() => setHovered(0)}
             onClick={() => onChange(star)}
-            className="text-2xl transition-all duration-100 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-md"
+            className="text-2xl transition-all duration-200 hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-md"
             aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
           >
             <span

@@ -132,7 +132,7 @@ export default function PerformanceSection({ form }: PerformanceSectionProps) {
                 key={`status-${s}`}
                 type="button"
                 onClick={() => setValue('tradeStatus', s, { shouldDirty: true, shouldValidate: true })}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition-all duration-150 ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-medium transition-all duration-150 motion-safe:hover:-translate-y-0.5 active:scale-95 ${
                   tradeStatus === s
                     ? s === 'win'
                       ? 'bg-green-500/15 border-green-500/40 text-green-400'
