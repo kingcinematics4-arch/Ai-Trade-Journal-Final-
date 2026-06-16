@@ -81,6 +81,7 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   const [filename, setFilename] = useState(`${category}_export`);
   const [format, setFormat] = useState<ExportFormat>('xlsx');
   const [isExporting, setIsExporting] = useState(false);
+  const [exportMode, setExportMode] = useState<'single' | 'separate'>('single');
   const [includeMeta, setIncludeMeta] = useState(true);
 
   if (!isOpen) return null;
@@ -101,7 +102,8 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
         format: format as any,
         selectedFields: [],
         includeHeaders: true,
-        prettyPrint: true
+        prettyPrint: true,
+        exportMode: exportMode
       }, {
         // Note: For a truly global report, consider passing actual store data here
         tasks: [],
@@ -180,6 +182,41 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
               ))}
             </motion.div>
           </div>
+
+          {format === 'xlsx' && (
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Export Mode</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setExportMode('single')}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
+                    exportMode === 'single' // Default to single workbook
+                      ? 'bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                      : 'bg-muted/20 border-border text-muted-foreground hover:bg-muted/40'
+                  }`}
+                >
+                  <Table size={14} />
+                  Single Workbook
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExportMode('separate')}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
+                    exportMode === 'separate'
+                      ? 'bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                      : 'bg-muted/20 border-border text-muted-foreground hover:bg-muted/40'
+                  }`}
+                >
+                  <div className="flex -space-x-1">
+                    <Table size={12} className="opacity-50" />
+                    <Table size={12} />
+                  </div>
+                  Separate Files
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-white/[0.03] transition-all duration-300 hover:border-primary/50 group">
             <div className="flex items-center gap-3">

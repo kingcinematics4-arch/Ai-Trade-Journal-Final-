@@ -1,6 +1,6 @@
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { format, startOfWeek, startOfMonth, parseISO, isWithinInterval } from 'date-fns';
+import { format, startOfWeek, startOfMonth } from 'date-fns';
 
 /**
  * Utility to recursively flatten nested objects and format values for Excel.
@@ -10,7 +10,7 @@ function flattenAndFormat(item: any): any {
   const result: any = {};
 
   function walk(obj: any, prefix = ''): void {
-    if (!obj || typeof obj !== 'object') return;
+    if (obj === null || typeof obj !== 'object') return;
 
     Object.keys(obj).forEach(key => {
       const value = obj[key];
@@ -21,12 +21,14 @@ function flattenAndFormat(item: any): any {
       } else if (typeof value === 'boolean') {
         result[newKey] = value ? 'Yes' : 'No';
       } else if (value instanceof Date) {
-        result[newKey] = format(value, 'yyyy-MM-dd HH:mm:ss');
+        result[newKey] = format(value, 'yyyy-MM-dd HH:mm:ss'); // Consistent date format
       } else if (Array.isArray(value)) {
-        // Handle arrays (e.g., tags, images) as comma-separated text
-        result[newKey] = value.map(v => (v && typeof v === 'object' ? JSON.stringify(v) : v)).join(', ');
-      } else if (typeof value === 'object' && !Array.isArray(value)) {
-        // Recursively flatten nested objects
+        // Convert arrays to readable comma-separated strings
+        result[newKey] = value
+          .map(v => (v !== null && typeof v === 'object' ? JSON.stringify(v) : String(v)))
+          .join(', ');
+      } else if (typeof value === 'object') {
+        // Recursively flatten nested objects (strategy, goal, etc)
         const keys = Object.keys(value);
         if (keys.length === 0) {
           result[newKey] = '{}';
@@ -57,7 +59,7 @@ function addProfessionalDataSheet(
   // Sort data by date if it's the trades sheet
   let processedData = data.map(item => flattenAndFormat(item));
   if (isTradesSheet) {
-    processedData.sort((a, b) => new Date(a.trade_date || a.date).getTime() - new Date(b.trade_date || b.date).getTime());
+    processedData.sort((a, b) => new Date(a.trade_date || a.date || 0).getTime() - new Date(b.trade_date || b.date || 0).getTime());
   }
 
   const worksheet = workbook.addWorksheet(sheetName);
@@ -65,10 +67,23 @@ function addProfessionalDataSheet(
   // 1. Detect all unique keys across the dataset for dynamic columns
   const allKeys = Array.from(new Set(processedData.flatMap(Object.keys)));
 
+  if (isTradesSheet) {
+    console.log('--- EXCEL EXPORT DEBUG: DISCOVERED TRADE FIELDS ---');
+    console.log('Detected properties across all trade records:', allKeys);
+    console.log(`Total unique columns to be generated: ${allKeys.length}`);
+    console.log('--------------------------------------------------');
+  }
+
   // 2a. Determine Column Order
   const priorityKeys = isTradesSheet ? [
-    'trade_date', 'asset_name', 'risk_amount', 'pnl_amount', 'pnl_percent', 
-    'strategy_used', 'goal_id', 'task_id', 'trade_direction', 'trade_status', 'notes'
+    'trade_date', 'trade_time', 'id', 'asset_name', 'symbol', 'market', 'exchange', 'asset_type', 
+    'side', 'trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 
+    'position_size', 'quantity', 'leverage', 'risk_amount', 'reward_amount', 'rr_ratio',
+    'fees', 'commission', 'spread', 'slippage', 'gross_pnl', 'net_pnl', 'pnl_amount', 'pnl_percent',
+    'strategy_used', 'strategy.name', 'strategy.category', 'setup', 'tags', 'confidence_level', 
+    'execution_rating', 'psychology_rating', 'emotion_before', 'emotion_after', 'mistakes', 
+    'lessons_learned', 'goal_id', 'goal.title', 'goal.status', 'task_id', 'task.title', 'task.status', 
+    'notes', 'session', 'duration', 'screenshot_url', 'created_at', 'updated_at'
   ] : [];
 
   const remainingKeys = allKeys.filter(k => !priorityKeys.includes(k));
@@ -86,8 +101,9 @@ function addProfessionalDataSheet(
     headerText: 'FFFFFF',
     alternateRow: 'F8FAFC',
     profit: '10B981', // Emerald 500
-    loss: 'EF4444',    // Red 500
-    separator: 'F1F5F9'
+    loss: 'EF4444', // Red 500
+    separator: 'F1F5F9',
+    border: 'E2E8F0' // Slate 200
   };
 
   const headerStyle: Partial<ExcelJS.Style> = {
@@ -106,7 +122,7 @@ function addProfessionalDataSheet(
       
       if (monthStr !== currentMonthStr) {
         const separatorRow = worksheet.addRow({ trade_date: `----- ${monthStr} -----` });
-        worksheet.mergeCells(separatorRow.number, 1, separatorRow.number, worksheet.columns.length);
+        worksheet.mergeCells(separatorRow.number, 1, separatorRow.number, worksheet.columns.length); // Merge across all columns
         
         separatorRow.eachCell(cell => {
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.separator } };
@@ -122,7 +138,7 @@ function addProfessionalDataSheet(
     
     // Conditional formatting for P&L columns on insertion
     const pnl = parseFloat(rowData.pnl_amount);
-    const pnlCell = newRow.getCell('pnl_amount');
+    const pnlCell = newRow.getCell('pnl_amount'); // Get P&L cell
     if (!isNaN(pnl)) pnlCell.font = { color: { argb: pnl >= 0 ? colors.profit : colors.loss }, bold: true };
   });
 
@@ -155,7 +171,7 @@ function addProfessionalDataSheet(
         if (typeof val === 'number') {
           // Apply Currency/Numeric formatting based on field detection
           if (header.match(/PNL|PROFIT|AMOUNT|PRICE|LOSS|COST|VALUE|RISK|EQUITY/)) {
-            cell.numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
+            cell.numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00'; // Corrected negative currency format
             if (header.match(/PNL|PROFIT|LOSS/)) {
               cell.font = { bold: true, color: { argb: val >= 0 ? colors.profit : colors.loss } };
             }
@@ -182,7 +198,7 @@ function addProfessionalDataSheet(
       const val = row.getCell(column.key!).value;
       if (val) {
         const len = val.toString().length;
-        if (len > maxLen) maxLen = len;
+        if (len > maxLen) maxLen = len; // Update max length
       }
     });
     column.width = Math.min(Math.max(12, maxLen + 3), 60);
@@ -204,7 +220,7 @@ function addSummarySheet(
   const groupedData: Record<string, any> = {};
 
   trades.forEach(t => {
-    const date = new Date(t.trade_date || t.date);
+    const date = new Date(t.trade_date || t.date || 0); // Handle potentially missing date
     const key = type === 'weekly' ? format(startOfWeek(date), 'yyyy-MM-dd') : format(startOfMonth(date), 'MMM yyyy');
     
     if (!groupedData[key]) {
@@ -215,7 +231,7 @@ function addSummarySheet(
     }
     
     const stats = groupedData[key];
-    const pnl = parseFloat(t.pnl_amount) || 0;
+    const pnl = parseFloat(t.pnl_amount || 0); // Ensure pnl_amount is a number
     stats.trades++;
     if (pnl > 0) { stats.wins++; stats.profit += pnl; } else if (pnl < 0) { stats.losses++; stats.loss += Math.abs(pnl); }
     stats.maxProfit = Math.max(stats.maxProfit, pnl);
@@ -251,7 +267,7 @@ function addSummarySheet(
   if (rows.length === 0) return;
   
   worksheet.columns = Object.keys(rows[0]).map(k => ({ header: k, key: k, width: 18 }));
-  worksheet.addRows(rows);
+  worksheet.addRows(rows); // Add all summary rows
   
   // Styling
   const headerRow = worksheet.getRow(1);
@@ -265,7 +281,7 @@ function addSummarySheet(
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber > 1) {
       const pnl = row.getCell('NET P&L');
-      const val = parseFloat(pnl.value?.toString() || '0');
+      const val = parseFloat(pnl.value?.toString() || '0'); // Parse P&L value
       pnl.font = { bold: true, color: { argb: val >= 0 ? '10B981' : 'EF4444' } };
       pnl.numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
       row.getCell('WIN RATE').numFmt = '0.0"%"';
@@ -280,10 +296,10 @@ function addDashboardSheet(workbook: ExcelJS.Workbook, trades: any[], tasks: any
   const ws = workbook.addWorksheet('Dashboard');
   ws.columns = [{ width: 30 }, { width: 25 }];
   
-  const totalPnL = trades.reduce((acc, t) => acc + (parseFloat(t.pnl_amount) || 0), 0);
-  const winRate = trades.length > 0 ? (trades.filter(t => (parseFloat(t.pnl_amount) || 0) > 0).length / trades.length) * 100 : 0;
-  const totalProfit = trades.reduce((acc, t) => acc + Math.max(0, parseFloat(t.pnl_amount) || 0), 0);
-  const totalLoss = trades.reduce((acc, t) => acc + Math.abs(Math.min(0, parseFloat(t.pnl_amount) || 0)), 0);
+  const totalPnL = trades.reduce((acc, t) => acc + (parseFloat(t.pnl_amount || 0)), 0);
+  const winRate = trades.length > 0 ? (trades.filter(t => (parseFloat(t.pnl_amount || 0)) > 0).length / trades.length) * 100 : 0;
+  const totalProfit = trades.reduce((acc, t) => acc + Math.max(0, parseFloat(t.pnl_amount || 0)), 0);
+  const totalLoss = trades.reduce((acc, t) => acc + Math.abs(Math.min(0, parseFloat(t.pnl_amount || 0))), 0);
 
   ws.addRows([
     ['TRADING JOURNAL PERFORMANCE DASHBOARD'],
@@ -298,9 +314,9 @@ function addDashboardSheet(workbook: ExcelJS.Workbook, trades: any[], tasks: any
     [],
     ['DISCIPLINE & UTILITY', 'COUNT'],
     ['Active Performance Goals', goals.filter(g => g.status !== 'completed').length],
-    ['Completed Goals', goals.filter(g => g.status === 'completed').length],
-    ['Pending Tasks', tasks.filter(t => !t.completed).length],
-    ['Completed Tasks', tasks.filter(t => t.completed).length],
+    ['Completed Goals', goals.filter(g => g.status === 'completed').length], // Filter completed goals
+    ['Pending Tasks', tasks.filter(t => !t.completed).length], // Filter pending tasks
+    ['Completed Tasks', tasks.filter(t => t.completed).length], // Filter completed tasks
   ]);
 
   // Styling
@@ -339,31 +355,41 @@ export async function generateProfessionalExcelWorkbook(
   workbook.creator = 'AITrade Intelligence';
   workbook.created = new Date();
 
-  // 1. Dashboard & Analysis Sheets
-  addDashboardSheet(workbook, trades, tasks, goals);
-  addSummarySheet(workbook, 'Weekly Summary', trades, tasks, goals, 'weekly');
-  addSummarySheet(workbook, 'Monthly Summary', trades, tasks, goals, 'monthly');
-
-  // 2. Primary Data Sheet
-  addProfessionalDataSheet(workbook, 'Trades', trades, true);
-
-  // Map of Sheet Names to their corresponding data arrays
   const dataMap: Record<string, any[]> = {
+    'Dashboard': [], // Placeholder for ordering, will be handled separately
+    'Trades': trades,
+    'Weekly Summary': [], // Placeholder for ordering
+    'Monthly Summary': [], // Placeholder for ordering
+    'Goals': goals,
+    'Tasks': tasks,
     'Calendar': context.calendarEvents || [],
     'Journal': context.journalEntries || [],
     'Performance': context.performanceData || [],
     'Psychology': context.psychologyLogs || [],
     'Risk Management': context.riskData || [],
-    'Strategies': context.strategyData || [],
+    'Strategies': context.strategyData || [], // Ensure strategies are included
     'Notes': context.notes || [],
-    'Goals': goals,
-    'Tasks': tasks,
   };
 
-  // Iterate and create sheets ONLY if data exists for that module
-  Object.entries(dataMap).forEach(([name, data]) => {
+  // Define the desired sheet order
+  const sheetOrder = [
+    'Dashboard', 'Trades', 'Weekly Summary', 'Monthly Summary', 'Goals', 'Tasks', 'Calendar',
+    'Journal', 'Performance', 'Psychology', 'Risk Management', 'Strategies', 'Notes'
+  ];
+
+  // Iterate and create sheets in the specified order, ONLY if data exists for that module
+  sheetOrder.forEach(name => {
+    const data = dataMap[name];
     if (data && data.length > 0) {
-      addProfessionalDataSheet(workbook, name, data);
+      if (name === 'Dashboard') {
+        addDashboardSheet(workbook, trades, tasks, goals);
+      } else if (name === 'Weekly Summary') {
+        addSummarySheet(workbook, name, trades, tasks, goals, 'weekly');
+      } else if (name === 'Monthly Summary') {
+        addSummarySheet(workbook, name, trades, tasks, goals, 'monthly');
+      } else {
+        addProfessionalDataSheet(workbook, name, data, name === 'Trades');
+      }
     }
   });
 
@@ -378,14 +404,70 @@ export async function exportProfessionalExcel(
   tasks: any[] = [],
   goals: any[] = [],
   fileName: string = 'TradingJournal',
-  context: Record<string, any> = {}
+  context: Record<string, any> = {},
+  exportMode: 'single' | 'separate' = 'single' // Added exportMode parameter
 ): Promise<boolean> {
   try {
-    const workbook = await generateProfessionalExcelWorkbook(trades, tasks, goals, context);
-    const buffer = await workbook.xlsx.writeBuffer();
-    const dateStr = format(new Date(), 'yyyy-MM-dd');
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(blob, `${fileName}_${dateStr}.xlsx`);
+    const dateStr = format(new Date(), 'yyyy_MM_dd');
+    
+    if (exportMode === 'single') {
+      const workbook = await generateProfessionalExcelWorkbook(trades, tasks, goals, context);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `${fileName}_Export_${dateStr}.xlsx`);
+    } else {
+      // Separate Files Logic
+      const saveWb = async (wb: ExcelJS.Workbook, suffix: string, dataExists: boolean = true) => {
+        if (!dataExists) return; // Only save if data exists for the sheet
+        const buf = await wb.xlsx.writeBuffer();
+        const b = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(b, `${fileName}_${suffix}_${dateStr}.xlsx`);
+      };
+
+      // 1. Dashboard
+      if (trades.length > 0 || tasks.length > 0 || goals.length > 0) {
+        const dashWb = new ExcelJS.Workbook();
+        addDashboardSheet(dashWb, trades, tasks, goals);
+        await saveWb(dashWb, 'Dashboard', true);
+      }
+
+      // 2. Trades & Summaries
+      if (trades && trades.length > 0) {
+        const tradesWb = new ExcelJS.Workbook(); // Create new workbook for Trades
+        addProfessionalDataSheet(tradesWb, 'Trades', trades, true); // Add Trades sheet
+        await saveWb(tradesWb, 'Trades', true); // Save Trades workbook
+
+        const weeklyWb = new ExcelJS.Workbook(); // Create new workbook for Weekly Summary
+        addSummarySheet(weeklyWb, 'Weekly_Summary', trades, tasks, goals, 'weekly'); // Add Weekly Summary sheet
+        await saveWb(weeklyWb, 'Weekly_Summary', true); // Save Weekly Summary workbook
+
+        const monthlyWb = new ExcelJS.Workbook(); // Create new workbook for Monthly Summary
+        addSummarySheet(monthlyWb, 'Monthly_Summary', trades, tasks, goals, 'monthly'); // Add Monthly Summary sheet
+        await saveWb(monthlyWb, 'Monthly_Summary', true); // Save Monthly Summary workbook
+      }
+
+      // 3. Data Modules
+      const dataMap: Record<string, any[]> = {
+        'Goals': goals,
+        'Tasks': tasks,
+        'Calendar': context.calendarEvents || [],
+        'Journal': context.journalEntries || [],
+        'Performance': context.performanceData || [],
+        'Psychology': context.psychologyLogs || [],
+        'Risk Management': context.riskData || [],
+        'Strategies': context.strategyData || [],
+        'Notes': context.notes || [],
+      };
+
+      for (const [name, data] of Object.entries(dataMap)) {
+        if (data && data.length > 0) {
+          const wb = new ExcelJS.Workbook(); // Create new workbook for each module
+          addProfessionalDataSheet(wb, name, data, name === 'Trades'); // Add module data
+          await saveWb(wb, name.replace(/\s+/g, '_'), true); // Save module workbook
+        }
+      }
+    }
+
     return true;
   } catch (error) {
     console.error('[exportProfessionalExcel] Error generating workbook:', error);

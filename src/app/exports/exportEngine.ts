@@ -33,7 +33,14 @@ export async function exportData(data: any[], options: ExportOptions, context?: 
       return exportJSON(cleaned, options);
 
     case "xlsx":
-      return exportProfessionalExcel(cleaned, context?.tasks || [], context?.goals || [], options.fileName, context);
+      return exportProfessionalExcel(
+        cleaned, 
+        context?.tasks || [], 
+        context?.goals || [], 
+        options.fileName,
+        context,
+        options.exportMode
+      );
 
     case "pdf":
       return exportPDF(cleaned, options);

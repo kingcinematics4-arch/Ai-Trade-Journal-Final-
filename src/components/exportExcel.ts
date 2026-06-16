@@ -1,7 +1,7 @@
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
-import { generateProfessionalExcelWorkbook } from '@/lib/exportExcel';
+import { generateProfessionalExcelWorkbook, exportProfessionalExcel as libExport } from '@/lib/exportExcel';
 
 /**
  * Professional Excel Export UI Component.
@@ -12,21 +12,9 @@ export async function exportProfessionalExcel(
   tasks: any[] = [],
   goals: any[] = [],
   fileName: string = 'TradingJournal',
-  context: any = {}
+  context: any = {},
+  exportMode: 'single' | 'separate' = 'single' // Added exportMode parameter
 ): Promise<boolean> {
-  try {
-    const workbook = await generateProfessionalExcelWorkbook(trades, tasks, goals, context);
-    const buffer = await workbook.xlsx.writeBuffer();
-    const dateStr = format(new Date(), 'yyyy-MM-dd');
-    
-    const blob = new Blob([buffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-    });
-    
-    saveAs(blob, `${fileName}_${dateStr}.xlsx`);
-    return true;
-  } catch (error) {
-    console.error('[exportProfessionalExcel] Error:', error);
-    return false;
-  }
+  // Centralize logic by delegating to lib implementation
+  return libExport(trades, tasks, goals, fileName, context, exportMode);
 }

@@ -10,7 +10,7 @@ export default function ExportPanel() {
   const { trades, isLoading } = useTrades();
   const [format, setFormat] = useState("csv");
   const [fileName, setFileName] = useState("export"); // Default filename
-  const [fields, setFields] = useState(["asset_name", "pnl_amount", "trade_date"]); // Default fields
+  const [fields, setFields] = useState<string[]>([]); // Default to empty (Full Database Export)
   return (
     <div className={styles.container}>
       <div className={styles.card}>
@@ -100,6 +100,9 @@ export default function ExportPanel() {
                 <span className={styles.checkboxText}>Trade Date</span>
               </label>
             </div>
+            <p className="text-[10px] text-muted-foreground mt-4 italic opacity-70">
+              * Leave all fields unchecked to perform a full dynamic database export (all available properties).
+            </p>
           </div>
 
           <button
@@ -108,7 +111,7 @@ export default function ExportPanel() {
               exportData(trades, {
                 fileName,
                 format,
-                selectedFields: fields,
+                selectedFields: fields.length > 0 ? fields : undefined, // If empty, export everything
                 includeHeaders: true,
                 prettyPrint: true
               } as any)
