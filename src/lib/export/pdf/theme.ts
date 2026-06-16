@@ -29,6 +29,7 @@ export const PDF_LAYOUT = {
   subtitleSize: 10,
   cardTitleSize: 12,
   tableFontSize: 10,
+  standardTableFontSize: 10,
   summaryCardHeight: 24,
   summaryCardGap: 5,
   tradeCardPadding: 5,

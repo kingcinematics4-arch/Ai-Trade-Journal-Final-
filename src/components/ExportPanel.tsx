@@ -58,6 +58,7 @@ const formatLabel = (key: string) => {
 export default function ExportPanel() {
   const { trades, isLoading } = useTrades();
   const [format, setFormat] = useState("csv");
+  const [pdfReportType, setPdfReportType] = useState<"standard" | "detailed">("standard");
   const [fileName, setFileName] = useState("export"); // Default filename
   const [fields, setFields] = useState<string[]>([]); // Default to empty (Full Database Export)
   const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
@@ -184,6 +185,39 @@ export default function ExportPanel() {
               <option value="zip">ZIP (Archive All)</option>
             </select>
           </div>
+
+          {format === "pdf" && (
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>PDF Report Type</label>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
+                  <input
+                    type="radio"
+                    name="pdfReportType"
+                    value="standard"
+                    checked={pdfReportType === "standard"}
+                    onChange={() => setPdfReportType("standard")}
+                    className="accent-primary"
+                  />
+                  Standard Report
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
+                  <input
+                    type="radio"
+                    name="pdfReportType"
+                    value="detailed"
+                    checked={pdfReportType === "detailed"}
+                    onChange={() => setPdfReportType("detailed")}
+                    className="accent-primary"
+                  />
+                  Detailed Report
+                </label>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2">
+                Standard uses a compact table. Detailed exports all selected fields.
+              </p>
+            </div>
+          )}
 
           {/* FIELD FILTERS */}
           <div className={styles.inputGroup}>
@@ -385,7 +419,8 @@ export default function ExportPanel() {
                 format,
                 selectedFields: [...PERMANENT_KEYS, ...fields],
                 includeHeaders: true,
-                prettyPrint: true
+                prettyPrint: true,
+                pdfReportType: format === "pdf" ? pdfReportType : undefined,
               } as any)
             }
           >

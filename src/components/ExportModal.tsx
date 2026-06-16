@@ -130,6 +130,7 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   const [format, setFormat] = useState<ExportFormat>('xlsx');
   const [isExporting, setIsExporting] = useState(false);
   const [exportMode, setExportMode] = useState<'single' | 'separate'>('single');
+  const [pdfReportType, setPdfReportType] = useState<'standard' | 'detailed'>('standard');
   const [selectedOptionalFields, setSelectedOptionalFields] = useState<string[]>([]);
   const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
   const [deletedFilters, setDeletedFilters] = useState<{ id: string; label: string }[]>([]);
@@ -278,7 +279,8 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
           : undefined,
         includeHeaders: true,
         prettyPrint: true,
-        exportMode: exportMode
+        exportMode: exportMode,
+        pdfReportType: format === 'pdf' ? pdfReportType : undefined,
       }, {
         // Note: For a truly global report, consider passing actual store data here
         tasks: [],
@@ -553,6 +555,38 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
               </p>
             )}
           </div>
+
+          {format === 'pdf' && (
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">PDF Report Type</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPdfReportType('standard')}
+                  className={`flex flex-col items-start gap-1 p-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
+                    pdfReportType === 'standard'
+                      ? 'bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.1)]'
+                      : 'bg-muted/20 border-border text-muted-foreground hover:bg-muted/40'
+                  }`}
+                >
+                  <span>Standard Report</span>
+                  <span className="text-[10px] font-normal opacity-70">Compact table · low page count</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPdfReportType('detailed')}
+                  className={`flex flex-col items-start gap-1 p-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
+                    pdfReportType === 'detailed'
+                      ? 'bg-primary/10 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.1)]'
+                      : 'bg-muted/20 border-border text-muted-foreground hover:bg-muted/40'
+                  }`}
+                >
+                  <span>Detailed Report</span>
+                  <span className="text-[10px] font-normal opacity-70">All selected export fields</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {format === 'xlsx' && (
             <div className="space-y-3">

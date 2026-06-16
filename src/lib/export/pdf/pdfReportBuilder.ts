@@ -1,24 +1,48 @@
 import jsPDF from 'jspdf';
-import { resolveExportColumns } from '@/lib/export/exportFields';
+import { resolveExportColumns, type PdfReportType } from '@/lib/export/exportFields';
 import { PDF_LAYOUT } from './theme';
 import { PdfDocumentContext } from './PdfDocumentContext';
 import {
-  buildSummaryMetrics,
+  buildDetailedSummaryMetrics,
+  buildStandardSummaryMetrics,
   computeReportDateRange,
   getReportAnalytics,
 } from './pdfAnalytics';
 import { drawReportHeader, drawSectionHeader, drawSummaryCardGrid } from './pdfSummaryCards';
+import { drawStandardTradeTable } from './pdfStandardTable';
 import { drawTradeCardLayout } from './pdfTradeCard';
 import { drawTradeTableLayout } from './pdfTableLayout';
 
+export type { PdfReportType };
 export interface PDFReportOptions {
   fileName?: string;
   selectedFields?: string[];
+  pdfReportType?: PdfReportType;
 }
 
-export function buildPremiumTradingReport(
+function buildStandardReport(data: Record<string, unknown>[]): jsPDF {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+  const ctx = new PdfDocumentContext(doc);
+  const analytics = getReportAnalytics(data);
+  const dateRange = computeReportDateRange(data);
+
+  drawReportHeader(ctx, {
+    dateRangeLabel: dateRange.label,
+    fieldCount: 6,
+    tradeCount: data.length,
+    reportLabel: 'Standard Report',
+  });
+  drawSummaryCardGrid(ctx, buildStandardSummaryMetrics(analytics));
+
+  drawSectionHeader(ctx, 'Trade Log', 'Compact overview — optimized for quick review');
+  drawStandardTradeTable(ctx, data);
+
+  return doc;
+}
+
+function buildDetailedReport(
   data: Record<string, unknown>[],
-  options: PDFReportOptions = {},
+  options: PDFReportOptions,
 ): jsPDF {
   const columns = resolveExportColumns(data, options.selectedFields);
   if (!columns.length) {
@@ -29,14 +53,14 @@ export function buildPremiumTradingReport(
   const ctx = new PdfDocumentContext(doc);
   const analytics = getReportAnalytics(data);
   const dateRange = computeReportDateRange(data);
-  const metrics = buildSummaryMetrics(analytics);
 
   drawReportHeader(ctx, {
     dateRangeLabel: dateRange.label,
     fieldCount: columns.length,
     tradeCount: data.length,
+    reportLabel: 'Detailed Report',
   });
-  drawSummaryCardGrid(ctx, metrics);
+  drawSummaryCardGrid(ctx, buildDetailedSummaryMetrics(analytics));
 
   ctx.addPage('Trade Details');
   const layoutMode = columns.length <= PDF_LAYOUT.maxTableColumns ? 'table' : 'cards';
@@ -44,7 +68,7 @@ export function buildPremiumTradingReport(
     ctx,
     'Trade Details',
     layoutMode === 'table'
-      ? 'Table view for selected export fields'
+      ? 'All selected export fields'
       : 'Card view — optimized for readability with many fields',
   );
 
@@ -55,6 +79,17 @@ export function buildPremiumTradingReport(
   }
 
   return doc;
+}
+
+export function buildPremiumTradingReport(
+  data: Record<string, unknown>[],
+  options: PDFReportOptions = {},
+): jsPDF {
+  const reportType = options.pdfReportType ?? 'standard';
+  if (reportType === 'standard') {
+    return buildStandardReport(data);
+  }
+  return buildDetailedReport(data, options);
 }
 
 export function exportPremiumTradingReport(

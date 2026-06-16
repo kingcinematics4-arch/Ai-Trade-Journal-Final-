@@ -5,4 +5,5 @@ export type { PDFReportOptions } from './pdfReportBuilder';
 export { drawSummaryCard, drawSummaryCardGrid, drawReportHeader } from './pdfSummaryCards';
 export { drawTradeCard, drawTradeCardLayout } from './pdfTradeCard';
 export { drawTradeTableLayout } from './pdfTableLayout';
-export { buildSummaryMetrics, computeReportDateRange, getReportAnalytics } from './pdfAnalytics';
+export { drawStandardTradeTable } from './pdfStandardTable';
+export { buildStandardSummaryMetrics, buildDetailedSummaryMetrics, buildSummaryMetrics, computeReportDateRange, getReportAnalytics } from './pdfAnalytics';

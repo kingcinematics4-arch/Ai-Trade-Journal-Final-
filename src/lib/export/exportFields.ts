@@ -282,6 +282,65 @@ export function isPnlField(field: string): boolean {
   return PNL_FIELDS.has(field);
 }
 
+/** Fixed columns for standard PDF report (compact investor summary) */
+export const STANDARD_PDF_COLUMNS = [
+  { key: 'trade_date', label: 'Date' },
+  { key: 'asset_name', label: 'Asset' },
+  { key: 'strategy_used', label: 'Strategy' },
+  { key: 'risk_amount', label: 'Amount' },
+  { key: 'pnl_amount', label: 'P&L' },
+  { key: 'trade_status', label: 'Result' },
+] as const;
+
+export type PdfReportType = 'standard' | 'detailed';
+
+function resolveNestedValue(row: Record<string, unknown>, key: string): unknown {
+  if (key in row) return row[key];
+  if (key.includes('.')) {
+    const parts = key.split('.');
+    let current: unknown = row;
+    for (const part of parts) {
+      if (!current || typeof current !== 'object') return undefined;
+      current = (current as Record<string, unknown>)[part];
+    }
+    return current;
+  }
+  return undefined;
+}
+
+/** Resolves a standard-report cell with sensible fallbacks across trade shapes */
+export function getStandardPdfCellValue(field: string, row: Record<string, unknown>): string {
+  switch (field) {
+    case 'trade_date': {
+      const parsed = parseDateValue(row.trade_date ?? row.date ?? row.created_at);
+      return parsed ? format(parsed, 'dd-MMM') : '—';
+    }
+    case 'asset_name':
+      return formatExportCellValue('asset_name', row.asset_name ?? row.symbol ?? row.asset);
+    case 'strategy_used':
+      return formatExportCellValue(
+        'strategy_used',
+        row.strategy_used ?? resolveNestedValue(row, 'strategy.name'),
+      );
+    case 'risk_amount':
+      return formatExportCellValue('risk_amount', row.risk_amount ?? row.amount);
+    case 'pnl_amount':
+      return formatExportCellValue('pnl_amount', row.pnl_amount ?? row.net_pnl ?? row.pnl ?? row.profit);
+    case 'trade_status': {
+      const status = row.trade_status ?? row.status;
+      if (status !== null && status !== undefined && status !== '') {
+        return formatExportCellValue('trade_status', status);
+      }
+      const pnl = Number(row.pnl_amount ?? row.net_pnl ?? row.pnl ?? row.profit ?? 0);
+      if (pnl > 0) return 'Win';
+      if (pnl < 0) return 'Loss';
+      return 'Breakeven';
+    }
+    default:
+      return formatExportCellValue(field, resolveNestedValue(row, field));
+  }
+}
+
 export function getFlatKeys(obj: Record<string, unknown>, prefix = ''): string[] {
   if (!obj || typeof obj !== 'object') return [];
   let keys: string[] = [];

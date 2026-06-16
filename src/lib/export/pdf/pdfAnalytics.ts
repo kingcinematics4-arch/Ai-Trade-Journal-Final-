@@ -44,7 +44,8 @@ export function computeReportDateRange(data: Record<string, unknown>[]): ReportD
   return { label, from, to };
 }
 
-export function buildSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] {
+/** Compact summary for standard PDF report */
+export function buildStandardSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] {
   return [
     {
       id: 'net-pnl',
@@ -59,6 +60,12 @@ export function buildSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] 
       tone: 'default',
     },
     {
+      id: 'win-rate',
+      label: 'Win Rate',
+      value: `${analytics.winRate.toFixed(1)}%`,
+      tone: analytics.winRate >= 50 ? 'profit' : analytics.winRate > 0 ? 'loss' : 'muted',
+    },
+    {
       id: 'wins',
       label: 'Winning Trades',
       value: String(analytics.winCount),
@@ -70,12 +77,13 @@ export function buildSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] 
       value: String(analytics.lossCount),
       tone: 'loss',
     },
-    {
-      id: 'win-rate',
-      label: 'Win Rate',
-      value: `${analytics.winRate.toFixed(1)}%`,
-      tone: analytics.winRate >= 50 ? 'profit' : analytics.winRate > 0 ? 'loss' : 'muted',
-    },
+  ];
+}
+
+/** Full summary for detailed PDF report */
+export function buildDetailedSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] {
+  return [
+    ...buildStandardSummaryMetrics(analytics),
     {
       id: 'avg-rr',
       label: 'Average Risk Reward',
@@ -83,6 +91,11 @@ export function buildSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] 
       tone: 'primary',
     },
   ];
+}
+
+/** @deprecated Use buildStandardSummaryMetrics or buildDetailedSummaryMetrics */
+export function buildSummaryMetrics(analytics: TradeAnalytics): SummaryMetric[] {
+  return buildDetailedSummaryMetrics(analytics);
 }
 
 export function getReportAnalytics(data: Record<string, unknown>[]) {

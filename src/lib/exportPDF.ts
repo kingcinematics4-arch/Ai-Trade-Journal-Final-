@@ -19,7 +19,12 @@ export function exportPDF(
       : {
           fileName: typeof fileNameOrOptions === 'string' ? fileNameOrOptions : 'Trade_Report',
           selectedFields: options?.selectedFields,
+          pdfReportType: options?.pdfReportType,
         };
+
+  if (!resolved.pdfReportType) {
+    resolved.pdfReportType = 'standard';
+  }
 
   exportPremiumTradingReport(data as Record<string, unknown>[], resolved);
 }

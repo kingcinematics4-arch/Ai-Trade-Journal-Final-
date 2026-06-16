@@ -5,7 +5,7 @@ import type { PdfDocumentContext } from './PdfDocumentContext';
 
 export function drawReportHeader(
   ctx: PdfDocumentContext,
-  options: { dateRangeLabel: string; fieldCount: number; tradeCount: number },
+  options: { dateRangeLabel: string; fieldCount: number; tradeCount: number; reportLabel?: string },
 ): void {
   const { doc } = ctx;
   const x = PDF_LAYOUT.marginX;
@@ -25,7 +25,11 @@ export function drawReportHeader(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(PDF_LAYOUT.subtitleSize);
   doc.setTextColor(...PDF_THEME.muted);
-  doc.text('Trading Performance Report', x + 8, ctx.y + 16);
+  doc.text(
+    options.reportLabel ? `Trading Performance Report · ${options.reportLabel}` : 'Trading Performance Report',
+    x + 8,
+    ctx.y + 16,
+  );
 
   const generated = format(new Date(), 'dd MMM yyyy · HH:mm');
   doc.text(`Generated ${generated}`, x + 8, ctx.y + 22);
