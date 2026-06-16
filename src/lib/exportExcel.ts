@@ -1,6 +1,6 @@
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { format, startOfWeek, startOfMonth } from 'date-fns';
+import { format, startOfWeek, startOfMonth, getWeek } from 'date-fns';
 
 /**
  * Utility to recursively flatten nested objects and format values for Excel.
@@ -302,7 +302,7 @@ function addDashboardSheet(workbook: ExcelJS.Workbook, trades: any[], tasks: any
   const totalLoss = trades.reduce((acc, t) => acc + Math.abs(Math.min(0, parseFloat(t.pnl_amount || 0))), 0);
 
   ws.addRows([
-    ['TRADING JOURNAL PERFORMANCE DASHBOARD'],
+    ['HEDGE FUND PERFORMANCE REPORT'],
     ['Generated On', format(new Date(), 'yyyy-MM-dd HH:mm')],
     [],
     ['KEY PERFORMANCE INDICATORS', 'VALUE'],
