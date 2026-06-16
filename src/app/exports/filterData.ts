@@ -5,7 +5,22 @@ export function filterData(data: any[], options: any) {
   return data.map(item => {
     const filtered: any = {};
     options.selectedFields.forEach((field: string) => {
-      filtered[field] = item[field];
+      if (field.includes('.')) {
+        const parts = field.split('.');
+        let current = item;
+        let found = true;
+        for (const part of parts) {
+          if (current && typeof current === 'object' && part in current) {
+            current = current[part];
+          } else {
+            found = false;
+            break;
+          }
+        }
+        if (found) filtered[field] = current;
+      } else {
+        filtered[field] = item[field];
+      }
     });
     return filtered;
   });

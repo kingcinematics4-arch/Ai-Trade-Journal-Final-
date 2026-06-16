@@ -1,11 +1,59 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, FileText, Check, Settings2, Loader2, Table } from 'lucide-react';
+import { X, Download, FileText, Check, Settings2, Loader2, Table, Filter, ListChecks } from 'lucide-react';
 import { exportData } from '@/app/exports/exportEngine';
 import { logExport, ExportFormat } from '@/lib/utils/exportUtils';
 import { toast } from 'sonner';
+
+const TRADE_PERMANENT_KEYS = ['trade_date', 'asset_name', 'risk_amount', 'pnl_amount', 'pnl_percent', 'strategy_used'];
+const TRADE_ESSENTIAL_KEYS = ['trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 'lot_size', 'rr_ratio', 'notes'];
+
+const FIELD_LABELS: Record<string, string> = {
+  trade_date: 'Date',
+  asset_name: 'Asset Name',
+  risk_amount: 'Amount',
+  pnl_amount: 'PNL',
+  pnl_percent: 'PNL %',
+  strategy_used: 'Strategy',
+  trade_direction: 'Direction',
+  entry_price: 'Entry Price',
+  exit_price: 'Exit Price',
+  stop_loss: 'Stop Loss',
+  take_profit: 'Take Profit',
+  lot_size: 'Quantity',
+  rr_ratio: 'Risk Reward Ratio',
+  notes: 'Notes',
+  created_at: 'Created Date',
+  updated_at: 'Updated Date'
+};
+
+function getFlatKeys(obj: any, prefix = ''): string[] {
+  if (!obj || typeof obj !== 'object') return [];
+  let keys: string[] = [];
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    const newKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+      keys = [...keys, ...getFlatKeys(value, newKey)];
+    } else {
+      keys.push(newKey);
+    }
+  });
+  return keys;
+}
+
+const formatLabel = (key: string) => {
+  if (FIELD_LABELS[key]) return FIELD_LABELS[key];
+  return key
+    .replace(/[._]/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -82,9 +130,62 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   const [format, setFormat] = useState<ExportFormat>('xlsx');
   const [isExporting, setIsExporting] = useState(false);
   const [exportMode, setExportMode] = useState<'single' | 'separate'>('single');
+  const [selectedOptionalFields, setSelectedOptionalFields] = useState<string[]>([]);
+  const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
   const [includeMeta, setIncludeMeta] = useState(true);
 
+  // Load saved preferences
+  useEffect(() => {
+    if (isOpen) {
+      const saved = localStorage.getItem(`export_fields_${category}`);
+      if (saved) {
+        try {
+          setSelectedOptionalFields(JSON.parse(saved));
+        } catch (e) {
+          console.error('Failed to parse export preferences');
+        }
+      }
+    }
+  }, [isOpen, category]);
+
+  // Detect available fields
+  useEffect(() => {
+    if (isOpen && data && data.length > 0) {
+      const permanent = category === 'trades' ? TRADE_PERMANENT_KEYS : [];
+      const allKeys = new Set<string>();
+      data.slice(0, 10).forEach(item => {
+        getFlatKeys(item).forEach(k => allKeys.add(k));
+      });
+      const optional = Array.from(allKeys).filter(k => !permanent.includes(k)).sort();
+      setAvailableOptionalFields(optional);
+    }
+  }, [isOpen, data, category]);
+
+  const toggleField = (field: string) => {
+    const next = selectedOptionalFields.includes(field)
+      ? selectedOptionalFields.filter(f => f !== field)
+      : [...selectedOptionalFields, field];
+    setSelectedOptionalFields(next);
+    localStorage.setItem(`export_fields_${category}`, JSON.stringify(next));
+  };
+
   if (!isOpen) return null;
+
+  const quickActions = {
+    selectAll: () => {
+      setSelectedOptionalFields(availableOptionalFields);
+      localStorage.setItem(`export_fields_${category}`, JSON.stringify(availableOptionalFields));
+    },
+    clear: () => {
+      setSelectedOptionalFields([]);
+      localStorage.setItem(`export_fields_${category}`, JSON.stringify([]));
+    },
+    tradingEssentials: () => {
+      const essentials = availableOptionalFields.filter(f => TRADE_ESSENTIAL_KEYS.includes(f));
+      setSelectedOptionalFields(essentials);
+      localStorage.setItem(`export_fields_${category}`, JSON.stringify(essentials));
+    }
+  };
 
   const handleExport = async () => {
     if (!data || data.length === 0) {
@@ -95,12 +196,16 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
     setIsExporting(true);
     const loadingToast = toast.loading('Architecting professional report...');
     
+    const permanent = category === 'trades' ? TRADE_PERMANENT_KEYS : [];
+
     try {
       // Execute the export via the specialized export engine
       const success = await exportData(data, {
         fileName: filename,
         format: format as any,
-        selectedFields: [],
+        selectedFields: (category === 'trades' || selectedOptionalFields.length > 0)
+          ? [...permanent, ...selectedOptionalFields]
+          : undefined,
         includeHeaders: true,
         prettyPrint: true,
         exportMode: exportMode
@@ -181,6 +286,76 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                 </motion.button>
               ))}
             </motion.div>
+          </div>
+
+          {/* DATA FIELDS FILTER SECTION */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Export Fields</label>
+              <div className="flex gap-2">
+                <button onClick={quickActions.tradingEssentials} className="text-[9px] font-bold text-primary hover:underline transition-all">Trading Essentials</button>
+                <button onClick={quickActions.selectAll} className="text-[9px] font-bold text-primary hover:underline transition-all">Select All</button>
+                <button onClick={quickActions.clear} className="text-[9px] font-bold text-primary hover:underline transition-all">Clear Optional</button>
+              </div>
+            </div>
+
+            <div className="bg-muted/10 border border-border rounded-2xl p-4 space-y-4 max-h-[250px] overflow-y-auto custom-scrollbar">
+              {category === 'trades' && (
+                <div className="space-y-2">
+                  <p className="text-[9px] font-bold text-muted-foreground/40 uppercase flex items-center gap-1.5">
+                    <ListChecks size={10} /> Required Fields (Locked)
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {TRADE_PERMANENT_KEYS.map(key => (
+                      <div key={key} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] border border-white/[0.03] opacity-60">
+                        <Check size={12} className="text-primary" />
+                        <span className="text-[11px] font-medium text-muted-foreground">{formatLabel(key)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <p className="text-[9px] font-bold text-muted-foreground/40 uppercase flex items-center gap-1.5">
+                  <Filter size={10} /> {category === 'trades' ? 'Optional Fields' : 'Available Fields'}
+                </p>
+                {availableOptionalFields.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {availableOptionalFields.map(field => (
+                      <button
+                        key={field}
+                        onClick={() => toggleField(field)}
+                        className={`flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 text-left ${
+                          selectedOptionalFields.includes(field)
+                            ? 'bg-primary/5 border-primary/30 text-primary'
+                            : 'bg-white/[0.01] border-white/[0.05] text-muted-foreground hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
+                          selectedOptionalFields.includes(field)
+                            ? 'bg-primary border-primary'
+                            : 'bg-transparent border-muted-foreground/30'
+                        }`}>
+                          {selectedOptionalFields.includes(field) && <Check size={10} className="text-white" />}
+                        </div>
+                        <span className="text-[11px] font-medium truncate">{formatLabel(field)}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-4 text-center">
+                    <p className="text-[10px] text-muted-foreground italic">No optional fields detected</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {category === 'trades' && (
+              <p className="text-[10px] text-muted-foreground/60 italic leading-relaxed">
+                * Permanent fields like <strong>PNL</strong> and <strong>Strategy</strong> are essential for professional review and cannot be removed.
+              </p>
+            )}
           </div>
 
           {format === 'xlsx' && (
