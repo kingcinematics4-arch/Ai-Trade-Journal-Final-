@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, FileText, Check, Settings2, Loader2, Table, Filter, ListChecks, Trash2, AlertTriangle } from 'lucide-react';
+import { X, Download, FileText, Check, Settings2, Loader2, Table, Filter, ListChecks, Trash2, AlertTriangle, RefreshCcw, Eraser } from 'lucide-react';
 import { exportData } from '@/app/exports/exportEngine';
 import { logExport, ExportFormat } from '@/lib/utils/exportUtils';
 import { toast } from 'sonner';
@@ -132,9 +132,15 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   const [exportMode, setExportMode] = useState<'single' | 'separate'>('single');
   const [selectedOptionalFields, setSelectedOptionalFields] = useState<string[]>([]);
   const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
-  const [deletedFields, setDeletedFields] = useState<string[]>([]);
+  const [deletedFilters, setDeletedFilters] = useState<{ id: string; label: string }[]>([]);
+  const [showDeletedFilters, setShowDeletedFilters] = useState(false);
   const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
   const [includeMeta, setIncludeMeta] = useState(true);
+
+  // Debugging log for deleted filters state as requested
+  useEffect(() => {
+    console.log("Deleted Filters:", deletedFilters);
+  }, [deletedFilters]);
 
   // Load saved preferences
   useEffect(() => {
@@ -156,7 +162,12 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
       const savedDeleted = localStorage.getItem(`export_deleted_fields_${category}`);
       if (savedDeleted) {
         try {
-          setDeletedFields(JSON.parse(savedDeleted));
+          const parsed = JSON.parse(savedDeleted);
+          if (Array.isArray(parsed)) {
+            // Migrate strings to objects if necessary
+            const normalized = parsed.map(item => typeof item === 'string' ? { id: item, label: formatLabel(item) } : item);
+            setDeletedFilters(normalized);
+          }
         } catch (e) {
           console.error('Failed to parse deleted fields preferences');
         }
@@ -173,11 +184,11 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
         getFlatKeys(item).forEach(k => allKeys.add(k));
       });
       const optional = Array.from(allKeys)
-        .filter(k => !permanent.includes(k) && !deletedFields.includes(k))
+        .filter(k => !permanent.includes(k) && !deletedFilters.some(df => df.id === k))
         .sort();
       setAvailableOptionalFields(optional);
     }
-  }, [isOpen, data, category, deletedFields]);
+  }, [isOpen, data, category, deletedFilters]);
 
   const toggleField = (field: string) => {
     const next = selectedOptionalFields.includes(field)
@@ -190,9 +201,10 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   const handleConfirmDelete = () => {
     if (!filterToDelete) return;
     
-    const newDeleted = [...deletedFields, filterToDelete];
-    setDeletedFields(newDeleted);
-    localStorage.setItem(`export_deleted_fields_${category}`, JSON.stringify(newDeleted));
+    const filterObj = { id: filterToDelete, label: formatLabel(filterToDelete) };
+    const nextDeleted = [...deletedFilters, filterObj];
+    setDeletedFilters(nextDeleted);
+    localStorage.setItem(`export_deleted_fields_${category}`, JSON.stringify(nextDeleted));
     
     // Also remove from selected if it was there
     if (selectedOptionalFields.includes(filterToDelete)) {
@@ -202,7 +214,28 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
     }
     
     setFilterToDelete(null);
-    toast.success(`Filter "${formatLabel(filterToDelete)}" removed from view`);
+    toast.success(`Filter "${filterObj.label}" removed from view`);
+  };
+
+  const restoreFilter = (id: string) => {
+    console.log("Restoring", id);
+    const filterToRestore = deletedFilters.find(f => f.id === id);
+    const next = deletedFilters.filter(f => f.id !== id);
+    setDeletedFilters(next);
+    localStorage.setItem(`export_deleted_fields_${category}`, JSON.stringify(next));
+    
+    if (filterToRestore) {
+      toast.success(`Restored "${filterToRestore.label}"`);
+    }
+    if (next.length === 0) setShowDeletedFilters(false);
+  };
+
+  const restoreAllFilters = () => {
+    console.log("Restoring all filters");
+    setDeletedFilters([]);
+    localStorage.setItem(`export_deleted_fields_${category}`, JSON.stringify([]));
+    setShowDeletedFilters(false);
+    toast.success('All filters restored');
   };
 
   if (!isOpen) return null;
@@ -239,6 +272,7 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
       const success = await exportData(data, {
         fileName: filename,
         format: format as any,
+      // Ensure we pass the actual field names to the engine
         selectedFields: (category === 'trades' || selectedOptionalFields.length > 0)
           ? [...permanent, ...selectedOptionalFields]
           : undefined,
@@ -328,9 +362,79 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Export Fields</label>
-              <div className="flex gap-2">
-                <button onClick={quickActions.tradingEssentials} className="text-[9px] font-bold text-primary hover:underline transition-all">Trading Essentials</button>
-                <button onClick={quickActions.selectAll} className="text-[9px] font-bold text-primary hover:underline transition-all">Select All</button>
+              <div className="flex gap-2 relative">
+                <button onClick={quickActions.tradingEssentials} className="text-[9px] font-bold text-primary hover:underline transition-all">Essentials</button>
+                <button onClick={quickActions.selectAll} className="text-[9px] font-bold text-primary hover:underline transition-all">All</button>
+                
+                {deletedFilters.length > 0 && (
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      console.log("Opening deleted filters popup");
+                      setShowDeletedFilters(!showDeletedFilters);
+                    }}
+                    className={`text-[9px] font-black flex items-center gap-1 px-2 py-0.5 rounded border transition-all ${
+                      showDeletedFilters 
+                        ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20' 
+                        : 'text-amber-500 hover:text-amber-400 bg-amber-500/10 border-amber-500/20'
+                    }`}
+                  >
+                    Edit Filters ({deletedFilters.length})
+                  </button>
+                )}
+
+                {/* NEW REBUILT POPUP CARD */}
+                <AnimatePresence>
+                  {showDeletedFilters && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute z-[60] right-0 top-full mt-2 w-72 bg-card border border-border shadow-2xl rounded-2xl overflow-hidden p-0"
+                    >
+                      <div className="px-4 py-3 bg-muted/30 border-b border-border flex items-center justify-between">
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-foreground">Deleted Filters</h3>
+                        <button onClick={() => setShowDeletedFilters(false)} className="text-muted-foreground hover:text-white transition-colors">
+                          <X size={14} />
+                        </button>
+                      </div>
+                      
+                      <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
+                        {deletedFilters.length === 0 ? (
+                          <p className="text-[10px] text-muted-foreground text-center py-4 italic">No hidden filters</p>
+                        ) : (
+                          deletedFilters.map(filter => (
+                            <div key={filter.id} className="flex justify-between items-center p-2 hover:bg-white/[0.02] rounded-lg border border-transparent hover:border-white/5 transition-all group">
+                              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{filter.label}</span>
+                              <button
+                                onClick={() => restoreFilter(filter.id)}
+                                className="px-2 py-1 bg-primary/10 text-primary text-[9px] font-black uppercase rounded md hover:bg-primary hover:text-white transition-all"
+                              >
+                                Restore
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      <div className="p-3 bg-muted/20 border-t border-border flex gap-2">
+                        <button 
+                          onClick={restoreAllFilters}
+                          className="flex-1 px-2 py-1.5 bg-primary text-white text-[9px] font-black uppercase tracking-wider rounded-lg hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+                        >
+                          Restore All
+                        </button>
+                        <button 
+                          onClick={() => setShowDeletedFilters(false)}
+                          className="flex-1 px-2 py-1.5 bg-white/[0.05] text-muted-foreground text-[9px] font-black uppercase tracking-wider rounded-lg hover:text-white hover:bg-white/10 transition-all"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <button onClick={quickActions.clear} className="text-[9px] font-bold text-primary hover:underline transition-all">Clear Optional</button>
               </div>
             </div>
@@ -368,7 +472,7 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
 
             <div className="bg-muted/10 border border-border rounded-2xl p-4 space-y-4 max-h-[250px] overflow-y-auto custom-scrollbar">
               {category === 'trades' && (
-                <div className="space-y-2">
+                <div className="space-y-2 mb-4">
                   <p className="text-[9px] font-bold text-muted-foreground/40 uppercase flex items-center gap-1.5">
                     <ListChecks size={10} /> Required Fields (Locked)
                   </p>
@@ -428,10 +532,10 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                 )}
               </div>
             </div>
-            
+
             {category === 'trades' && (
-              <p className="text-[10px] text-muted-foreground/60 italic leading-relaxed">
-                * Permanent fields like <strong>PNL</strong> and <strong>Strategy</strong> are essential for professional review and cannot be removed.
+              <p className="text-[10px] text-muted-foreground/60 italic leading-relaxed px-1">
+                * Required fields like <strong>PNL</strong> and <strong>Strategy</strong> are essential and cannot be removed.
               </p>
             )}
           </div>

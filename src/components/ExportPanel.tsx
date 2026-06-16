@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTrades } from "@/contexts/TradesContext";
 import { exportData } from "@/app/exports/exportEngine";
 import styles from "./ExportPanel.module.css";
-import { Loader2, ListChecks, Filter, Check, Trash2, AlertTriangle } from "lucide-react";
+import { Loader2, ListChecks, Filter, Check, Trash2, AlertTriangle, RefreshCcw, X } from "lucide-react";
 
 const PERMANENT_KEYS = ['trade_date', 'asset_name', 'risk_amount', 'pnl_amount', 'pnl_percent', 'strategy_used'];
 const ESSENTIAL_KEYS = ['trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 'lot_size', 'rr_ratio', 'notes'];
@@ -62,7 +62,13 @@ export default function ExportPanel() {
   const [fields, setFields] = useState<string[]>([]); // Default to empty (Full Database Export)
   const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
   const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
-  const [deletedFields, setDeletedFields] = useState<string[]>([]);
+  const [deletedFilters, setDeletedFilters] = useState<{ id: string; label: string }[]>([]);
+  const [showDeletedFilters, setShowDeletedFilters] = useState(false);
+
+  // Debugging log for panel deleted filters as requested
+  useEffect(() => {
+    console.log("Deleted Filters:", deletedFilters);
+  }, [deletedFilters]);
 
   useEffect(() => {
     const saved = localStorage.getItem('export_fields_panel');
@@ -71,7 +77,12 @@ export default function ExportPanel() {
     const savedDeleted = localStorage.getItem('export_deleted_fields_panel');
     if (savedDeleted) {
       try {
-        setDeletedFields(JSON.parse(savedDeleted));
+        const parsed = JSON.parse(savedDeleted);
+        if (Array.isArray(parsed)) {
+          // Migrate format
+          const normalized = parsed.map(item => typeof item === 'string' ? { id: item, label: formatLabel(item) } : item);
+          setDeletedFilters(normalized);
+        }
       } catch (e) {
         console.error('Failed to parse deleted fields preferences');
       }
@@ -85,11 +96,11 @@ export default function ExportPanel() {
         getFlatKeys(item).forEach(k => allKeys.add(k));
       });
       const optional = Array.from(allKeys)
-        .filter(k => !PERMANENT_KEYS.includes(k) && !deletedFields.includes(k))
+        .filter(k => !PERMANENT_KEYS.includes(k) && !deletedFilters.some(df => df.id === k))
         .sort();
       setAvailableOptionalFields(optional);
     }
-  }, [trades, deletedFields]);
+  }, [trades, deletedFilters]);
 
   const toggleField = (field: string) => {
     const next = fields.includes(field)
@@ -102,14 +113,30 @@ export default function ExportPanel() {
   const handleConfirmDelete = () => {
     if (!filterToDelete) return;
     
-    const newDeleted = [...deletedFields, filterToDelete];
-    setDeletedFields(newDeleted);
-    localStorage.setItem('export_deleted_fields_panel', JSON.stringify(newDeleted));
+    const filterObj = { id: filterToDelete, label: formatLabel(filterToDelete) };
+    const nextDeleted = [...deletedFilters, filterObj];
+    setDeletedFilters(nextDeleted);
+    localStorage.setItem('export_deleted_fields_panel', JSON.stringify(nextDeleted));
     
     if (fields.includes(filterToDelete)) {
       toggleField(filterToDelete);
     }
     setFilterToDelete(null);
+  };
+
+  const restoreFilter = (id: string) => {
+    console.log("Restoring", id);
+    const next = deletedFilters.filter(f => f.id !== id);
+    setDeletedFilters(next);
+    localStorage.setItem('export_deleted_fields_panel', JSON.stringify(next));
+    if (next.length === 0) setShowDeletedFilters(false);
+  };
+
+  const restoreAllFilters = () => {
+    console.log("Restoring all filters");
+    setDeletedFilters([]);
+    localStorage.setItem('export_deleted_fields_panel', JSON.stringify([]));
+    setShowDeletedFilters(false);
   };
 
   return (
@@ -172,6 +199,73 @@ export default function ExportPanel() {
                   setFields(availableOptionalFields);
                   localStorage.setItem('export_fields_panel', JSON.stringify(availableOptionalFields));
                 }} className="text-[10px] font-bold text-primary hover:underline">Select All</button>
+                <div className="relative">
+                  {deletedFilters.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        console.log("Opening Panel deleted filters popup");
+                        setShowDeletedFilters(!showDeletedFilters);
+                      }}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
+                        showDeletedFilters ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                      }`}
+                    >
+                      Edit ({deletedFilters.length})
+                    </button>
+                  )}
+
+                  {/* POPUP CARD FOR PANEL */}
+                  <AnimatePresence>
+                    {showDeletedFilters && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute z-[100] right-0 top-full mt-2 w-72 bg-[#1a1f2e] border border-white/10 shadow-2xl rounded-2xl overflow-hidden p-0"
+                      >
+                        <div className="px-4 py-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                          <h3 className="text-[10px] font-black uppercase tracking-widest text-white/60">Deleted Filters</h3>
+                          <button onClick={() => setShowDeletedFilters(false)} className="text-white/40 hover:text-white">
+                            <X size={14} />
+                          </button>
+                        </div>
+                        
+                        <div className="max-h-52 overflow-y-auto p-2 custom-scrollbar">
+                          {deletedFilters.length === 0 ? (
+                            <p className="text-[10px] text-white/30 text-center py-4 italic uppercase tracking-widest">Empty Bin</p>
+                          ) : (
+                            deletedFilters.map(filter => (
+                              <div key={filter.id} className="flex justify-between items-center p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.05] mb-1 group">
+                                <span className="text-xs font-bold text-white/60 truncate mr-2">{filter.label}</span>
+                                <button 
+                                  onClick={() => restoreFilter(filter.id)}
+                                  className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-lg hover:bg-primary hover:text-white transition-all shrink-0"
+                                >
+                                  Restore
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        <div className="p-3 bg-white/5 border-t border-white/5 flex gap-2">
+                          <button 
+                            onClick={restoreAllFilters}
+                            className="flex-1 py-2 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg"
+                          >
+                            Restore All
+                          </button>
+                          <button 
+                            onClick={() => setShowDeletedFilters(false)}
+                            className="flex-1 py-2 bg-white/10 text-white/60 text-[9px] font-black uppercase tracking-widest rounded-lg"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <button onClick={() => {
                   setFields([]);
                   localStorage.setItem('export_fields_panel', JSON.stringify([]));
