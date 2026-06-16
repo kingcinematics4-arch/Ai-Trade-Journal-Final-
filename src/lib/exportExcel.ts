@@ -3,6 +3,44 @@ import { saveAs } from 'file-saver';
 import { format, startOfWeek, startOfMonth, getWeek, parseISO } from 'date-fns';
 
 /**
+ * Safely merges cells by checking for existing merges and overlaps.
+ * Prevents "Error: Cannot merge already merged cells" in ExcelJS.
+ */
+function safeMergeCells(
+  worksheet: ExcelJS.Worksheet,
+  startRow: number,
+  startCol: number,
+  endRow: number,
+  endCol: number
+) {
+  try {
+    // Debugging: Reveal existing merges in development if needed
+    // console.log(`[Excel Export] Requested merge: ${startRow},${startCol} to ${endRow},${endCol}`);
+    // console.log(`[Excel Export] Current merges:`, (worksheet as any)._merges);
+
+    // Check if any cell in the target range is already part of a merge
+    for (let r = startRow; r <= endRow; r++) {
+      for (let c = startCol; c <= endCol; c++) {
+        const cell = worksheet.getCell(r, c);
+        if (cell.isMerged) {
+          const range = `${worksheet.getColumn(startCol).letter}${startRow}:${worksheet.getColumn(endCol).letter}${endRow}`;
+          console.warn(`[Excel Export] Skipping merge for ${range} - conflicts with ${cell.master.address}`);
+          return;
+        }
+      }
+    }
+
+    worksheet.mergeCells(startRow, startCol, endRow, endCol);
+  } catch (error: any) {
+    if (error.message && error.message.includes('merged')) {
+      console.warn(`[Excel Export] Non-fatal merge conflict: ${error.message}`);
+    } else {
+      throw error;
+    }
+  }
+}
+
+/**
  * Normalizes and applies emojis to emotion strings for professional consistency.
  */
 function formatEmotionWithEmoji(emotion: string): string {
@@ -25,8 +63,8 @@ function formatEmotionWithEmoji(emotion: string): string {
 }
 
 const emotionColors: Record<string, string> = {
-  'CONFIDENT': '166534', 'CALM': '0F766E', 'FOCUSED': '1E40AF',
-  'FEARFUL': '991B1B', 'ANXIOUS': 'C2410C', 'GREEDY': 'B45309',
+  'CONFIDENT': '059669', 'CALM': '0F766E', 'FOCUSED': '1E40AF',
+  'FEARFUL': 'DC2626', 'ANXIOUS': 'EA580C', 'GREEDY': 'D97706',
   'REVENGE': '7F1D1D', 'EXCITED': '6B21A8'
 };
 
@@ -72,15 +110,35 @@ function flattenAndFormat(item: any): any {
 
   walk(item);
 
-  // Add Month and Week Number for institutional analysis
-  const dateVal = item.trade_date || item.date;
-  if (dateVal) {
-    const dateObj = typeof dateVal === 'string' ? parseISO(dateVal) : new Date(dateVal);
-    result['month'] = format(dateObj, 'MMMM yyyy');
-    result['week_number'] = getWeek(dateObj);
-  }
-
   return result;
+}
+
+/**
+ * Internal utility to apply SaaS branding to the top of a sheet.
+ */
+function applyBranding(worksheet: ExcelJS.Worksheet, title: string) {
+  // Splice 4 rows at the top (branding, subtitle, timestamp, empty)
+  worksheet.spliceRows(1, 0, [], [], [], []);
+
+  const brandCell = worksheet.getCell('A1');
+  brandCell.value = 'AI Trade Journal';
+  brandCell.font = { name: 'Arial Black', size: 18, bold: true, color: { argb: '001F3F' } };
+  
+  const titleCell = worksheet.getCell('A2');
+  titleCell.value = title;
+  titleCell.font = { name: 'Arial', size: 12, bold: true, color: { argb: '64748B' } };
+  
+  const genCell = worksheet.getCell('A3');
+  genCell.value = `Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`;
+  genCell.font = { name: 'Arial', size: 10, italic: true, color: { argb: '94A3B8' } };
+
+  safeMergeCells(worksheet, 1, 1, 1, 3); // A1:C1
+  safeMergeCells(worksheet, 2, 1, 2, 3); // A2:C2
+  safeMergeCells(worksheet, 3, 1, 3, 3); // A3:C3
+  
+  worksheet.getRow(1).height = 30;
+  worksheet.getRow(2).height = 20;
+  worksheet.getRow(3).height = 20;
 }
 
 /**
@@ -107,7 +165,7 @@ function addProfessionalDataSheet(
 
   // 2a. Determine Column Order
   const priorityKeys = isTradesSheet ? [
-    'trade_date', 'month', 'week_number', 'asset_name', 'pnl_amount', 'pnl_percent', 'risk_amount', 'strategy_used', 'goal.title', 'task.title', 'trade_direction', 'trade_status', 'trade_time', 'id', 'symbol', 'market', 'exchange', 'asset_type', 
+    'trade_date', 'trade_time', 'asset_name', 'pnl_amount', 'pnl_percent', 'risk_amount', 'strategy_used', 'goal.title', 'task.title', 'trade_direction', 'trade_status', 'id', 'symbol', 'market', 'exchange', 'asset_type', 
     'side', 'trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 
     'position_size', 'quantity', 'leverage', 'reward_amount', 'rr_ratio',
     'fees', 'commission', 'spread', 'slippage', 'gross_pnl', 'net_pnl',
@@ -133,10 +191,8 @@ function addProfessionalDataSheet(
     monthBg: '1E3A8A', // Medium Dark Blue
     monthText: 'FFFFFF',
     alternateRow: 'F9FAFB', // Very light gray
-    profit: '059669', 
-    profitDeep: '064E3B',
+    profit: '059669',
     loss: 'DC2626',
-    lossDeep: '7F1D1D',
     breakeven: '94A3B8', // Gray
     border: 'D1D5DB'
   };
@@ -148,8 +204,9 @@ function addProfessionalDataSheet(
     border: { bottom: { style: 'thin', color: { argb: colors.border } } }
   };
 
-  // 4. Populate Rows with Professional Month Separators
+  // 4. Populate Rows with Professional Left-Aligned Month Separators
   let currentMonthStr = '';
+  const monthHeaders = new Set<string>();
 
   processedData.forEach(rowData => {
     const tradeDate = rowData.trade_date || rowData.date;
@@ -159,13 +216,14 @@ function addProfessionalDataSheet(
       
       if (monthStr !== currentMonthStr) {
         const separatorRow = worksheet.addRow({ [finalKeys[0]]: monthStr });
-        worksheet.mergeCells(separatorRow.number, 1, separatorRow.number, worksheet.columns.length);
+        safeMergeCells(worksheet, separatorRow.number, 1, separatorRow.number, worksheet.columns.length);
         
         separatorRow.eachCell(cell => {
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.monthBg } };
-          cell.font = { bold: true, color: { argb: colors.monthText }, size: 14 };
-          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          cell.font = { bold: true, color: { argb: colors.monthText }, size: 12 };
+          cell.alignment = { horizontal: 'left', vertical: 'middle', indent: 1 };
         });
+        monthHeaders.add(monthStr);
         currentMonthStr = monthStr;
       }
     }
@@ -175,32 +233,32 @@ function addProfessionalDataSheet(
     const pnl = parseFloat(rowData.pnl_amount);
     const pnlCell = newRow.getCell('pnl_amount'); // Get P&L cell
     if (!isNaN(pnl)) {
-      const isLarge = Math.abs(pnl) >= 1000;
-      pnlCell.font = { 
-        color: { argb: pnl > 0 ? (isLarge ? colors.profitDeep : colors.profit) : (isLarge ? colors.lossDeep : colors.loss) }, 
-        bold: true 
-      };
+      pnlCell.font = { color: { argb: pnl >= 0 ? colors.profit : colors.loss }, bold: true };
     }
   });
 
-  // 5. Apply Professional Sheet Formatting
-  worksheet.getRow(1).height = 32;
-  worksheet.getRow(1).eachCell(cell => Object.assign(cell, headerStyle));
+  // Apply SaaS Branding at the top
+  applyBranding(worksheet, isTradesSheet ? 'Professional Trade Execution Log' : `${sheetName} Data Export`);
 
-  // Freeze Headers
-  worksheet.views = [{ state: 'frozen', xSplit: 3, ySplit: 1 }];
+  // 5. Apply Professional Sheet Formatting
+  const headerRowIdx = 5;
+  worksheet.getRow(headerRowIdx).height = 30;
+  worksheet.getRow(headerRowIdx).eachCell(cell => Object.assign(cell, headerStyle));
+
+  // Freeze Branding and Headers
+  worksheet.views = [{ state: 'frozen', xSplit: 2, ySplit: 5 }];
 
   // Enable Column Filters
   worksheet.autoFilter = {
-    from: { row: 1, column: 1 },
-    to: { row: 1, column: worksheet.columnCount }
+    from: { row: headerRowIdx, column: 1 },
+    to: { row: headerRowIdx, column: worksheet.columnCount }
   };
 
   // Alternate Row Colors & Intelligent Cell Formatting
   worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber > 1) {
+    if (rowNumber > headerRowIdx) {
       const firstCellVal = row.getCell(1).value?.toString();
-      const isSeparator = firstCellVal && currentMonthStr.includes(firstCellVal);
+      const isSeparator = firstCellVal && monthHeaders.has(firstCellVal);
 
       if (!isSeparator && rowNumber % 2 === 0) {
         row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.alternateRow } };
@@ -218,11 +276,11 @@ function addProfessionalDataSheet(
         if (header.match(/DIRECTION|SIDE/)) {
           const dir = val?.toString().toUpperCase();
           if (dir === 'BUY' || dir === 'LONG') {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DCFCE7' } }; // Light Green
-            cell.font = { bold: true, color: { argb: '15803D' } }; // Dark Green
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DCFCE7' } };
+            cell.font = { bold: true, color: { argb: '166534' } }; // Dark Green
           } else if (dir === 'SELL' || dir === 'SHORT') {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEE2E2' } }; // Light Red
-            cell.font = { bold: true, color: { argb: 'B91C1C' } }; // Dark Red
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEE2E2' } };
+            cell.font = { bold: true, color: { argb: '991B1B' } }; // Dark Red
           }
         }
 
@@ -239,11 +297,7 @@ function addProfessionalDataSheet(
           if (header.match(/PNL|PROFIT|AMOUNT|PRICE|LOSS|COST|VALUE|RISK|EQUITY/)) {
             cell.numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
             if (header.match(/PNL|PROFIT|LOSS/)) {
-              const isLarge = Math.abs(val) >= 1000;
-              cell.font = { 
-                bold: true, 
-                color: { argb: val >= 0 ? (isLarge ? colors.profitDeep : colors.profit) : (isLarge ? colors.lossDeep : colors.loss) } 
-              };
+              cell.font = { bold: true, color: { argb: val >= 0 ? colors.profit : colors.loss } };
             }
           } else if (header.match(/RATE|PROGRESS|%|PERCENT/)) {
             cell.numFmt = '0.00"%"';
@@ -372,11 +426,11 @@ function addDashboardSheet(workbook: ExcelJS.Workbook, trades: any[], tasks: any
   const totalProfit = trades.reduce((acc, t) => acc + Math.max(0, parseFloat(t.pnl_amount || 0)), 0);
   const totalLoss = trades.reduce((acc, t) => acc + Math.abs(Math.min(0, parseFloat(t.pnl_amount || 0))), 0);
 
+  applyBranding(ws, 'Professional Trading Analytics Export');
+  
   ws.addRows([
-    ['TRADING JOURNAL PERFORMANCE DASHBOARD'],
-    ['Generated On', format(new Date(), 'yyyy-MM-dd HH:mm')],
     [],
-    ['KEY PERFORMANCE INDICATORS', 'VALUE'],
+    ['KEY PERFORMANCE ATTRIBUTES', 'METRIC VALUE'],
     ['Net Cumulative P&L', totalPnL],
     ['Gross Profits', totalProfit],
     ['Gross Losses', totalLoss],
@@ -390,14 +444,11 @@ function addDashboardSheet(workbook: ExcelJS.Workbook, trades: any[], tasks: any
     ['Completed Tasks', tasks.filter(t => t.completed).length], // Filter completed tasks
   ]);
 
-  // Styling
-  ws.getCell('A1').font = { size: 16, bold: true, color: { argb: '1E293B' } };
-  ws.getRow(4).font = { bold: true };
-  ws.getRow(4).eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F1F5F9' } });
-  ws.getRow(11).font = { bold: true };
-  ws.getRow(11).eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F1F5F9' } });
+  const tableStartIdx = 6;
+  ws.getRow(tableStartIdx).font = { bold: true, color: { argb: 'FFFFFF' } };
+  ws.getRow(tableStartIdx).eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '001F3F' } });
 
-  const pnlCell = ws.getCell('B5');
+  const pnlCell = ws.getCell('B7');
   pnlCell.numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
   pnlCell.font = { bold: true, color: { argb: totalPnL >= 0 ? '10B981' : 'EF4444' } };
   
