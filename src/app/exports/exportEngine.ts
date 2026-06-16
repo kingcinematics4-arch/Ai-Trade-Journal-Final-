@@ -3,8 +3,8 @@ import Papa from "papaparse";
 import { filterData } from "./filterData";
 import { ExportOptions } from "./exportTypes";
 import { exportPDF as generateProfessionalPDF } from "@/lib/exportPDF";
+import { buildPremiumTradingReport } from "@/lib/export/pdf/pdfReportBuilder";
 import { exportProfessionalExcel } from "@/lib/exportExcel";
-import { jsPDF } from "jspdf";
 
 function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -75,7 +75,10 @@ function exportJSON(data: any[], options: ExportOptions) {
 
 /* ---------------- PDF ---------------- */
 function exportPDF(data: any[], options: ExportOptions) {
-  generateProfessionalPDF(data, options.fileName);
+  generateProfessionalPDF(data, {
+    fileName: options.fileName,
+    selectedFields: options.selectedFields,
+  });
   return true;
 }
 
@@ -97,10 +100,11 @@ async function exportZIP(data: any[], options: ExportOptions) {
 
   // Note: To include the professional Excel in ZIP, you would generate the buffer here using ExcelJS
 
-  const pdf = new jsPDF();
-  data.forEach(r => pdf.text(JSON.stringify(r), 10, 10));
-
-  zip.file("data.pdf", pdf.output("blob"));
+  const pdfDoc = buildPremiumTradingReport(data, {
+    fileName: options.fileName,
+    selectedFields: options.selectedFields,
+  });
+  zip.file("data.pdf", pdfDoc.output("blob"));
 
   const content = await zip.generateAsync({ type: "blob" });
 

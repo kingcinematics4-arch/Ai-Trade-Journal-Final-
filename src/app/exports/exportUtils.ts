@@ -40,7 +40,10 @@ export async function exportData({ filename, format, data, columns, title }: Exp
       break;
 
     case 'pdf':
-      generateProfessionalPDF(data, filename);
+      generateProfessionalPDF(data, {
+        fileName: filename,
+        selectedFields: columns?.map((c) => c.key),
+      });
       break;
 
     case 'txt':
