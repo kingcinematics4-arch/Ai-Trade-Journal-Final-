@@ -390,25 +390,38 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute z-[60] right-0 top-full mt-2 w-72 bg-card border border-border shadow-2xl rounded-2xl overflow-hidden p-0"
+                      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                      className="absolute z-[60] right-0 top-full mt-3 w-80 bg-[#070911]/98 backdrop-blur-2xl border border-white/[0.1] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[24px] overflow-hidden p-0"
                     >
-                      <div className="px-4 py-3 bg-muted/30 border-b border-border flex items-center justify-between">
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-foreground">Deleted Filters</h3>
-                        <button onClick={() => setShowDeletedFilters(false)} className="text-muted-foreground hover:text-white transition-colors">
-                          <X size={14} />
+                      {/* HEADER */}
+                      <div className="px-5 py-4 bg-white/[0.02] border-b border-white/[0.05] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">Hidden Filters</h3>
+                          <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/20">
+                            {deletedFilters.length}
+                          </span>
+                        </div>
+                        <button onClick={() => setShowDeletedFilters(false)} className="text-white/30 hover:text-white transition-all p-1.5 rounded-xl hover:bg-white/[0.05]">
+                          <X size={16} />
                         </button>
                       </div>
                       
-                      <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
+                      {/* BODY */}
+                      <div className="max-h-64 overflow-y-auto p-3 custom-scrollbar space-y-1.5">
                         {deletedFilters.length === 0 ? (
-                          <p className="text-[10px] text-muted-foreground text-center py-4 italic">No hidden filters</p>
+                          <div className="py-10 text-center flex flex-col items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white/[0.02] flex items-center justify-center border border-white/[0.05]">
+                              <Eraser size={18} className="text-white/10" />
+                            </div>
+                            <p className="text-[10px] font-black text-[#475569] uppercase tracking-[0.2em]">Bin is Empty</p>
+                          </div>
                         ) : (
                           deletedFilters.map(filter => (
-                            <div key={filter.id} className="flex justify-between items-center p-2 hover:bg-white/[0.02] rounded-lg border border-transparent hover:border-white/5 transition-all group">
-                              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{filter.label}</span>
+                            <div key={filter.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.01] border border-white/[0.04] hover:bg-white/[0.03] hover:border-white/[0.08] transition-all group">
+                              <span className="text-xs font-bold text-[#94a3b8] group-hover:text-white transition-colors tracking-tight">{filter.label}</span>
                               <button
                                 onClick={() => restoreFilter(filter.id)}
-                                className="px-2 py-1 bg-primary/10 text-primary text-[9px] font-black uppercase rounded md hover:bg-primary hover:text-white transition-all"
+                                className="px-3 py-1 bg-blue-600/10 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-blue-500/20 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                               >
                                 Restore
                               </button>
@@ -417,16 +430,17 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                         )}
                       </div>
 
-                      <div className="p-3 bg-muted/20 border-t border-border flex gap-2">
+                      {/* FOOTER */}
+                      <div className="p-5 bg-white/[0.01] border-t border-white/[0.05] flex gap-3">
                         <button 
                           onClick={restoreAllFilters}
-                          className="flex-1 px-2 py-1.5 bg-primary text-white text-[9px] font-black uppercase tracking-wider rounded-lg hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+                          className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[14px] transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
                         >
                           Restore All
                         </button>
                         <button 
                           onClick={() => setShowDeletedFilters(false)}
-                          className="flex-1 px-2 py-1.5 bg-white/[0.05] text-muted-foreground text-[9px] font-black uppercase tracking-wider rounded-lg hover:text-white hover:bg-white/10 transition-all"
+                          className="flex-1 py-3 bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/[0.08] text-[10px] font-black uppercase tracking-[0.2em] rounded-[14px] transition-all active:scale-[0.98]"
                         >
                           Close
                         </button>
