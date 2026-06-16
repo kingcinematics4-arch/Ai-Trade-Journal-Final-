@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTrades } from "@/contexts/TradesContext";
 import { exportData } from "@/app/exports/exportEngine";
 import styles from "./ExportPanel.module.css";
-import { Loader2, ListChecks, Filter, Check } from "lucide-react";
+import { Loader2, ListChecks, Filter, Check, Trash2, AlertTriangle } from "lucide-react";
 
 const PERMANENT_KEYS = ['trade_date', 'asset_name', 'risk_amount', 'pnl_amount', 'pnl_percent', 'strategy_used'];
 const ESSENTIAL_KEYS = ['trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 'lot_size', 'rr_ratio', 'notes'];
@@ -60,10 +61,21 @@ export default function ExportPanel() {
   const [fileName, setFileName] = useState("export"); // Default filename
   const [fields, setFields] = useState<string[]>([]); // Default to empty (Full Database Export)
   const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
+  const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
+  const [deletedFields, setDeletedFields] = useState<string[]>([]);
 
   useEffect(() => {
     const saved = localStorage.getItem('export_fields_panel');
     if (saved) setFields(JSON.parse(saved));
+
+    const savedDeleted = localStorage.getItem('export_deleted_fields_panel');
+    if (savedDeleted) {
+      try {
+        setDeletedFields(JSON.parse(savedDeleted));
+      } catch (e) {
+        console.error('Failed to parse deleted fields preferences');
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -72,10 +84,12 @@ export default function ExportPanel() {
       trades.slice(0, 10).forEach(item => {
         getFlatKeys(item).forEach(k => allKeys.add(k));
       });
-      const optional = Array.from(allKeys).filter(k => !PERMANENT_KEYS.includes(k)).sort();
+      const optional = Array.from(allKeys)
+        .filter(k => !PERMANENT_KEYS.includes(k) && !deletedFields.includes(k))
+        .sort();
       setAvailableOptionalFields(optional);
     }
-  }, [trades]);
+  }, [trades, deletedFields]);
 
   const toggleField = (field: string) => {
     const next = fields.includes(field)
@@ -83,6 +97,19 @@ export default function ExportPanel() {
       : [...fields, field];
     setFields(next);
     localStorage.setItem('export_fields_panel', JSON.stringify(next));
+  };
+
+  const handleConfirmDelete = () => {
+    if (!filterToDelete) return;
+    
+    const newDeleted = [...deletedFields, filterToDelete];
+    setDeletedFields(newDeleted);
+    localStorage.setItem('export_deleted_fields_panel', JSON.stringify(newDeleted));
+    
+    if (fields.includes(filterToDelete)) {
+      toggleField(filterToDelete);
+    }
+    setFilterToDelete(null);
   };
 
   return (
@@ -153,6 +180,37 @@ export default function ExportPanel() {
             </div>
 
             <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-4 max-h-[300px] overflow-y-auto">
+              {/* DELETE CONFIRMATION UI */}
+              <AnimatePresence>
+                {filterToDelete && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between gap-4 overflow-hidden"
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle size={14} className="text-red-400" />
+                      <span className="text-[10px] font-bold text-red-200">Delete selected filter?</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setFilterToDelete(null)}
+                        className="px-2 py-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={handleConfirmDelete}
+                        className="px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-wider rounded-md hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="space-y-2">
                 <p className="text-[9px] font-bold text-muted-foreground/40 uppercase flex items-center gap-1.5">
                   <ListChecks size={10} /> Required Fields
@@ -173,17 +231,35 @@ export default function ExportPanel() {
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableOptionalFields.map(field => (
-                    <label key={field} className="flex items-center gap-2 p-2 rounded-lg border border-white/5 hover:bg-white/5 cursor-pointer transition-all">
-                      <input
-                        type="checkbox"
-                        checked={fields.includes(field)}
-                        onChange={() => toggleField(field)}
-                        className="w-3.5 h-3.5 rounded-sm bg-black border-white/10 checked:bg-primary"
-                      />
-                      <span className={`text-[11px] truncate ${fields.includes(field) ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {formatLabel(field)}
-                      </span>
-                    </label>
+                    <div
+                      key={field}
+                      className={`group relative flex items-center justify-between p-2 rounded-lg border transition-all duration-200 ${
+                        fields.includes(field)
+                          ? 'bg-primary/5 border-primary/30'
+                          : 'bg-white/5 border-white/5 hover:bg-white/10'
+                      }`}
+                    >
+                      <button
+                        onClick={() => toggleField(field)}
+                        className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                      >
+                        <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
+                          fields.includes(field)
+                            ? 'bg-primary border-primary'
+                            : 'bg-transparent border-white/20'
+                        }`}>
+                          {fields.includes(field) && <Check size={10} className="text-white" />}
+                        </div>
+                        <span className={`text-[11px] font-medium truncate ${fields.includes(field) ? 'text-primary' : 'text-muted-foreground'}`}>{formatLabel(field)}</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setFilterToDelete(field); }}
+                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 hover:text-red-400 rounded-md transition-all duration-300 text-muted-foreground/40 shrink-0"
+                        title="Remove from view"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   ))}
                 </div>
                 {availableOptionalFields.length === 0 && (

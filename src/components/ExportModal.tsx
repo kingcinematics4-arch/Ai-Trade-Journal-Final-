@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, FileText, Check, Settings2, Loader2, Table, Filter, ListChecks } from 'lucide-react';
+import { X, Download, FileText, Check, Settings2, Loader2, Table, Filter, ListChecks, Trash2, AlertTriangle } from 'lucide-react';
 import { exportData } from '@/app/exports/exportEngine';
 import { logExport, ExportFormat } from '@/lib/utils/exportUtils';
 import { toast } from 'sonner';
@@ -131,6 +131,8 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
   const [isExporting, setIsExporting] = useState(false);
   const [exportMode, setExportMode] = useState<'single' | 'separate'>('single');
   const [selectedOptionalFields, setSelectedOptionalFields] = useState<string[]>([]);
+  const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
+  const [deletedFields, setDeletedFields] = useState<string[]>([]);
   const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
   const [includeMeta, setIncludeMeta] = useState(true);
 
@@ -148,6 +150,20 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
     }
   }, [isOpen, category]);
 
+  // Load deleted fields from localStorage
+  useEffect(() => {
+    if (isOpen) {
+      const savedDeleted = localStorage.getItem(`export_deleted_fields_${category}`);
+      if (savedDeleted) {
+        try {
+          setDeletedFields(JSON.parse(savedDeleted));
+        } catch (e) {
+          console.error('Failed to parse deleted fields preferences');
+        }
+      }
+    }
+  }, [isOpen, category]);
+
   // Detect available fields
   useEffect(() => {
     if (isOpen && data && data.length > 0) {
@@ -156,10 +172,12 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
       data.slice(0, 10).forEach(item => {
         getFlatKeys(item).forEach(k => allKeys.add(k));
       });
-      const optional = Array.from(allKeys).filter(k => !permanent.includes(k)).sort();
+      const optional = Array.from(allKeys)
+        .filter(k => !permanent.includes(k) && !deletedFields.includes(k))
+        .sort();
       setAvailableOptionalFields(optional);
     }
-  }, [isOpen, data, category]);
+  }, [isOpen, data, category, deletedFields]);
 
   const toggleField = (field: string) => {
     const next = selectedOptionalFields.includes(field)
@@ -167,6 +185,24 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
       : [...selectedOptionalFields, field];
     setSelectedOptionalFields(next);
     localStorage.setItem(`export_fields_${category}`, JSON.stringify(next));
+  };
+
+  const handleConfirmDelete = () => {
+    if (!filterToDelete) return;
+    
+    const newDeleted = [...deletedFields, filterToDelete];
+    setDeletedFields(newDeleted);
+    localStorage.setItem(`export_deleted_fields_${category}`, JSON.stringify(newDeleted));
+    
+    // Also remove from selected if it was there
+    if (selectedOptionalFields.includes(filterToDelete)) {
+      const nextSelected = selectedOptionalFields.filter(f => f !== filterToDelete);
+      setSelectedOptionalFields(nextSelected);
+      localStorage.setItem(`export_fields_${category}`, JSON.stringify(nextSelected));
+    }
+    
+    setFilterToDelete(null);
+    toast.success(`Filter "${formatLabel(filterToDelete)}" removed from view`);
   };
 
   if (!isOpen) return null;
@@ -299,6 +335,37 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
               </div>
             </div>
 
+            {/* DELETE CONFIRMATION UI */}
+            <AnimatePresence>
+              {filterToDelete && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+                  exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                  className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between gap-4 overflow-hidden"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={14} className="text-red-400" />
+                    <span className="text-[10px] font-bold text-red-200">Delete selected filter?</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setFilterToDelete(null)}
+                      className="px-2 py-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleConfirmDelete}
+                      className="px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-wider rounded-md hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="bg-muted/10 border border-border rounded-2xl p-4 space-y-4 max-h-[250px] overflow-y-auto custom-scrollbar">
               {category === 'trades' && (
                 <div className="space-y-2">
@@ -323,24 +390,35 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                 {availableOptionalFields.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
                     {availableOptionalFields.map(field => (
-                      <button
+                      <div
                         key={field}
-                        onClick={() => toggleField(field)}
-                        className={`flex items-center gap-2 p-2 rounded-lg border transition-all duration-200 text-left ${
+                        className={`group relative flex items-center justify-between p-2 rounded-lg border transition-all duration-200 ${
                           selectedOptionalFields.includes(field)
-                            ? 'bg-primary/5 border-primary/30 text-primary'
-                            : 'bg-white/[0.01] border-white/[0.05] text-muted-foreground hover:bg-white/[0.03]'
+                            ? 'bg-primary/5 border-primary/30'
+                            : 'bg-white/[0.01] border-white/[0.05] hover:bg-white/[0.03]'
                         }`}
                       >
-                        <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
-                          selectedOptionalFields.includes(field)
-                            ? 'bg-primary border-primary'
-                            : 'bg-transparent border-muted-foreground/30'
-                        }`}>
-                          {selectedOptionalFields.includes(field) && <Check size={10} className="text-white" />}
-                        </div>
-                        <span className="text-[11px] font-medium truncate">{formatLabel(field)}</span>
-                      </button>
+                        <button
+                          onClick={() => toggleField(field)}
+                          className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                        >
+                          <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
+                            selectedOptionalFields.includes(field)
+                              ? 'bg-primary border-primary'
+                              : 'bg-transparent border-muted-foreground/30'
+                          }`}>
+                            {selectedOptionalFields.includes(field) && <Check size={10} className="text-white" />}
+                          </div>
+                          <span className={`text-[11px] font-medium truncate ${selectedOptionalFields.includes(field) ? 'text-primary' : 'text-muted-foreground'}`}>{formatLabel(field)}</span>
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setFilterToDelete(field); }}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 hover:text-red-400 rounded-md transition-all duration-300 text-muted-foreground/40 shrink-0"
+                          title="Remove from view"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 ) : (
