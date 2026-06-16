@@ -5,9 +5,9 @@ import { PdfDocumentContext } from './PdfDocumentContext';
 import {
   buildDetailedSummaryMetrics,
   buildStandardSummaryMetrics,
-  computeReportDateRange,
   getReportAnalytics,
 } from './pdfAnalytics';
+import { buildBrandedPdfFileName, resolveReportIdentity } from './pdfReportIdentity';
 import { drawReportHeader, drawSectionHeader, drawSummaryCardGrid } from './pdfSummaryCards';
 import { drawStandardTradeTable } from './pdfStandardTable';
 import { drawTradeCardLayout } from './pdfTradeCard';
@@ -20,18 +20,26 @@ export interface PDFReportOptions {
   pdfReportType?: PdfReportType;
 }
 
+function drawBrandedHeader(
+  ctx: PdfDocumentContext,
+  data: Record<string, unknown>[],
+  meta: { fieldCount: number; reportLabel?: string },
+): ReturnType<typeof resolveReportIdentity> {
+  const identity = resolveReportIdentity(data);
+  drawReportHeader(ctx, identity, {
+    tradeCount: data.length,
+    fieldCount: meta.fieldCount,
+    reportLabel: meta.reportLabel,
+  });
+  return identity;
+}
+
 function buildStandardReport(data: Record<string, unknown>[]): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
   const ctx = new PdfDocumentContext(doc);
   const analytics = getReportAnalytics(data);
-  const dateRange = computeReportDateRange(data);
 
-  drawReportHeader(ctx, {
-    dateRangeLabel: dateRange.label,
-    fieldCount: 6,
-    tradeCount: data.length,
-    reportLabel: 'Standard Report',
-  });
+  drawBrandedHeader(ctx, data, { fieldCount: 6, reportLabel: 'Standard Report' });
   drawSummaryCardGrid(ctx, buildStandardSummaryMetrics(analytics));
 
   drawSectionHeader(ctx, 'Trade Log', 'Compact overview — optimized for quick review');
@@ -52,14 +60,8 @@ function buildDetailedReport(
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
   const ctx = new PdfDocumentContext(doc);
   const analytics = getReportAnalytics(data);
-  const dateRange = computeReportDateRange(data);
 
-  drawReportHeader(ctx, {
-    dateRangeLabel: dateRange.label,
-    fieldCount: columns.length,
-    tradeCount: data.length,
-    reportLabel: 'Detailed Report',
-  });
+  drawBrandedHeader(ctx, data, { fieldCount: columns.length, reportLabel: 'Detailed Report' });
   drawSummaryCardGrid(ctx, buildDetailedSummaryMetrics(analytics));
 
   ctx.addPage('Trade Details');
@@ -97,7 +99,14 @@ export function exportPremiumTradingReport(
   options: PDFReportOptions = {},
 ): void {
   if (!data?.length) return;
-  const fileName = (options.fileName ?? 'Trade_Report').replace(/\s+/g, '_');
+
+  const identity = resolveReportIdentity(data);
+  const brandedName = buildBrandedPdfFileName(identity);
   const doc = buildPremiumTradingReport(data, options);
-  doc.save(`${fileName}.pdf`);
+  doc.save(`${brandedName}.pdf`);
+}
+
+/** Resolve branded filename without generating the PDF */
+export function resolveBrandedPdfFileName(data: Record<string, unknown>[]): string {
+  return buildBrandedPdfFileName(resolveReportIdentity(data));
 }

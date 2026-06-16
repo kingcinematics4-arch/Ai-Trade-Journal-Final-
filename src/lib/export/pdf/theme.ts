@@ -1,3 +1,5 @@
+import type { ReportPeriodKind } from './pdfReportIdentity';
+
 /** PDF theme aligned with app CSS variables (dark dashboard) */
 export const PDF_THEME = {
   bg: [5, 5, 7] as [number, number, number], // #050507
@@ -35,6 +37,20 @@ export const PDF_LAYOUT = {
   tradeCardPadding: 5,
   tradeCardHeaderHeight: 9,
   maxTableColumns: 8,
+  reportBannerHeight: 34,
+  reportPeriodCardHeight: 34,
+  bannerTitleSize: 16,
+  bannerSubtitleSize: 12,
+};
+
+export const PERIOD_BADGE_COLORS: Record<ReportPeriodKind, Rgb> = {
+  this_month: [59, 130, 246],
+  last_month: [245, 158, 11],
+  last_3_months: [139, 92, 246],
+  last_6_months: [20, 184, 166],
+  this_year: [34, 197, 94],
+  custom_range: [236, 72, 153],
+  all_time: [107, 114, 128],
 };
 
 export type Rgb = [number, number, number];
