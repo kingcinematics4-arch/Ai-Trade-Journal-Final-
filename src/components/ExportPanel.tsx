@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTrades } from "@/contexts/TradesContext";
 import { exportData } from "@/app/exports/exportEngine";
 import styles from "./ExportPanel.module.css";
-import { Loader2, ListChecks, Filter, Check, Trash2, AlertTriangle, RefreshCcw, X } from "lucide-react";
+import { Loader2, ListChecks, Filter, Check, Trash2, AlertTriangle, RefreshCcw, X, Search, Calendar as CalendarIcon, Download } from "lucide-react";
 
 const PERMANENT_KEYS = ['trade_date', 'asset_name', 'risk_amount', 'pnl_amount', 'pnl_percent', 'strategy_used'];
 const ESSENTIAL_KEYS = ['trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 'lot_size', 'rr_ratio', 'notes'];
@@ -60,6 +60,9 @@ export default function ExportPanel() {
   const [format, setFormat] = useState("csv");
   const [pdfReportType, setPdfReportType] = useState<"standard" | "detailed">("standard");
   const [fileName, setFileName] = useState("export"); // Default filename
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [fields, setFields] = useState<string[]>([]); // Default to empty (Full Database Export)
   const [availableOptionalFields, setAvailableOptionalFields] = useState<string[]>([]);
   const [filterToDelete, setFilterToDelete] = useState<string | null>(null);
@@ -98,10 +101,11 @@ export default function ExportPanel() {
       });
       const optional = Array.from(allKeys)
         .filter(k => !PERMANENT_KEYS.includes(k) && !deletedFilters.some(df => df.id === k))
+        .filter(k => formatLabel(k).toLowerCase().includes(searchTerm.toLowerCase()))
         .sort();
       setAvailableOptionalFields(optional);
     }
-  }, [trades, deletedFilters]);
+  }, [trades, deletedFilters, searchTerm]);
 
   const toggleField = (field: string) => {
     const next = fields.includes(field)
@@ -140,6 +144,14 @@ export default function ExportPanel() {
     setShowDeletedFilters(false);
   };
 
+  const filteredTrades = useMemo(() => {
+    return trades.filter(t => {
+      if (!startDate && !endDate) return true;
+      const d = new Date(t.trade_date).getTime();
+      return (!startDate || d >= new Date(startDate).getTime()) && (!endDate || d <= new Date(endDate).getTime());
+    });
+  }, [trades, startDate, endDate]);
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
@@ -157,275 +169,294 @@ export default function ExportPanel() {
             <p className={styles.checkboxText}>No data available for export</p>
           </div>
         ) : (
-        <div className={styles.formSection}>
-          {/* FILE NAME */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Filename</label>
-            <input
-              className={styles.input}
-              placeholder="e.g. trades_q1_report"
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
-            />
-          </div>
-
-          {/* FORMAT SELECT */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Target Format</label>
-            <select 
-              className={styles.select}
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
-            >
-              <option value="csv">CSV (Raw Data)</option>
-              <option value="json">JSON (API Object)</option>
-              <option value="xlsx">Excel (Worksheet)</option>
-              <option value="pdf">PDF (Document)</option>
-              <option value="txt">TXT (Flat File)</option>
-              <option value="zip">ZIP (Archive All)</option>
-            </select>
-          </div>
-
-          {format === "pdf" && (
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>PDF Report Type</label>
-              <div className="flex flex-col gap-2">
-                <label className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
+        <div className="flex flex-col h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[38%_1fr] gap-6 flex-1 overflow-hidden">
+            {/* LEFT COLUMN: CONFIGURATION */}
+            <div className="flex flex-col gap-5 pr-2">
+              <div className="space-y-4">
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Filename</label>
                   <input
-                    type="radio"
-                    name="pdfReportType"
-                    value="standard"
-                    checked={pdfReportType === "standard"}
-                    onChange={() => setPdfReportType("standard")}
-                    className="accent-primary"
+                    className={styles.input}
+                    placeholder="e.g. trades_q1_report"
+                    value={fileName}
+                    onChange={(e) => setFileName(e.target.value)}
                   />
-                  Standard Report
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
-                  <input
-                    type="radio"
-                    name="pdfReportType"
-                    value="detailed"
-                    checked={pdfReportType === "detailed"}
-                    onChange={() => setPdfReportType("detailed")}
-                    className="accent-primary"
-                  />
-                  Detailed Report
-                </label>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-2">
-                Standard uses a compact table. Detailed exports all selected fields.
-              </p>
-            </div>
-          )}
-
-          {/* FIELD FILTERS */}
-          <div className={styles.inputGroup}>
-            <div className="flex items-center justify-between mb-4">
-              <label className={styles.fieldLabel}>Export Fields</label>
-              <div className="flex gap-3">
-                <button onClick={() => {
-                  const essentials = availableOptionalFields.filter(f => ESSENTIAL_KEYS.includes(f));
-                  setFields(essentials);
-                  localStorage.setItem('export_fields_panel', JSON.stringify(essentials));
-                }} className="text-[10px] font-bold text-primary hover:underline">Essentials</button>
-                <button onClick={() => {
-                  setFields(availableOptionalFields);
-                  localStorage.setItem('export_fields_panel', JSON.stringify(availableOptionalFields));
-                }} className="text-[10px] font-bold text-primary hover:underline">Select All</button>
-                <div className="relative">
-                  {deletedFilters.length > 0 && (
-                    <button 
-                      onClick={() => {
-                        console.log("Opening Panel deleted filters popup");
-                        setShowDeletedFilters(!showDeletedFilters);
-                      }}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
-                        showDeletedFilters ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-amber-500 bg-amber-500/10 border border-amber-500/20'
-                      }`}
-                    >
-                      Edit ({deletedFilters.length})
-                    </button>
-                  )}
-
-                  {/* POPUP CARD FOR PANEL */}
-                  <AnimatePresence>
-                    {showDeletedFilters && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-                        className="absolute z-[110] right-0 top-full mt-3 w-80 bg-[#070911]/98 backdrop-blur-2xl border border-white/[0.1] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.05)] rounded-[24px] overflow-hidden"
-                      >
-                        {/* HEADER */}
-                        <div className="px-5 py-4 bg-white/[0.02] border-b border-white/[0.05] flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">Hidden Filters</h3>
-                            <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/20">
-                              {deletedFilters.length}
-                            </span>
-                          </div>
-                          <button onClick={() => setShowDeletedFilters(false)} className="text-white/30 hover:text-white transition-all p-1.5 rounded-xl hover:bg-white/[0.05]">
-                            <X size={16} />
-                          </button>
-                        </div>
-                        
-                        {/* BODY */}
-                        <div className="max-h-64 overflow-y-auto p-3 custom-scrollbar space-y-1.5">
-                          {deletedFilters.length === 0 ? (
-                            <div className="py-10 text-center flex flex-col items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-white/[0.02] flex items-center justify-center border border-white/[0.05]">
-                                <Eraser size={18} className="text-white/10" />
-                              </div>
-                              <p className="text-[10px] font-black text-[#475569] uppercase tracking-[0.2em]">Bin is empty</p>
-                            </div>
-                          ) : (
-                            deletedFilters.map(filter => (
-                              <div key={filter.id} className="flex justify-between items-center p-3 rounded-xl bg-white/[0.01] border border-white/[0.04] hover:bg-white/[0.03] hover:border-white/[0.08] transition-all group">
-                                <span className="text-xs font-bold text-[#94a3b8] group-hover:text-white transition-colors truncate tracking-tight mr-2">{filter.label}</span>
-                                <button 
-                                  onClick={() => restoreFilter(filter.id)}
-                                  className="flex items-center gap-1.5 px-3 py-1 bg-blue-600/10 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-blue-500/20 hover:bg-blue-600 hover:text-white transition-all shrink-0 shadow-sm"
-                                >
-                                  Restore
-                                </button>
-                              </div>
-                            ))
-                          )}
-                        </div>
-
-                        {/* FOOTER */}
-                        <div className="p-5 bg-white/[0.01] border-t border-white/[0.05] flex gap-3">
-                          <button 
-                            onClick={restoreAllFilters}
-                            className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[14px] transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98]"
-                          >
-                            Restore All
-                          </button>
-                          <button 
-                            onClick={() => setShowDeletedFilters(false)}
-                            className="flex-1 py-3 bg-white/5 text-[#94a3b8] hover:text-white hover:bg-white/[0.08] text-[10px] font-black uppercase tracking-[0.2em] rounded-[14px] transition-all active:scale-[0.98]"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
-                <button onClick={() => {
-                  setFields([]);
-                  localStorage.setItem('export_fields_panel', JSON.stringify([]));
-                }} className="text-[10px] font-bold text-primary hover:underline">Clear</button>
-              </div>
-            </div>
 
-            <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-4 max-h-[300px] overflow-y-auto">
-              {/* DELETE CONFIRMATION UI */}
-              <AnimatePresence>
-                {filterToDelete && (
-                  <motion.div 
-                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                    animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
-                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                    className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between gap-4 overflow-hidden"
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Target Format</label>
+                  <select 
+                    className={styles.select}
+                    value={format}
+                    onChange={(e) => setFormat(e.target.value)}
                   >
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle size={14} className="text-red-400" />
-                      <span className="text-[10px] font-bold text-red-200">Delete selected filter?</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => setFilterToDelete(null)}
-                        className="px-2 py-1 text-[9px] font-black uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        onClick={handleConfirmDelete}
-                        className="px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-wider rounded-md hover:bg-red-400 transition-colors shadow-lg shadow-red-500/20"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    <option value="csv">CSV (Raw Data)</option>
+                    <option value="json">JSON (API Object)</option>
+                    <option value="xlsx">Excel (Worksheet)</option>
+                    <option value="pdf">PDF (Document)</option>
+                    <option value="txt">TXT (Flat File)</option>
+                    <option value="zip">ZIP (Archive All)</option>
+                  </select>
+                </div>
 
-              <div className="space-y-2">
-                <p className="text-[9px] font-bold text-muted-foreground/40 uppercase flex items-center gap-1.5">
-                  <ListChecks size={10} /> Required Fields
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {PERMANENT_KEYS.map(key => (
-                    <div key={key} className="flex items-center gap-2 p-2 rounded-lg bg-white/5 opacity-50">
-                      <Check size={12} className="text-primary" />
-                      <span className="text-[11px] text-muted-foreground">{formatLabel(key)}</span>
+                {format === "pdf" && (
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>PDF Report Type</label>
+                    <div className="flex flex-col gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-foreground hover:text-primary transition-colors">
+                        <input
+                          type="radio"
+                          name="pdfReportType"
+                          value="standard"
+                          checked={pdfReportType === "standard"}
+                          onChange={() => setPdfReportType("standard")}
+                          className="accent-primary"
+                        />
+                        Standard Summary
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-foreground hover:text-primary transition-colors">
+                        <input
+                          type="radio"
+                          name="pdfReportType"
+                          value="detailed"
+                          checked={pdfReportType === "detailed"}
+                          onChange={() => setPdfReportType("detailed")}
+                          className="accent-primary"
+                        />
+                        Detailed Log
+                      </label>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Date Range (Optional)</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="date" 
+                      className={styles.input} 
+                      value={startDate} 
+                      onChange={(e) => setStartDate(e.target.value)} 
+                    />
+                    <input 
+                      type="date" 
+                      className={styles.input} 
+                      value={endDate} 
+                      onChange={(e) => setEndDate(e.target.value)} 
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-[9px] font-bold text-muted-foreground/40 uppercase flex items-center gap-1.5">
-                  <Filter size={10} /> Optional Fields
+              <div className="mt-auto p-4 bg-primary/5 border border-primary/20 rounded-2xl backdrop-blur-sm">
+                <p className="text-[10px] font-black text-primary uppercase mb-1">Export Summary</p>
+                <p className="text-xs text-muted-foreground">
+                  Processing <span className="text-white font-bold">{filteredTrades.length}</span> records with <span className="text-white font-bold">{fields.length + PERMANENT_KEYS.length}</span> data points.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {availableOptionalFields.map(field => (
-                    <div
-                      key={field}
-                      className={`group relative flex items-center justify-between p-2 rounded-lg border transition-all duration-200 ${
-                        fields.includes(field)
-                          ? 'bg-primary/5 border-primary/30'
-                          : 'bg-white/5 border-white/5 hover:bg-white/10'
-                      }`}
-                    >
-                      <button
-                        onClick={() => toggleField(field)}
-                        className="flex items-center gap-2 flex-1 min-w-0 text-left"
-                      >
-                        <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
-                          fields.includes(field)
-                            ? 'bg-primary border-primary'
-                            : 'bg-transparent border-white/20'
-                        }`}>
-                          {fields.includes(field) && <Check size={10} className="text-white" />}
-                        </div>
-                        <span className={`text-[11px] font-medium truncate ${fields.includes(field) ? 'text-primary' : 'text-muted-foreground'}`}>{formatLabel(field)}</span>
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setFilterToDelete(field); }}
-                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 hover:text-red-400 rounded-md transition-all duration-300 text-muted-foreground/40 shrink-0"
-                        title="Remove from view"
-                      >
-                        <Trash2 size={12} />
-                      </button>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: FIELDS */}
+            <div className="flex flex-col h-[520px]">
+              <div className="flex flex-col h-full bg-black/20 rounded-2xl border border-white/5 overflow-hidden">
+                {/* FIELDS HEADER */}
+                <div className="p-4 border-b border-white/5 bg-white/[0.02]">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className={styles.fieldLabel}>Select Data Fields</label>
+                    <div className="flex gap-3">
+                      <button onClick={() => {
+                        const essentials = availableOptionalFields.filter(f => ESSENTIAL_KEYS.includes(f));
+                        setFields(essentials);
+                        localStorage.setItem('export_fields_panel', JSON.stringify(essentials));
+                      }} className="text-[10px] font-bold text-primary hover:underline">Essentials</button>
+                      <button onClick={() => {
+                        setFields(availableOptionalFields);
+                        localStorage.setItem('export_fields_panel', JSON.stringify(availableOptionalFields));
+                      }} className="text-[10px] font-bold text-primary hover:underline">Select All</button>
+                      <button onClick={() => {
+                        setFields([]);
+                        localStorage.setItem('export_fields_panel', JSON.stringify([]));
+                      }} className="text-[10px] font-bold text-muted-foreground hover:text-white">Clear</button>
+                      <div className="relative">
+                        {deletedFilters.length > 0 && (
+                          <button 
+                            onClick={() => setShowDeletedFilters(!showDeletedFilters)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
+                              showDeletedFilters ? 'bg-amber-500 text-white shadow-lg' : 'text-amber-500 bg-amber-500/10 border border-amber-500/20'
+                            }`}
+                          >
+                            Bin ({deletedFilters.length})
+                          </button>
+                        )}
+                        <AnimatePresence>
+                          {showDeletedFilters && (
+                            <motion.div 
+                              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                              className="absolute z-[120] right-0 top-full mt-2 w-64 bg-[#070911] border border-white/10 shadow-2xl rounded-2xl overflow-hidden p-3"
+                            >
+                               <div className="flex justify-between items-center mb-2 pb-2 border-b border-white/5">
+                                 <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Hidden Fields</span>
+                                 <button onClick={restoreAllFilters} className="text-[9px] font-bold text-primary">Restore All</button>
+                               </div>
+                               <div className="max-h-40 overflow-y-auto space-y-1 custom-scrollbar">
+                                 {deletedFilters.map(f => (
+                                   <div key={f.id} className="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                                     <span className="text-[10px] font-bold text-white/60 truncate">{f.label}</span>
+                                     <button onClick={() => restoreFilter(f.id)} className="p-1 hover:text-primary"><RefreshCcw size={10} /></button>
+                                   </div>
+                                 ))}
+                               </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* SEARCH BOX */}
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input 
+                      type="text" 
+                      placeholder="Search fields (e.g. price, notes, emotion)..."
+                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
                 </div>
-                {availableOptionalFields.length === 0 && (
-                  <p className="text-[10px] text-muted-foreground italic py-2">No optional fields detected</p>
-                )}
+
+                {/* FIELDS SCROLL AREA */}
+                <div className="flex-1 overflow-y-auto p-5 custom-scrollbar bg-black/10">
+                  <div className="space-y-6">
+                    {/* REQUIRED FIELDS (Always visible) */}
+                    <div>
+                      <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                        <ListChecks size={10} /> Core Mandatory Fields
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {PERMANENT_KEYS.map(key => (
+                          <div key={key} className="flex items-center gap-2 p-2 rounded-lg bg-white/5 border border-white/5 opacity-40">
+                            <Check size={10} className="text-primary" />
+                            <span className="text-[11px] font-bold text-white/80">{formatLabel(key)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* OPTIONAL FIELDS GRID */}
+                    <div>
+                      <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                        <Filter size={10} /> Dynamic Optional Fields
+                      </p>
+                      {availableOptionalFields.length > 0 ? (
+                        <div className="grid grid-cols-2 xl:grid-cols-3 gap-2">
+                          {availableOptionalFields.map(field => (
+                            <div
+                              key={field}
+                              className={`group relative flex items-center justify-between p-2 rounded-lg border transition-all duration-200 ${
+                                fields.includes(field)
+                                  ? 'bg-primary/5 border-primary/30'
+                                  : 'bg-white/5 border-white/5 hover:bg-white/10'
+                              }`}
+                            >
+                              <button
+                                onClick={() => toggleField(field)}
+                                className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                              >
+                                <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-all ${
+                                  fields.includes(field)
+                                    ? 'bg-primary border-primary'
+                                    : 'bg-transparent border-white/20'
+                                }`}>
+                                  {fields.includes(field) && <Check size={10} className="text-white" />}
+                                </div>
+                                <span className={`text-[11px] font-bold truncate ${fields.includes(field) ? 'text-primary' : 'text-white/60'}`}>{formatLabel(field)}</span>
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setFilterToDelete(field); }}
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 hover:text-red-400 rounded-md transition-all duration-300 text-muted-foreground/40 shrink-0"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center bg-white/[0.01] rounded-2xl border border-dashed border-white/5">
+                          <p className="text-xs text-muted-foreground italic">No fields matching "{searchTerm}"</p>
+                          <button onClick={() => setSearchTerm("")} className="mt-2 text-[10px] font-bold text-primary underline">Clear Search</button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <button
-            className={styles.button}
-            onClick={() =>
-              exportData(trades, {
-                fileName,
-                format,
-                selectedFields: [...PERMANENT_KEYS, ...fields],
-                includeHeaders: true,
-                prettyPrint: true,
-                pdfReportType: format === "pdf" ? pdfReportType : undefined,
-              } as any)
-            }
-          >
-            Execute Export
-          </button>
+          {/* STICKY FOOTER BUTTON */}
+          <div className="mt-6 pt-6 border-t border-white/5">
+            <button
+              className={styles.button}
+              onClick={() =>
+                exportData(filteredTrades, {
+                  fileName,
+                  format,
+                  selectedFields: [...PERMANENT_KEYS, ...fields],
+                  includeHeaders: true,
+                  prettyPrint: true,
+                  pdfReportType: format === "pdf" ? pdfReportType : undefined,
+                } as any)
+              }
+            >
+              <Download size={18} className="mr-2" />
+              Execute Institutional Export
+            </button>
+          </div>
+          
+          {/* DELETE CONFIRMATION OVERLAY */}
+          <AnimatePresence>
+            {filterToDelete && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              >
+                <motion.div 
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="bg-[#070911] border border-red-500/20 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                >
+                  <div className="flex items-center gap-3 mb-4 text-red-400">
+                    <AlertTriangle size={24} />
+                    <h3 className="font-bold">Hide Data Point</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Are you sure you want to remove <span className="text-white font-bold">"{formatLabel(filterToDelete)}"</span> from the available export fields list?
+                  </p>
+                  <div className="flex gap-3">
+                    <button 
+                      onClick={() => setFilterToDelete(null)}
+                      className="flex-1 py-2 rounded-xl bg-white/5 text-white font-bold text-xs"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleConfirmDelete}
+                      className="flex-1 py-2 rounded-xl bg-red-600 text-white font-bold text-xs"
+                    >
+                      Confirm Hide
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         )}
       </div>
