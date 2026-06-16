@@ -1,6 +1,34 @@
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { format, startOfWeek, startOfMonth, getWeek } from 'date-fns';
+import { format, startOfWeek, startOfMonth, getWeek, parseISO } from 'date-fns';
+
+/**
+ * Normalizes and applies emojis to emotion strings for professional consistency.
+ */
+function formatEmotionWithEmoji(emotion: string): string {
+  if (!emotion) return '';
+  // Strip existing emojis and normalize text
+  const e = emotion.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\u200D|[\u2600-\u27BF]/g, "").trim().toUpperCase();
+  
+  const map: Record<string, string> = {
+    'CONFIDENT': '💪 Confident',
+    'CALM': '😌 Calm',
+    'FOCUSED': '🎯 Focused',
+    'FEARFUL': '😨 Fearful',
+    'ANXIOUS': '😰 Anxious',
+    'GREEDY': '🤑 Greedy',
+    'REVENGE': '😡 Revenge',
+    'EXCITED': '🚀 Excited'
+  };
+
+  return map[e] || emotion;
+}
+
+const emotionColors: Record<string, string> = {
+  'CONFIDENT': '166534', 'CALM': '0F766E', 'FOCUSED': '1E40AF',
+  'FEARFUL': '991B1B', 'ANXIOUS': 'C2410C', 'GREEDY': 'B45309',
+  'REVENGE': '7F1D1D', 'EXCITED': '6B21A8'
+};
 
 /**
  * Utility to recursively flatten nested objects and format values for Excel.
@@ -10,7 +38,7 @@ function flattenAndFormat(item: any): any {
   const result: any = {};
 
   function walk(obj: any, prefix = ''): void {
-    if (obj === null || typeof obj !== 'object') return;
+    if (!obj || typeof obj !== 'object') return;
 
     Object.keys(obj).forEach(key => {
       const value = obj[key];
@@ -23,18 +51,19 @@ function flattenAndFormat(item: any): any {
       } else if (value instanceof Date) {
         result[newKey] = format(value, 'yyyy-MM-dd HH:mm:ss'); // Consistent date format
       } else if (Array.isArray(value)) {
-        // Convert arrays to readable comma-separated strings
-        result[newKey] = value
-          .map(v => (v !== null && typeof v === 'object' ? JSON.stringify(v) : String(v)))
-          .join(', ');
-      } else if (typeof value === 'object') {
-        // Recursively flatten nested objects (strategy, goal, etc)
+        // Handle arrays (e.g., tags, images) as comma-separated text
+        result[newKey] = value.map(v => (v && typeof v === 'object' ? JSON.stringify(v) : v)).join(', ');
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        // Recursively flatten nested objects
         const keys = Object.keys(value);
         if (keys.length === 0) {
           result[newKey] = '{}';
         } else {
           walk(value, newKey);
         }
+      } else if (typeof value === 'string' && newKey.toLowerCase().includes('emotion')) {
+        // Apply consistent emoji formatting to emotion fields
+        result[newKey] = formatEmotionWithEmoji(value);
       } else {
         result[newKey] = value;
       }
@@ -42,6 +71,15 @@ function flattenAndFormat(item: any): any {
   }
 
   walk(item);
+
+  // Add Month and Week Number for institutional analysis
+  const dateVal = item.trade_date || item.date;
+  if (dateVal) {
+    const dateObj = typeof dateVal === 'string' ? parseISO(dateVal) : new Date(dateVal);
+    result['month'] = format(dateObj, 'MMMM yyyy');
+    result['week_number'] = getWeek(dateObj);
+  }
+
   return result;
 }
 
@@ -67,22 +105,15 @@ function addProfessionalDataSheet(
   // 1. Detect all unique keys across the dataset for dynamic columns
   const allKeys = Array.from(new Set(processedData.flatMap(Object.keys)));
 
-  if (isTradesSheet) {
-    console.log('--- EXCEL EXPORT DEBUG: DISCOVERED TRADE FIELDS ---');
-    console.log('Detected properties across all trade records:', allKeys);
-    console.log(`Total unique columns to be generated: ${allKeys.length}`);
-    console.log('--------------------------------------------------');
-  }
-
   // 2a. Determine Column Order
   const priorityKeys = isTradesSheet ? [
-    'trade_date', 'trade_time', 'id', 'asset_name', 'symbol', 'market', 'exchange', 'asset_type', 
+    'trade_date', 'month', 'week_number', 'asset_name', 'pnl_amount', 'pnl_percent', 'risk_amount', 'strategy_used', 'goal.title', 'task.title', 'trade_direction', 'trade_status', 'trade_time', 'id', 'symbol', 'market', 'exchange', 'asset_type', 
     'side', 'trade_direction', 'entry_price', 'exit_price', 'stop_loss', 'take_profit', 
-    'position_size', 'quantity', 'leverage', 'risk_amount', 'reward_amount', 'rr_ratio',
-    'fees', 'commission', 'spread', 'slippage', 'gross_pnl', 'net_pnl', 'pnl_amount', 'pnl_percent',
-    'strategy_used', 'strategy.name', 'strategy.category', 'setup', 'tags', 'confidence_level', 
+    'position_size', 'quantity', 'leverage', 'reward_amount', 'rr_ratio',
+    'fees', 'commission', 'spread', 'slippage', 'gross_pnl', 'net_pnl',
+    'strategy.name', 'strategy.category', 'setup', 'tags', 'confidence_level', 
     'execution_rating', 'psychology_rating', 'emotion_before', 'emotion_after', 'mistakes', 
-    'lessons_learned', 'goal_id', 'goal.title', 'goal.status', 'task_id', 'task.title', 'task.status', 
+    'lessons_learned', 'goal_id', 'goal.status', 'task_id', 'task.status', 
     'notes', 'session', 'duration', 'screenshot_url', 'created_at', 'updated_at'
   ] : [];
 
@@ -97,49 +128,59 @@ function addProfessionalDataSheet(
   }));
 
   const colors = {
-    headerBg: '0F172A', // Slate 900
+    headerBg: '001F3F', // Deep Navy
     headerText: 'FFFFFF',
-    alternateRow: 'F8FAFC',
-    profit: '10B981', // Emerald 500
-    loss: 'EF4444', // Red 500
-    separator: 'F1F5F9',
-    border: 'E2E8F0' // Slate 200
+    monthBg: '1E3A8A', // Medium Dark Blue
+    monthText: 'FFFFFF',
+    alternateRow: 'F9FAFB', // Very light gray
+    profit: '059669', 
+    profitDeep: '064E3B',
+    loss: 'DC2626',
+    lossDeep: '7F1D1D',
+    breakeven: '94A3B8', // Gray
+    border: 'D1D5DB'
   };
 
   const headerStyle: Partial<ExcelJS.Style> = {
-    font: { bold: true, color: { argb: colors.headerText }, size: 11 },
+    font: { bold: true, color: { argb: colors.headerText }, size: 12 },
     fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.headerBg } },
     alignment: { vertical: 'middle', horizontal: 'center' },
     border: { bottom: { style: 'thin', color: { argb: colors.border } } }
   };
 
-  // 4. Populate Rows with Month Separators
+  // 4. Populate Rows with Professional Month Separators
   let currentMonthStr = '';
+
   processedData.forEach(rowData => {
-    if (isTradesSheet && rowData.trade_date) {
-      const date = new Date(rowData.trade_date);
-      const monthStr = format(date, 'MMMM yyyy').toUpperCase();
+    const tradeDate = rowData.trade_date || rowData.date;
+    if (isTradesSheet && tradeDate) {
+      const date = new Date(tradeDate);
+      const monthStr = format(date, 'MMMM yyyy');
       
       if (monthStr !== currentMonthStr) {
-        const separatorRow = worksheet.addRow({ trade_date: `----- ${monthStr} -----` });
-        worksheet.mergeCells(separatorRow.number, 1, separatorRow.number, worksheet.columns.length); // Merge across all columns
+        const separatorRow = worksheet.addRow({ [finalKeys[0]]: monthStr });
+        worksheet.mergeCells(separatorRow.number, 1, separatorRow.number, worksheet.columns.length);
         
         separatorRow.eachCell(cell => {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.separator } };
-          cell.font = { bold: true, color: { argb: '64748B' }, size: 10 };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.monthBg } };
+          cell.font = { bold: true, color: { argb: colors.monthText }, size: 14 };
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
         });
-        
         currentMonthStr = monthStr;
       }
     }
 
     const newRow = worksheet.addRow(rowData);
     
-    // Conditional formatting for P&L columns on insertion
     const pnl = parseFloat(rowData.pnl_amount);
     const pnlCell = newRow.getCell('pnl_amount'); // Get P&L cell
-    if (!isNaN(pnl)) pnlCell.font = { color: { argb: pnl >= 0 ? colors.profit : colors.loss }, bold: true };
+    if (!isNaN(pnl)) {
+      const isLarge = Math.abs(pnl) >= 1000;
+      pnlCell.font = { 
+        color: { argb: pnl > 0 ? (isLarge ? colors.profitDeep : colors.profit) : (isLarge ? colors.lossDeep : colors.loss) }, 
+        bold: true 
+      };
+    }
   });
 
   // 5. Apply Professional Sheet Formatting
@@ -147,7 +188,7 @@ function addProfessionalDataSheet(
   worksheet.getRow(1).eachCell(cell => Object.assign(cell, headerStyle));
 
   // Freeze Headers
-  worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+  worksheet.views = [{ state: 'frozen', xSplit: 3, ySplit: 1 }];
 
   // Enable Column Filters
   worksheet.autoFilter = {
@@ -159,31 +200,61 @@ function addProfessionalDataSheet(
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber > 1) {
       const firstCellVal = row.getCell(1).value?.toString();
-      if (rowNumber % 2 === 0 && !firstCellVal?.startsWith('---')) {
+      const isSeparator = firstCellVal && currentMonthStr.includes(firstCellVal);
+
+      if (!isSeparator && rowNumber % 2 === 0) {
         row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colors.alternateRow } };
       }
+
+      if (isSeparator) return;
+
       row.alignment = { vertical: 'middle', horizontal: 'center' };
       row.height = 24;
       row.eachCell((cell, colNumber) => {
         const header = (worksheet.getColumn(colNumber).header as string) || '';
         const val = cell.value;
 
+        // BUY / SELL High-Contrast Styling
+        if (header.match(/DIRECTION|SIDE/)) {
+          const dir = val?.toString().toUpperCase();
+          if (dir === 'BUY' || dir === 'LONG') {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'DCFCE7' } }; // Light Green
+            cell.font = { bold: true, color: { argb: '15803D' } }; // Dark Green
+          } else if (dir === 'SELL' || dir === 'SHORT') {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEE2E2' } }; // Light Red
+            cell.font = { bold: true, color: { argb: 'B91C1C' } }; // Dark Red
+          }
+        }
+
+        // Emotion Semantic Coloring
+        if (header.includes('EMOTION')) {
+          const eRaw = val?.toString() || '';
+          const eKey = eRaw.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\u200D|[\u2600-\u27BF]/g, "").trim().toUpperCase();
+          if (emotionColors[eKey]) {
+            cell.font = { bold: true, color: { argb: emotionColors[eKey] } };
+          }
+        }
+
         if (typeof val === 'number') {
-          // Apply Currency/Numeric formatting based on field detection
           if (header.match(/PNL|PROFIT|AMOUNT|PRICE|LOSS|COST|VALUE|RISK|EQUITY/)) {
-            cell.numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00'; // Corrected negative currency format
+            cell.numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
             if (header.match(/PNL|PROFIT|LOSS/)) {
-              cell.font = { bold: true, color: { argb: val >= 0 ? colors.profit : colors.loss } };
+              const isLarge = Math.abs(val) >= 1000;
+              cell.font = { 
+                bold: true, 
+                color: { argb: val >= 0 ? (isLarge ? colors.profitDeep : colors.profit) : (isLarge ? colors.lossDeep : colors.loss) } 
+              };
             }
           } else if (header.match(/RATE|PROGRESS|%|PERCENT/)) {
             cell.numFmt = '0.00"%"';
           }
         } else if (typeof val === 'string') {
-          // Semantic status coloring
           const upper = val.toUpperCase();
-          if (['WIN', 'COMPLETED', 'SUCCESS', 'ACTIVE'].includes(upper)) {
+          if (['WIN', 'SUCCESS', 'ACTIVE'].includes(upper)) {
             cell.font = { color: { argb: colors.profit }, bold: true };
-          } else if (['LOSS', 'FAILED', 'HIGH'].includes(upper)) {
+          } else if (upper === 'COMPLETED') {
+             cell.font = { color: { argb: '059669' }, bold: true };
+          } else if (['LOSS', 'FAILED'].includes(upper)) {
             cell.font = { color: { argb: colors.loss }, bold: true };
           }
         }
@@ -302,7 +373,7 @@ function addDashboardSheet(workbook: ExcelJS.Workbook, trades: any[], tasks: any
   const totalLoss = trades.reduce((acc, t) => acc + Math.abs(Math.min(0, parseFloat(t.pnl_amount || 0))), 0);
 
   ws.addRows([
-    ['HEDGE FUND PERFORMANCE REPORT'],
+    ['TRADING JOURNAL PERFORMANCE DASHBOARD'],
     ['Generated On', format(new Date(), 'yyyy-MM-dd HH:mm')],
     [],
     ['KEY PERFORMANCE INDICATORS', 'VALUE'],
