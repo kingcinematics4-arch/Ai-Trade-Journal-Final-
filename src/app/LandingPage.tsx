@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { 
   BookOpen, 
   BrainCircuit, 
@@ -28,22 +28,27 @@ const staggerContainer = {
   },
 };
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+const scrollReveal = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
   visible: {
     opacity: 1,
+    scale: 1,
     y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+    transition: { 
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+    },
   },
 };
 
-const fadeDown = {
-  hidden: { opacity: 0, y: -20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
+const cardHover = {
+  scale: 1.05,
+  transition: {
+    type: "spring",
+    stiffness: 400,
+    damping: 17
+  }
 };
 
 const scaleIn = {
@@ -109,6 +114,25 @@ const stats = [
 ];
 
 export default function LandingPage() {
+  // Scroll-reactive refs
+  const heroRef = useRef(null);
+  const isHeroInView = useInView(heroRef, { once: false, amount: 0.2 });
+
+  const previewRef = useRef(null);
+  const isPreviewInView = useInView(previewRef, { once: false, amount: 0.2 });
+
+  const statsRef = useRef(null);
+  const isStatsInView = useInView(statsRef, { once: false, amount: 0.2 });
+
+  const featuresHeaderRef = useRef(null);
+  const isFeaturesHeaderInView = useInView(featuresHeaderRef, { once: false, amount: 0.5 });
+
+  const featuresGridRef = useRef(null);
+  const isFeaturesGridInView = useInView(featuresGridRef, { once: false, amount: 0.1 });
+
+  const ctaRef = useRef(null);
+  const isCtaInView = useInView(ctaRef, { once: false, amount: 0.2 });
+
   const scrollToAuth = () => {
     const authSection = document.getElementById('auth-section');
     if (authSection) {
@@ -141,13 +165,14 @@ export default function LandingPage() {
         </div>
 
         <motion.div 
+          ref={heroRef}
           className="max-w-5xl mx-auto text-center relative z-10"
           initial="hidden"
-          animate="visible"
+          animate={isHeroInView ? "visible" : "hidden"}
           variants={staggerContainer}
         >
           <motion.h1 
-            variants={fadeUp}
+            variants={scrollReveal}
             className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]"
           >
             TRACK EVERY TRADE. <br />
@@ -157,7 +182,7 @@ export default function LandingPage() {
           </motion.h1>
 
           <motion.p 
-            variants={fadeUp}
+            variants={scrollReveal}
             className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl font-medium leading-relaxed mb-12"
           >
             Transform your trading data into a competitive edge. Our AI-powered journal isolates execution flaws and psychological triggers before they become habits.
@@ -180,7 +205,10 @@ export default function LandingPage() {
 
           {/* Dashboard Preview */}
           <motion.div
-            variants={scaleIn}
+            ref={previewRef}
+            variants={scrollReveal}
+            initial="hidden"
+            animate={isPreviewInView ? "visible" : "hidden"}
             className="relative group"
           >
             <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full group-hover:bg-blue-500/30 transition-all duration-700" />
@@ -223,17 +251,17 @@ export default function LandingPage() {
       {/* Stats Section */}
       <section className="py-24 border-y border-white/5 bg-white/[0.01]">
         <motion.div 
+          ref={statsRef}
           className="max-w-7xl mx-auto px-6"
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+          animate={isStatsInView ? "visible" : "hidden"}
           variants={staggerContainer}
         >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
             {stats.map((stat, i) => (
               <motion.div 
                 key={i}
-                variants={fadeUp}
+                variants={scrollReveal}
                 className="flex flex-col items-center lg:items-start"
               >
                 <div className="flex items-center gap-2 text-blue-500 mb-2">
@@ -251,33 +279,29 @@ export default function LandingPage() {
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div 
+            ref={featuresHeaderRef}
             className="text-center mb-20"
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
+            animate={isFeaturesHeaderInView ? "visible" : "hidden"}
+            variants={scrollReveal}
           >
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">THE ARCHITECTURE OF EDGE</h2>
             <p className="text-slate-500 font-medium uppercase tracking-[0.3em] text-[10px]">Professional tools for disciplined execution</p>
           </motion.div>
           
           <motion.div 
+            ref={featuresGridRef}
             variants={staggerContainer}
-            initial="initial"
-            whileInView="visible"
-            viewport={{ once: true }}
+            initial="hidden"
+            animate={isFeaturesGridInView ? "visible" : "hidden"}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {features.map((feature, i) => (
               <motion.div
                 key={i}
-                variants={fadeUp}
-                whileHover={{ 
-                  y: -8, 
-                  backgroundColor: 'rgba(255,255,255,0.04)',
-                  boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
-                }}
-                className="p-10 rounded-[40px] bg-white/[0.02] border border-white/[0.06] transition-shadow duration-300 cursor-default group"
+                variants={scrollReveal}
+                whileHover={cardHover}
+                className="p-10 rounded-[40px] bg-white/[0.02] border border-white/[0.06] transition-colors duration-300 hover:bg-white/[0.04] cursor-default group"
               >
                 <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
@@ -295,22 +319,23 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-32 px-6">
         <motion.div 
+          ref={ctaRef}
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={scaleIn}
+          animate={isCtaInView ? "visible" : "hidden"}
+          variants={scrollReveal}
+          whileHover={{ scale: 1.02 }}
           className="max-w-5xl mx-auto rounded-[60px] bg-gradient-to-br from-blue-600 via-indigo-700 to-indigo-950 p-12 md:p-24 text-center relative overflow-hidden shadow-2xl"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
           <div className="relative z-10">
             <motion.h2 
-              variants={fadeUp}
+              variants={scrollReveal}
               className="text-4xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]"
             >
               READY TO MASTER <br /> YOUR PERFORMANCE?
             </motion.h2>
             <motion.p 
-              variants={fadeUp}
+              variants={scrollReveal}
               className="text-white/70 text-lg md:text-xl font-medium max-w-xl mx-auto mb-12 leading-relaxed"
             >
               Join 12,000+ traders using AI to eliminate emotional bias and achieve consistent profitability.
