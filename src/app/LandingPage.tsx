@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Activity,
   Users,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 // Reusable Animation Variants
@@ -29,7 +30,7 @@ const staggerContainer = {
 };
 
 const scrollReveal = {
-  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  hidden: { opacity: 0, scale: 0.95, y: 15 },
   visible: {
     opacity: 1,
     scale: 1,
@@ -215,34 +216,44 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full group-hover:bg-blue-500/30 transition-all duration-700" />
             <div className="relative rounded-[32px] border border-white/10 bg-[#070911]/80 backdrop-blur-3xl p-2 shadow-2xl">
               <div className="rounded-[24px] overflow-hidden border border-white/5 bg-[#0b0f1a]">
-                <div className="aspect-video w-full bg-gradient-to-br from-slate-900 to-black flex items-center justify-center p-12">
-               <div className="w-full h-full flex flex-col justify-center text-left">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                    <h2 className="text-[14px] font-black uppercase tracking-[0.2em] text-blue-400">AI Trade Journal Platform</h2>
-                  </div>
-                  <p className="text-sm md:text-base text-slate-300 font-medium leading-relaxed mb-6 max-w-xl">
-                    AI-powered system to track trades, analyze performance, and improve trading decisions using structured data.
-                  </p>
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-8">
-                    {[
-                      'Trade history tracking',
-                      'Performance analytics (win/loss, accuracy)',
-                      'Strategy evaluation',
-                      'Exportable reports',
-                      'Clean dashboard insights',
-                    ].map((feature) => (
-                      <div key={feature} className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
-                        <CheckCircle2 size={14} className="text-blue-500 shrink-0" />
-                        <span>{feature}</span>
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                  className="aspect-video w-full relative"
+                >
+                  {/* App Mockup Screenshot */}
+                  <img 
+                    src="https://images.unsplash.com/photo-1642790106117-e829e14a795f?q=80&w=2000&auto=format&fit=crop" 
+                    alt="AI Trade Journal Dashboard Mockup"
+                    className="w-full h-full object-cover opacity-60"
+                  />
+                  
+                  {/* Visual Feature Section Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b0f1a] via-transparent to-transparent flex flex-col justify-end p-6 md:p-12">
+                    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-6 md:p-8 rounded-[24px] shadow-2xl max-w-xl">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                          <BrainCircuit size={18} className="text-blue-400" />
+                        </div>
+                        <h2 className="text-[14px] font-black uppercase tracking-[0.25em] text-blue-400">AI Trade Journal Platform</h2>
                       </div>
-                    ))}
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { label: 'Trade tracking', icon: <TrendingUp size={14} /> },
+                          { label: 'Performance analytics', icon: <BarChart3 size={14} /> },
+                          { label: 'Strategy insights', icon: <BrainCircuit size={14} /> },
+                          { label: 'Export reports', icon: <Download size={14} /> },
+                        ].map((item) => (
+                          <div key={item.label} className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <span className="text-blue-500">{item.icon}</span>
+                            <span>{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest border-t border-white/5 pt-4">
-                    Built for disciplined traders who rely on data, not emotion.
-                  </p>
-               </div>
-                </div>
+                </motion.div>
               </div>
             </div>
           </motion.div>
