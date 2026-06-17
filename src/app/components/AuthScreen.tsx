@@ -5,7 +5,7 @@ import AuthRedirect from './AuthRedirect';
 
 export default function AuthScreen() {
   return (
-    <div className="min-h-screen max-h-screen flex items-stretch overflow-hidden bg-background">
+    <div id="auth-section" className="min-h-screen flex items-stretch bg-background scroll-mt-20">
       <AuthRedirect />
       <AuthBrandPanel />
       <AuthFormPanel />

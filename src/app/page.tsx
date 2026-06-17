@@ -4,11 +4,13 @@
 //   return <MaintenancePage />;
 // }
 import LandingPage from './LandingPage';
-import AuthScreen from './components/AuthScreen'; 
+import AuthScreen from './components/AuthScreen';
+import LandingNavbar from '@/components/LandingNavbar';
 
 export default function Page() {
   return (
     <>
+      <LandingNavbar />
       <LandingPage />
       <AuthScreen />
     </>

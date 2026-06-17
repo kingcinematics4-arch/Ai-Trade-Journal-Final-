@@ -254,8 +254,8 @@ export default function AuthFormPanel() {
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
-            backgroundImage: ` ransparent 1px),
-              linear-gradient(to bottom, rgba(59, 130, 246, 0.2) 1px, transparent 1px)
+            backgroundImage: `radial-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
             `,
             backgroundSize: '40px 40px',
           }}

@@ -145,7 +145,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 overflow-hidden">
         {/* Animated Background Gradients */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <motion.div 
             animate={{ 
               scale: [1, 1.2, 1],
@@ -193,6 +193,7 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
           >
             <motion.button 
+              type="button"
               onClick={scrollToAuth}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -341,6 +342,7 @@ export default function LandingPage() {
               Join 12,000+ traders using AI to eliminate emotional bias and achieve consistent profitability.
             </motion.p>
             <motion.button 
+              type="button"
               onClick={scrollToAuth}
               variants={bounceIn}
               whileHover={{ scale: 1.05 }}
