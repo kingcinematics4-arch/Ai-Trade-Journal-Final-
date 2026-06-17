@@ -37,7 +37,7 @@ export default function StrategyAnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-3xl" />)}
         </div>
-        <Skeleton className="h-[400px] rounded-3xl" />
+        <Skeleton className="h-[350px] rounded-3xl" />
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function StrategyAnalyticsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-8 pb-20">
+    <div className="p-4 md:p-6 space-y-6 pb-20">
       {/* Header & Global Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -100,7 +100,7 @@ export default function StrategyAnalyticsPage() {
 
       <StrategyOverview analytics={analytics} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <StrategyCharts analytics={analytics} />
         <StrategyTimeline timeline={analytics.timeline} />
       </div>

@@ -58,10 +58,10 @@ export default function StrategyOverview({ analytics }: { analytics: any }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.05 }}
-          className="card-premium p-5 flex flex-col justify-between"
+          className="card-premium p-4 flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-1.5 rounded-xl bg-white/[0.03] border border-white/[0.05]">
               {card.icon}
             </div>
             {card.trend && (
@@ -72,7 +72,7 @@ export default function StrategyOverview({ analytics }: { analytics: any }) {
           </div>
           <div>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{card.label}</p>
-            <h4 className="text-lg font-bold text-white truncate">{card.value}</h4>
+            <h4 className="text-base font-bold text-white truncate">{card.value}</h4>
             <p className="text-xs text-muted-foreground/60 font-medium mt-1 truncate">{card.sub}</p>
           </div>
         </motion.div>
