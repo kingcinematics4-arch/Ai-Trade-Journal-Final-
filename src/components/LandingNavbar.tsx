@@ -23,6 +23,8 @@ export default function LandingNavbar() {
   ];
 
   const scrollToAuth = () => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
+  
+  const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
   return (
     <nav 
@@ -46,13 +48,14 @@ export default function LandingNavbar() {
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
-            <a 
+            <button 
               key={link.name} 
-              href={link.href}
+              type="button"
+              onClick={() => scrollToId(link.href.replace('#', ''))}
               className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
             >
               {link.name}
-            </a>
+            </button>
           ))}
         </div>
 

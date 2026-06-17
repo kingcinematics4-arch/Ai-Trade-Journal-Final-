@@ -288,7 +288,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-32 px-6">
+      <section id="features" className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div 
             ref={featuresHeaderRef}
