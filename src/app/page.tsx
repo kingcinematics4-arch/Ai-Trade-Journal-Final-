@@ -3,9 +3,14 @@
 // export default function Home() {
 //   return <MaintenancePage />;
 // }
-import React from 'react';
-import AuthScreen from './components/AuthScreen';
+import LandingPage from './LandingPage';
+import AuthScreen from './components/AuthScreen'; 
 
 export default function Page() {
-  return <AuthScreen />;
+  return (
+    <>
+      <LandingPage />
+      <AuthScreen />
+    </>
+  );
 }
