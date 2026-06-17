@@ -15,7 +15,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (isInitialized && !isLoading && !user) {
-      router.replace('/login');
+      router.replace('/'); // Ensures unauthenticated users land on the Landing Page
     }
   }, [isLoading, isInitialized, user, router]);
 

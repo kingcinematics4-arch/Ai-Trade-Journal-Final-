@@ -111,7 +111,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
     console.log("Closing sidebar...");
     setIsMobileOpen(false);
     await signOut();
-    router.push('/');
+    router.replace('/');
     router.refresh();
   }, [router, signOut, isMobileOpen]);
 
