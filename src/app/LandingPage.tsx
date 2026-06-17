@@ -16,18 +16,56 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+// Reusable Animation Variants
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.2,
+    },
+  },
 };
 
-const staggerContainer = {
-  animate: {
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const fadeDown = {
+  hidden: { opacity: 0, y: -20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 1, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+const bounceIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      type: "spring",
+      stiffness: 260,
+      damping: 20,
+    },
+  },
 };
 
 const features = [
@@ -102,20 +140,14 @@ export default function LandingPage() {
           />
         </div>
 
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
-          >
-            <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Institutional Terminal v1.4</span>
-          </motion.div>
-
+        <motion.div 
+          className="max-w-5xl mx-auto text-center relative z-10"
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
           <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.8 }}
+            variants={fadeUp}
             className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]"
           >
             TRACK EVERY TRADE. <br />
@@ -125,67 +157,83 @@ export default function LandingPage() {
           </motion.h1>
 
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
+            variants={fadeUp}
             className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl font-medium leading-relaxed mb-12"
           >
             Transform your trading data into a competitive edge. Our AI-powered journal isolates execution flaws and psychological triggers before they become habits.
           </motion.p>
 
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            variants={bounceIn}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
           >
-            <button 
+            <motion.button 
               onClick={scrollToAuth}
-              className="w-full sm:w-auto px-10 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-blue-500 hover:text-white transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto px-10 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-blue-500 hover:text-white transition-all shadow-2xl flex items-center justify-center gap-3"
             >
               Get Started
               <ArrowRight size={16} />
-            </button>
+            </motion.button>
           </motion.div>
 
           {/* Dashboard Preview */}
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            variants={scaleIn}
             className="relative group"
           >
             <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full group-hover:bg-blue-500/30 transition-all duration-700" />
             <div className="relative rounded-[32px] border border-white/10 bg-[#070911]/80 backdrop-blur-3xl p-2 shadow-2xl">
               <div className="rounded-[24px] overflow-hidden border border-white/5 bg-[#0b0f1a]">
                 <div className="aspect-video w-full bg-gradient-to-br from-slate-900 to-black flex items-center justify-center p-12">
-                   {/* Abstract Dashboard Mockup Elements */}
-                   <div className="w-full h-full grid grid-cols-3 gap-4">
-                      <div className="col-span-2 h-full rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                      <div className="space-y-4">
-                        <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                        <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                        <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
+               <div className="w-full h-full flex flex-col justify-center text-left">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                    <h2 className="text-[14px] font-black uppercase tracking-[0.2em] text-blue-400">AI Trade Journal Platform</h2>
+                  </div>
+                  <p className="text-sm md:text-base text-slate-300 font-medium leading-relaxed mb-6 max-w-xl">
+                    AI-powered system to track trades, analyze performance, and improve trading decisions using structured data.
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-8">
+                    {[
+                      'Trade history tracking',
+                      'Performance analytics (win/loss, accuracy)',
+                      'Strategy evaluation',
+                      'Exportable reports',
+                      'Clean dashboard insights',
+                    ].map((feature) => (
+                      <div key={feature} className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                        <CheckCircle2 size={14} className="text-blue-500 shrink-0" />
+                        <span>{feature}</span>
                       </div>
-                   </div>
+                    ))}
+                  </div>
+                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest border-t border-white/5 pt-4">
+                    Built for disciplined traders who rely on data, not emotion.
+                  </p>
+               </div>
                 </div>
               </div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats Section */}
       <section className="py-24 border-y border-white/5 bg-white/[0.01]">
-        <div className="max-w-7xl mx-auto px-6">
+        <motion.div 
+          className="max-w-7xl mx-auto px-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+        >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
             {stats.map((stat, i) => (
               <motion.div 
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                variants={fadeUp}
                 className="flex flex-col items-center lg:items-start"
               >
                 <div className="flex items-center gap-2 text-blue-500 mb-2">
@@ -196,30 +244,40 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Features Grid */}
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
+          <motion.div 
+            className="text-center mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+          >
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">THE ARCHITECTURE OF EDGE</h2>
             <p className="text-slate-500 font-medium uppercase tracking-[0.3em] text-[10px]">Professional tools for disciplined execution</p>
-          </div>
+          </motion.div>
           
           <motion.div 
             variants={staggerContainer}
             initial="initial"
-            whileInView="animate"
+            whileInView="visible"
             viewport={{ once: true }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {features.map((feature, i) => (
               <motion.div
                 key={i}
-                variants={fadeIn}
-                whileHover={{ y: -8, backgroundColor: 'rgba(255,255,255,0.04)' }}
-                className="p-10 rounded-[40px] bg-white/[0.02] border border-white/[0.06] transition-all cursor-default group"
+                variants={fadeUp}
+                whileHover={{ 
+                  y: -8, 
+                  backgroundColor: 'rgba(255,255,255,0.04)',
+                  boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+                }}
+                className="p-10 rounded-[40px] bg-white/[0.02] border border-white/[0.06] transition-shadow duration-300 cursor-default group"
               >
                 <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
@@ -237,23 +295,35 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-32 px-6">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
+          variants={scaleIn}
           className="max-w-5xl mx-auto rounded-[60px] bg-gradient-to-br from-blue-600 via-indigo-700 to-indigo-950 p-12 md:p-24 text-center relative overflow-hidden shadow-2xl"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]">READY TO MASTER <br /> YOUR PERFORMANCE?</h2>
-            <p className="text-white/70 text-lg md:text-xl font-medium max-w-xl mx-auto mb-12 leading-relaxed">
+            <motion.h2 
+              variants={fadeUp}
+              className="text-4xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]"
+            >
+              READY TO MASTER <br /> YOUR PERFORMANCE?
+            </motion.h2>
+            <motion.p 
+              variants={fadeUp}
+              className="text-white/70 text-lg md:text-xl font-medium max-w-xl mx-auto mb-12 leading-relaxed"
+            >
               Join 12,000+ traders using AI to eliminate emotional bias and achieve consistent profitability.
-            </p>
-            <button 
+            </motion.p>
+            <motion.button 
               onClick={scrollToAuth}
-              className="px-12 py-6 bg-white text-black font-black uppercase tracking-[0.2em] text-sm rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl"
+              variants={bounceIn}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-12 py-6 bg-white text-black font-black uppercase tracking-[0.2em] text-sm rounded-2xl transition-all shadow-xl"
             >
               Initialize Account
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </section>
