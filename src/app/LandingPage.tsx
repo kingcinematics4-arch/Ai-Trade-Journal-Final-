@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { 
   BookOpen, 
@@ -114,6 +114,29 @@ const stats = [
   { label: "Success Rate", value: "99.9%", icon: <CheckCircle2 size={16} /> },
 ];
 
+const showcaseItems = [
+  {
+    title: "Trade Tracking System",
+    description: "Institutional-grade execution logging with precise entry and exit metrics tracked in real-time.",
+    icon: <TrendingUp className="text-blue-400" />
+  },
+  {
+    title: "Performance Analytics",
+    description: "Deep-dive into win rates, expectancy, and profit factor with automated, visual dashboard summaries.",
+    icon: <BarChart3 className="text-emerald-400" />
+  },
+  {
+    title: "Strategy Insights",
+    description: "AI-driven evaluation of your setups to identify which strategies are generating your true edge.",
+    icon: <BrainCircuit className="text-purple-400" />
+  },
+  {
+    title: "Export / Reports System",
+    description: "Generate professional PDF and CSV reports for performance reviews, tax auditing, or mentorship.",
+    icon: <Download className="text-amber-400" />
+  }
+];
+
 export default function LandingPage() {
   // Scroll-reactive refs
   const heroRef = useRef(null);
@@ -121,6 +144,9 @@ export default function LandingPage() {
 
   const previewRef = useRef(null);
   const isPreviewInView = useInView(previewRef, { once: false, amount: 0.2 });
+
+  const showcaseRef = useRef(null);
+  const isShowcaseInView = useInView(showcaseRef, { once: false, amount: 0.2 });
 
   const statsRef = useRef(null);
   const isStatsInView = useInView(statsRef, { once: false, amount: 0.2 });
@@ -133,6 +159,15 @@ export default function LandingPage() {
 
   const ctaRef = useRef(null);
   const isCtaInView = useInView(ctaRef, { once: false, amount: 0.2 });
+
+  // State to re-trigger highlight animation on navbar click
+  const [highlightTrigger, setHighlightTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleHighlight = () => setHighlightTrigger(prev => prev + 1);
+    window.addEventListener('trigger-showcase-highlight', handleHighlight);
+    return () => window.removeEventListener('trigger-showcase-highlight', handleHighlight);
+  }, []);
 
   const scrollToAuth = () => {
     const authSection = document.getElementById('auth-section');
@@ -285,6 +320,65 @@ export default function LandingPage() {
             ))}
           </div>
         </motion.div>
+      </section>
+
+      {/* Showcase Section */}
+      <section id="showcase" className="py-32 px-6 scroll-mt-24">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            ref={showcaseRef}
+            key={highlightTrigger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.2 }}
+            variants={{
+              hidden: { opacity: 0, scale: 0.95 },
+              visible: { 
+                opacity: 1, 
+                scale: 1,
+                transition: { duration: 0.6, type: "spring", stiffness: 100 }
+              }
+            }}
+            className="relative group"
+          >
+            {/* Highlight Glow Effect triggered on scroll or click */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={isShowcaseInView ? { 
+                opacity: [0, 1, 0],
+                scale: [0.98, 1.02, 1]
+              } : { opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 via-indigo-500/30 to-cyan-500/30 rounded-[44px] blur-xl z-0 pointer-events-none"
+            />
+            
+            <div className="relative z-10 bg-[#070911] border border-white/10 rounded-[40px] p-8 md:p-16 overflow-hidden shadow-2xl">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">PLATFORM SHOWCASE</h2>
+                <p className="text-slate-500 font-medium uppercase tracking-[0.3em] text-[10px]">Institutional Feature Architecture</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {showcaseItems.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    variants={scrollReveal}
+                    whileHover={cardHover}
+                    className="p-8 rounded-[32px] bg-white/[0.02] border border-white/[0.06] flex items-start gap-6 hover:bg-white/[0.04] transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center shrink-0">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2 tracking-tight">{item.title}</h3>
+                      <p className="text-slate-500 text-sm leading-relaxed font-medium">{item.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Features Grid */}

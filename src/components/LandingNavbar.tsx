@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import AppLogo from '@/components/ui/AppLogo';
 import { Menu, X } from 'lucide-react';
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils';
 export default function LandingNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -18,13 +20,21 @@ export default function LandingNavbar() {
   }, []);
 
   const navLinks = [
-    { name: 'Features', href: '#features' },
-    { name: 'Showcase', href: '#showcase' },
+    { name: 'Features', href: '#features', type: 'scroll' },
+    { name: 'Showcase', href: '#showcase', type: 'scroll' },
   ];
 
   const scrollToAuth = () => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
   
-  const scrollToId = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToId = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      if (id === 'showcase') {
+        window.dispatchEvent(new CustomEvent('trigger-showcase-highlight'));
+      }
+    }
+  };
 
   return (
     <nav 
@@ -51,7 +61,13 @@ export default function LandingNavbar() {
             <button 
               key={link.name} 
               type="button"
-              onClick={() => scrollToId(link.href.replace('#', ''))}
+              onClick={() => {
+                if (link.type === 'scroll') {
+                  scrollToId(link.href.replace('#', ''));
+                } else {
+                  router.push(link.href);
+                }
+              }}
               className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
             >
               {link.name}
