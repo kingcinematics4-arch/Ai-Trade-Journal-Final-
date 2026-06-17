@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { 
   BookOpen, 
   BrainCircuit, 
@@ -79,31 +79,37 @@ const features = [
     title: "Trade Logging",
     description: "Intuitive interface designed for institutional speed. Record entries, exits, and context in seconds.",
     icon: <BookOpen className="text-blue-400" />,
+    previewImage: "/images/previews/trade-logging.png" // Hypothetical path to real asset
   },
   {
     title: "AI Analysis",
     description: "Identify hidden patterns. Our neural engine detects emotional triggers and execution flaws automatically.",
     icon: <BrainCircuit className="text-emerald-400" />,
+    previewImage: "/images/previews/ai-analysis.png" // Hypothetical path to real asset
   },
   {
     title: "Strategy Tracking",
     description: "Compare performance across different setups. Isolate your true edge with granular data tagging.",
     icon: <Target className="text-indigo-400" />,
+    previewImage: "/images/previews/strategy-tracking.png" // Hypothetical path to real asset
   },
   {
     title: "Advanced Analytics",
     description: "Visual summaries of Expectancy, Profit Factor, and Drawdown. Professional metrics, simplified.",
     icon: <BarChart3 className="text-purple-400" />,
+    previewImage: "/images/previews/advanced-analytics.png" // Hypothetical path to real asset
   },
   {
     title: "Risk Management",
     description: "Monitor R-multiple and portfolio heat. Ensure survival with institutional-grade risk oversight.",
     icon: <ShieldCheck className="text-rose-400" />,
+    previewImage: "/images/previews/risk-management.png" // Hypothetical path to real asset
   },
   {
     title: "Institutional Export",
     description: "Generate professional PDF or XLSX reports for performance reviews or tax compliance.",
     icon: <Download className="text-amber-400" />,
+    previewImage: "/images/previews/institutional-export.png" // Hypothetical path to real asset
   }
 ];
 
@@ -162,6 +168,7 @@ export default function LandingPage() {
 
   // State to re-trigger highlight animation on navbar click
   const [highlightTrigger, setHighlightTrigger] = useState(0);
+  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
 
   useEffect(() => {
     const handleHighlight = () => setHighlightTrigger(prev => prev + 1);
@@ -407,7 +414,10 @@ export default function LandingPage() {
                 key={i}
                 variants={scrollReveal}
                 whileHover={cardHover}
-                className="p-10 rounded-[40px] bg-white/[0.02] border border-white/[0.06] transition-colors duration-300 hover:bg-white/[0.04] cursor-default group"
+                onMouseEnter={() => setHoveredFeature(i)}
+                onMouseLeave={() => setHoveredFeature(null)}
+                className={`p-10 rounded-[40px] bg-white/[0.02] border transition-all duration-300 cursor-default group relative z-10 
+                  ${hoveredFeature === i ? 'border-blue-500/50 bg-white/[0.05] shadow-[0_0_30px_rgba(59,130,246,0.15)]' : 'border-white/[0.06]'}`}
               >
                 <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
@@ -416,6 +426,25 @@ export default function LandingPage() {
                 <p className="text-slate-500 text-sm leading-relaxed font-medium group-hover:text-slate-400 transition-colors">
                   {feature.description}
                 </p>
+
+                {/* Hover Preview Image Tooltip */}
+                <AnimatePresence>
+                  {hoveredFeature === i && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8, y: 10, x: '-50%' }}
+                      animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+                      exit={{ opacity: 0, scale: 0.8, y: 10, x: '-50%' }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                      className="absolute left-1/2 bottom-full mb-6 w-64 h-40 rounded-2xl overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] pointer-events-none"
+                    >
+                      <img 
+                        src={(feature as any).previewImage} 
+                        alt={`${feature.title} Preview`}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </motion.div>

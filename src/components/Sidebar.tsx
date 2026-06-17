@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import {
   PlusCircle,
   BookOpen,
   BarChart3,
+  Layers,
   Calendar,
   BrainCircuit,
   Target,
@@ -54,6 +55,7 @@ const primaryNavItems: NavItem[] = [
     href: '/dashboard/calendar',
     icon: <Calendar size={18} />,
   },
+  { id: 'nav-strategies', label: 'Strategies', href: '/strategies', icon: <Layers size={18} /> },
   {
     id: 'nav-ai-coach',
     label: 'AI Coach',
@@ -76,12 +78,20 @@ export default function Sidebar({ activePath }: SidebarProps) {
   const { profile, displayName, isLoading, signOut } = useAuth();
   const { unreadCount } = useNotifications();
 
-  // Close mobile menu on route change
+  // Root Cause Fix: Automatically close mobile menu on route change.
+  // This ensures that when the user navigates, the persistent layout state is reset.
   useEffect(() => {
-    setIsMobileOpen(false);
-  }, [pathname]);
+    if (isMobileOpen) {
+      console.log("Navigation triggered");
+      console.log("Current sidebar state:", isMobileOpen);
+      console.log("Closing sidebar via pathname change...");
+      setIsMobileOpen(false);
+    }
+  }, [pathname, isMobileOpen]);
 
-  const secondaryNavItems: NavItem[] = [
+  // Memoize nav items to prevent unnecessary re-renders
+  const secondaryNavItems: NavItem[] = useMemo(() => {
+    return [
     { id: 'nav-goals', label: 'Goals', href: '/goals', icon: <Target size={18} /> },
     {
       id: 'nav-notifications',
@@ -92,13 +102,25 @@ export default function Sidebar({ activePath }: SidebarProps) {
     },
     { id: 'nav-profile', label: 'Profile', href: '/profile', icon: <User size={18} /> },
     { id: 'nav-settings', label: 'Settings', href: '/settings', icon: <Settings size={18} /> },
-  ];
+    ];
+  }, [unreadCount]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
+    console.log("Sidebar item clicked");
+    console.log("Current sidebar state:", isMobileOpen);
+    console.log("Closing sidebar...");
+    setIsMobileOpen(false);
     await signOut();
     router.push('/');
     router.refresh();
-  };
+  }, [router, signOut, isMobileOpen]);
+
+  const handleNavItemClick = useCallback(() => {
+    console.log("Sidebar item clicked");
+    console.log("Current sidebar state:", isMobileOpen);
+    console.log("Closing sidebar...");
+    setIsMobileOpen(false);
+  }, [isMobileOpen]);
 
   // Ensure activePath falls back to the current pathname if not provided by parent
   const effectivePath = activePath || pathname;
@@ -107,12 +129,19 @@ export default function Sidebar({ activePath }: SidebarProps) {
     <>
       {/* Mobile Header Top Bar */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background/50 backdrop-blur-3xl border-b border-white/[0.05] z-40 px-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <Link 
+          href="/dashboard" 
+          onClick={handleNavItemClick}
+          className="flex items-center gap-2"
+        >
           <AppLogo size={30} />
           <span className="font-bold text-[18px] tracking-[-0.03em] text-white">AITrade</span>
-        </div>
+        </Link>
         <button
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          onClick={() => {
+            console.log("[Sidebar] Toggling mobile sidebar. Previous state:", isMobileOpen);
+            setIsMobileOpen(!isMobileOpen);
+          }}
           className="p-2 text-muted-foreground hover:text-foreground"
           aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
         >
@@ -143,6 +172,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
             profile={profile}
             displayName={displayName}
             secondaryNavItems={secondaryNavItems}
+            onNavItemClick={handleNavItemClick}
           />
         </aside>
       </div>
@@ -185,6 +215,7 @@ interface SidebarContentProps {
   profile: Record<string, unknown> | null;
   displayName: string | null;
   secondaryNavItems: NavItem[];
+  onNavItemClick?: () => void;
 }
 
 function SidebarContent({
@@ -195,10 +226,15 @@ function SidebarContent({
   profile,
   displayName,
   secondaryNavItems,
+  onNavItemClick,
 }: SidebarContentProps) {
   return (
     <>
-      <div className={`flex items-center h-20 px-6 border-b border-white/[0.03] ${collapsed ? 'justify-center' : 'gap-3'}`}>
+      <Link 
+        href="/dashboard"
+        onClick={onNavItemClick}
+        className={`flex items-center h-20 px-6 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors ${collapsed ? 'justify-center' : 'gap-3'}`}
+      >
         <AppLogo size={collapsed ? 28 : 36} />
         {!collapsed && (
           <div className="flex flex-col">
@@ -206,18 +242,27 @@ function SidebarContent({
             <span className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] mt-1">SaaS Intelligence</span>
           </div>
         )}
-      </div>
+      </Link>
 
       {collapsed ? (
         (profile || isLoading) && (
-          <div className="flex justify-center mt-4 mb-2 px-2" title={displayName || ''}>
+          <Link 
+            href="/profile"
+            onClick={onNavItemClick}
+            className="flex justify-center mt-4 mb-2 px-2 hover:opacity-80 transition-opacity" 
+            title={displayName || ''}
+          >
             <UserAvatar size="sm" />
-          </div>
+          </Link>
         )
       ) : (
-        <div className="mx-4 mt-6 mb-2 p-4 bg-white/[0.03] rounded-[24px] border border-white/[0.05]">
+        <Link 
+          href="/profile"
+          onClick={onNavItemClick}
+          className="block mx-4 mt-6 mb-2 p-4 bg-white/[0.03] rounded-[24px] border border-white/[0.05] hover:bg-white/[0.06] transition-colors"
+        >
           <UserProfileSummary size="sm" layout="horizontal" compact />
-        </div>
+        </Link>
       )}
 
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-none">
@@ -229,13 +274,14 @@ function SidebarContent({
         {primaryNavItems.map((item) => {
           // Robust comparison: Exact for dashboard, startsWith for deep routes (history, analytics, etc)
           const isActive = item.href === '/dashboard' 
-            ? (effectivePath === '/dashboard' || effectivePath === '/')
+            ? (effectivePath === '/dashboard' || effectivePath === '/') // Keep '/' for dashboard if it's the default logged-in route
             : effectivePath.startsWith(item.href);
 
           return (
             <Link
               key={item.id}
               href={item.href}
+              onClick={onNavItemClick}
               className={`nav-item transition-all duration-200 motion-safe:hover:translate-x-1 active:scale-95 ${
                 isActive ? 'text-blue-500' : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
               } ${collapsed ? 'justify-center px-2' : ''}`}
@@ -272,6 +318,7 @@ function SidebarContent({
             <Link
               key={item.id}
               href={item.href}
+              onClick={onNavItemClick}
               className={`nav-item py-3 px-3 rounded-xl transition-all duration-200 motion-safe:hover:translate-x-1 active:scale-95 ${
                 isActive ? 'text-blue-500' : 'text-slate-400 hover:bg-white/[0.03] hover:text-slate-200'
               } ${collapsed ? 'justify-center px-2' : ''}`}

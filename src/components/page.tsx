@@ -1,80 +1,115 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BarChart3, BrainCircuit, Download, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
+import { useTrades } from '@/contexts/TradesContext';
+import { calculateStrategyAnalytics } from '@/lib/trades/strategy-analytics';
+import { Layers, Search, Filter, Calendar as CalendarIcon } from 'lucide-react';
+import StrategyOverview from '@/components/strategies/StrategyOverview';
+import StrategyTable from '@/components/strategies/StrategyTable';
+import StrategyCharts from '@/components/strategies/StrategyCharts';
+import StrategyTimeline from '@/components/strategies/StrategyTimeline';
+import { Skeleton } from '@/components/ui/LoadingSkeleton';
 
-const features = [
-  {
-    title: 'Trade Tracking System',
-    description: 'Log every detail of your trades with precision, from entry/exit points to market conditions and personal notes.',
-    icon: <LayoutDashboard size={24} className="text-blue-400" />,
-  },
-  {
-    title: 'Performance Analytics Dashboard',
-    description: 'Visualize your trading performance with advanced metrics like P&L, R-multiple, win rate, and drawdown analysis.',
-    icon: <BarChart3 size={24} className="text-emerald-400" />,
-  },
-  {
-    title: 'Strategy Insights',
-    description: 'Evaluate the effectiveness of your trading strategies with AI-driven insights, identifying strengths and weaknesses.',
-    icon: <BrainCircuit size={24} className="text-purple-400" />,
-  },
-  {
-    title: 'Export/Report System',
-    description: 'Generate professional, customizable reports for tax purposes, performance reviews, or sharing with mentors.',
-    icon: <Download size={24} className="text-amber-400" />,
-  },
-];
+export default function StrategyAnalyticsPage() {
+  const { trades, isLoading } = useTrades();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
-export default function ShowcasePage() {
+  const analytics = useMemo(() => {
+    if (!trades) return null;
+    
+    // Apply basic filters
+    const filtered = trades.filter(t => {
+      const date = new Date(t.trade_date);
+      const inDateRange = (!dateRange.start || date >= new Date(dateRange.start)) &&
+                          (!dateRange.end || date <= new Date(dateRange.end));
+      return inDateRange;
+    });
+
+    return calculateStrategyAnalytics(filtered);
+  }, [trades, dateRange]);
+
+  if (isLoading) {
+    return (
+      <div className="p-8 space-y-8">
+        <Skeleton className="h-12 w-64 rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-3xl" />)}
+        </div>
+        <Skeleton className="h-[400px] rounded-3xl" />
+      </div>
+    );
+  }
+
+  if (!analytics || analytics.strategies.length === 0) {
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center text-center p-8">
+        <div className="w-20 h-20 bg-white/[0.03] rounded-full flex items-center justify-center mb-6 border border-white/[0.05]">
+          <Layers className="text-muted-foreground/40" size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">No Strategy Data Found</h2>
+        <p className="text-muted-foreground max-w-md">
+          Start assigning strategies to your trades in the "Add Trade" form to see detailed performance analytics.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#050816] text-white selection:bg-blue-500/30 overflow-x-hidden pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-4">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400">
-              App Showcase
-            </span>
+    <div className="p-4 md:p-8 space-y-8 pb-20">
+      {/* Header & Global Filters */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+            <Layers className="text-blue-500" />
+            Strategy Analytics
           </h1>
-          <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto">
-            Explore the powerful features that make AI Trade Journal your ultimate trading companion.
+          <p className="text-muted-foreground text-sm mt-1 uppercase tracking-widest font-bold opacity-50">
+            Performance Tracking & Execution Edge
           </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {features.map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="p-8 rounded-[32px] bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] transition-all relative overflow-hidden"
-            >
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center">
-                  {feature.icon}
-                </div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">{feature.title}</h2>
-              </div>
-              <p className="text-zinc-400 text-base leading-relaxed">
-                {feature.description}
-              </p>
-            </motion.div>
-          ))}
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }} className="text-center mt-20">
-          <Link href="/#auth-section" className="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full transition-all">
-            <TrendingUp size={20} /> Start Your Journey
-          </Link>
-        </motion.div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-blue-500 transition-colors" size={16} />
+            <input 
+              type="text"
+              placeholder="Search Strategy..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-white/[0.03] border border-white/[0.07] rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500/50 transition-all w-full md:w-64"
+            />
+          </div>
+          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2">
+            <CalendarIcon size={16} className="text-muted-foreground" />
+            <input 
+              type="date" 
+              className="bg-transparent text-xs text-white outline-none"
+              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+            />
+            <span className="text-muted-foreground">→</span>
+            <input 
+              type="date" 
+              className="bg-transparent text-xs text-white outline-none"
+              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+            />
+          </div>
+        </div>
+      </div>
+
+      <StrategyOverview analytics={analytics} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <StrategyCharts analytics={analytics} />
+        <StrategyTimeline timeline={analytics.timeline} />
+      </div>
+
+      <div className="card-premium p-0 overflow-hidden">
+        <div className="p-6 border-b border-white/[0.05]">
+          <h3 className="font-bold text-white">Strategy Performance Matrix</h3>
+        </div>
+        <StrategyTable strategies={analytics.strategies} searchTerm={searchTerm} />
       </div>
     </div>
   );
