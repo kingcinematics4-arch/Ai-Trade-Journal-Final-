@@ -21,7 +21,6 @@ export default function LandingNavbar() {
 
   const navLinks = [
     { name: 'Features', href: '#features', type: 'scroll' },
-    { name: 'Showcase', href: '#showcase', type: 'scroll' },
   ];
 
   const scrollToAuth = () => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -30,9 +29,6 @@ export default function LandingNavbar() {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-      if (id === 'showcase') {
-        window.dispatchEvent(new CustomEvent('trigger-showcase-highlight'));
-      }
     }
   };
 

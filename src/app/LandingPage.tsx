@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { 
   BookOpen,
@@ -10,13 +10,13 @@ import {
   ArrowRight,
   TrendingUp,
   TrendingDown,
-  Activity,
-  Users,
   CheckCircle2,
   Layers,
   ShieldCheck
 } from 'lucide-react';
 import AppImage from '@/components/ui/AppImage';
+import LegalSection from '@/components/LegalSection'; // Added missing import
+import AuthScreen from './components/AuthScreen';
 
 // Reusable Animation Variants
 const staggerContainer = {
@@ -51,15 +51,6 @@ const cardHover = {
     stiffness: 400,
     damping: 17
   }
-};
-
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 1, ease: [0.22, 1, 0.36, 1] },
-  },
 };
 
 const bounceIn = {
@@ -262,36 +253,6 @@ const features = [
   }
 ];
 
-const stats = [
-  { label: "Trades Tracked", value: "2.4M+", icon: <Activity size={16} /> },
-  { label: "Avg. Edge Growth", value: "18.5%", icon: <TrendingUp size={16} /> },
-  { label: "Active Traders", value: "12k+", icon: <Users size={16} /> },
-  { label: "Success Rate", value: "99.9%", icon: <CheckCircle2 size={16} /> },
-];
-
-const showcaseItems = [
-  {
-    title: "Trade Tracking System",
-    description: "Institutional-grade execution logging with precise entry and exit metrics tracked in real-time.",
-    icon: <TrendingUp className="text-blue-400" />
-  },
-  {
-    title: "Performance Analytics",
-    description: "Deep-dive into win rates, expectancy, and profit factor with automated, visual dashboard summaries.",
-    icon: <BarChart3 className="text-emerald-400" />
-  },
-  {
-    title: "Strategy Insights",
-    description: "AI-driven evaluation of your setups to identify which strategies are generating your true edge.",
-    icon: <BrainCircuit className="text-purple-400" />
-  },
-  {
-    title: "Export / Reports System",
-    description: "Generate professional PDF and CSV reports for performance reviews, tax auditing, or mentorship.",
-    icon: <Download className="text-amber-400" />
-  }
-];
-
 export default function LandingPage() {
   // Scroll-reactive refs
   const heroRef = useRef(null);
@@ -300,30 +261,13 @@ export default function LandingPage() {
   const previewRef = useRef(null);
   const isPreviewInView = useInView(previewRef, { once: false, amount: 0.2 });
 
-  const showcaseRef = useRef(null);
-  const isShowcaseInView = useInView(showcaseRef, { once: false, amount: 0.2 });
-
-  const statsRef = useRef(null);
-  const isStatsInView = useInView(statsRef, { once: false, amount: 0.2 });
-
   const featuresHeaderRef = useRef(null);
   const isFeaturesHeaderInView = useInView(featuresHeaderRef, { once: false, amount: 0.5 });
 
   const featuresGridRef = useRef(null);
   const isFeaturesGridInView = useInView(featuresGridRef, { once: false, amount: 0.1 });
 
-  const ctaRef = useRef(null);
-  const isCtaInView = useInView(ctaRef, { once: false, amount: 0.2 });
-
-  // State to re-trigger highlight animation on navbar click
-  const [highlightTrigger, setHighlightTrigger] = useState(0);
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
-
-  useEffect(() => {
-    const handleHighlight = () => setHighlightTrigger(prev => prev + 1);
-    window.addEventListener('trigger-showcase-highlight', handleHighlight);
-    return () => window.removeEventListener('trigger-showcase-highlight', handleHighlight);
-  }, []);
 
   const scrollToAuth = () => {
     const authSection = document.getElementById('auth-section');
@@ -452,92 +396,6 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-24 border-y border-white/5 bg-white/[0.01]">
-        <motion.div 
-          ref={statsRef}
-          className="max-w-7xl mx-auto px-6"
-          initial="hidden"
-          animate={isStatsInView ? "visible" : "hidden"}
-          variants={staggerContainer}
-        >
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
-            {stats.map((stat, i) => (
-              <motion.div 
-                key={i}
-                variants={scrollReveal}
-                className="flex flex-col items-center lg:items-start"
-              >
-                <div className="flex items-center gap-2 text-blue-500 mb-2">
-                  {stat.icon}
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</span>
-                </div>
-                <span className="text-4xl md:text-5xl font-black tracking-tighter">{stat.value}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Showcase Section */}
-      <section id="showcase" className="py-32 px-6 scroll-mt-24">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            ref={showcaseRef}
-            key={highlightTrigger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, amount: 0.2 }}
-            variants={{
-              hidden: { opacity: 0, scale: 0.95 },
-              visible: { 
-                opacity: 1, 
-                scale: 1,
-                transition: { duration: 0.6, type: "spring", stiffness: 100 }
-              }
-            }}
-            className="relative group"
-          >
-            {/* Highlight Glow Effect triggered on scroll or click */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={isShowcaseInView ? { 
-                opacity: [0, 1, 0],
-                scale: [0.98, 1.02, 1]
-              } : { opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-              className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 via-indigo-500/30 to-cyan-500/30 rounded-[44px] blur-xl z-0 pointer-events-none"
-            />
-            
-            <div className="relative z-10 bg-[#070911] border border-white/10 rounded-[40px] p-8 md:p-16 overflow-hidden shadow-2xl">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">PLATFORM SHOWCASE</h2>
-                <p className="text-slate-500 font-medium uppercase tracking-[0.3em] text-[10px]">Institutional Feature Architecture</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {showcaseItems.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    variants={scrollReveal}
-                    whileHover={cardHover}
-                    className="p-8 rounded-[32px] bg-white/[0.02] border border-white/[0.06] flex items-start gap-6 hover:bg-white/[0.04] transition-colors"
-                  >
-                    <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center shrink-0">
-                      {item.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-2 tracking-tight">{item.title}</h3>
-                      <p className="text-slate-500 text-sm leading-relaxed font-medium">{item.description}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Features Grid */}
       <section id="features" className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
@@ -592,43 +450,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-32 px-6">
-        <motion.div 
-          ref={ctaRef}
-          initial="hidden"
-          animate={isCtaInView ? "visible" : "hidden"}
-          variants={scrollReveal}
-          whileHover={{ scale: 1.02 }}
-          className="max-w-5xl mx-auto rounded-[60px] bg-gradient-to-br from-blue-600 via-indigo-700 to-indigo-950 p-12 md:p-24 text-center relative overflow-hidden shadow-2xl"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
-          <div className="relative z-10">
-            <motion.h2 
-              variants={scrollReveal}
-              className="text-4xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]"
-            >
-              READY TO MASTER <br /> YOUR PERFORMANCE?
-            </motion.h2>
-            <motion.p 
-              variants={scrollReveal}
-              className="text-white/70 text-lg md:text-xl font-medium max-w-xl mx-auto mb-12 leading-relaxed"
-            >
-              Join 12,000+ traders using AI to eliminate emotional bias and achieve consistent profitability.
-            </motion.p>
-            <motion.button 
-              type="button"
-              onClick={scrollToAuth}
-              variants={bounceIn}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-12 py-6 bg-white text-black font-black uppercase tracking-[0.2em] text-sm rounded-2xl transition-all shadow-xl"
-            >
-              Initialize Account
-            </motion.button>
-          </div>
-        </motion.div>
-      </section>
+      {/* Authentication Section (Moved to flow logically) */}
+      <div id="auth-section">
+        <AuthScreen />
+      </div>
+
+      {/* Professional Legal & Compliance Section */}
+      <LegalSection />
     </div>
   );
 }
