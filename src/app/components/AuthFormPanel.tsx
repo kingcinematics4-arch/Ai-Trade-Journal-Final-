@@ -97,6 +97,17 @@ const itemVariants = {
     transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   },
 };
+// Hide scrollbars via injected style (cross-browser)
+const scrollbarHideStyle = `
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow-x: hidden;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+`;
 
 export default function AuthFormPanel() {
   const [activeTab, setActiveTab] = useState<AuthTab>('login');
@@ -769,11 +780,15 @@ export default function AuthFormPanel() {
   //
   return (
     <LayoutGroup id="auth-focus-group">
+      {/* Global scrollbar-hide inject */}
+      <style>{scrollbarHideStyle}</style>
+
       {/* ── Page shell ──────────────────────────────────────── */}
-      <div className="flex-1 h-full overflow-y-auto bg-gradient-to-b from-[#02040a] via-[#050814] to-[#02040a]">
+      <div className="flex-1 h-full overflow-y-auto scrollbar-hide bg-gradient-to-b from-[#02040a] via-[#050814] to-[#02040a]">
         <div className="min-h-full w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 xl:p-10 relative">
 
           {/* Dot-grid background */}
+
           <div
             className="absolute inset-0 opacity-[0.03] pointer-events-none"
             style={{
@@ -848,7 +863,7 @@ export default function AuthFormPanel() {
                 </div>
 
                 {/* ── Scrollable Form Body ── */}
-                <div className="flex-1 overflow-y-auto min-h-0 pr-1 -mr-1">
+                <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
                   <AnimatePresence mode="wait" initial={false}>
                     {activeTab === 'login' ? (
                       <motion.form
@@ -1343,7 +1358,7 @@ export default function AuthFormPanel() {
                 </div>
 
                 {/* ── Scrollable Form Body ── */}
-                <div className="flex-1 overflow-y-auto min-h-0 pr-1 -mr-1">
+                <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
                   <AnimatePresence mode="wait" initial={false}>
                     {activeTab === 'login' ? (
                       <motion.form
