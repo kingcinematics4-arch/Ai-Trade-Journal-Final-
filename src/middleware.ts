@@ -35,10 +35,10 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (isProtectedRoute && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    loginUrl.searchParams.set('redirected', 'true');
-    const redirectResponse = NextResponse.redirect(loginUrl);
+    const homeUrl = request.nextUrl.clone();
+    homeUrl.pathname = '/';
+    homeUrl.searchParams.set('redirected', 'true');
+    const redirectResponse = NextResponse.redirect(homeUrl);
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value, { ...cookie });
     });
