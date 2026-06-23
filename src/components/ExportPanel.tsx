@@ -58,6 +58,7 @@ const formatLabel = (key: string) => {
 export default function ExportPanel() {
   const { trades, isLoading } = useTrades();
   const [format, setFormat] = useState("csv");
+  const [complianceFormat, setComplianceFormat] = useState<"pdf" | "xlsx">("pdf");
   const [pdfReportType, setPdfReportType] = useState<"standard" | "detailed">("standard");
   const [fileName, setFileName] = useState("export"); // Default filename
   const [searchTerm, setSearchTerm] = useState("");
@@ -196,9 +197,37 @@ export default function ExportPanel() {
                     <option value="xlsx">Excel (Worksheet)</option>
                     <option value="pdf">PDF (Document)</option>
                     <option value="txt">TXT (Flat File)</option>
-                    <option value="zip">ZIP (Archive All)</option>
+                    <option value="compliance_report">Annual Compliance Report</option>
                   </select>
                 </div>
+
+                {format === "compliance_report" && (
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Export Format</label>
+                    <div className="flex gap-2">
+                      <button
+                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+                          complianceFormat === "pdf"
+                            ? "bg-primary text-white"
+                            : "bg-white/5 text-white/60 hover:bg-white/10"
+                        }`}
+                        onClick={() => setComplianceFormat("pdf")}
+                      >
+                        PDF
+                      </button>
+                      <button
+                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+                          complianceFormat === "xlsx"
+                            ? "bg-primary text-white"
+                            : "bg-white/5 text-white/60 hover:bg-white/10"
+                        }`}
+                        onClick={() => setComplianceFormat("xlsx")}
+                      >
+                        Excel
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {format === "pdf" && (
                   <div className={styles.inputGroup}>
@@ -410,6 +439,7 @@ export default function ExportPanel() {
                   includeHeaders: true,
                   prettyPrint: true,
                   pdfReportType: format === "pdf" ? pdfReportType : undefined,
+                  complianceFormat: format === "compliance_report" ? complianceFormat : undefined,
                 } as any)
               }
             >

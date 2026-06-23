@@ -1,10 +1,12 @@
-import JSZip from "jszip";
 import Papa from "papaparse";
 import { filterData } from "./filterData";
 import { ExportOptions } from "./exportTypes";
 import { exportPDF as generateProfessionalPDF } from "@/lib/exportPDF";
 import { buildPremiumTradingReport } from "@/lib/export/pdf/pdfReportBuilder";
 import { exportProfessionalExcel } from "@/lib/exportExcel";
+import { exportAnnualComplianceReportPDF } from "@/lib/export/compliance/annualCompliancePdf";
+import { exportAnnualComplianceReportExcel } from "@/lib/export/compliance/annualComplianceExcel";
+import { buildComplianceReportData } from "@/lib/export/compliance/complianceEngine";
 
 function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
@@ -23,6 +25,8 @@ function download(blob: Blob, filename: string) {
  * MAIN EXPORT FUNCTION
  */
 export async function exportData(data: any[], options: ExportOptions, context?: { tasks?: any[], goals?: any[] }) {
+  console.log("Export format:", options.format);
+
   const cleaned = filterData(data, options);
 
   switch (options.format) {
@@ -50,11 +54,11 @@ export async function exportData(data: any[], options: ExportOptions, context?: 
     case "txt":
       return exportTXT(cleaned, options);
 
-    case "zip":
-      return exportZIP(data, cleaned, options);
+    case "compliance_report":
+      return exportAnnualComplianceReport(data, options);
 
     default:
-      throw new Error("Unsupported format");
+      throw new Error(`Unsupported format: ${options.format}`);
   }
 }
 
@@ -94,22 +98,28 @@ function exportTXT(data: any[], options: ExportOptions) {
   download(new Blob([text], { type: "text/plain" }), `${options.fileName}.txt`);
 }
 
-/* ---------------- ZIP (ALL) ---------------- */
-async function exportZIP(originalData: any[], cleaned: any[], options: ExportOptions) {
-  const zip = new JSZip();
-
-  zip.file("data.json", JSON.stringify(cleaned, null, 2));
-  zip.file("data.csv", Papa.unparse(cleaned));
-
-  const pdfSource = (options.pdfReportType ?? "standard") === "standard" ? originalData : cleaned;
-  const pdfDoc = buildPremiumTradingReport(pdfSource, {
-    fileName: options.fileName,
-    selectedFields: options.selectedFields,
-    pdfReportType: options.pdfReportType ?? "standard",
-  });
-  zip.file("data.pdf", pdfDoc.output("blob"));
-
-  const content = await zip.generateAsync({ type: "blob" });
-
-  download(content, `${options.fileName}.zip`);
+/* ---------------- ANNUAL COMPLIANCE REPORT ---------------- */
+async function exportAnnualComplianceReport(data: any[], options: ExportOptions) {
+  const subFormat = options.complianceFormat || 'pdf';
+  const fileName = options.fileName || 'AnnualComplianceReport';
+  
+  try {
+    const reportData = await buildComplianceReportData(data, 'N/A', 'N/A');
+    
+    if (subFormat === 'pdf') {
+      const pdfDoc = await exportAnnualComplianceReportPDF(reportData);
+      const pdfBlob = pdfDoc.output('blob');
+      download(pdfBlob, `${fileName}.pdf`);
+    } else if (subFormat === 'xlsx') {
+      const workbook = await exportAnnualComplianceReportExcel(reportData);
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      download(blob, `${fileName}.xlsx`);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('[exportAnnualComplianceReport] Error:', error);
+    return false;
+  }
 }

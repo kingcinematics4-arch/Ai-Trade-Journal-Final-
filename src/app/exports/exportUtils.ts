@@ -2,10 +2,9 @@ import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import JSZip from 'jszip';
 import { exportPDF as generateProfessionalPDF } from '@/lib/exportPDF';
 
-export type ExportFormat = 'pdf' | 'csv' | 'xlsx' | 'json' | 'txt' | 'md' | 'xml' | 'html' | 'zip';
+export type ExportFormat = 'pdf' | 'csv' | 'xlsx' | 'json' | 'txt' | 'md' | 'xml' | 'html' | 'compliance_report';
 
 interface ExportOptions {
   filename: string;
@@ -95,14 +94,6 @@ export async function exportData({ filename, format, data, columns, title }: Exp
       html += `</tbody></table></body></html>`;
       const htmlBlob = new Blob([html], { type: 'text/html' });
       saveAs(htmlBlob, `${finalFilename}.html`);
-      break;
-
-    case 'zip':
-      const zip = new JSZip();
-      zip.file("data.json", JSON.stringify(data, null, 2));
-      zip.file("readme.txt", `Export of ${title} generated on ${new Date().toISOString()}`);
-      const zipContent = await zip.generateAsync({ type: "blob" });
-      saveAs(zipContent, `${finalFilename}.zip`);
       break;
 
     default:

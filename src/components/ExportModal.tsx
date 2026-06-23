@@ -69,8 +69,8 @@ const FORMATS: { value: ExportFormat; label: string; icon: string }[] = [
   { value: 'pdf', label: 'Document (.pdf)', icon: '📄' },
   { value: 'csv', label: 'Data (.csv)', icon: '📝' },
   { value: 'json', label: 'Raw (.json)', icon: '💽' },
-  { value: 'md', label: 'Markdown (.md)', icon: '✍️' },
-  { value: 'zip', label: 'Archive (.zip)', icon: '📦' },
+  { value: 'txt', label: 'Text (.txt)', icon: '📝' },
+  { value: 'compliance_report', label: 'Annual Compliance Report', icon: '🏛️' },
 ];
 
 const containerVariants = {
@@ -128,6 +128,7 @@ const getPreviewColumns = (category: string, data: any[]) => {
 export default function ExportModal({ isOpen, onClose, category, data, onExportSuccess }: ExportModalProps) {
   const [filename, setFilename] = useState(`${category}_export`);
   const [format, setFormat] = useState<ExportFormat>('xlsx');
+  const [complianceFormat, setComplianceFormat] = useState<'pdf' | 'xlsx'>('pdf');
   const [isExporting, setIsExporting] = useState(false);
   const [exportMode, setExportMode] = useState<'single' | 'separate'>('single');
   const [pdfReportType, setPdfReportType] = useState<'standard' | 'detailed'>('standard');
@@ -283,6 +284,7 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
         prettyPrint: true,
         exportMode: exportMode,
         pdfReportType: format === 'pdf' ? pdfReportType : undefined,
+        complianceFormat: format === 'compliance_report' ? complianceFormat : undefined,
       }, {
         // Note: For a truly global report, consider passing actual store data here
         tasks: [],
@@ -356,6 +358,32 @@ export default function ExportModal({ isOpen, onClose, category, data, onExportS
                   ))}
                 </div>
               </div>
+
+              {format === 'compliance_report' && (
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Export Format</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setComplianceFormat('pdf')}
+                      className={`flex-1 p-3 rounded-xl border text-[11px] font-bold transition-all ${
+                        complianceFormat === 'pdf' ? 'bg-primary/10 border-primary text-primary' : 'bg-muted/20 border-border text-muted-foreground'
+                      }`}
+                    >
+                      PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setComplianceFormat('xlsx')}
+                      className={`flex-1 p-3 rounded-xl border text-[11px] font-bold transition-all ${
+                        complianceFormat === 'xlsx' ? 'bg-primary/10 border-primary text-primary' : 'bg-muted/20 border-border text-muted-foreground'
+                      }`}
+                    >
+                      Excel
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {format === 'pdf' && (
                 <div className="space-y-3">
