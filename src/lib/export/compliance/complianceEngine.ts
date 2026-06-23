@@ -26,6 +26,8 @@ export interface ComplianceStrategyStats {
   winRate: number;
   grossProfit: number;
   grossLoss: number;
+  averageTrade: number;
+  profitFactor: number;
 }
 
 export interface ComplianceReportData {
@@ -51,6 +53,27 @@ export interface ComplianceReportData {
     averageTrade: number;
     largestWin: number;
     largestLoss: number;
+    tradingDays: number;
+    averageDailyPnl: number;
+  };
+  accountInfo: {
+    accountId: string;
+    userId: string;
+    exportTimestamp: string;
+    reportingPeriod: string;
+    timeZone: string;
+    reportVersion: string;
+    dataSource: string;
+  };
+  financialSummary: {
+    grossProfit: number;
+    grossLoss: number;
+    netProfit: number;
+    totalFees: number;
+    netAfterFees: number;
+    averageTrade: number;
+    profitFactor: number;
+    winRate: number;
   };
   feeAnalysis: {
     brokerFees: number;
@@ -66,10 +89,18 @@ export interface ComplianceReportData {
     dataSource: string;
     exportTimestamp: string;
     exportVersion: string;
+    reportId: string;
+    accountId: string;
+    userId: string;
+    recordCount: number;
   };
   dataIntegrity: {
     recordCountVerification: number;
     exportChecksum: string; // SHA-256
+    sha256Hash: string;
+    checksum: string;
+    recordVerificationCount: number;
+    generationTimestamp: string;
   };
 }
 
@@ -90,7 +121,7 @@ function mapToComplianceLedger(data: any[]): ComplianceTrade[] {
       assetSymbol: trade.symbol || trade.asset_name || 'N/A',
       market: trade.market || 'N/A',
       entryDate: trade.trade_date || trade.date || 'N/A',
-      exitDate: trade.exit_date || trade.trade_date || trade.date || 'N/A', // Fallback to entry if no exit
+      exitDate: trade.exit_date || trade.trade_date || trade.date || 'N/A',
       positionType: (trade.trade_direction || trade.side || 'N/A').toUpperCase(),
       quantity: parseFloat(trade.quantity || trade.position_size || '0'),
       entryPrice: parseFloat(trade.entry_price || '0'),
@@ -115,6 +146,24 @@ async function generateDataHash(dataString: string): Promise<string> {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
   return 'UNABLE_TO_GENERATE_HASH_CLIENTSIDE';
+}
+
+/**
+ * Count unique trading days from ledger dates.
+ */
+function countTradingDays(ledger: ComplianceTrade[]): number {
+  const days = new Set<string>();
+  ledger.forEach(t => {
+    try {
+      const d = new Date(t.entryDate);
+      if (!isNaN(d.getTime())) {
+        days.add(format(d, 'yyyy-MM-dd'));
+      }
+    } catch {
+      // skip invalid dates
+    }
+  });
+  return days.size;
 }
 
 /**
@@ -153,7 +202,16 @@ export async function buildComplianceReportData(
 
     // Strategy Aggregation
     if (!strategyMap[t.strategyName]) {
-      strategyMap[t.strategyName] = { strategyName: t.strategyName, tradeCount: 0, netPnl: 0, winRate: 0, grossProfit: 0, grossLoss: 0 };
+      strategyMap[t.strategyName] = {
+        strategyName: t.strategyName,
+        tradeCount: 0,
+        netPnl: 0,
+        winRate: 0,
+        grossProfit: 0,
+        grossLoss: 0,
+        averageTrade: 0,
+        profitFactor: 0,
+      };
     }
     const s = strategyMap[t.strategyName];
     s.tradeCount++;
@@ -167,10 +225,14 @@ export async function buildComplianceReportData(
   const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
   const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
   const averageTrade = totalTrades > 0 ? netPnl / totalTrades : 0;
+  const tradingDays = countTradingDays(ledger);
+  const averageDailyPnl = tradingDays > 0 ? netPnl / tradingDays : 0;
 
   const strategies = Object.values(strategyMap).map(s => {
-    const sWins = s.grossProfit > 0 ? ledger.filter(t => t.strategyName === s.strategyName && t.netPnl > 0).length : 0;
+    const sWins = ledger.filter(t => t.strategyName === s.strategyName && t.netPnl > 0).length;
     s.winRate = s.tradeCount > 0 ? (sWins / s.tradeCount) * 100 : 0;
+    s.averageTrade = s.tradeCount > 0 ? s.netPnl / s.tradeCount : 0;
+    s.profitFactor = s.grossLoss > 0 ? s.grossProfit / s.grossLoss : (s.grossProfit > 0 ? Infinity : 0);
     return s;
   });
 
@@ -182,10 +244,12 @@ export async function buildComplianceReportData(
   const checksum = await generateDataHash(hashString);
   const nowUtc = new Date().toISOString();
 
+  const netAfterFees = netPnl - totalFees;
+
   return {
     metadata: {
       appName: 'AI Trade Journal',
-      exportVersion: '1.0.0',
+      exportVersion: '2.0.0',
       reportId: generateReportId(),
       exportTimestampUTC: nowUtc,
       userId,
@@ -205,9 +269,30 @@ export async function buildComplianceReportData(
       averageTrade,
       largestWin: maxWin === -Infinity ? 0 : maxWin,
       largestLoss: maxLoss === Infinity ? 0 : maxLoss,
+      tradingDays,
+      averageDailyPnl,
+    },
+    accountInfo: {
+      accountId,
+      userId,
+      exportTimestamp: nowUtc,
+      reportingPeriod: `${format(new Date(periodStart), 'yyyy-MM-dd')} to ${format(new Date(periodEnd), 'yyyy-MM-dd')}`,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      reportVersion: '2.0.0',
+      dataSource: 'AI Trade Journal Primary Database',
+    },
+    financialSummary: {
+      grossProfit,
+      grossLoss,
+      netProfit: netPnl,
+      totalFees,
+      netAfterFees,
+      averageTrade,
+      profitFactor,
+      winRate,
     },
     feeAnalysis: {
-      brokerFees: totalFees, // Simplified assumption
+      brokerFees: totalFees,
       platformFees: 0,
       otherCosts: 0,
       totalCosts: totalFees,
@@ -219,11 +304,19 @@ export async function buildComplianceReportData(
       recordModificationTimestamp: periodEnd,
       dataSource: 'AI Trade Journal Primary Database',
       exportTimestamp: nowUtc,
-      exportVersion: '1.0.0',
+      exportVersion: '2.0.0',
+      reportId: generateReportId(),
+      accountId,
+      userId,
+      recordCount: ledger.length,
     },
     dataIntegrity: {
       recordCountVerification: ledger.length,
       exportChecksum: checksum,
-    }
+      sha256Hash: checksum,
+      checksum: checksum,
+      recordVerificationCount: ledger.length,
+      generationTimestamp: nowUtc,
+    },
   };
 }

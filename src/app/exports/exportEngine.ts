@@ -24,7 +24,7 @@ function download(blob: Blob, filename: string) {
 /**
  * MAIN EXPORT FUNCTION
  */
-export async function exportData(data: any[], options: ExportOptions, context?: { tasks?: any[], goals?: any[] }) {
+export async function exportData(data: any[], options: ExportOptions, context?: { tasks?: any[], goals?: any[], userId?: string, accountId?: string }) {
   console.log("Export format:", options.format);
 
   const cleaned = filterData(data, options);
@@ -55,7 +55,7 @@ export async function exportData(data: any[], options: ExportOptions, context?: 
       return exportTXT(cleaned, options);
 
     case "compliance_report":
-      return exportAnnualComplianceReport(data, options);
+      return exportAnnualComplianceReport(data, options, context);
 
     default:
       throw new Error(`Unsupported format: ${options.format}`);
@@ -99,12 +99,28 @@ function exportTXT(data: any[], options: ExportOptions) {
 }
 
 /* ---------------- ANNUAL COMPLIANCE REPORT ---------------- */
-async function exportAnnualComplianceReport(data: any[], options: ExportOptions) {
+async function exportAnnualComplianceReport(data: any[], options: ExportOptions, context?: { tasks?: any[], goals?: any[], userId?: string, accountId?: string }) {
   const subFormat = options.complianceFormat || 'pdf';
   const fileName = options.fileName || 'AnnualComplianceReport';
   
   try {
-    const reportData = await buildComplianceReportData(data, 'N/A', 'N/A');
+    // Use auth context if provided, otherwise try localStorage fallback
+    let userId = context?.userId || 'N/A';
+    let accountId = context?.accountId || 'N/A';
+
+    // Fallback: try localStorage for browser environments
+    if ((userId === 'N/A' || accountId === 'N/A') && typeof window !== 'undefined') {
+      try {
+        const storedUserId = localStorage.getItem('userId');
+        const storedAccountId = localStorage.getItem('accountId');
+        if (storedUserId) userId = storedUserId;
+        if (storedAccountId) accountId = storedAccountId;
+      } catch {
+        // localStorage not available
+      }
+    }
+
+    const reportData = await buildComplianceReportData(data, userId, accountId);
     
     if (subFormat === 'pdf') {
       const pdfDoc = await exportAnnualComplianceReportPDF(reportData);

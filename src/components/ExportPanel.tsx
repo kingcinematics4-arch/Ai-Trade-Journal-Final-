@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTrades } from "@/contexts/TradesContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { exportData } from "@/app/exports/exportEngine";
 import styles from "./ExportPanel.module.css";
 import { Loader2, ListChecks, Filter, Check, Trash2, AlertTriangle, RefreshCcw, X, Search, Calendar as CalendarIcon, Download } from "lucide-react";
@@ -57,6 +58,7 @@ const formatLabel = (key: string) => {
 
 export default function ExportPanel() {
   const { trades, isLoading } = useTrades();
+  const { user, profile } = useAuth();
   const [format, setFormat] = useState("csv");
   const [complianceFormat, setComplianceFormat] = useState<"pdf" | "xlsx">("pdf");
   const [pdfReportType, setPdfReportType] = useState<"standard" | "detailed">("standard");
@@ -440,7 +442,12 @@ export default function ExportPanel() {
                   prettyPrint: true,
                   pdfReportType: format === "pdf" ? pdfReportType : undefined,
                   complianceFormat: format === "compliance_report" ? complianceFormat : undefined,
-                } as any)
+                } as any, {
+                  tasks: [],
+                  goals: [],
+                  userId: user?.id || '',
+                  accountId: user?.id || '',
+                })
               }
             >
               <Download size={18} className="mr-2" />
