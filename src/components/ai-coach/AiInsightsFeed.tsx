@@ -14,31 +14,39 @@ export default function AiInsightsFeed({ feedback }: AiInsightsFeedProps) {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
-    show: { opacity: 1, x: 0, transition: { duration: 0.4 } }
+    show: { opacity: 1, x: 0, transition: { duration: 0.4 } },
   };
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'positive': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-      case 'warning': return <AlertTriangle className="w-5 h-5 text-warning" />;
-      case 'negative': return <AlertOctagon className="w-5 h-5 text-loss" />;
-      default: return <Info className="w-5 h-5 text-primary" />;
+      case 'positive':
+        return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
+      case 'warning':
+        return <AlertTriangle className="w-5 h-5 text-warning" />;
+      case 'negative':
+        return <AlertOctagon className="w-5 h-5 text-loss" />;
+      default:
+        return <Info className="w-5 h-5 text-primary" />;
     }
   };
 
   const getBorderColor = (type: string) => {
     switch (type) {
-      case 'positive': return 'border-emerald-500/30 bg-emerald-500/5';
-      case 'warning': return 'border-warning/30 bg-warning/5';
-      case 'negative': return 'border-loss/30 bg-loss/5';
-      default: return 'border-primary/30 bg-primary/5';
+      case 'positive':
+        return 'border-emerald-500/30 bg-emerald-500/5';
+      case 'warning':
+        return 'border-warning/30 bg-warning/5';
+      case 'negative':
+        return 'border-loss/30 bg-loss/5';
+      default:
+        return 'border-primary/30 bg-primary/5';
     }
   };
 
@@ -48,13 +56,13 @@ export default function AiInsightsFeed({ feedback }: AiInsightsFeedProps) {
         <Zap className="w-5 h-5 text-accent" />
         <h3 className="text-lg font-semibold text-foreground">Live AI Insights</h3>
       </div>
-      
+
       {feedback.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           Not enough data yet. Keep trading to get personalized insights.
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -66,9 +74,7 @@ export default function AiInsightsFeed({ feedback }: AiInsightsFeedProps) {
               variants={itemVariants}
               className={`flex items-start gap-4 p-4 rounded-xl border backdrop-blur-sm transition-all hover:bg-background/80 ${getBorderColor(item.type)}`}
             >
-              <div className="mt-0.5 shrink-0">
-                {getIcon(item.type)}
-              </div>
+              <div className="mt-0.5 shrink-0">{getIcon(item.type)}</div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

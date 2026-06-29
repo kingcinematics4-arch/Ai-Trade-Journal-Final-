@@ -31,7 +31,18 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = ['/dashboard', '/add-trade', '/trade-history', '/profile', '/settings', '/analytics', '/ai-coach', '/goals', '/exports', '/strategies']; // Already correct
+  const protectedRoutes = [
+    '/dashboard',
+    '/add-trade',
+    '/trade-history',
+    '/profile',
+    '/settings',
+    '/analytics',
+    '/ai-coach',
+    '/goals',
+    '/exports',
+    '/strategies',
+  ]; // Already correct
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
   if (isProtectedRoute && !user) {

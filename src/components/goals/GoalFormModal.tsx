@@ -33,24 +33,27 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
       // Remove commas or currency symbols that might break parseFloat
       targetValue: parseFloat(targetValue.replace(/[^\d.-]/g, '')),
       deadline: deadline || undefined,
-      category
+      category,
     });
     onClose();
     // Reset
-    setTitle(''); setDescription(''); setTargetValue(''); setDeadline('');
+    setTitle('');
+    setDescription('');
+    setTargetValue('');
+    setDeadline('');
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
           >
-            <button 
+            <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 text-muted-foreground hover:bg-muted rounded-full transition-colors"
             >
@@ -62,11 +65,11 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Goal Title</label>
-                <input 
+                <input
                   required
-                  type="text" 
-                  value={title} 
-                  onChange={e => setTitle(e.target.value)}
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none"
                   placeholder="e.g. Hit $1k Profit"
                 />
@@ -74,9 +77,9 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Goal Type</label>
-                <select 
+                <select
                   value={type}
-                  onChange={e => setType(e.target.value as GoalType)}
+                  onChange={(e) => setType(e.target.value as GoalType)}
                   className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none"
                 >
                   <option value="profit">Profit Target ($)</option>
@@ -91,39 +94,45 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Target Value</label>
-                <input 
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Target Value
+                </label>
+                <input
                   required
-                  type="number" 
+                  type="number"
                   step="any"
-                  value={targetValue} 
-                  onChange={e => setTargetValue(e.target.value)}
+                  value={targetValue}
+                  onChange={(e) => setTargetValue(e.target.value)}
                   className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none"
                   placeholder="e.g. 1000"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Deadline (Optional)</label>
-                <input 
-                  type="date" 
-                  value={deadline} 
-                  onChange={e => setDeadline(e.target.value)}
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Deadline (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
                   className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Description (Optional)</label>
-                <textarea 
-                  value={description} 
-                  onChange={e => setDescription(e.target.value)}
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none resize-none"
                   rows={2}
                 />
               </div>
 
-              <button 
+              <button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground font-semibold py-2.5 rounded-xl hover:bg-primary/90 transition-colors mt-6"
               >

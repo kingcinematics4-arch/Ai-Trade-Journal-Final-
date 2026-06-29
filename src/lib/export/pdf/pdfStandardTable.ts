@@ -18,18 +18,22 @@ const COLUMN_WIDTHS: Record<string, number> = {
 
 export function drawStandardTradeTable(
   ctx: PdfDocumentContext,
-  data: Record<string, unknown>[],
+  data: Record<string, unknown>[]
 ): void {
   const headers = STANDARD_PDF_COLUMNS.map((col) => col.label);
   const body = data.map((row) =>
-    STANDARD_PDF_COLUMNS.map((col) => getStandardPdfCellValue(col.key, row)),
+    STANDARD_PDF_COLUMNS.map((col) => getStandardPdfCellValue(col.key, row))
   );
 
   const pnlIndex = STANDARD_PDF_COLUMNS.findIndex((col) => isPnlField(col.key));
 
   autoTable(ctx.doc, {
     startY: ctx.y,
-    margin: { left: PDF_LAYOUT.marginX, right: PDF_LAYOUT.marginX, bottom: PDF_LAYOUT.marginBottom },
+    margin: {
+      left: PDF_LAYOUT.marginX,
+      right: PDF_LAYOUT.marginX,
+      bottom: PDF_LAYOUT.marginBottom,
+    },
     head: [headers],
     body,
     theme: 'plain',
@@ -66,13 +70,14 @@ export function drawStandardTradeTable(
           cellWidth: COLUMN_WIDTHS[col.key] ?? 'auto',
           halign: col.key === 'pnl_amount' || col.key === 'risk_amount' ? 'right' : 'left',
         },
-      ]),
+      ])
     ),
     didParseCell: (cell) => {
       if (cell.section !== 'body' || cell.column.index !== pnlIndex) return;
       const num = parseFloat(String(cell.cell.raw).replace(/[+,$—]/g, ''));
       if (!Number.isNaN(num)) {
-        cell.cell.styles.textColor = num > 0 ? PDF_THEME.profit : num < 0 ? PDF_THEME.loss : PDF_THEME.text;
+        cell.cell.styles.textColor =
+          num > 0 ? PDF_THEME.profit : num < 0 ? PDF_THEME.loss : PDF_THEME.text;
         cell.cell.styles.fontStyle = 'bold';
       }
     },
@@ -86,6 +91,7 @@ export function drawStandardTradeTable(
     },
   });
 
-  const finalY = (ctx.doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY;
+  const finalY = (ctx.doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable
+    ?.finalY;
   if (finalY) ctx.y = finalY + PDF_LAYOUT.sectionGap;
 }

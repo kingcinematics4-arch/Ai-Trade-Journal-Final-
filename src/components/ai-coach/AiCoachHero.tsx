@@ -17,7 +17,7 @@ export default function AiCoachHero({
   streak,
 }: AiCoachHeroProps) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -34,10 +34,14 @@ export default function AiCoachHero({
             AI Trading Intelligence
           </div>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-            Your Performance is <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Improving</span>
+            Your Performance is{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+              Improving
+            </span>
           </h1>
           <p className="text-muted-foreground text-lg">
-            Based on your recent trades, your discipline is strong. Keep managing your risk properly and you'll hit your monthly targets.
+            Based on your recent trades, your discipline is strong. Keep managing your risk properly
+            and you'll hit your monthly targets.
           </p>
         </div>
 

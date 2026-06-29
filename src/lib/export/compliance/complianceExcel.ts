@@ -23,13 +23,22 @@ export async function buildComplianceExcel(data: ComplianceReportData): Promise<
   // Metadata Block
   execSheet.addRow(['REPORT METADATA', 'VALUE']).font = { bold: true };
   execSheet.addRow(['Report ID', data.metadata.reportId]);
-  execSheet.addRow(['Export Date (UTC)', format(new Date(data.metadata.exportTimestampUTC), 'yyyy-MM-dd HH:mm:ss')]);
+  execSheet.addRow([
+    'Export Date (UTC)',
+    format(new Date(data.metadata.exportTimestampUTC), 'yyyy-MM-dd HH:mm:ss'),
+  ]);
   execSheet.addRow(['App Name', data.metadata.appName]);
   execSheet.addRow(['Time Zone', data.metadata.timeZone]);
   execSheet.addRow(['User ID', data.metadata.userId]);
   execSheet.addRow(['Account ID', data.metadata.accountId]);
-  execSheet.addRow(['Period Start', format(new Date(data.metadata.reportingPeriodStart), 'yyyy-MM-dd')]);
-  execSheet.addRow(['Period End', format(new Date(data.metadata.reportingPeriodEnd), 'yyyy-MM-dd')]);
+  execSheet.addRow([
+    'Period Start',
+    format(new Date(data.metadata.reportingPeriodStart), 'yyyy-MM-dd'),
+  ]);
+  execSheet.addRow([
+    'Period End',
+    format(new Date(data.metadata.reportingPeriodEnd), 'yyyy-MM-dd'),
+  ]);
   execSheet.addRow([]);
 
   // Data Integrity Block
@@ -42,18 +51,28 @@ export async function buildComplianceExcel(data: ComplianceReportData): Promise<
   // Account Summary Block
   execSheet.addRow(['ACCOUNT SUMMARY & FEE ANALYSIS', 'VALUE']).font = { bold: true };
   execSheet.addRow(['Total Trades', data.accountSummary.totalTrades]);
-  execSheet.addRow(['Total Volume', data.accountSummary.totalVolume]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
-  execSheet.addRow(['Gross Profit', data.accountSummary.grossProfit]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
-  execSheet.addRow(['Gross Loss', data.accountSummary.grossLoss]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
-  execSheet.addRow(['Broker Fees', data.feeAnalysis.brokerFees]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
-  execSheet.addRow(['Net Profit/Loss', data.accountSummary.netPnl]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow(['Total Volume', data.accountSummary.totalVolume]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow(['Gross Profit', data.accountSummary.grossProfit]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow(['Gross Loss', data.accountSummary.grossLoss]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow(['Broker Fees', data.feeAnalysis.brokerFees]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow(['Net Profit/Loss', data.accountSummary.netPnl]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
   execSheet.addRow(['Win Rate', data.accountSummary.winRate / 100]).getCell(2).numFmt = '0.00%';
-  execSheet.addRow(['Profit Factor', data.accountSummary.profitFactor === Infinity ? 'Infinity' : data.accountSummary.profitFactor]);
-  execSheet.addRow(['Largest Win', data.accountSummary.largestWin]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
-  execSheet.addRow(['Largest Loss', data.accountSummary.largestLoss]).getCell(2).numFmt = '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow([
+    'Profit Factor',
+    data.accountSummary.profitFactor === Infinity ? 'Infinity' : data.accountSummary.profitFactor,
+  ]);
+  execSheet.addRow(['Largest Win', data.accountSummary.largestWin]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
+  execSheet.addRow(['Largest Loss', data.accountSummary.largestLoss]).getCell(2).numFmt =
+    '"$"#,##0.00;[Red]"$"#,##0.00';
 
   // Styling for specific headers
-  [4, 14, 19].forEach(r => {
+  [4, 14, 19].forEach((r) => {
     execSheet.getRow(r).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E2E8F0' } };
     execSheet.getRow(r).border = { bottom: { style: 'thin' } };
   });
@@ -82,7 +101,7 @@ export async function buildComplianceExcel(data: ComplianceReportData): Promise<
   ledgerSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
   ledgerSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '001F3F' } };
 
-  data.ledger.forEach(t => {
+  data.ledger.forEach((t) => {
     ledgerSheet.addRow({
       tradeId: t.tradeId,
       entryDate: format(new Date(t.entryDate), 'yyyy-MM-dd HH:mm:ss'),
@@ -121,7 +140,7 @@ export async function buildComplianceExcel(data: ComplianceReportData): Promise<
   stratSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFF' } };
   stratSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '001F3F' } };
 
-  data.strategies.forEach(s => {
+  data.strategies.forEach((s) => {
     stratSheet.addRow({
       strategyName: s.strategyName,
       tradeCount: s.tradeCount,
@@ -141,10 +160,19 @@ export async function buildComplianceExcel(data: ComplianceReportData): Promise<
   const auditSheet = workbook.addWorksheet('Audit Trail');
   auditSheet.columns = [{ width: 40 }, { width: 50 }];
   auditSheet.addRow(['AUDIT TRAIL LOG', 'DETAILS']).font = { bold: true };
-  auditSheet.addRow(['Record Creation Timestamp (Period Start)', format(new Date(data.auditTrail.recordCreationTimestamp), 'yyyy-MM-dd HH:mm:ss')]);
-  auditSheet.addRow(['Record Modification Timestamp (Period End)', format(new Date(data.auditTrail.recordModificationTimestamp), 'yyyy-MM-dd HH:mm:ss')]);
+  auditSheet.addRow([
+    'Record Creation Timestamp (Period Start)',
+    format(new Date(data.auditTrail.recordCreationTimestamp), 'yyyy-MM-dd HH:mm:ss'),
+  ]);
+  auditSheet.addRow([
+    'Record Modification Timestamp (Period End)',
+    format(new Date(data.auditTrail.recordModificationTimestamp), 'yyyy-MM-dd HH:mm:ss'),
+  ]);
   auditSheet.addRow(['Data Source', data.auditTrail.dataSource]);
-  auditSheet.addRow(['Export Timestamp', format(new Date(data.auditTrail.exportTimestamp), 'yyyy-MM-dd HH:mm:ss')]);
+  auditSheet.addRow([
+    'Export Timestamp',
+    format(new Date(data.auditTrail.exportTimestamp), 'yyyy-MM-dd HH:mm:ss'),
+  ]);
   auditSheet.addRow(['Export Version', data.auditTrail.exportVersion]);
 
   auditSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E2E8F0' } };

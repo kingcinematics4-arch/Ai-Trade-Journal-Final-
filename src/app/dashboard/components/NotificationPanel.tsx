@@ -179,19 +179,21 @@ export default function NotificationPanel() {
 
             {/* Volume Slider */}
             <div className="p-4 border-b border-white/[0.03]">
-               <div className="flex justify-between items-center mb-2">
-                  <p className="font-bold text-white">Alert Volume</p>
-                  <span className="text-[10px] text-muted-foreground">{Math.round((settings?.volume || 0) * 100)}%</span>
-               </div>
-               <input 
-                 type="range" 
-                 min="0" 
-                 max="1" 
-                 step="0.1" 
-                 value={settings?.volume || 0.5}
-                 onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
-                 className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
-               />
+              <div className="flex justify-between items-center mb-2">
+                <p className="font-bold text-white">Alert Volume</p>
+                <span className="text-[10px] text-muted-foreground">
+                  {Math.round((settings?.volume || 0) * 100)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={settings?.volume || 0.5}
+                onChange={(e) => updateSettings({ volume: parseFloat(e.target.value) })}
+                className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
+              />
             </div>
 
             {/* Actions Row */}

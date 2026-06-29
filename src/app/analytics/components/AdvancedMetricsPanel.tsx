@@ -2,15 +2,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Percent, 
-  HelpCircle, 
-  TrendingUp, 
-  ShieldAlert, 
-  TrendingDown, 
-  Hourglass, 
+import {
+  Percent,
+  HelpCircle,
+  TrendingUp,
+  ShieldAlert,
+  TrendingDown,
+  Hourglass,
   Award,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/trades/analytics';
 import type { AdvancedAnalytics } from '@/lib/trades/analyticsEngine';
@@ -26,7 +26,8 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
       value: formatCurrency(stats.expectancy, { showSign: true }),
       desc: 'The average amount of money you expect to make (or lose) per trade.',
       icon: <Percent size={16} />,
-      iconBg: stats.expectancy >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
+      iconBg:
+        stats.expectancy >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
       valueColor: stats.expectancy >= 0 ? 'text-green-400' : 'text-red-400',
     },
     {
@@ -34,8 +35,18 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
       value: stats.sharpeRatio.toFixed(2),
       desc: 'Measures risk-adjusted performance. Above 1.0 is good, above 2.0 is excellent.',
       icon: <Award size={16} />,
-      iconBg: stats.sharpeRatio >= 1.0 ? 'bg-green-500/15 text-green-400' : stats.sharpeRatio >= 0 ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400',
-      valueColor: stats.sharpeRatio >= 1.0 ? 'text-green-400' : stats.sharpeRatio >= 0 ? 'text-amber-400' : 'text-red-400',
+      iconBg:
+        stats.sharpeRatio >= 1.0
+          ? 'bg-green-500/15 text-green-400'
+          : stats.sharpeRatio >= 0
+            ? 'bg-amber-500/15 text-amber-400'
+            : 'bg-red-500/15 text-red-400',
+      valueColor:
+        stats.sharpeRatio >= 1.0
+          ? 'text-green-400'
+          : stats.sharpeRatio >= 0
+            ? 'text-amber-400'
+            : 'text-red-400',
     },
     {
       title: 'Max Drawdown',
@@ -50,7 +61,12 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
       value: stats.recoveryFactor.toFixed(2),
       desc: 'Measures how quickly your account recovers from drawdowns (Total P&L / Max DD).',
       icon: <TrendingUp size={16} />,
-      iconBg: stats.recoveryFactor >= 2.0 ? 'bg-green-500/15 text-green-400' : stats.recoveryFactor >= 1.0 ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400',
+      iconBg:
+        stats.recoveryFactor >= 2.0
+          ? 'bg-green-500/15 text-green-400'
+          : stats.recoveryFactor >= 1.0
+            ? 'bg-amber-500/15 text-amber-400'
+            : 'bg-red-500/15 text-red-400',
       valueColor: stats.recoveryFactor >= 2.0 ? 'text-green-400' : 'text-foreground',
     },
     {
@@ -77,7 +93,8 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
         <div>
           <h3 className="text-base font-semibold text-foreground">Advanced Trading Metrics</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Mathematical statistics assessing system expectancy, risk adjustments, and capital returns
+            Mathematical statistics assessing system expectancy, risk adjustments, and capital
+            returns
           </p>
         </div>
       </div>
@@ -91,14 +108,19 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
             transition={{ duration: 0.3, delay: idx * 0.04 }}
             className="flex items-start gap-4 p-4.5 bg-muted/20 border border-border/50 rounded-xl hover:border-border transition-all duration-150"
           >
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${item.iconBg}`}>
+            <div
+              className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${item.iconBg}`}
+            >
               {item.icon}
             </div>
             <div className="space-y-1.5 flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs text-muted-foreground font-semibold">{item.title}</p>
                 <div className="group relative cursor-help">
-                  <HelpCircle size={12} className="text-muted-foreground/60 hover:text-foreground transition-colors" />
+                  <HelpCircle
+                    size={12}
+                    className="text-muted-foreground/60 hover:text-foreground transition-colors"
+                  />
                   <div className="absolute bottom-full right-0 mb-2 w-48 scale-0 group-hover:scale-100 transition-transform origin-bottom-right p-2.5 bg-card border border-border text-[10px] text-muted-foreground rounded-lg shadow-xl z-30 leading-relaxed font-normal">
                     {item.desc}
                   </div>

@@ -23,7 +23,7 @@ export interface PDFReportOptions {
 function drawBrandedHeader(
   ctx: PdfDocumentContext,
   data: Record<string, unknown>[],
-  meta: { fieldCount: number; reportLabel?: string },
+  meta: { fieldCount: number; reportLabel?: string }
 ): ReturnType<typeof resolveReportIdentity> {
   const identity = resolveReportIdentity(data);
   drawReportHeader(ctx, identity, {
@@ -35,7 +35,12 @@ function drawBrandedHeader(
 }
 
 function buildStandardReport(data: Record<string, unknown>[]): jsPDF {
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+    putOnlyUsedFonts: true,
+  });
   const ctx = new PdfDocumentContext(doc);
   const analytics = getReportAnalytics(data);
 
@@ -48,16 +53,18 @@ function buildStandardReport(data: Record<string, unknown>[]): jsPDF {
   return doc;
 }
 
-function buildDetailedReport(
-  data: Record<string, unknown>[],
-  options: PDFReportOptions,
-): jsPDF {
+function buildDetailedReport(data: Record<string, unknown>[], options: PDFReportOptions): jsPDF {
   const columns = resolveExportColumns(data, options.selectedFields);
   if (!columns.length) {
     throw new Error('No export fields available for PDF report');
   }
 
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+    putOnlyUsedFonts: true,
+  });
   const ctx = new PdfDocumentContext(doc);
   const analytics = getReportAnalytics(data);
 
@@ -71,7 +78,7 @@ function buildDetailedReport(
     'Trade Details',
     layoutMode === 'table'
       ? 'All selected export fields'
-      : 'Card view — optimized for readability with many fields',
+      : 'Card view — optimized for readability with many fields'
   );
 
   if (layoutMode === 'table') {
@@ -85,7 +92,7 @@ function buildDetailedReport(
 
 export function buildPremiumTradingReport(
   data: Record<string, unknown>[],
-  options: PDFReportOptions = {},
+  options: PDFReportOptions = {}
 ): jsPDF {
   const reportType = options.pdfReportType ?? 'standard';
   if (reportType === 'standard') {
@@ -96,7 +103,7 @@ export function buildPremiumTradingReport(
 
 export function exportPremiumTradingReport(
   data: Record<string, unknown>[],
-  options: PDFReportOptions = {},
+  options: PDFReportOptions = {}
 ): void {
   if (!data?.length) return;
 

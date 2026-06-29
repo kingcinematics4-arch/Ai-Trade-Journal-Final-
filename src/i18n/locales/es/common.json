@@ -1,0 +1,234 @@
+{
+  "appName": "AI Diario de Trading",
+  "loading": "Cargando...",
+  "saving": "Guardando...",
+  "saved": "Guardado",
+  "error": "Error",
+  "success": "Éxito",
+  "cancel": "Cancelar",
+  "confirm": "Confirmar",
+  "delete": "Eliminar",
+  "edit": "Editar",
+  "view": "Ver",
+  "create": "Crear",
+  "update": "Actualizar",
+  "search": "Buscar",
+  "filter": "Filtrar",
+  "sort": "Ordenar",
+  "import": "Importar",
+  "refresh": "Actualizar",
+  "close": "Cerrar",
+  "back": "Atrás",
+  "next": "Siguiente",
+  "previous": "Anterior",
+  "submit": "Enviar",
+  "reset": "Restablecer",
+  "clear": "Limpiar",
+  "select": "Seleccionar",
+  "selectAll": "Seleccionar todo",
+  "deselectAll": "Deseleccionar todo",
+  "noResults": "No se encontraron resultados",
+  "noData": "No hay datos disponibles",
+  "retry": "Reintentar",
+  "or": "o",
+  "and": "y",
+  "yes": "Sí",
+  "no": "No",
+  "maybe": "Quizás",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "tomorrow": "Mañana",
+  "thisWeek": "Esta semana",
+  "thisMonth": "Este mes",
+  "thisYear": "Este año",
+  "lastWeek": "La semana pasada",
+  "lastMonth": "El mes pasado",
+  "lastYear": "El año pasado",
+  "custom": "Personalizado",
+  "all": "Todo",
+  "none": "Ninguno",
+  "enabled": "Habilitado",
+  "disabled": "Deshabilitado",
+  "active": "Activo",
+  "inactive": "Inactivo",
+  "on": "Encendido",
+  "off": "Apagado",
+  "open": "Abierto",
+  "closed": "Cerrado",
+  "pending": "Pendiente",
+  "completed": "Completado",
+  "inProgress": "En progreso",
+  "failed": "Fallido",
+  "total": "Total",
+  "average": "Promedio",
+  "count": "Conteo",
+  "percentage": "Porcentaje",
+  "currency": "Moneda",
+  "date": "Fecha",
+  "time": "Hora",
+  "datetime": "Fecha y hora",
+  "language": "Idioma",
+  "theme": "Tema",
+  "darkMode": "Modo oscuro",
+  "lightMode": "Modo claro",
+  "system": "Sistema",
+  "settings": "Configuración",
+  "profile": "Perfil",
+  "logout": "Cerrar sesión",
+  "login": "Iniciar sesión",
+  "signup": "Registrarse",
+  "signIn": "Iniciar sesión",
+  "signUp": "Registrarse",
+  "signOut": "Cerrar sesión",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "username": "Nombre de usuario",
+  "fullName": "Nombre completo",
+  "rememberMe": "Recordarme",
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "resetPassword": "Restablecer contraseña",
+  "changePassword": "Cambiar contraseña",
+  "confirmPassword": "Confirmar contraseña",
+  "welcome": "Bienvenido",
+  "welcomeBack": "Bienvenido de nuevo",
+  "goodMorning": "Buenos días",
+  "goodAfternoon": "Buenas tardes",
+  "goodEvening": "Buenas noches",
+  "goodNight": "Buenas noches",
+  "saaSIntelligence": "Inteligencia SaaS",
+  "sidebar": {
+    "sections": {
+      "trading": "Trading",
+      "account": "Cuenta"
+    },
+    "nav": {
+      "dashboard": "Panel",
+      "addTrade": "Añadir Operación",
+      "tradeHistory": "Historial de Operaciones",
+      "analytics": "Analíticas",
+      "calendar": "Calendario",
+      "strategies": "Estrategias",
+      "aiCoach": "Entrenador IA",
+      "exports": "Exportaciones",
+      "goals": "Objetivos",
+      "notifications": "Notificaciones",
+      "profile": "Perfil",
+      "settings": "Configuración",
+      "logout": "Cerrar Sesión"
+    },
+    "aria": {
+      "openMenu": "Abrir menú",
+      "closeMenu": "Cerrar menú",
+      "expandSidebar": "Expandir barra lateral",
+      "collapseSidebar": "Contraer barra lateral"
+    }
+  },
+  "legal": {
+    "title": "LEGAL Y CUMPLIMIENTO",
+    "subtitle": "Marco de Gobernanza Institucional",
+    "tos": {
+      "title": "Términos de Servicio",
+      "userResponsibilities": {
+        "title": "1. Responsabilidades del Usuario",
+        "content": "Los usuarios son responsables de mantener la confidencialidad de sus credenciales y de todas las actividades realizadas a través de su cuenta. Debe proporcionar información precisa durante el registro."
+      },
+      "acceptableUse": {
+        "title": "2. Uso Aceptable",
+        "content": "La plataforma es para análisis de trading personal. La ingeniería inversa, el raspado automatizado de datos o el uso del servicio para proporcionar asesoramiento financiero no autorizado está estrictamente prohibido."
+      },
+      "subscription": {
+        "title": "3. Suscripción y Facturación",
+        "content": "El acceso a funciones premium requiere una suscripción válida. Las tarifas no son reembolsables a menos que se especifique en la Política de Reembolso. Nos reservamos el derecho de modificar los precios con 30 días de aviso."
+      }
+    },
+    "privacy": {
+      "title": "Política de Privacidad",
+      "dataCollection": {
+        "title": "Recopilación de Datos",
+        "content": "Recopilamos datos de operaciones, detalles de autenticación y métricas de uso de la plataforma para proporcionar información de IA. Sus datos de operaciones están cifrados en reposo y en tránsito."
+      },
+      "analytics": {
+        "title": "Analítica y Cookies",
+        "content": "Utilizamos cookies esenciales para la gestión de sesiones y analítica anonimizada para mejorar el rendimiento. No vendemos datos de usuarios a anunciantes de terceros."
+      },
+      "rights": {
+        "title": "Sus Derechos",
+        "content": "Tiene derecho a exportar sus datos (a través del Motor de Exportación) o solicitar la eliminación permanente de la cuenta en cualquier momento a través del panel de configuración."
+      }
+    },
+    "risk": {
+      "title": "Divulgación de Riesgos",
+      "warning": "Advertencia de Alto Riesgo:",
+      "warningContent": "El trading de instrumentos financieros implica un riesgo significativo de pérdida. Solo debe operar con capital que pueda permitirse perder.",
+      "educational": {
+        "title": "Fines Educativos",
+        "content": "AITradeJournal proporciona herramientas de análisis y registro para uso educativo. No garantizamos la rentabilidad, y el desempeño pasado no es indicativo de resultados futuros."
+      },
+      "noAdvice": {
+        "title": "Sin Asesoramiento Financiero",
+        "content": "Nuestro Entrenador IA y métricas de análisis se basan en modelos matemáticos de sus datos. No constituyen asesoramiento financiero, de inversión o legal."
+      }
+    },
+    "disclaimer": {
+      "title": "Descargo de Responsabilidad",
+      "toolLimitation": {
+        "title": "Limitación de la Herramienta",
+        "content": "Esta plataforma es una herramienta de registro y análisis de datos. NO es una plataforma de trading, corredor o exchange. No ejecutamos operaciones ni retenemos fondos de usuarios."
+      },
+      "accuracy": {
+        "title": "Precisión de los Datos",
+        "content": "Aunque nos esforzamos por una precisión del 100%, los usuarios deben verificar cálculos críticos. No somos responsables de las pérdidas resultantes de errores de entrada de datos o latencia del sistema."
+      }
+    },
+    "refund": {
+      "title": "Política de Reembolso",
+      "cancellation": {
+        "title": "Cancelación",
+        "content": "Puede cancelar su suscripción en cualquier momento. Conservará el acceso hasta el final del ciclo de facturación actual. No se emiten reembolsos parciales por tiempo no utilizado."
+      },
+      "exceptions": {
+        "title": "Excepciones",
+        "content": "Los reembolsos pueden otorgarse dentro de los 7 días de la compra inicial si el servicio es técnicamente no funcional y nuestro equipo de soporte no puede resolver el problema."
+      }
+    },
+    "contact": {
+      "title": "Contacto e Información Legal",
+      "support": {
+        "title": "Soporte",
+        "email": "Correo: support@aitradejournal.com",
+        "responseTime": "Tiempo de respuesta: < 24 horas (Lun-Vie)"
+      },
+      "business": {
+        "title": "Información Empresarial",
+        "company": "AITrade Intelligence Systems LLC",
+        "location": "Registrado en Delaware, EE.UU."
+      }
+    },
+    "footer": {
+      "tos": "Términos",
+      "privacy": "Privacidad",
+      "risk": "Riesgo",
+      "disclaimer": "Descargo"
+    }
+  },
+  "export": {
+    "title": "Arquitecto de Exportación",
+    "filename": "Nombre de Archivo",
+    "outputFormat": "Formato de Salida",
+    "exportFormat": "Formato de Exportación",
+    "pdfReportType": "Tipo de Reporte PDF",
+    "exportFields": "Campos de Exportación",
+    "essentials": "Esenciales",
+    "all": "Todos",
+    "clear": "Limpiar",
+    "editBin": "Editar Papelera",
+    "searchPlaceholder": "Buscar campos opcionales...",
+    "mandatoryFields": "Campos Obligatorios",
+    "optionalDataPoints": "Puntos de Datos Opcionales",
+    "noFieldsMatch": "Ningún campo coincide",
+    "selectedFormat": "Formato Seleccionado",
+    "reportDepth": "Profundidad del Reporte",
+    "cancel": "Cancelar",
+    "generateExport": "Generar Exportación Institucional"
+  }
+}

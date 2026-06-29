@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Search, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 interface Item {
   id: string;
@@ -34,6 +35,7 @@ export default function SearchableSelect({
   placeholder = 'Select option...',
   error,
 }: SearchableSelectProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,7 +60,7 @@ export default function SearchableSelect({
     <div className="relative" ref={containerRef}>
       <label className="form-label text-white">{label}</label>
       {helperText && <p className="form-helper text-zinc-500">{helperText}</p>}
-      
+
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -69,7 +71,10 @@ export default function SearchableSelect({
         <span className={value ? 'text-white' : 'text-zinc-500'}>
           {selectedItem ? selectedItem.label : placeholder}
         </span>
-        <ChevronDown className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} size={16} />
+        <ChevronDown
+          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          size={16}
+        />
       </button>
 
       {error && <p className="form-error mt-1 text-red-500 text-xs">{error}</p>}
@@ -88,7 +93,7 @@ export default function SearchableSelect({
               <input
                 autoFocus
                 className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder:text-zinc-600 p-1"
-                placeholder="Search or add custom..."
+                placeholder={t('trading.addTrade.searchable.searchOrAdd')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
@@ -99,7 +104,11 @@ export default function SearchableSelect({
                 }}
               />
               {searchTerm && (
-                <button type="button" onClick={() => setSearchTerm('')} className="text-zinc-500 hover:text-white">
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="text-zinc-500 hover:text-white"
+                >
                   <X size={14} />
                 </button>
               )}
@@ -111,7 +120,9 @@ export default function SearchableSelect({
                   <div
                     key={item.id}
                     className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                      value === item.value || value === item.id ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                      value === item.value || value === item.id
+                        ? 'bg-zinc-800 text-white'
+                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
                     }`}
                     onClick={() => {
                       onSelect(item.value);
@@ -136,7 +147,9 @@ export default function SearchableSelect({
                 ))
               ) : (
                 <div className="p-4 text-center">
-                  <p className="text-xs text-zinc-500">No matches found</p>
+                  <p className="text-xs text-zinc-500">
+                    {t('trading.addTrade.searchable.noMatches')}
+                  </p>
                   {onAddCustom && searchTerm && (
                     <button
                       type="button"
@@ -146,7 +159,7 @@ export default function SearchableSelect({
                       }}
                       className="mt-2 text-xs text-blue-400 hover:underline"
                     >
-                      Add "{searchTerm}" as custom
+                      {t('trading.addTrade.searchable.addCustom', { term: searchTerm })}
                     </button>
                   )}
                 </div>

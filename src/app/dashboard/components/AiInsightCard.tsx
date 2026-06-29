@@ -12,6 +12,7 @@ import {
 import { useTrades } from '@/contexts/TradesContext';
 import EmptyState from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 const typeStyles = {
   positive: 'text-green-400 bg-green-500/10',
@@ -26,6 +27,7 @@ const typeIcons = {
 };
 
 export default function AiInsightCard() {
+  const { t } = useTranslation();
   const { insights, isLoading, isEmpty } = useTrades();
   const [expanded, setExpanded] = useState(false);
   const visibleInsights = expanded ? insights : insights.slice(0, 2);
@@ -48,14 +50,14 @@ export default function AiInsightCard() {
             <BrainCircuit size={15} className="text-violet-400" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-foreground">AI Coach</h4>
-            <p className="text-xs text-muted-foreground">Insights from your journal</p>
+            <h4 className="text-sm font-semibold text-foreground">{t('dashboard.ai.title')}</h4>
+            <p className="text-xs text-muted-foreground">{t('dashboard.ai.subtitle')}</p>
           </div>
         </div>
         <EmptyState
-          title="No insights yet"
-          description="Log at least two trades to unlock pattern-based coaching from your own data."
-          actionLabel="Add a trade"
+          title={t('dashboard.ai.emptyTitle')}
+          description={t('dashboard.ai.emptyDescription')}
+          actionLabel={t('dashboard.ai.emptyAction')}
           actionHref="/add-trade"
           className="py-6"
         />
@@ -70,11 +72,11 @@ export default function AiInsightCard() {
           <BrainCircuit size={15} className="text-violet-400" />
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-foreground">AI Coach</h4>
-          <p className="text-xs text-muted-foreground">From your logged trades</p>
+          <h4 className="text-sm font-semibold text-foreground">{t('dashboard.ai.title')}</h4>
+          <p className="text-xs text-muted-foreground">{t('dashboard.ai.fromTrades')}</p>
         </div>
         <span className="text-xs bg-violet-500/15 text-violet-400 px-2 py-0.5 rounded-full font-medium">
-          {insights.length} insight{insights.length === 1 ? '' : 's'}
+          {insights.length} {t('dashboard.ai.insight', { count: insights.length })}
         </span>
       </div>
 
@@ -98,11 +100,11 @@ export default function AiInsightCard() {
         >
           {expanded ? (
             <>
-              Show less <ChevronUp size={12} />
+              {t('dashboard.ai.showLess')} <ChevronUp size={12} />
             </>
           ) : (
             <>
-              See all {insights.length} insights <ChevronDown size={12} />
+              {t('dashboard.ai.seeAll', { count: insights.length })} <ChevronDown size={12} />
             </>
           )}
         </button>

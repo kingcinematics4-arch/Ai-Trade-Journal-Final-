@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import AppLogo from '@/components/ui/AppLogo';
 import { ArrowUpRight, CheckCircle2, Activity } from 'lucide-react';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 // High fidelity realistic mock candlestick chart data
 const chartCandles = [
@@ -20,6 +21,8 @@ const chartCandles = [
 ];
 
 export default function AuthBrandPanel() {
+  const { t } = useTranslation();
+
   // SVG path generation for the neon line chart
   const pathD = chartCandles.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x} ${c.close}`).join(' ');
 
@@ -52,10 +55,7 @@ export default function AuthBrandPanel() {
             <AppLogo size={28} />
           </div>
           <div>
-            
-            <p className="text-[10px] text-slate-400 font-medium">
-              Smart journaling for institutional performance
-            </p>
+            <p className="text-[10px] text-slate-400 font-medium">{t('auth.brand.tagline')}</p>
           </div>
         </div>
       </div>
@@ -65,16 +65,15 @@ export default function AuthBrandPanel() {
         {/* Hero Title */}
         <div className="space-y-3 max-w-lg">
           <h1 className="text-3xl xl:text-4xl font-extrabold text-white leading-[1.15] tracking-tight">
-            Stop guessing.
+            {t('auth.brand.heroLine1')}
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400">
-              Start understanding
+              {t('auth.brand.heroLine2')}
             </span>{' '}
-            your trades.
+            {t('auth.brand.heroLine3')}
           </h1>
           <p className="text-slate-400 text-xs xl:text-sm leading-relaxed font-medium">
-            Log your executions, track emotional triggers, and let our rule-based AI isolate
-            structural flaws costing you money—before they become habits.
+            {t('auth.brand.description')}
           </p>
         </div>
 
@@ -88,7 +87,7 @@ export default function AuthBrandPanel() {
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-semibold text-white tracking-wide">
-                BTC/USD 1H Chart
+                {t('auth.brand.chartTitle')}
               </span>
               <span className="text-[10px] text-emerald-400 font-mono font-medium bg-emerald-500/10 px-2 py-0.5 rounded">
                 +$4,820.50 (+4.82%)
@@ -235,7 +234,7 @@ export default function AuthBrandPanel() {
             </div>
             <div>
               <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-sans">
-                Payout Target
+                {t('auth.brand.payoutTarget')}
               </p>
               <p className="text-xs font-mono font-bold text-emerald-400">+$2,450.00</p>
             </div>
@@ -254,7 +253,7 @@ export default function AuthBrandPanel() {
             </div>
             <div>
               <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold font-sans">
-                Setup Ratio
+                {t('auth.brand.setupRatio')}
               </p>
               <p className="text-xs font-mono font-bold text-blue-400">R:R 1 : 3.5</p>
             </div>
@@ -268,7 +267,7 @@ export default function AuthBrandPanel() {
             className="absolute top-[100px] left-[175px] pointer-events-none hidden md:flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-sm border border-white/[0.04] px-2 py-0.5 rounded-full text-[10px] font-mono text-slate-400"
           >
             <Activity size={10} className="text-cyan-400 animate-pulse" />
-            <span>Volume: 124.8K</span>
+            <span>{t('auth.brand.volume')}</span>
           </motion.div>
         </div>
       </div>

@@ -1,0 +1,75 @@
+{
+  "hero": {
+    "title": "Master Your Trading with AI-Powered Insights",
+    "subtitle": "Track, analyze, and optimize your trading performance with intelligent journaling and AI-driven analytics",
+    "cta": "Start Free Trial",
+    "secondaryCta": "Watch Demo"
+  },
+  "features": {
+    "title": "Everything You Need to Trade Smarter",
+    "subtitle": "Powerful features designed for serious traders who want to improve their performance",
+    "tradeJournal": {
+      "title": "Trade Journal",
+      "description": "Record every trade with entry, exit, notes, emotions and execution details in a structured journal."
+    },
+    "aiCoach": {
+      "title": "AI Coach",
+      "description": "AI-powered trading psychology and performance analysis that identifies strengths, weaknesses and behavioral patterns."
+    },
+    "strategyManagement": {
+      "title": "Strategy Management",
+      "description": "Create, organize, test and track trading strategies with detailed performance statistics and historical results."
+    },
+    "advancedAnalytics": {
+      "title": "Advanced Analytics",
+      "description": "Deep analytics including equity curve, win rate, profit factor, drawdown, expectancy and performance metrics."
+    },
+    "riskManagement": {
+      "title": "Risk Management",
+      "description": "Monitor R-multiple and portfolio heat. Ensure survival with institutional-grade risk oversight."
+    },
+    "exportEngine": {
+      "title": "Export Engine",
+      "description": "Generate professional PDF or XLSX reports for performance reviews or tax compliance."
+    }
+  },
+  "testimonials": {
+    "title": "Trusted by Professional Traders",
+    "subtitle": "See what traders are saying about AI Trade Journal",
+    "items": [
+      {
+        "name": "Sarah Mitchell",
+        "role": "Professional Day Trader",
+        "content": "AI Trade Journal has completely transformed how I approach my trading. The AI insights have helped me identify patterns I never noticed before."
+      },
+      {
+        "name": "James Rodriguez",
+        "role": "Swing Trader",
+        "content": "The comprehensive analytics and journaling features have helped me improve my win rate by 15% in just 3 months."
+      },
+      {
+        "name": "Emily Chen",
+        "role": "Algorithmic Trader",
+        "content": "Finally, a journal that understands the needs of serious traders. The backtesting and strategy analysis tools are incredible."
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that fits your trading needs",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "popular": "Most Popular",
+    "choosePlan": "Choose Plan"
+  },
+  "footer": {
+    "about": "About",
+    "product": "Product",
+    "resources": "Resources",
+    "legal": "Legal",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2024 AI Trade Journal. All rights reserved."
+  }
+}

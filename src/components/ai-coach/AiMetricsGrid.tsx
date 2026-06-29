@@ -17,14 +17,14 @@ const containerVariants = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, scale: 0.95 },
-  show: { opacity: 1, scale: 1, transition: { duration: 0.4 } }
+  show: { opacity: 1, scale: 1, transition: { duration: 0.4 } },
 };
 
 export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
@@ -37,7 +37,7 @@ export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
       color: 'text-blue-500',
       bgRing: 'text-blue-500/20',
       fillRing: 'text-blue-500',
-      desc: 'Rule following & consistency'
+      desc: 'Rule following & consistency',
     },
     {
       id: 'risk',
@@ -47,7 +47,7 @@ export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
       color: 'text-emerald-500',
       bgRing: 'text-emerald-500/20',
       fillRing: 'text-emerald-500',
-      desc: 'Drawdown control'
+      desc: 'Drawdown control',
     },
     {
       id: 'emotion',
@@ -57,7 +57,7 @@ export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
       color: 'text-purple-500',
       bgRing: 'text-purple-500/20',
       fillRing: 'text-purple-500',
-      desc: 'Mental stability'
+      desc: 'Mental stability',
     },
     {
       id: 'consistency',
@@ -67,12 +67,12 @@ export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
       color: 'text-orange-500',
       bgRing: 'text-orange-500/20',
       fillRing: 'text-orange-500',
-      desc: 'Win-rate stability'
-    }
+      desc: 'Win-rate stability',
+    },
   ];
 
   return (
-    <motion.div 
+    <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -91,11 +91,15 @@ export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
             className="bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
           >
             {/* Hover Glow */}
-            <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-500 bg-current ${m.color}`} />
-            
+            <div
+              className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-500 bg-current ${m.color}`}
+            />
+
             <div className="flex justify-between items-start mb-4">
               <div>
-                <div className={`p-2 rounded-lg bg-background border border-border inline-flex mb-3 ${m.color}`}>
+                <div
+                  className={`p-2 rounded-lg bg-background border border-border inline-flex mb-3 ${m.color}`}
+                >
                   {m.icon}
                 </div>
                 <h3 className="font-semibold text-foreground">{m.title}</h3>
@@ -123,7 +127,7 @@ export default function AiMetricsGrid({ scores }: AiMetricsGridProps) {
                     cy="40"
                     initial={{ strokeDashoffset: circumference }}
                     animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    transition={{ duration: 1.5, ease: 'easeOut' }}
                     style={{ strokeDasharray: circumference }}
                   />
                 </svg>

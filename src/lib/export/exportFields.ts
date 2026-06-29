@@ -187,12 +187,7 @@ const PNL_FIELDS = new Set([
   'value',
 ]);
 
-const DATE_FIELDS = new Set([
-  'trade_date',
-  'date',
-  'created_at',
-  'updated_at',
-]);
+const DATE_FIELDS = new Set(['trade_date', 'date', 'created_at', 'updated_at']);
 
 export function getExportFieldLabel(key: string): string {
   if (EXPORT_FIELD_LABELS[key]) return EXPORT_FIELD_LABELS[key];
@@ -217,7 +212,10 @@ export function orderExportKeys(keys: string[]): string[] {
  * Resolves export columns from selected fields (Export Filters) or data keys.
  * PDF and CSV use the same order as Excel.
  */
-export function resolveExportColumns(data: Record<string, unknown>[], selectedFields?: string[]): string[] {
+export function resolveExportColumns(
+  data: Record<string, unknown>[],
+  selectedFields?: string[]
+): string[] {
   if (!data.length) return [];
 
   const dataKeys = new Set(data.flatMap((row) => Object.keys(row ?? {})));
@@ -320,12 +318,15 @@ export function getStandardPdfCellValue(field: string, row: Record<string, unkno
     case 'strategy_used':
       return formatExportCellValue(
         'strategy_used',
-        row.strategy_used ?? resolveNestedValue(row, 'strategy.name'),
+        row.strategy_used ?? resolveNestedValue(row, 'strategy.name')
       );
     case 'risk_amount':
       return formatExportCellValue('risk_amount', row.risk_amount ?? row.amount);
     case 'pnl_amount':
-      return formatExportCellValue('pnl_amount', row.pnl_amount ?? row.net_pnl ?? row.pnl ?? row.profit);
+      return formatExportCellValue(
+        'pnl_amount',
+        row.pnl_amount ?? row.net_pnl ?? row.pnl ?? row.profit
+      );
     case 'trade_status': {
       const status = row.trade_status ?? row.status;
       if (status !== null && status !== undefined && status !== '') {

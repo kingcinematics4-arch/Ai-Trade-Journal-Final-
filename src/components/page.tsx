@@ -18,12 +18,13 @@ export default function StrategyAnalyticsPage() {
 
   const analytics = useMemo(() => {
     if (!trades) return null;
-    
+
     // Apply basic filters
-    const filtered = trades.filter(t => {
+    const filtered = trades.filter((t) => {
       const date = new Date(t.trade_date);
-      const inDateRange = (!dateRange.start || date >= new Date(dateRange.start)) &&
-                          (!dateRange.end || date <= new Date(dateRange.end));
+      const inDateRange =
+        (!dateRange.start || date >= new Date(dateRange.start)) &&
+        (!dateRange.end || date <= new Date(dateRange.end));
       return inDateRange;
     });
 
@@ -35,7 +36,9 @@ export default function StrategyAnalyticsPage() {
       <div className="p-8 space-y-8">
         <Skeleton className="h-12 w-64 rounded-xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-3xl" />)}
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-3xl" />
+          ))}
         </div>
         <Skeleton className="h-[350px] rounded-3xl" />
       </div>
@@ -50,7 +53,8 @@ export default function StrategyAnalyticsPage() {
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">No Strategy Data Found</h2>
         <p className="text-muted-foreground max-w-md">
-          Start assigning strategies to your trades in the "Add Trade" form to see detailed performance analytics.
+          Start assigning strategies to your trades in the "Add Trade" form to see detailed
+          performance analytics.
         </p>
       </div>
     );
@@ -72,8 +76,11 @@ export default function StrategyAnalyticsPage() {
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-blue-500 transition-colors" size={16} />
-            <input 
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-blue-500 transition-colors"
+              size={16}
+            />
+            <input
               type="text"
               placeholder="Search Strategy..."
               value={searchTerm}
@@ -83,16 +90,16 @@ export default function StrategyAnalyticsPage() {
           </div>
           <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.07] rounded-xl px-3 py-2">
             <CalendarIcon size={16} className="text-muted-foreground" />
-            <input 
-              type="date" 
+            <input
+              type="date"
               className="bg-transparent text-xs text-white outline-none"
-              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+              onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
             />
             <span className="text-muted-foreground">→</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               className="bg-transparent text-xs text-white outline-none"
-              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+              onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
             />
           </div>
         </div>

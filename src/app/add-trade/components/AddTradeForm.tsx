@@ -19,8 +19,9 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
 import { createClient } from '@/lib/supabase';
-import { notificationService } from '@/services/notificationService'; // Ensure this points to src/services/
+import { notificationService } from '@/services/notificationService';
 import { parseSafeNumber } from '@/lib/trades/analytics';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import TradeInfoSection from './TradeInfoSection';
 import PerformanceSection from './PerformanceSection';
 import PsychologySection from './PsychologySection';
@@ -61,6 +62,7 @@ export interface TradeFormData {
 type SectionKey = 'tradeInfo' | 'performance' | 'psychology' | 'media';
 
 export default function AddTradeForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
   const { refetch } = useTrades();
@@ -153,7 +155,7 @@ export default function AddTradeForm() {
       }
     }
 
-    // Guarded setValue calls: Only update if the value has actually changed to prevent 
+    // Guarded setValue calls: Only update if the value has actually changed to prevent
     // redundant re-renders and "Update during render" clashes.
     const { pnlAmount: curPnl, tradeStatus: curStatus, rrRatio: curRr } = form.getValues();
     const dirtyFields = form.formState.dirtyFields;
@@ -163,7 +165,9 @@ export default function AddTradeForm() {
       form.setValue('pnlAmount', pnlAmount, { shouldValidate: true });
     }
     if (!dirtyFields.tradeStatus && curStatus !== tradeStatus) {
-      form.setValue('tradeStatus', (tradeStatus as 'win' | 'loss' | 'breakeven' | '') || '', { shouldValidate: true });
+      form.setValue('tradeStatus', (tradeStatus as 'win' | 'loss' | 'breakeven' | '') || '', {
+        shouldValidate: true,
+      });
     }
     if (!dirtyFields.rrRatio && curRr !== rrRatio) {
       form.setValue('rrRatio', rrRatio, { shouldValidate: true });
@@ -196,14 +200,14 @@ export default function AddTradeForm() {
 
   const handleSubmit = async (data: TradeFormData) => {
     if (!user) {
-      toast.error('You must be signed in to log a trade.');
+      toast.error(t('trading.addTrade.mustBeSignedIn'));
       return;
     }
 
     setIsSubmitting(true);
     const supabase = createClient();
     // Capture the ID to update the toast later
-    const toastId = toast.loading('Logging trade and syncing goals...');
+    const toastId = toast.loading(t('trading.addTrade.loggingTrade'));
 
     try {
       // 1. Upload Images
@@ -257,18 +261,21 @@ export default function AddTradeForm() {
       // 3. Create Notification
       await notificationService.createNotification({
         userId: user.id,
-        title: 'Trade Logged',
-        message: `Successfully recorded ${data.tradeDirection} on ${data.assetName}`,
+        title: t('trading.addTrade.tradeLogged'),
+        message: t('trading.addTrade.successfullyRecorded', {
+          direction: data.tradeDirection,
+          asset: data.assetName,
+        }),
         type: 'trade',
         link: '/dashboard',
       });
 
       // Update the existing loading toast to success
-      toast.success('Trade logged successfully!', { id: toastId });
+      toast.success(t('trading.addTrade.tradeLoggedSuccessfully'), { id: toastId });
       router.push('/dashboard');
     } catch (error: any) {
       // Update the loading toast to error
-      toast.error(error.message || 'Failed to save trade.', { id: toastId });
+      toast.error(error.message || t('trading.addTrade.failedToSave'), { id: toastId });
       setIsSubmitting(false);
     } finally {
       setIsSubmitting(false);
@@ -277,7 +284,7 @@ export default function AddTradeForm() {
 
   const handleCancel = () => {
     if (form.formState.isDirty) {
-      if (confirm('You have unsaved changes. Are you sure you want to leave?')) {
+      if (confirm(t('trading.addTrade.unsavedChanges'))) {
         router.push('/dashboard');
       }
     } else {
@@ -288,35 +295,35 @@ export default function AddTradeForm() {
   const sections: { key: SectionKey; label: string; icon: React.ReactNode; desc: string }[] = [
     {
       key: 'tradeInfo',
-      label: 'Trade Information',
+      label: t('trading.addTrade.sections.tradeInfo.label'),
       icon: <TrendingUp size={15} />,
-      desc: 'Asset, direction, prices',
+      desc: t('trading.addTrade.sections.tradeInfo.desc'),
     },
     {
       key: 'performance',
-      label: 'Performance Metrics',
+      label: t('trading.addTrade.sections.performance.label'),
       icon: <Zap size={15} />,
-      desc: 'P&L, RR ratio, outcome',
+      desc: t('trading.addTrade.sections.performance.desc'),
     },
     {
       key: 'psychology',
-      label: 'Psychology & Strategy',
+      label: t('trading.addTrade.sections.psychology.label'),
       icon: <Brain size={15} />,
-      desc: 'Emotions, mistakes, lessons',
+      desc: t('trading.addTrade.sections.psychology.desc'),
     },
     {
       key: 'media',
-      label: 'Media & Metadata',
+      label: t('trading.addTrade.sections.media.label'),
       icon: <Camera size={15} />,
-      desc: 'Screenshots, tags, rating',
+      desc: t('trading.addTrade.sections.media.desc'),
     },
   ];
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       {sections.map((section, index) => (
-        <div 
-          key={`section-${section.key}`} 
+        <div
+          key={`section-${section.key}`}
           className={`card-premium relative transition-all duration-300 ${openSections[section.key] ? 'overflow-visible' : 'overflow-hidden hover:scale-[1.005] hover:shadow-xl'}`}
           style={{ zIndex: openSections[section.key] ? 40 - index : 0 }}
         >
@@ -332,10 +339,15 @@ export default function AddTradeForm() {
               </div>
               <div className="text-left">
                 <p className="text-[17px] font-bold text-white tracking-tight">{section.label}</p>
-                <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mt-1">{section.desc}</p>
+                <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em] mt-1">
+                  {section.desc}
+                </p>
               </div>
             </div>
-            <motion.div animate={{ rotate: openSections[section.key] ? 0 : 180 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}>
+            <motion.div
+              animate={{ rotate: openSections[section.key] ? 0 : 180 }}
+              transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+            >
               <ChevronDown size={16} className="text-muted-foreground" />
             </motion.div>
           </button>
@@ -351,9 +363,7 @@ export default function AddTradeForm() {
                 transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
                 className="border-t border-border px-5 py-5 overflow-hidden"
               >
-                {section.key === 'tradeInfo' && (
-                  <TradeInfoSection form={form} />
-                )}
+                {section.key === 'tradeInfo' && <TradeInfoSection form={form} />}
                 {section.key === 'performance' && <PerformanceSection form={form} />}
                 {section.key === 'psychology' && <PsychologySection form={form} />}
                 {section.key === 'media' && (
@@ -378,7 +388,7 @@ export default function AddTradeForm() {
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-4">
           <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
             <Info size={13} />
-            <span>AI insights will be generated automatically after saving</span>
+            <span>{t('trading.addTrade.aiInsights')}</span>
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
@@ -387,7 +397,7 @@ export default function AddTradeForm() {
               className="btn-secondary flex-1 md:flex-none flex items-center justify-center gap-2 text-sm font-black h-14 md:h-10 md:px-8 rounded-2xl md:rounded-xl transition-all duration-200 active:scale-95"
             >
               <X size={16} />
-              Cancel
+              {t('trading.addTrade.cancel')}
             </button>
             <button
               type="submit"
@@ -397,12 +407,12 @@ export default function AddTradeForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 size={14} className="animate-spin" />
-                  Saving Trade...
+                  {t('trading.addTrade.savingTrade')}
                 </>
               ) : (
                 <>
                   <Save size={14} />
-                  Save Trade
+                  {t('trading.addTrade.saveTrade')}
                 </>
               )}
             </button>

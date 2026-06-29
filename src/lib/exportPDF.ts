@@ -1,4 +1,7 @@
-import { exportPremiumTradingReport, type PDFReportOptions } from '@/lib/export/pdf/pdfReportBuilder';
+import {
+  exportPremiumTradingReport,
+  type PDFReportOptions,
+} from '@/lib/export/pdf/pdfReportBuilder';
 
 export type { PDFReportOptions as PDFExportOptions };
 
@@ -9,7 +12,7 @@ export type { PDFReportOptions as PDFExportOptions };
 export function exportPDF(
   data: any[],
   fileNameOrOptions: string | PDFReportOptions = 'Trade_Report',
-  options?: PDFReportOptions,
+  options?: PDFReportOptions
 ): void {
   if (!data?.length) return;
 

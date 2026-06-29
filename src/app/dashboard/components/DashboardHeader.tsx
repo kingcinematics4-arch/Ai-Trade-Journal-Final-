@@ -10,10 +10,12 @@ import UserProfileSummary from '@/components/UserProfileSummary';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import { useNotifications } from '@/hooks/useNotifications';
 import NotificationPanel from './NotificationPanel';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 const timeframes = ['Today', 'This Week', 'This Month', 'Last 3 Months', 'All Time'];
 
 export default function DashboardHeader() {
+  const { t } = useTranslation();
   const { displayName, isLoading } = useAuth();
   const { refetch } = useTrades();
   const { unreadCount } = useNotifications();
@@ -52,9 +54,11 @@ export default function DashboardHeader() {
             <>
               <UserProfileSummary size="md" layout="horizontal" className="flex-shrink-0" />
               <div className="min-w-0 sm:border-l sm:border-border sm:pl-4 flex-1 hidden sm:block">
-                <h1 className="text-lg sm:text-2xl font-bold text-foreground tracking-tight">Dashboard</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground tracking-tight">
+                  {t('dashboard.title')}
+                </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
-                  Welcome back, {firstName} — here is your trading performance overview
+                  {t('dashboard.welcome', { name: firstName })}
                 </p>
               </div>
             </>
@@ -121,7 +125,10 @@ export default function DashboardHeader() {
             </button>
             {showNotifications && <NotificationPanel />}
           </div>
-          <Link href="/add-trade" className="btn-primary flex-shrink-0 flex items-center justify-center gap-2 py-2.5 px-4 sm:px-5 text-sm font-bold shadow-xl shadow-primary/20 rounded-xl transition-all active:scale-[0.98] whitespace-nowrap">
+          <Link
+            href="/add-trade"
+            className="btn-primary flex-shrink-0 flex items-center justify-center gap-2 py-2.5 px-4 sm:px-5 text-sm font-bold shadow-xl shadow-primary/20 rounded-xl transition-all active:scale-[0.98] whitespace-nowrap"
+          >
             <PlusCircle size={15} />
             Add Trade
           </Link>

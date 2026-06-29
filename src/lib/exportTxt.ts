@@ -4,7 +4,7 @@ import {
   calculateReportAnalytics,
   formatCurrency,
   formatPercentage,
-  formatExportDate
+  formatExportDate,
 } from './export/exportFormatting';
 
 /**
@@ -16,12 +16,12 @@ export function buildProfessionalTxt(data: any[], fileName: string = 'TradingJou
   const generatedDate = new Date();
   const generatedDateStr = format(generatedDate, 'yyyy-MM-dd HH:mm:ss');
   const dateStr = format(generatedDate, 'yyyy_MM_dd');
-  
+
   const analytics = calculateReportAnalytics(data);
 
   // Build Strategy Stats
   const strategyStats: Record<string, any> = {};
-  data.forEach(trade => {
+  data.forEach((trade) => {
     const strat = trade.strategy_used || 'Uncategorized';
     if (!strategyStats[strat]) {
       strategyStats[strat] = { trades: 0, wins: 0, losses: 0, pnl: 0 };
@@ -56,7 +56,10 @@ export function buildProfessionalTxt(data: any[], fileName: string = 'TradingJou
   lines.push(String('Net P&L:').padEnd(30) + formatCurrency(analytics.netPnl));
   lines.push(String('Gross Profit:').padEnd(30) + formatCurrency(analytics.grossProfit));
   lines.push(String('Gross Loss:').padEnd(30) + formatCurrency(analytics.grossLoss));
-  lines.push(String('Profit Factor:').padEnd(30) + (analytics.profitFactor === Infinity ? 'Infinity' : analytics.profitFactor.toFixed(2)));
+  lines.push(
+    String('Profit Factor:').padEnd(30) +
+      (analytics.profitFactor === Infinity ? 'Infinity' : analytics.profitFactor.toFixed(2))
+  );
   lines.push(String('Largest Win:').padEnd(30) + formatCurrency(analytics.maxWin));
   lines.push(String('Largest Loss:').padEnd(30) + formatCurrency(analytics.maxLoss));
   lines.push('');
@@ -67,21 +70,21 @@ export function buildProfessionalTxt(data: any[], fileName: string = 'TradingJou
   lines.push(separator);
   lines.push(
     String('STRATEGY').padEnd(30) +
-    String('TRADES').padStart(10) +
-    String('WIN %').padStart(15) +
-    String('NET P&L').padStart(20)
+      String('TRADES').padStart(10) +
+      String('WIN %').padStart(15) +
+      String('NET P&L').padStart(20)
   );
   lines.push(lightSeparator);
 
-  Object.keys(strategyStats).forEach(strat => {
+  Object.keys(strategyStats).forEach((strat) => {
     const stats = strategyStats[strat];
     const winRate = stats.trades > 0 ? (stats.wins / stats.trades) * 100 : 0;
-    
+
     lines.push(
       String(strat).substring(0, 28).padEnd(30) +
-      String(stats.trades).padStart(10) +
-      String(formatPercentage(winRate)).padStart(15) +
-      String(formatCurrency(stats.pnl)).padStart(20)
+        String(stats.trades).padStart(10) +
+        String(formatPercentage(winRate)).padStart(15) +
+        String(formatCurrency(stats.pnl)).padStart(20)
     );
   });
   lines.push('');
@@ -91,7 +94,11 @@ export function buildProfessionalTxt(data: any[], fileName: string = 'TradingJou
   lines.push('TRADE EXECUTION LOG');
   lines.push(separator);
 
-  const sortedData = [...data].sort((a, b) => new Date(a.trade_date || a.date || 0).getTime() - new Date(b.trade_date || b.date || 0).getTime());
+  const sortedData = [...data].sort(
+    (a, b) =>
+      new Date(a.trade_date || a.date || 0).getTime() -
+      new Date(b.trade_date || b.date || 0).getTime()
+  );
 
   sortedData.forEach((trade, index) => {
     const date = formatExportDate(trade.trade_date || trade.date);
@@ -99,11 +106,11 @@ export function buildProfessionalTxt(data: any[], fileName: string = 'TradingJou
     const side = (trade.trade_direction || trade.side || 'N/A').toUpperCase();
     const pnl = parseFloat(trade.pnl_amount || '0');
     const strategy = trade.strategy_used || 'Uncategorized';
-    
+
     lines.push(`Trade #${index + 1} | ${date}`);
     lines.push(`Asset: ${asset.padEnd(15)} | Side: ${side.padEnd(10)} | Strategy: ${strategy}`);
     lines.push(`P&L:   ${formatCurrency(pnl).padEnd(15)} | Result: ${pnl >= 0 ? 'WIN' : 'LOSS'}`);
-    
+
     if (trade.notes) {
       lines.push(`Notes: ${trade.notes}`);
     }

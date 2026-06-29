@@ -18,10 +18,10 @@ import {
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { DbNotification } from '@/lib/notifications';
-import { 
-  notificationService, 
+import {
+  notificationService,
   type NotificationSettings,
-  DEFAULT_NOTIFICATION_SETTINGS
+  DEFAULT_NOTIFICATION_SETTINGS,
 } from '@/services/notificationService';
 import { soundService } from '@/services/soundService';
 import { toast } from 'sonner';
@@ -112,53 +112,58 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         setSettings(DEFAULT_NOTIFICATION_SETTINGS);
       }
     } catch (err) {
-      console.warn('[NotificationsContext] Settings not found, using defaults:', err instanceof Error ? err.message : 'Unknown error');
+      console.warn(
+        '[NotificationsContext] Settings not found, using defaults:',
+        err instanceof Error ? err.message : 'Unknown error'
+      );
       setSettings(DEFAULT_NOTIFICATION_SETTINGS);
     }
   }, [user?.id]);
 
-  const updateSettings = useCallback(async (newSettings: Partial<NotificationSettings>) => {
-    if (!user?.id) return;
-    
-    // 1. Optimistic UI update (Functional to avoid stale closure issues)
-    setSettings((prev) => {
-      const current = prev ?? DEFAULT_NOTIFICATION_SETTINGS;
-      const updated = { ...current, ...newSettings };
+  const updateSettings = useCallback(
+    async (newSettings: Partial<NotificationSettings>) => {
+      if (!user?.id) return;
 
-      // 2. Sound preview when volume is being adjusted
-      if (newSettings.volume !== undefined && 
+      // 1. Optimistic UI update (Functional to avoid stale closure issues)
+      setSettings((prev) => {
+        const current = prev ?? DEFAULT_NOTIFICATION_SETTINGS;
+        const updated = { ...current, ...newSettings };
+
+        // 2. Sound preview when volume is being adjusted
+        if (
+          newSettings.volume !== undefined &&
           newSettings.volume !== current.volume &&
-          updated.sound_enabled && 
-          !updated.do_not_disturb) {
-        soundService.play('notification', newSettings.volume);
+          updated.sound_enabled &&
+          !updated.do_not_disturb
+        ) {
+          soundService.play('notification', newSettings.volume);
+        }
+
+        return updated;
+      });
+
+      // If desktop notifications are being enabled, request browser permission
+      if (newSettings.desktop_enabled === true) {
+        await requestBrowserPermission();
       }
 
-      return updated;
-    });
-
-    // If desktop notifications are being enabled, request browser permission
-    if (newSettings.desktop_enabled === true) {
-      await requestBrowserPermission();
-    }
-
-    try {
-      // 3. Persist to DB
-      await notificationService.updateSettings(user.id, newSettings);
-    } catch (err: any) {
-      console.error(
-        '[NotificationsContext] Settings sync failed:',
-        JSON.stringify(err, null, 2)
-      );
-      console.error('Supabase Error Details:', {
-        message: err?.message,
-        details: err?.details,
-        hint: err?.hint,
-        code: err?.code,
-        payload: newSettings
-      });
-      await fetchSettings(); // 4. Rollback to server state on failure
-    }
-  }, [user?.id, fetchSettings]);
+      try {
+        // 3. Persist to DB
+        await notificationService.updateSettings(user.id, newSettings);
+      } catch (err: any) {
+        console.error('[NotificationsContext] Settings sync failed:', JSON.stringify(err, null, 2));
+        console.error('Supabase Error Details:', {
+          message: err?.message,
+          details: err?.details,
+          hint: err?.hint,
+          code: err?.code,
+          payload: newSettings,
+        });
+        await fetchSettings(); // 4. Rollback to server state on failure
+      }
+    },
+    [user?.id, fetchSettings]
+  );
 
   // Theme persistence & application
   useEffect(() => {
@@ -166,7 +171,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
       if (settings.theme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
         root.classList.add(systemTheme);
       } else {
         root.classList.add(settings.theme);
@@ -185,18 +192,21 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  const showNativeNotification = useCallback((notif: DbNotification, currentSettings: NotificationSettings | null) => {
-    if (
-      currentSettings?.desktop_enabled && 
-      Notification.permission === 'granted' && 
-      !currentSettings.do_not_disturb
-    ) {
-      new Notification(notif.title, {
-        body: currentSettings.popup_preview_enabled ? notif.message : 'New notification received',
-        icon: '/logo.png',
-      });
-    }
-  }, []);
+  const showNativeNotification = useCallback(
+    (notif: DbNotification, currentSettings: NotificationSettings | null) => {
+      if (
+        currentSettings?.desktop_enabled &&
+        Notification.permission === 'granted' &&
+        !currentSettings.do_not_disturb
+      ) {
+        new Notification(notif.title, {
+          body: currentSettings.popup_preview_enabled ? notif.message : 'New notification received',
+          icon: '/logo.png',
+        });
+      }
+    },
+    []
+  );
 
   const requestBrowserPermission = async () => {
     if (!('Notification' in window)) return false;
@@ -223,7 +233,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       });
 
       try {
-        const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+        const { error } = await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('id', id);
 
         if (error) {
           throw error;
@@ -264,10 +277,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const clearAllNotifications = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('user_id', user.id);
+      const { error } = await supabase.from('notifications').delete().eq('user_id', user.id);
       if (error) throw error;
       setNotifications((_: DbNotification[]) => []);
       setUnreadCount((_: number) => 0);
@@ -319,7 +329,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
           // Handle side effects outside state updaters
           if (isEnabled && currentSettings.notifications_enabled) {
-            console.debug('[Notifications] Side effects enabled for this type. Triggering feedback...');
+            console.debug(
+              '[Notifications] Side effects enabled for this type. Triggering feedback...'
+            );
             playNotificationSound(currentSettings);
             triggerVibration(currentSettings);
             showNativeNotification(newNotif, currentSettings);
@@ -327,10 +339,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
             if (currentSettings.floating_enabled) {
               toast.info(newNotif.title, {
                 description: currentSettings.popup_preview_enabled ? newNotif.message : undefined,
-                action: newNotif.link ? {
-                  label: 'View',
-                  onClick: () => (window.location.href = newNotif.link!),
-                } : undefined,
+                action: newNotif.link
+                  ? {
+                      label: 'View',
+                      onClick: () => (window.location.href = newNotif.link!),
+                    }
+                  : undefined,
               });
             }
           }
@@ -356,15 +370,15 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         (payload: RealtimePostgresUpdatePayload<DbNotification>) => {
           const updatedNotif = payload.new;
           console.debug('[Notifications] Realtime UPDATE received:', updatedNotif.id);
-          
+
           setNotifications((prev: DbNotification[]) => {
             if (!isMounted) return prev;
             const oldNotif = prev.find((n) => n.id === updatedNotif.id);
-            
+
             if (oldNotif && oldNotif.is_read !== updatedNotif.is_read) {
               setUnreadCount((c: number) => (updatedNotif.is_read ? Math.max(0, c - 1) : c + 1));
             }
-            
+
             return prev.map((n) => (n.id === updatedNotif.id ? updatedNotif : n));
           });
         }
@@ -397,7 +411,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     // Call subscribe after all listeners are registered
     channel.subscribe((status) => {
       if (!isMounted) return;
-      
+
       if (status === 'SUBSCRIBED') {
         console.debug('Realtime notification channel subscribed:', uniqueChannelName);
       } else if (status === 'CHANNEL_ERROR') {
@@ -412,7 +426,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     return () => {
       isMounted = false;
       if (channel) {
-        supabase.removeChannel(channel).catch(err => {
+        supabase.removeChannel(channel).catch((err) => {
           console.warn('[Notifications] Cleanup failed:', err);
         });
         if (channelRef.current === channel) channelRef.current = null;
@@ -434,7 +448,18 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       requestBrowserPermission,
       triggerTest,
     }),
-    [notifications, unreadCount, isLoading, markAsRead, markAllAsRead, fetchNotifications, settings, updateSettings, clearAllNotifications, triggerTest]
+    [
+      notifications,
+      unreadCount,
+      isLoading,
+      markAsRead,
+      markAllAsRead,
+      fetchNotifications,
+      settings,
+      updateSettings,
+      clearAllNotifications,
+      triggerTest,
+    ]
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

@@ -4,7 +4,16 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { exportPDF as generateProfessionalPDF } from '@/lib/exportPDF';
 
-export type ExportFormat = 'pdf' | 'csv' | 'xlsx' | 'json' | 'txt' | 'md' | 'xml' | 'html' | 'compliance_report';
+export type ExportFormat =
+  | 'pdf'
+  | 'csv'
+  | 'xlsx'
+  | 'json'
+  | 'txt'
+  | 'md'
+  | 'xml'
+  | 'html'
+  | 'compliance_report';
 
 interface ExportOptions {
   filename: string;
@@ -49,15 +58,15 @@ export async function exportData({ filename, format, data, columns, title }: Exp
     case 'md':
       let textContent = title ? `# ${title}\n\n` : '';
       if (format === 'md') {
-        const headers = columns ? columns.map(c => c.header) : Object.keys(data[0] || {});
+        const headers = columns ? columns.map((c) => c.header) : Object.keys(data[0] || {});
         textContent += `| ${headers.join(' | ')} |\n`;
         textContent += `| ${headers.map(() => '---').join(' | ')} |\n`;
-        data.forEach(row => {
-          const values = columns ? columns.map(c => row[c.key]) : Object.values(row);
+        data.forEach((row) => {
+          const values = columns ? columns.map((c) => row[c.key]) : Object.values(row);
           textContent += `| ${values.join(' | ')} |\n`;
         });
       } else {
-        data.forEach(row => {
+        data.forEach((row) => {
           textContent += JSON.stringify(row) + '\n';
         });
       }
@@ -67,7 +76,7 @@ export async function exportData({ filename, format, data, columns, title }: Exp
 
     case 'xml':
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<root>\n`;
-      data.forEach(item => {
+      data.forEach((item) => {
         xml += `  <item>\n`;
         Object.entries(item).forEach(([key, val]) => {
           xml += `    <${key}>${val}</${key}>\n`;
@@ -82,13 +91,13 @@ export async function exportData({ filename, format, data, columns, title }: Exp
     case 'html':
       let html = `<html><head><style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}th{background-color:#f2f2f2}</style></head><body>`;
       html += `<h1>${title || 'Export'}</h1><table><thead><tr>`;
-      const keys = columns ? columns.map(c => c.key) : Object.keys(data[0] || {});
-      const labels = columns ? columns.map(c => c.header) : keys;
-      labels.forEach(l => html += `<th>${l}</th>`);
+      const keys = columns ? columns.map((c) => c.key) : Object.keys(data[0] || {});
+      const labels = columns ? columns.map((c) => c.header) : keys;
+      labels.forEach((l) => (html += `<th>${l}</th>`));
       html += `</tr></thead><tbody>`;
-      data.forEach(row => {
+      data.forEach((row) => {
         html += `<tr>`;
-        keys.forEach(k => html += `<td>${row[k] || ''}</td>`);
+        keys.forEach((k) => (html += `<td>${row[k] || ''}</td>`));
         html += `</tr>`;
       });
       html += `</tbody></table></body></html>`;
@@ -108,7 +117,7 @@ export function logExport(exportType: string, format: string) {
     type: exportType,
     format,
     timestamp: new Date().toISOString(),
-    status: 'completed'
+    status: 'completed',
   };
   localStorage.setItem('export-history', JSON.stringify([newEntry, ...history].slice(0, 50)));
 }

@@ -26,10 +26,7 @@ export default function TradeHistoryEmpty() {
         Start building your trading journal by logging your first trade. Track your performance,
         analyze patterns, and improve your strategy over time.
       </p>
-      <Link
-        href="/add-trade"
-        className="btn-primary flex items-center gap-2 py-2.5 px-6 text-sm"
-      >
+      <Link href="/add-trade" className="btn-primary flex items-center gap-2 py-2.5 px-6 text-sm">
         <PlusCircle size={16} />
         Log Your First Trade
       </Link>

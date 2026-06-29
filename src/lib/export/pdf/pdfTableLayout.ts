@@ -11,23 +11,27 @@ import type { PdfDocumentContext } from './PdfDocumentContext';
 export function drawTradeTableLayout(
   ctx: PdfDocumentContext,
   data: Record<string, unknown>[],
-  columns: string[],
+  columns: string[]
 ): void {
   const headers = columns.map(getExportFieldLabel);
   const body = data.map((row) => columns.map((field) => formatExportCellValue(field, row[field])));
 
   const pnlIndexes = new Set(
-    columns.map((field, i) => (isPnlField(field) ? i : -1)).filter((i) => i >= 0),
+    columns.map((field, i) => (isPnlField(field) ? i : -1)).filter((i) => i >= 0)
   );
   const longIndexes = new Set(
-    columns.map((field, i) => (isLongTextField(field) ? i : -1)).filter((i) => i >= 0),
+    columns.map((field, i) => (isLongTextField(field) ? i : -1)).filter((i) => i >= 0)
   );
 
   const colWidth = ctx.contentWidth / columns.length;
 
   autoTable(ctx.doc, {
     startY: ctx.y,
-    margin: { left: PDF_LAYOUT.marginX, right: PDF_LAYOUT.marginX, bottom: PDF_LAYOUT.marginBottom },
+    margin: {
+      left: PDF_LAYOUT.marginX,
+      right: PDF_LAYOUT.marginX,
+      bottom: PDF_LAYOUT.marginBottom,
+    },
     head: [headers],
     body,
     theme: 'plain',
@@ -61,7 +65,8 @@ export function drawTradeTableLayout(
       if (pnlIndexes.has(cell.column.index)) {
         const num = parseFloat(String(cell.cell.raw).replace(/[+,$—]/g, ''));
         if (!Number.isNaN(num)) {
-          cell.cell.styles.textColor = num > 0 ? PDF_THEME.profit : num < 0 ? PDF_THEME.loss : PDF_THEME.text;
+          cell.cell.styles.textColor =
+            num > 0 ? PDF_THEME.profit : num < 0 ? PDF_THEME.loss : PDF_THEME.text;
         }
       }
 
@@ -79,6 +84,7 @@ export function drawTradeTableLayout(
     },
   });
 
-  const finalY = (ctx.doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY;
+  const finalY = (ctx.doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable
+    ?.finalY;
   if (finalY) ctx.y = finalY + PDF_LAYOUT.sectionGap;
 }

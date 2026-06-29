@@ -13,7 +13,7 @@ interface GoalsState {
   syncProgress: (trades: (DbTrade & { goalId?: string })[]) => void;
   lastCompletedGoal: Goal | null;
   clearLastCompletedGoal: () => void;
-  
+
   // Analytics
   getActiveGoals: () => Goal[];
   getCompletedGoals: () => Goal[];
@@ -55,23 +55,23 @@ export const useGoalsStore = create<GoalsState>()(
         set((state) => {
           let hasChanges = false;
           let newlyCompleted: Goal | null = null;
-          const updatedGoals = state.goals.map(goal => {
+          const updatedGoals = state.goals.map((goal) => {
             // Migration safety: Provide defaults for fields removed from persistence
-            const currentGoal = { 
+            const currentGoal = {
               ...goal,
               status: goal.status || 'active',
               currentValue: goal.currentValue || 0,
-              progress: goal.progress || 0
+              progress: goal.progress || 0,
             } as Goal;
-            
+
             const updated = calculateGoalProgress(currentGoal, trades);
-            
+
             const safeProgress = isNaN(Number(updated.progress)) ? 0 : Number(updated.progress);
             const safeCurrentValue = isNaN(updated.currentValue) ? 0 : updated.currentValue;
 
             if (
-              Math.abs(safeProgress - (goal.progress || 0)) > 0.001 || 
-              Math.abs(safeCurrentValue - (goal.currentValue || 0)) > 0.01 || 
+              Math.abs(safeProgress - (goal.progress || 0)) > 0.001 ||
+              Math.abs(safeCurrentValue - (goal.currentValue || 0)) > 0.01 ||
               updated.status !== goal.status ||
               updated.startingPnL !== goal.startingPnL
             ) {
@@ -81,34 +81,54 @@ export const useGoalsStore = create<GoalsState>()(
                 newlyCompleted = {
                   ...updated,
                   completedAt: new Date().toISOString(),
-                  progress: 100
+                  progress: 100,
                 };
               }
               return { ...updated, progress: safeProgress, currentValue: safeCurrentValue };
             }
             return goal;
           });
-          
-          return hasChanges ? { 
-            goals: updatedGoals, 
-            lastCompletedGoal: newlyCompleted || state.lastCompletedGoal 
-          } : state;
+
+          return hasChanges
+            ? {
+                goals: updatedGoals,
+                lastCompletedGoal: newlyCompleted || state.lastCompletedGoal,
+              }
+            : state;
         });
       },
 
-      getActiveGoals: () => get().goals.filter(g => g.status === 'active'),
-      getCompletedGoals: () => get().goals.filter(g => g.status === 'completed'),
-      getFailedGoals: () => get().goals.filter(g => g.status === 'failed'),
+      getActiveGoals: () => get().goals.filter((g) => g.status === 'active'),
+      getCompletedGoals: () => get().goals.filter((g) => g.status === 'completed'),
+      getFailedGoals: () => get().goals.filter((g) => g.status === 'failed'),
     }),
     {
       name: 'ai-trade-journal-goals',
       // Persist ONLY configuration. Computed fields are recalculated on load.
       partialize: (state) => ({
-        goals: state.goals.map(({ 
-          id, title, description, type, targetValue, startingPnL, createdAt, deadline, category 
-        }) => ({
-          id, title, description, type, targetValue, startingPnL, createdAt, deadline, category
-        })),
+        goals: state.goals.map(
+          ({
+            id,
+            title,
+            description,
+            type,
+            targetValue,
+            startingPnL,
+            createdAt,
+            deadline,
+            category,
+          }) => ({
+            id,
+            title,
+            description,
+            type,
+            targetValue,
+            startingPnL,
+            createdAt,
+            deadline,
+            category,
+          })
+        ),
       }),
     }
   )

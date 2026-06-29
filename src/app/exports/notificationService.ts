@@ -14,5 +14,5 @@ export const notificationService = {
   },
   async markAsRead(notificationId: string) {
     return { success: true };
-  }
+  },
 };

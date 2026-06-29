@@ -99,7 +99,11 @@ function monthRangeLabel(from: Date, to: Date): string {
   return `${format(from, 'MMM yyyy')} - ${format(to, 'MMM yyyy')}`;
 }
 
-function buildPerformanceSubtitle(kind: ReportPeriodKind, from: Date | null, to: Date | null): string {
+function buildPerformanceSubtitle(
+  kind: ReportPeriodKind,
+  from: Date | null,
+  to: Date | null
+): string {
   if (!from || !to) return 'Performance Report — All Time';
 
   if (kind === 'this_month' || kind === 'last_month') {
@@ -117,11 +121,7 @@ function buildPerformanceSubtitle(kind: ReportPeriodKind, from: Date | null, to:
   return `Performance Report from ${format(from, 'dd MMM yyyy')} to ${format(to, 'dd MMM yyyy')}`;
 }
 
-function buildFileNameSuffix(
-  kind: ReportPeriodKind,
-  from: Date | null,
-  to: Date | null,
-): string {
+function buildFileNameSuffix(kind: ReportPeriodKind, from: Date | null, to: Date | null): string {
   const meta = PERIOD_META[kind];
 
   if (!from || !to) {
@@ -135,7 +135,10 @@ function buildFileNameSuffix(
       return `${meta.filePrefix}_${monthYear(from)}`;
     case 'last_3_months':
     case 'last_6_months':
-      return `${meta.filePrefix}_${format(from, 'MMM')}-${format(to, 'MMM yyyy')}`.replace(/\s/g, '');
+      return `${meta.filePrefix}_${format(from, 'MMM')}-${format(to, 'MMM yyyy')}`.replace(
+        /\s/g,
+        ''
+      );
     case 'this_year':
       return `${meta.filePrefix}_${format(from, 'yyyy')}`;
     case 'custom_range':
@@ -177,7 +180,10 @@ function detectPeriodKind(from: Date, to: Date, reference: Date): ReportPeriodKi
   const yearStart = startOfDay(startOfYear(reference));
   const yearEnd = startOfDay(endOfYear(reference));
 
-  if (fromDay.getTime() === lastMonthStart.getTime() && toDay.getTime() === lastMonthEnd.getTime()) {
+  if (
+    fromDay.getTime() === lastMonthStart.getTime() &&
+    toDay.getTime() === lastMonthEnd.getTime()
+  ) {
     return 'last_month';
   }
 
@@ -204,7 +210,7 @@ function buildIdentity(
   kind: ReportPeriodKind,
   from: Date | null,
   to: Date | null,
-  generatedAt: Date,
+  generatedAt: Date
 ): ReportPeriodIdentity {
   const meta = PERIOD_META[kind];
   const generatedOnLabel = format(generatedAt, 'dd MMM yyyy');
@@ -228,7 +234,7 @@ function buildIdentity(
 /** Infer report period branding from exported trade dates */
 export function resolveReportIdentity(
   data: Record<string, unknown>[],
-  generatedAt: Date = new Date(),
+  generatedAt: Date = new Date()
 ): ReportPeriodIdentity {
   const range = computeReportDateRange(data);
 

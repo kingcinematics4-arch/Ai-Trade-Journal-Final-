@@ -126,7 +126,10 @@ export default function ProfileAvatar({ editable = false, size = 'xl' }: Profile
         <div
           className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/50 rounded-full transition-all duration-200 cursor-pointer group"
           onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           title="Change avatar"

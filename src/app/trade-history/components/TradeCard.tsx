@@ -71,13 +71,19 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
           <div>
             <p className="text-[11px] text-muted-foreground font-medium">Entry</p>
             <p className="text-sm font-semibold text-foreground font-tabular">
-              ${parseSafeNumber(trade.entry_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              $
+              {parseSafeNumber(trade.entry_price).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+              })}
             </p>
           </div>
           <div>
             <p className="text-[11px] text-muted-foreground font-medium">Exit</p>
             <p className="text-sm font-semibold text-foreground font-tabular">
-              ${parseSafeNumber(trade.exit_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              $
+              {parseSafeNumber(trade.exit_price).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+              })}
             </p>
           </div>
           <div>
@@ -124,8 +130,7 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
             </div>
             {allImages.length > 1 && (
               <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <ImageIcon size={10} />
-                +{allImages.length - 1} more
+                <ImageIcon size={10} />+{allImages.length - 1} more
               </span>
             )}
           </div>

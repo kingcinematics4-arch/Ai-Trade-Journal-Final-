@@ -108,14 +108,19 @@ export interface ComplianceReportData {
  * Helper to generate a deterministic UUID-like string if none exists.
  */
 function generateReportId(): string {
-  return 'COMP-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+  return (
+    'COMP-' +
+    Math.random().toString(36).substring(2, 10).toUpperCase() +
+    '-' +
+    Date.now().toString(36).toUpperCase()
+  );
 }
 
 /**
  * Filter out subjective data and strictly map to a ComplianceTrade object.
  */
 function mapToComplianceLedger(data: any[]): ComplianceTrade[] {
-  return data.map(trade => {
+  return data.map((trade) => {
     return {
       tradeId: trade.id || 'N/A',
       assetSymbol: trade.symbol || trade.asset_name || 'N/A',
@@ -143,7 +148,7 @@ async function generateDataHash(dataString: string): Promise<string> {
     const data = encoder.encode(dataString);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
   return 'UNABLE_TO_GENERATE_HASH_CLIENTSIDE';
 }
@@ -153,7 +158,7 @@ async function generateDataHash(dataString: string): Promise<string> {
  */
 function countTradingDays(ledger: ComplianceTrade[]): number {
   const days = new Set<string>();
-  ledger.forEach(t => {
+  ledger.forEach((t) => {
     try {
       const d = new Date(t.entryDate);
       if (!isNaN(d.getTime())) {
@@ -187,7 +192,7 @@ export async function buildComplianceReportData(
 
   const strategyMap: Record<string, ComplianceStrategyStats> = {};
 
-  ledger.forEach(t => {
+  ledger.forEach((t) => {
     if (t.netPnl > 0) {
       wins++;
       grossProfit += t.netPnl;
@@ -197,7 +202,7 @@ export async function buildComplianceReportData(
       maxLoss = Math.min(maxLoss, t.netPnl);
     }
 
-    totalVolume += (t.quantity * t.entryPrice);
+    totalVolume += t.quantity * t.entryPrice;
     totalFees += t.fees;
 
     // Strategy Aggregation
@@ -223,21 +228,23 @@ export async function buildComplianceReportData(
   const totalTrades = ledger.length;
   const netPnl = grossProfit - grossLoss;
   const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
-  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
   const averageTrade = totalTrades > 0 ? netPnl / totalTrades : 0;
   const tradingDays = countTradingDays(ledger);
   const averageDailyPnl = tradingDays > 0 ? netPnl / tradingDays : 0;
 
-  const strategies = Object.values(strategyMap).map(s => {
-    const sWins = ledger.filter(t => t.strategyName === s.strategyName && t.netPnl > 0).length;
+  const strategies = Object.values(strategyMap).map((s) => {
+    const sWins = ledger.filter((t) => t.strategyName === s.strategyName && t.netPnl > 0).length;
     s.winRate = s.tradeCount > 0 ? (sWins / s.tradeCount) * 100 : 0;
     s.averageTrade = s.tradeCount > 0 ? s.netPnl / s.tradeCount : 0;
-    s.profitFactor = s.grossLoss > 0 ? s.grossProfit / s.grossLoss : (s.grossProfit > 0 ? Infinity : 0);
+    s.profitFactor =
+      s.grossLoss > 0 ? s.grossProfit / s.grossLoss : s.grossProfit > 0 ? Infinity : 0;
     return s;
   });
 
   const periodStart = ledger.length > 0 ? ledger[0].entryDate : new Date().toISOString();
-  const periodEnd = ledger.length > 0 ? ledger[ledger.length - 1].entryDate : new Date().toISOString();
+  const periodEnd =
+    ledger.length > 0 ? ledger[ledger.length - 1].entryDate : new Date().toISOString();
 
   // Create hash payload based ONLY on the ledger to ensure consistent hashing
   const hashString = JSON.stringify(ledger);

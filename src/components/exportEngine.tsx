@@ -26,18 +26,18 @@ export async function exportData(
 
   if (exportFormat === 'xlsx') {
     return await exportProfessionalExcel(
-      data, 
-      context.tasks, 
-      context.goals, 
-      fileName, 
-      {}, 
+      data,
+      context.tasks,
+      context.goals,
+      fileName,
+      {},
       options.exportMode || 'single'
     );
   }
 
   if (exportFormat === 'pdf') {
-    return await exportProfessionalPdf(data, fileName, { 
-      pdfReportType: options.pdfReportType 
+    return await exportProfessionalPdf(data, fileName, {
+      pdfReportType: options.pdfReportType,
     });
   }
 
@@ -55,7 +55,11 @@ export async function exportData(
 
   if (exportFormat === 'compliance_report') {
     const { exportData } = await import('@/app/exports/exportEngine');
-    return await exportData(data, { fileName, format: 'compliance_report', complianceFormat: 'pdf' });
+    return await exportData(data, {
+      fileName,
+      format: 'compliance_report',
+      complianceFormat: 'pdf',
+    });
   }
 
   // Fallback for md and unsupported

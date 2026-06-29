@@ -20,7 +20,7 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
   doc.setFontSize(18);
   doc.setTextColor(...primaryColor);
   doc.text('COMPLIANCE & AUDIT REPORT', 14, cursorY);
-  
+
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...secondaryColor);
@@ -33,17 +33,27 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     theme: 'plain',
     styles: { fontSize: 9, cellPadding: 2 },
     body: [
-      ['Report ID:', data.metadata.reportId, 'Export Date:', format(new Date(data.metadata.exportTimestampUTC), 'yyyy-MM-dd HH:mm:ss')],
+      [
+        'Report ID:',
+        data.metadata.reportId,
+        'Export Date:',
+        format(new Date(data.metadata.exportTimestampUTC), 'yyyy-MM-dd HH:mm:ss'),
+      ],
       ['App Name:', data.metadata.appName, 'Time Zone:', data.metadata.timeZone],
       ['User ID:', data.metadata.userId, 'Account ID:', data.metadata.accountId],
-      ['Period Start:', format(new Date(data.metadata.reportingPeriodStart), 'yyyy-MM-dd'), 'Period End:', format(new Date(data.metadata.reportingPeriodEnd), 'yyyy-MM-dd')]
+      [
+        'Period Start:',
+        format(new Date(data.metadata.reportingPeriodStart), 'yyyy-MM-dd'),
+        'Period End:',
+        format(new Date(data.metadata.reportingPeriodEnd), 'yyyy-MM-dd'),
+      ],
     ],
     columnStyles: {
       0: { fontStyle: 'bold', cellWidth: 30 },
       1: { cellWidth: 60 },
       2: { fontStyle: 'bold', cellWidth: 30 },
-      3: { cellWidth: 60 }
-    }
+      3: { cellWidth: 60 },
+    },
   });
   cursorY = (doc as any).lastAutoTable.finalY + 10;
 
@@ -63,7 +73,7 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     body: [
       ['SHA-256 Checksum', data.dataIntegrity.exportChecksum],
       ['Record Count Verification', data.dataIntegrity.recordCountVerification.toString()],
-      ['Export Version', data.metadata.exportVersion]
+      ['Export Version', data.metadata.exportVersion],
     ],
   });
   cursorY = (doc as any).lastAutoTable.finalY + 10;
@@ -80,12 +90,39 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     styles: { fontSize: 9 },
     head: [['Metric', 'Value', 'Metric', 'Value']],
     body: [
-      ['Total Trades', data.accountSummary.totalTrades.toString(), 'Gross Profit', formatCurrency(data.accountSummary.grossProfit)],
-      ['Win Rate', formatPercentage(data.accountSummary.winRate), 'Gross Loss', formatCurrency(data.accountSummary.grossLoss)],
-      ['Profit Factor', data.accountSummary.profitFactor === Infinity ? 'Infinity' : data.accountSummary.profitFactor.toFixed(2), 'Total Volume', formatCurrency(data.accountSummary.totalVolume)],
-      ['Largest Win', formatCurrency(data.accountSummary.largestWin), 'Largest Loss', formatCurrency(data.accountSummary.largestLoss)],
-      ['Broker Fees', formatCurrency(data.feeAnalysis.brokerFees), 'Net Profit/Loss', formatCurrency(data.accountSummary.netPnl)]
-    ]
+      [
+        'Total Trades',
+        data.accountSummary.totalTrades.toString(),
+        'Gross Profit',
+        formatCurrency(data.accountSummary.grossProfit),
+      ],
+      [
+        'Win Rate',
+        formatPercentage(data.accountSummary.winRate),
+        'Gross Loss',
+        formatCurrency(data.accountSummary.grossLoss),
+      ],
+      [
+        'Profit Factor',
+        data.accountSummary.profitFactor === Infinity
+          ? 'Infinity'
+          : data.accountSummary.profitFactor.toFixed(2),
+        'Total Volume',
+        formatCurrency(data.accountSummary.totalVolume),
+      ],
+      [
+        'Largest Win',
+        formatCurrency(data.accountSummary.largestWin),
+        'Largest Loss',
+        formatCurrency(data.accountSummary.largestLoss),
+      ],
+      [
+        'Broker Fees',
+        formatCurrency(data.feeAnalysis.brokerFees),
+        'Net Profit/Loss',
+        formatCurrency(data.accountSummary.netPnl),
+      ],
+    ],
   });
   cursorY = (doc as any).lastAutoTable.finalY + 15;
 
@@ -100,14 +137,14 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
     styles: { fontSize: 9 },
     head: [['Strategy Name', 'Trade Count', 'Win Rate', 'Gross Profit', 'Gross Loss', 'Net P&L']],
-    body: data.strategies.map(s => [
+    body: data.strategies.map((s) => [
       s.strategyName,
       s.tradeCount.toString(),
       formatPercentage(s.winRate),
       formatCurrency(s.grossProfit),
       formatCurrency(s.grossLoss),
-      formatCurrency(s.netPnl)
-    ])
+      formatCurrency(s.netPnl),
+    ]),
   });
 
   // --- 3. Trading Activity Ledger ---
@@ -122,8 +159,10 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     theme: 'grid',
     headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontSize: 8 },
     styles: { fontSize: 7, cellPadding: 1.5 },
-    head: [['Trade ID', 'Date', 'Asset', 'Type', 'Qty', 'Entry', 'Exit', 'Gross P&L', 'Fees', 'Net P&L']],
-    body: data.ledger.map(t => [
+    head: [
+      ['Trade ID', 'Date', 'Asset', 'Type', 'Qty', 'Entry', 'Exit', 'Gross P&L', 'Fees', 'Net P&L'],
+    ],
+    body: data.ledger.map((t) => [
       (t.tradeId || 'N/A').substring(0, 8),
       format(new Date(t.entryDate), 'yyyy-MM-dd HH:mm'),
       t.assetSymbol,
@@ -133,8 +172,8 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
       formatCurrency(t.exitPrice),
       formatCurrency(t.grossPnl),
       formatCurrency(t.fees),
-      formatCurrency(t.netPnl)
-    ])
+      formatCurrency(t.netPnl),
+    ]),
   });
 
   // --- 9. Compliance Appendix ---
@@ -143,7 +182,7 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
   doc.setFontSize(14);
   doc.text('Compliance Appendix: Methodology & Definitions', 14, cursorY);
   cursorY += 10;
-  
+
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(0, 0, 0);
@@ -155,7 +194,7 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     '4. Profit Factor: Calculated as Gross Profit / Gross Loss.',
     '5. Date / Time: All timestamps are recorded and exported in UTC unless otherwise stated.',
     '',
-    'This document is generated factually from user-provided or broker-synced trade data. It is intended to serve as a robust record for accountants, auditors, tax professionals, and compliance reviews. This system makes no claims of legal validity without independent broker verification.'
+    'This document is generated factually from user-provided or broker-synced trade data. It is intended to serve as a robust record for accountants, auditors, tax professionals, and compliance reviews. This system makes no claims of legal validity without independent broker verification.',
   ];
 
   doc.text(appendixLines, 14, cursorY);
@@ -166,7 +205,12 @@ export function buildCompliancePdf(data: ComplianceReportData): jsPDF {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text(`Page ${i} of ${pageCount} | Report ID: ${data.metadata.reportId} | Generated: ${data.metadata.exportTimestampUTC}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+    doc.text(
+      `Page ${i} of ${pageCount} | Report ID: ${data.metadata.reportId} | Generated: ${data.metadata.exportTimestampUTC}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: 'center' }
+    );
   }
 
   return doc;

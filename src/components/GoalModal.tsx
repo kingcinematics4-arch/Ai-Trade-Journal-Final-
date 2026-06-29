@@ -73,13 +73,17 @@ export default function GoalModal({
 
           <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Goal Title</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                Goal Title
+              </label>
               <input
                 {...register('title', { required: 'Title is required' })}
                 placeholder="e.g., Complete 5 backtesting sessions"
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
               />
-              {errors.title && <p className="text-[10px] text-red-500 mt-1">{errors.title.message as string}</p>}
+              {errors.title && (
+                <p className="text-[10px] text-red-500 mt-1">{errors.title.message as string}</p>
+              )}
             </div>
 
             <div>
@@ -103,11 +107,22 @@ export default function GoalModal({
                 >
                   <Trash2 size={14} /> Delete
                 </button>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
 
               <div className="flex gap-3">
-                <button type="button" onClick={onClose} className="px-4 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-xl transition-colors">Cancel</button>
-                <button type="submit" className="btn-primary flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-xs font-bold text-muted-foreground hover:bg-muted rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-bold"
+                >
                   <Save size={14} /> {editingGoal ? 'Update' : 'Save'}
                 </button>
               </div>

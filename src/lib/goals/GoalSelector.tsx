@@ -10,7 +10,7 @@ interface GoalSelectorProps {
 }
 
 export default function GoalSelector({ value, onChange }: GoalSelectorProps) {
-  const activeGoals = useGoalsStore(state => state.getActiveGoals());
+  const activeGoals = useGoalsStore((state) => state.getActiveGoals());
 
   return (
     <div className="space-y-2">

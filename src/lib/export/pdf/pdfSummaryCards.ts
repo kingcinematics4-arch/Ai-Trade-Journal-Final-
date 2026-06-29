@@ -24,13 +24,7 @@ function toneColor(tone: string): Rgb {
   }
 }
 
-function drawPeriodBadge(
-  doc: jsPDF,
-  x: number,
-  y: number,
-  label: string,
-  color: Rgb,
-): void {
+function drawPeriodBadge(doc: jsPDF, x: number, y: number, label: string, color: Rgb): void {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   const paddingX = 4;
@@ -120,7 +114,10 @@ function drawReportPeriodCard(ctx: PdfDocumentContext, identity: ReportPeriodIde
   ctx.advance(cardHeight + PDF_LAYOUT.sectionGap);
 }
 
-function drawPerformanceSummaryDivider(ctx: PdfDocumentContext, identity: ReportPeriodIdentity): void {
+function drawPerformanceSummaryDivider(
+  ctx: PdfDocumentContext,
+  identity: ReportPeriodIdentity
+): void {
   const { doc } = ctx;
   const x = PDF_LAYOUT.marginX;
   const w = ctx.contentWidth;
@@ -151,7 +148,7 @@ function drawPerformanceSummaryDivider(ctx: PdfDocumentContext, identity: Report
 export function drawReportHeader(
   ctx: PdfDocumentContext,
   identity: ReportPeriodIdentity,
-  meta: ReportHeaderMeta,
+  meta: ReportHeaderMeta
 ): void {
   drawReportBanner(ctx, identity);
   drawReportPeriodCard(ctx, identity);
@@ -174,7 +171,7 @@ export function drawReportHeader(
   doc.text(
     `${meta.tradeCount} trade${meta.tradeCount === 1 ? '' : 's'} · ${meta.fieldCount} exported field${meta.fieldCount === 1 ? '' : 's'}`,
     x,
-    ctx.y,
+    ctx.y
   );
 
   ctx.advance(8);
@@ -209,7 +206,7 @@ export function drawSummaryCard(
   height: number,
   label: string,
   value: string,
-  tone: string,
+  tone: string
 ): void {
   doc.setFillColor(...PDF_THEME.cardElevated);
   doc.setDrawColor(...PDF_THEME.border);
@@ -231,7 +228,7 @@ export function drawSummaryCard(
 /** 2-column grid of summary KPI cards */
 export function drawSummaryCardGrid(
   ctx: PdfDocumentContext,
-  metrics: { label: string; value: string; tone: string }[],
+  metrics: { label: string; value: string; tone: string }[]
 ): void {
   const cols = 2;
   const gap = PDF_LAYOUT.summaryCardGap;

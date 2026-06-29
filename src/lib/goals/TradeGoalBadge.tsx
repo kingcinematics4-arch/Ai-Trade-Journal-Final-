@@ -5,8 +5,8 @@ import { useGoalsStore } from '@/stores/useGoalsStore';
 import { Target } from 'lucide-react';
 
 export default function TradeGoalBadge({ goalId }: { goalId?: string }) {
-  const goals = useGoalsStore(state => state.goals);
-  const assignedGoal = goals.find(g => g.id === goalId);
+  const goals = useGoalsStore((state) => state.goals);
+  const assignedGoal = goals.find((g) => g.id === goalId);
 
   if (!assignedGoal) return null;
 

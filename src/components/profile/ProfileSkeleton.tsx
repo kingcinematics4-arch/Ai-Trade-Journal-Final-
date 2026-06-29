@@ -5,12 +5,7 @@ import React from 'react';
 // ─── Page-level skeleton ───────────────────────────────────────────────────────
 
 function Bone({ className = '' }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse rounded-lg bg-white/[0.06] ${className}`}
-      aria-hidden
-    />
-  );
+  return <div className={`animate-pulse rounded-lg bg-white/[0.06] ${className}`} aria-hidden />;
 }
 
 export function ProfilePageSkeleton() {
@@ -31,7 +26,10 @@ export function ProfilePageSkeleton() {
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-4 mt-8">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-4 space-y-2">
+            <div
+              key={i}
+              className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-4 space-y-2"
+            >
               <Bone className="h-6 w-16" />
               <Bone className="h-3 w-20" />
             </div>

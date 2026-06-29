@@ -2,16 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Activity, 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
-  Flame, 
-  Percent, 
-  Scale, 
-  Trophy, 
-  AlertTriangle 
+import {
+  Activity,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  Flame,
+  Percent,
+  Scale,
+  Trophy,
+  AlertTriangle,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/trades/analytics';
 import type { AdvancedAnalytics } from '@/lib/trades/analyticsEngine';
@@ -57,9 +57,19 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       label: 'Profit Factor',
       value: stats.profitFactor >= 10 ? '10.0+' : stats.profitFactor.toFixed(2),
       icon: <Scale size={18} />,
-      iconBg: stats.profitFactor >= 1.5 ? 'bg-green-500/15 text-green-400' : stats.profitFactor >= 1.0 ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400',
+      iconBg:
+        stats.profitFactor >= 1.5
+          ? 'bg-green-500/15 text-green-400'
+          : stats.profitFactor >= 1.0
+            ? 'bg-amber-500/15 text-amber-400'
+            : 'bg-red-500/15 text-red-400',
       gradient: stats.profitFactor >= 1.0 ? 'gradient-profit' : 'gradient-loss', // Keep gradient
-      valueColor: stats.profitFactor >= 1.5 ? 'text-green-400' : stats.profitFactor >= 1.0 ? 'text-amber-400' : 'text-red-400',
+      valueColor:
+        stats.profitFactor >= 1.5
+          ? 'text-green-400'
+          : stats.profitFactor >= 1.0
+            ? 'text-amber-400'
+            : 'text-red-400',
     },
     {
       label: 'Average R-Ratio',
@@ -108,7 +118,10 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       icon: <Flame size={18} />,
       iconBg: 'bg-amber-500/15 text-amber-400',
       gradient: 'gradient-warning', // Keep gradient
-      subtitle: stats.currentStreak.type === 'win' ? `Current: ${stats.currentStreak.count} active` : 'No active streak',
+      subtitle:
+        stats.currentStreak.type === 'win'
+          ? `Current: ${stats.currentStreak.count} active`
+          : 'No active streak',
     },
     {
       label: 'Losing Streak',
@@ -116,7 +129,10 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       icon: <Flame size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
       gradient: 'gradient-loss', // Keep gradient
-      subtitle: stats.currentStreak.type === 'loss' ? `Current: ${stats.currentStreak.count} active` : 'No active streak',
+      subtitle:
+        stats.currentStreak.type === 'loss'
+          ? `Current: ${stats.currentStreak.count} active`
+          : 'No active streak',
     },
   ];
 
@@ -136,7 +152,9 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
             </div>
           </div>
           <p className="text-xs text-muted-foreground font-medium mb-1 truncate">{card.label}</p>
-          <p className={`text-lg font-bold font-tabular truncate ${card.valueColor || 'text-foreground'}`}>
+          <p
+            className={`text-lg font-bold font-tabular truncate ${card.valueColor || 'text-foreground'}`}
+          >
             {card.value}
           </p>
           {card.subtitle && (

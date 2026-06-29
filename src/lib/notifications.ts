@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase';
 
-export type NotificationType = 
-  | 'trade' 
-  | 'system' 
-  | 'achievement' 
-  | 'warning' 
-  | 'analytics' 
-  | 'ai' 
+export type NotificationType =
+  | 'trade'
+  | 'system'
+  | 'achievement'
+  | 'warning'
+  | 'analytics'
+  | 'ai'
   | 'admin';
 
 export interface DbNotification {
@@ -42,7 +42,7 @@ interface CreateNotificationParams {
 
 export async function createNotification(params: CreateNotificationParams) {
   const supabase = createClient();
-  
+
   const insertData: DbNotificationInsert = {
     user_id: params.userId,
     title: params.title,

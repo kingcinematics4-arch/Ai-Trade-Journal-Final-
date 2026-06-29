@@ -3,16 +3,16 @@ import { format } from 'date-fns';
 import type { ComplianceReportData } from './complianceEngine';
 
 // Brand colors - exact values from design spec
-const NAVY = '0F172A';      // #0F172A
-const INDIGO = '4338CA';    // #4338CA
-const BLUE = '2563EB';      // #2563EB
+const NAVY = '0F172A'; // #0F172A
+const INDIGO = '4338CA'; // #4338CA
+const BLUE = '2563EB'; // #2563EB
 const WHITE = 'FFFFFF';
-const LIGHT_BG = 'F8FAFC';  // #F8FAFC
-const PROFIT_GREEN = '16A34A';  // #16A34A
-const LOSS_RED = 'DC2626';      // #DC2626
-const NEUTRAL_BLUE = '2563EB';  // #2563EB
-const DARK_GRAY = '374151';     // #374151
-const MEDIUM_GRAY = '64748B';   // #64748B
+const LIGHT_BG = 'F8FAFC'; // #F8FAFC
+const PROFIT_GREEN = '16A34A'; // #16A34A
+const LOSS_RED = 'DC2626'; // #DC2626
+const NEUTRAL_BLUE = '2563EB'; // #2563EB
+const DARK_GRAY = '374151'; // #374151
+const MEDIUM_GRAY = '64748B'; // #64748B
 const BORDER_GRAY = 'D1D5DB';
 const HEADER_FONT_SIZE = 14;
 const BODY_FONT_SIZE = 10;
@@ -23,7 +23,9 @@ const SMALL_FONT_SIZE = 9;
  * Overview, Executive Summary, Account Information, Trading Ledger, Strategy Analysis,
  * Financial Summary, Audit Trail, Data Integrity.
  */
-export async function exportAnnualComplianceReportExcel(data: ComplianceReportData): Promise<ExcelJS.Workbook> {
+export async function exportAnnualComplianceReportExcel(
+  data: ComplianceReportData
+): Promise<ExcelJS.Workbook> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'AI Trade Journal';
   workbook.title = 'Annual Compliance Report';
@@ -97,10 +99,7 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   overview.properties.tabColor = { argb: NAVY };
 
   // Columns: A=Label, B=Value
-  overview.columns = [
-    { width: 35 },
-    { width: 55 },
-  ];
+  overview.columns = [{ width: 35 }, { width: 55 }];
 
   // Brand header
   const brandRow1 = overview.addRow(['ANNUAL COMPLIANCE REPORT']);
@@ -126,14 +125,29 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
     ['User ID', data.metadata.userId || 'N/A'],
     ['Account ID', data.metadata.accountId || 'N/A'],
     ['Export Version', data.metadata.exportVersion],
-    ['Reporting Period Start', data.metadata.reportingPeriodStart ? format(new Date(data.metadata.reportingPeriodStart), 'yyyy-MM-dd') : 'N/A'],
-    ['Reporting Period End', data.metadata.reportingPeriodEnd ? format(new Date(data.metadata.reportingPeriodEnd), 'yyyy-MM-dd') : 'N/A'],
+    [
+      'Reporting Period Start',
+      data.metadata.reportingPeriodStart
+        ? format(new Date(data.metadata.reportingPeriodStart), 'yyyy-MM-dd')
+        : 'N/A',
+    ],
+    [
+      'Reporting Period End',
+      data.metadata.reportingPeriodEnd
+        ? format(new Date(data.metadata.reportingPeriodEnd), 'yyyy-MM-dd')
+        : 'N/A',
+    ],
   ];
 
   metaRows.forEach((rowData, idx) => {
     const row = overview.addRow(rowData);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
   });
 
   // Financial Summary section
@@ -142,30 +156,72 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   addSectionHeader(overview, finStartRow, 'FINANCIAL SUMMARY');
 
   const finSummaryRows = [
-    ['Gross Profit', `$${(data.financialSummary.grossProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`],
-    ['Gross Loss', `($${(data.financialSummary.grossLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })})`],
-    ['Net Profit', `$${(data.financialSummary.netProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`],
-    ['Total Fees', `$${(data.financialSummary.totalFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`],
-    ['Net After Fees', `$${(data.financialSummary.netAfterFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`],
-    ['Average Trade', `$${(data.financialSummary.averageTrade || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`],
-    ['Profit Factor', data.financialSummary.profitFactor === Infinity ? '∞' : (data.financialSummary.profitFactor || 0).toFixed(2)],
+    [
+      'Gross Profit',
+      `$${(data.financialSummary.grossProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    ],
+    [
+      'Gross Loss',
+      `($${(data.financialSummary.grossLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })})`,
+    ],
+    [
+      'Net Profit',
+      `$${(data.financialSummary.netProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    ],
+    [
+      'Total Fees',
+      `$${(data.financialSummary.totalFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    ],
+    [
+      'Net After Fees',
+      `$${(data.financialSummary.netAfterFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    ],
+    [
+      'Average Trade',
+      `$${(data.financialSummary.averageTrade || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    ],
+    [
+      'Profit Factor',
+      data.financialSummary.profitFactor === Infinity
+        ? '∞'
+        : (data.financialSummary.profitFactor || 0).toFixed(2),
+    ],
     ['Win Rate', `${(data.financialSummary.winRate || 0).toFixed(2)}%`],
   ];
 
   finSummaryRows.forEach((rowData, idx) => {
     const row = overview.addRow(rowData);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
 
     // Color code values
     const label = rowData[0];
     if (['Gross Profit', 'Net Profit', 'Net After Fees'].includes(label)) {
       const val = parseFloat(rowData[1].replace(/[$,()]/g, '') || '0');
-      row.getCell(2).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: val >= 0 ? PROFIT_GREEN : LOSS_RED } };
+      row.getCell(2).font = {
+        bold: true,
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: val >= 0 ? PROFIT_GREEN : LOSS_RED },
+      };
     } else if (label === 'Gross Loss') {
-      row.getCell(2).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: LOSS_RED } };
+      row.getCell(2).font = {
+        bold: true,
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: LOSS_RED },
+      };
     } else if (['Total Fees', 'Average Trade', 'Profit Factor', 'Win Rate'].includes(label)) {
-      row.getCell(2).font = { size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: NEUTRAL_BLUE } };
+      row.getCell(2).font = {
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: NEUTRAL_BLUE },
+      };
     }
   });
 
@@ -178,13 +234,23 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
     ['SHA-256 Hash', data.dataIntegrity.sha256Hash || 'N/A'],
     ['Checksum', data.dataIntegrity.checksum || 'N/A'],
     ['Record Verification Count', (data.dataIntegrity.recordVerificationCount || 0).toString()],
-    ['Generation Timestamp', data.dataIntegrity.generationTimestamp ? format(new Date(data.dataIntegrity.generationTimestamp), 'yyyy-MM-dd HH:mm:ss') + ' UTC' : 'N/A'],
+    [
+      'Generation Timestamp',
+      data.dataIntegrity.generationTimestamp
+        ? format(new Date(data.dataIntegrity.generationTimestamp), 'yyyy-MM-dd HH:mm:ss') + ' UTC'
+        : 'N/A',
+    ],
   ];
 
   integrityRows.forEach((rowData, idx) => {
     const row = overview.addRow(rowData);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
   });
 
   // Freeze panes
@@ -196,13 +262,7 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   const execSummary = workbook.addWorksheet('Executive Summary');
   execSummary.properties.tabColor = { argb: INDIGO };
 
-  const execCols = [
-    { width: 25 },
-    { width: 25 },
-    { width: 25 },
-    { width: 25 },
-    { width: 25 },
-  ];
+  const execCols = [{ width: 25 }, { width: 25 }, { width: 25 }, { width: 25 }, { width: 25 }];
   execSummary.columns = execCols;
 
   // Brand header
@@ -232,37 +292,100 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
 
   const metricsLeft = [
     { label: 'Total Trades', value: data.accountSummary.totalTrades.toString(), color: NAVY },
-    { label: 'Gross Profit', value: `$${(data.accountSummary.grossProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: PROFIT_GREEN },
-    { label: 'Gross Loss', value: `$${(data.accountSummary.grossLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: LOSS_RED },
-    { label: 'Net P&L', value: `$${(data.accountSummary.netPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: data.accountSummary.netPnl >= 0 ? PROFIT_GREEN : LOSS_RED },
-    { label: 'Profit Factor', value: data.accountSummary.profitFactor === Infinity ? '∞' : (data.accountSummary.profitFactor || 0).toFixed(2), color: INDIGO },
+    {
+      label: 'Gross Profit',
+      value: `$${(data.accountSummary.grossProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      color: PROFIT_GREEN,
+    },
+    {
+      label: 'Gross Loss',
+      value: `$${(data.accountSummary.grossLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      color: LOSS_RED,
+    },
+    {
+      label: 'Net P&L',
+      value: `$${(data.accountSummary.netPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      color: data.accountSummary.netPnl >= 0 ? PROFIT_GREEN : LOSS_RED,
+    },
+    {
+      label: 'Profit Factor',
+      value:
+        data.accountSummary.profitFactor === Infinity
+          ? '∞'
+          : (data.accountSummary.profitFactor || 0).toFixed(2),
+      color: INDIGO,
+    },
   ];
 
   const metricsRight = [
-    { label: 'Win Rate', value: `${(data.accountSummary.winRate || 0).toFixed(2)}%`, color: NEUTRAL_BLUE },
-    { label: 'Average Trade', value: `$${(data.accountSummary.averageTrade || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: DARK_GRAY },
-    { label: 'Largest Win', value: `$${(data.accountSummary.largestWin || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: PROFIT_GREEN },
-    { label: 'Largest Loss', value: `$${(data.accountSummary.largestLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: LOSS_RED },
-    { label: 'Trading Days', value: (data.accountSummary.tradingDays || 0).toString(), color: DARK_GRAY },
+    {
+      label: 'Win Rate',
+      value: `${(data.accountSummary.winRate || 0).toFixed(2)}%`,
+      color: NEUTRAL_BLUE,
+    },
+    {
+      label: 'Average Trade',
+      value: `$${(data.accountSummary.averageTrade || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      color: DARK_GRAY,
+    },
+    {
+      label: 'Largest Win',
+      value: `$${(data.accountSummary.largestWin || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      color: PROFIT_GREEN,
+    },
+    {
+      label: 'Largest Loss',
+      value: `$${(data.accountSummary.largestLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      color: LOSS_RED,
+    },
+    {
+      label: 'Trading Days',
+      value: (data.accountSummary.tradingDays || 0).toString(),
+      color: DARK_GRAY,
+    },
   ];
 
   // Additional row for Avg Daily P&L
-  const extraLeft = { label: 'Avg Daily P&L', value: `$${(data.accountSummary.averageDailyPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: INDIGO };
+  const extraLeft = {
+    label: 'Avg Daily P&L',
+    value: `$${(data.accountSummary.averageDailyPnl || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+    color: INDIGO,
+  };
 
   metricsLeft.forEach((m, idx) => {
     const rowIdx = 5 + idx;
     const row = execSummary.getRow(rowIdx);
     row.getCell(1).value = m.label;
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
     row.getCell(2).value = m.value;
-    row.getCell(2).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: m.color } };
+    row.getCell(2).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: m.color },
+    };
 
     if (metricsRight[idx]) {
       const mr = metricsRight[idx];
       row.getCell(3).value = mr.label;
-      row.getCell(3).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+      row.getCell(3).font = {
+        bold: true,
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: DARK_GRAY },
+      };
       row.getCell(4).value = mr.value;
-      row.getCell(4).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: mr.color } };
+      row.getCell(4).font = {
+        bold: true,
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: mr.color },
+      };
     }
 
     styleDataRow(row, idx, 5);
@@ -273,9 +396,19 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   const extraRowIdx = 5 + metricsLeft.length;
   const extraRow = execSummary.getRow(extraRowIdx);
   extraRow.getCell(1).value = extraLeft.label;
-  extraRow.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+  extraRow.getCell(1).font = {
+    bold: true,
+    size: BODY_FONT_SIZE,
+    name: 'Calibri',
+    color: { argb: DARK_GRAY },
+  };
   extraRow.getCell(2).value = extraLeft.value;
-  extraRow.getCell(2).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: extraLeft.color } };
+  extraRow.getCell(2).font = {
+    bold: true,
+    size: BODY_FONT_SIZE,
+    name: 'Calibri',
+    color: { argb: extraLeft.color },
+  };
   styleDataRow(extraRow, 0, 5);
   extraRow.height = 22;
 
@@ -286,10 +419,7 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   // ===================================================================
   const acctInfo = workbook.addWorksheet('Account Information');
   acctInfo.properties.tabColor = { argb: NAVY };
-  acctInfo.columns = [
-    { width: 30 },
-    { width: 60 },
-  ];
+  acctInfo.columns = [{ width: 30 }, { width: 60 }];
 
   const acctBrand = acctInfo.addRow(['ACCOUNT INFORMATION']);
   applyBrandHeader(acctBrand, 35);
@@ -304,7 +434,10 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   const acctFields = [
     ['Account ID', data.accountInfo.accountId || 'N/A'],
     ['User ID', data.accountInfo.userId || 'N/A'],
-    ['Export Timestamp', `${format(new Date(data.accountInfo.exportTimestamp), 'yyyy-MM-dd HH:mm:ss')} UTC`],
+    [
+      'Export Timestamp',
+      `${format(new Date(data.accountInfo.exportTimestamp), 'yyyy-MM-dd HH:mm:ss')} UTC`,
+    ],
     ['Reporting Period', data.accountInfo.reportingPeriod],
     ['Time Zone', data.accountInfo.timeZone || 'UTC'],
     ['Report Version', data.accountInfo.reportVersion],
@@ -314,7 +447,12 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   acctFields.forEach((rowData, idx) => {
     const row = acctInfo.addRow(rowData);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
   });
 
   acctInfo.views = [{ state: 'frozen', xSplit: 0, ySplit: 4 }];
@@ -386,13 +524,23 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
     // Color side
     const side = (t.positionType || '').toUpperCase();
     if (side === 'BUY' || side === 'LONG') {
-      row.getCell('side').font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: PROFIT_GREEN } };
+      row.getCell('side').font = {
+        bold: true,
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: PROFIT_GREEN },
+      };
     } else if (side === 'SELL' || side === 'SHORT') {
-      row.getCell('side').font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: LOSS_RED } };
+      row.getCell('side').font = {
+        bold: true,
+        size: BODY_FONT_SIZE,
+        name: 'Calibri',
+        color: { argb: LOSS_RED },
+      };
     }
 
     // Right-align numeric columns
-    ['quantity', 'entryPrice', 'exitPrice', 'fees', 'netPnl'].forEach(key => {
+    ['quantity', 'entryPrice', 'exitPrice', 'fees', 'netPnl'].forEach((key) => {
       row.getCell(key).alignment = { horizontal: 'right', vertical: 'middle' };
     });
   });
@@ -460,7 +608,12 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   } else {
     const noDataRow = strat.addRow(['No strategy data available for the reporting period.']);
     strat.mergeCells('A4:F4');
-    noDataRow.font = { italic: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: MEDIUM_GRAY } };
+    noDataRow.font = {
+      italic: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: MEDIUM_GRAY },
+    };
   }
 
   strat.views = [{ state: 'frozen', xSplit: 1, ySplit: 3 }];
@@ -475,10 +628,7 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   const finSum = workbook.addWorksheet('Financial Summary');
   finSum.properties.tabColor = { argb: NAVY };
 
-  finSum.columns = [
-    { width: 35 },
-    { width: 25 },
-  ];
+  finSum.columns = [{ width: 35 }, { width: 25 }];
 
   const finBrand = finSum.addRow(['ANNUAL COMPLIANCE REPORT — FINANCIAL SUMMARY']);
   applyBrandHeader(finBrand, 30);
@@ -490,29 +640,77 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   addSectionHeader(finSum, 4, 'FINANCIAL METRIC');
 
   const finDataRows = [
-    { label: 'Gross Profit', value: `$${(data.financialSummary.grossProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, type: 'positive' },
-    { label: 'Gross Loss', value: `($${(data.financialSummary.grossLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })})`, type: 'negative' },
-    { label: 'Net Profit', value: `$${(data.financialSummary.netProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, type: data.financialSummary.netProfit >= 0 ? 'positive' : 'negative' },
-    { label: 'Total Fees', value: `$${(data.financialSummary.totalFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, type: 'neutral' },
-    { label: 'Net After Fees', value: `$${(data.financialSummary.netAfterFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, type: data.financialSummary.netAfterFees >= 0 ? 'positive' : 'negative' },
-    { label: 'Average Trade', value: `$${(data.financialSummary.averageTrade || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, type: 'neutral' },
-    { label: 'Profit Factor', value: data.financialSummary.profitFactor === Infinity ? '∞' : (data.financialSummary.profitFactor || 0).toFixed(2), type: 'neutral' },
-    { label: 'Win Rate', value: `${(data.financialSummary.winRate || 0).toFixed(2)}%`, type: 'neutral' },
+    {
+      label: 'Gross Profit',
+      value: `$${(data.financialSummary.grossProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      type: 'positive',
+    },
+    {
+      label: 'Gross Loss',
+      value: `($${(data.financialSummary.grossLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })})`,
+      type: 'negative',
+    },
+    {
+      label: 'Net Profit',
+      value: `$${(data.financialSummary.netProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      type: data.financialSummary.netProfit >= 0 ? 'positive' : 'negative',
+    },
+    {
+      label: 'Total Fees',
+      value: `$${(data.financialSummary.totalFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      type: 'neutral',
+    },
+    {
+      label: 'Net After Fees',
+      value: `$${(data.financialSummary.netAfterFees || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      type: data.financialSummary.netAfterFees >= 0 ? 'positive' : 'negative',
+    },
+    {
+      label: 'Average Trade',
+      value: `$${(data.financialSummary.averageTrade || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      type: 'neutral',
+    },
+    {
+      label: 'Profit Factor',
+      value:
+        data.financialSummary.profitFactor === Infinity
+          ? '∞'
+          : (data.financialSummary.profitFactor || 0).toFixed(2),
+      type: 'neutral',
+    },
+    {
+      label: 'Win Rate',
+      value: `${(data.financialSummary.winRate || 0).toFixed(2)}%`,
+      type: 'neutral',
+    },
   ];
 
   const getColor = (type: string) => {
     switch (type) {
-      case 'positive': return PROFIT_GREEN;
-      case 'negative': return LOSS_RED;
-      default: return NEUTRAL_BLUE;
+      case 'positive':
+        return PROFIT_GREEN;
+      case 'negative':
+        return LOSS_RED;
+      default:
+        return NEUTRAL_BLUE;
     }
   };
 
   finDataRows.forEach((rowData, idx) => {
     const row = finSum.addRow([rowData.label, rowData.value]);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
-    row.getCell(2).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: getColor(rowData.type) } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
+    row.getCell(2).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: getColor(rowData.type) },
+    };
     row.getCell(2).alignment = { horizontal: 'right', vertical: 'middle' };
     row.getCell(2).numFmt = '#,##0.00';
   });
@@ -525,10 +723,7 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   const audit = workbook.addWorksheet('Audit Trail');
   audit.properties.tabColor = { argb: NAVY };
 
-  audit.columns = [
-    { width: 30 },
-    { width: 60 },
-  ];
+  audit.columns = [{ width: 30 }, { width: 60 }];
 
   const auditBrand = audit.addRow(['ANNUAL COMPLIANCE REPORT — AUDIT TRAIL']);
   applyBrandHeader(auditBrand, 30);
@@ -540,21 +735,39 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   addSectionHeader(audit, 4, 'AUDIT ATTRIBUTE');
 
   const auditRows = [
-    ['Export Timestamp', format(new Date(data.auditTrail.exportTimestamp), 'yyyy-MM-dd HH:mm:ss') + ' UTC'],
+    [
+      'Export Timestamp',
+      format(new Date(data.auditTrail.exportTimestamp), 'yyyy-MM-dd HH:mm:ss') + ' UTC',
+    ],
     ['Record Count', (data.auditTrail.recordCount || data.ledger.length).toString()],
     ['Account ID', data.auditTrail.accountId || 'N/A'],
     ['User ID', data.auditTrail.userId || 'N/A'],
     ['Export Version', data.auditTrail.exportVersion],
     ['Report ID', data.auditTrail.reportId],
     ['Data Source', data.auditTrail.dataSource],
-    ['Record Created', data.auditTrail.recordCreationTimestamp ? format(new Date(data.auditTrail.recordCreationTimestamp), 'yyyy-MM-dd HH:mm:ss') : 'N/A'],
-    ['Last Modified', data.auditTrail.recordModificationTimestamp ? format(new Date(data.auditTrail.recordModificationTimestamp), 'yyyy-MM-dd HH:mm:ss') : 'N/A'],
+    [
+      'Record Created',
+      data.auditTrail.recordCreationTimestamp
+        ? format(new Date(data.auditTrail.recordCreationTimestamp), 'yyyy-MM-dd HH:mm:ss')
+        : 'N/A',
+    ],
+    [
+      'Last Modified',
+      data.auditTrail.recordModificationTimestamp
+        ? format(new Date(data.auditTrail.recordModificationTimestamp), 'yyyy-MM-dd HH:mm:ss')
+        : 'N/A',
+    ],
   ];
 
   auditRows.forEach((rowData, idx) => {
     const row = audit.addRow(rowData);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
   });
 
   audit.views = [{ state: 'frozen', xSplit: 0, ySplit: 4 }];
@@ -565,10 +778,7 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
   const di = workbook.addWorksheet('Data Integrity');
   di.properties.tabColor = { argb: INDIGO };
 
-  di.columns = [
-    { width: 35 },
-    { width: 70 },
-  ];
+  di.columns = [{ width: 35 }, { width: 70 }];
 
   const diBrand = di.addRow(['ANNUAL COMPLIANCE REPORT — DATA INTEGRITY']);
   applyBrandHeader(diBrand, 30);
@@ -583,13 +793,23 @@ export async function exportAnnualComplianceReportExcel(data: ComplianceReportDa
     ['SHA-256 Hash', data.dataIntegrity.sha256Hash || 'N/A'],
     ['Checksum', data.dataIntegrity.checksum || 'N/A'],
     ['Record Verification Count', (data.dataIntegrity.recordVerificationCount || 0).toString()],
-    ['Generation Timestamp', data.dataIntegrity.generationTimestamp ? format(new Date(data.dataIntegrity.generationTimestamp), 'yyyy-MM-dd HH:mm:ss') + ' UTC' : 'N/A'],
+    [
+      'Generation Timestamp',
+      data.dataIntegrity.generationTimestamp
+        ? format(new Date(data.dataIntegrity.generationTimestamp), 'yyyy-MM-dd HH:mm:ss') + ' UTC'
+        : 'N/A',
+    ],
   ];
 
   diRows.forEach((rowData, idx) => {
     const row = di.addRow(rowData);
     styleDataRow(row, idx, 2);
-    row.getCell(1).font = { bold: true, size: BODY_FONT_SIZE, name: 'Calibri', color: { argb: DARK_GRAY } };
+    row.getCell(1).font = {
+      bold: true,
+      size: BODY_FONT_SIZE,
+      name: 'Calibri',
+      color: { argb: DARK_GRAY },
+    };
     // Allow text wrap for long hashes
     row.getCell(2).alignment = { wrapText: true, vertical: 'middle' };
   });

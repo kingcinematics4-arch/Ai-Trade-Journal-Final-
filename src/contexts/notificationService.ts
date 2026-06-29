@@ -26,7 +26,7 @@ export const notificationService = {
       .select('*')
       .eq('user_id', userId)
       .single();
-    
+
     if (error && error.code !== 'PGRST116') throw error;
     return data as NotificationSettings | null;
   },
@@ -37,7 +37,7 @@ export const notificationService = {
       .from('notification_settings')
       .update({ ...settings, updated_at: new Date().toISOString() })
       .eq('user_id', userId);
-    
+
     if (error) throw error;
   },
 
@@ -46,26 +46,41 @@ export const notificationService = {
     if (!settings.notifications_enabled || settings.do_not_disturb) return false;
 
     switch (type) {
-      case 'trade': return settings.trade_alerts;
-      case 'analytics': return settings.pnl_alerts;
-      case 'warning': return settings.security_alerts;
-      case 'system': return settings.system_updates;
-      case 'achievement': return settings.activity_alerts;
-      case 'admin': return settings.message_alerts;
-      case 'ai': return settings.system_updates; // Fallback category
-      default: return true;
+      case 'trade':
+        return settings.trade_alerts;
+      case 'analytics':
+        return settings.pnl_alerts;
+      case 'warning':
+        return settings.security_alerts;
+      case 'system':
+        return settings.system_updates;
+      case 'achievement':
+        return settings.activity_alerts;
+      case 'admin':
+        return settings.message_alerts;
+      case 'ai':
+        return settings.system_updates; // Fallback category
+      default:
+        return true;
     }
   },
 
   getNotificationIcon(type: NotificationType) {
     switch (type) {
-      case 'trade': return '📈';
-      case 'achievement': return '🏆';
-      case 'warning': return '⚠️';
-      case 'ai': return '🧠';
-      case 'analytics': return '📊';
-      case 'system': return '⚙️';
-      default: return '🔔';
+      case 'trade':
+        return '📈';
+      case 'achievement':
+        return '🏆';
+      case 'warning':
+        return '⚠️';
+      case 'ai':
+        return '🧠';
+      case 'analytics':
+        return '📊';
+      case 'system':
+        return '⚙️';
+      default:
+        return '🔔';
     }
-  }
+  },
 };

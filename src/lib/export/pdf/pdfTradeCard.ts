@@ -18,7 +18,7 @@ function measureWrappedText(
   ctx: PdfDocumentContext,
   text: string,
   width: number,
-  fontSize: number,
+  fontSize: number
 ): number {
   ctx.doc.setFontSize(fontSize);
   const lines = ctx.doc.splitTextToSize(text, width);
@@ -29,16 +29,13 @@ function measureWrappedText(
 export function estimateTradeCardHeight(
   ctx: PdfDocumentContext,
   columns: string[],
-  row: Record<string, unknown>,
+  row: Record<string, unknown>
 ): number {
   const { shortFields, longFields } = splitFields(columns);
   const innerWidth = ctx.contentWidth - PDF_LAYOUT.tradeCardPadding * 2;
   const pairRows = Math.ceil(shortFields.length / 2);
 
-  let height =
-    PDF_LAYOUT.tradeCardHeaderHeight +
-    PDF_LAYOUT.tradeCardPadding * 2 +
-    pairRows * 7;
+  let height = PDF_LAYOUT.tradeCardHeaderHeight + PDF_LAYOUT.tradeCardPadding * 2 + pairRows * 7;
 
   longFields.forEach((field) => {
     const value = formatExportCellValue(field, row[field]);
@@ -54,7 +51,7 @@ function drawFieldPair(
   y: number,
   colWidth: number,
   field: string,
-  row: Record<string, unknown>,
+  row: Record<string, unknown>
 ): number {
   const label = getExportFieldLabel(field);
   const value = formatExportCellValue(field, row[field]);
@@ -87,7 +84,7 @@ function drawLongFieldBlock(
   y: number,
   width: number,
   field: string,
-  row: Record<string, unknown>,
+  row: Record<string, unknown>
 ): number {
   const label = getExportFieldLabel(field);
   const value = formatExportCellValue(field, row[field]);
@@ -112,7 +109,7 @@ export function drawTradeCard(
   ctx: PdfDocumentContext,
   tradeIndex: number,
   columns: string[],
-  row: Record<string, unknown>,
+  row: Record<string, unknown>
 ): number {
   const startY = ctx.y;
   const x = PDF_LAYOUT.marginX;
@@ -124,8 +121,22 @@ export function drawTradeCard(
   const cardTop = ctx.y;
 
   ctx.doc.setFillColor(...PDF_THEME.header);
-  ctx.doc.roundedRect(x, cardTop, w, PDF_LAYOUT.tradeCardHeaderHeight, PDF_LAYOUT.cardRadius, PDF_LAYOUT.cardRadius, 'F');
-  ctx.doc.rect(x, cardTop + PDF_LAYOUT.tradeCardHeaderHeight - PDF_LAYOUT.cardRadius, w, PDF_LAYOUT.cardRadius, 'F');
+  ctx.doc.roundedRect(
+    x,
+    cardTop,
+    w,
+    PDF_LAYOUT.tradeCardHeaderHeight,
+    PDF_LAYOUT.cardRadius,
+    PDF_LAYOUT.cardRadius,
+    'F'
+  );
+  ctx.doc.rect(
+    x,
+    cardTop + PDF_LAYOUT.tradeCardHeaderHeight - PDF_LAYOUT.cardRadius,
+    w,
+    PDF_LAYOUT.cardRadius,
+    'F'
+  );
 
   ctx.doc.setFont('helvetica', 'bold');
   ctx.doc.setFontSize(PDF_LAYOUT.cardTitleSize);
@@ -175,7 +186,7 @@ export function drawTradeCard(
       cardTop + PDF_LAYOUT.tradeCardHeaderHeight + bodyEstHeight,
       w,
       actualBodyHeight - bodyEstHeight,
-      'F',
+      'F'
     );
   }
 
@@ -190,7 +201,7 @@ export function drawTradeCard(
 export function drawTradeCardLayout(
   ctx: PdfDocumentContext,
   data: Record<string, unknown>[],
-  columns: string[],
+  columns: string[]
 ): void {
   data.forEach((row, index) => {
     drawTradeCard(ctx, index, columns, row);

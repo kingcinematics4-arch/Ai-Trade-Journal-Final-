@@ -112,10 +112,7 @@ export function mapProfileToDb(
 }
 
 /** Get display name from profile (falls back gracefully) */
-export function getProfileDisplayName(
-  profile: Profile | null,
-  email?: string | null
-): string {
+export function getProfileDisplayName(profile: Profile | null, email?: string | null): string {
   if (!profile) return email?.split('@')[0] ?? 'Trader';
   if (profile.fullName) return profile.fullName;
   if (profile.username) return profile.username;

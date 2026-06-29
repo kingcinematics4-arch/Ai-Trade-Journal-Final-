@@ -1,4 +1,12 @@
-export type GoalType = 'profit' | 'win_rate' | 'consistency' | 'max_loss' | 'rr_ratio' | 'trade_count' | 'discipline' | 'custom';
+export type GoalType =
+  | 'profit'
+  | 'win_rate'
+  | 'consistency'
+  | 'max_loss'
+  | 'rr_ratio'
+  | 'trade_count'
+  | 'discipline'
+  | 'custom';
 export type GoalStatus = 'active' | 'completed' | 'failed';
 
 /**

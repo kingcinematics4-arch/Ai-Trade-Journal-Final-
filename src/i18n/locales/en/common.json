@@ -1,0 +1,234 @@
+{
+  "appName": "AI Trade Journal",
+  "loading": "Loading...",
+  "saving": "Saving...",
+  "saved": "Saved",
+  "error": "Error",
+  "success": "Success",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "delete": "Delete",
+  "edit": "Edit",
+  "view": "View",
+  "create": "Create",
+  "update": "Update",
+  "search": "Search",
+  "filter": "Filter",
+  "sort": "Sort",
+  "import": "Import",
+  "refresh": "Refresh",
+  "close": "Close",
+  "back": "Back",
+  "next": "Next",
+  "previous": "Previous",
+  "submit": "Submit",
+  "reset": "Reset",
+  "clear": "Clear",
+  "select": "Select",
+  "selectAll": "Select All",
+  "deselectAll": "Deselect All",
+  "noResults": "No results found",
+  "noData": "No data available",
+  "retry": "Retry",
+  "or": "or",
+  "and": "and",
+  "yes": "Yes",
+  "no": "No",
+  "maybe": "Maybe",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "tomorrow": "Tomorrow",
+  "thisWeek": "This Week",
+  "thisMonth": "This Month",
+  "thisYear": "This Year",
+  "lastWeek": "Last Week",
+  "lastMonth": "Last Month",
+  "lastYear": "Last Year",
+  "custom": "Custom",
+  "all": "All",
+  "none": "None",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "active": "Active",
+  "inactive": "Inactive",
+  "on": "On",
+  "off": "Off",
+  "open": "Open",
+  "closed": "Closed",
+  "pending": "Pending",
+  "completed": "Completed",
+  "inProgress": "In Progress",
+  "failed": "Failed",
+  "total": "Total",
+  "average": "Average",
+  "count": "Count",
+  "percentage": "Percentage",
+  "currency": "Currency",
+  "date": "Date",
+  "time": "Time",
+  "datetime": "Date & Time",
+  "language": "Language",
+  "theme": "Theme",
+  "darkMode": "Dark Mode",
+  "lightMode": "Light Mode",
+  "system": "System",
+  "settings": "Settings",
+  "profile": "Profile",
+  "logout": "Logout",
+  "login": "Login",
+  "signup": "Sign Up",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "signOut": "Sign Out",
+  "email": "Email",
+  "password": "Password",
+  "username": "Username",
+  "fullName": "Full Name",
+  "rememberMe": "Remember me",
+  "forgotPassword": "Forgot password?",
+  "resetPassword": "Reset Password",
+  "changePassword": "Change Password",
+  "confirmPassword": "Confirm Password",
+  "welcome": "Welcome",
+  "welcomeBack": "Welcome back",
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "goodNight": "Good night",
+  "saaSIntelligence": "SaaS Intelligence",
+  "sidebar": {
+    "sections": {
+      "trading": "Trading",
+      "account": "Account"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "addTrade": "Add Trade",
+      "tradeHistory": "Trade History",
+      "analytics": "Analytics",
+      "calendar": "Calendar",
+      "strategies": "Strategies",
+      "aiCoach": "AI Coach",
+      "exports": "Exports",
+      "goals": "Goals",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "aria": {
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "expandSidebar": "Expand sidebar",
+      "collapseSidebar": "Collapse sidebar"
+    }
+  },
+  "legal": {
+    "title": "LEGAL & COMPLIANCE",
+    "subtitle": "Institutional Governance Framework",
+    "tos": {
+      "title": "Terms of Service",
+      "userResponsibilities": {
+        "title": "1. User Responsibilities",
+        "content": "Users are responsible for maintaining the confidentiality of their credentials and for all activities conducted through their account. You must provide accurate information during registration."
+      },
+      "acceptableUse": {
+        "title": "2. Acceptable Use",
+        "content": "The platform is for personal trading analysis. Reverse engineering, automated data scraping, or using the service to provide unauthorized financial advice is strictly prohibited."
+      },
+      "subscription": {
+        "title": "3. Subscription & Billing",
+        "content": "Access to premium features requires a valid subscription. Fees are non-refundable unless specified in the Refund Policy. We reserve the right to modify pricing with 30 days notice."
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "dataCollection": {
+        "title": "Data Collection",
+        "content": "We collect trade data, authentication details, and platform usage metrics to provide AI insights. Your trade data is encrypted at rest and in transit."
+      },
+      "analytics": {
+        "title": "Analytics & Cookies",
+        "content": "We use essential cookies for session management and anonymized analytics to improve performance. We do not sell user data to third-party advertisers."
+      },
+      "rights": {
+        "title": "Your Rights",
+        "content": "You have the right to export your data (via the Export Engine) or request permanent account deletion at any time through the settings panel."
+      }
+    },
+    "risk": {
+      "title": "Risk Disclosure",
+      "warning": "High Risk Warning:",
+      "warningContent": "Trading financial instruments involves significant risk of loss. You should only trade with capital you can afford to lose.",
+      "educational": {
+        "title": "Educational Purposes",
+        "content": "AITradeJournal provides analytics and journaling tools for educational use. We do not guarantee profitability, and past performance is not indicative of future results."
+      },
+      "noAdvice": {
+        "title": "No Financial Advice",
+        "content": "Our AI Coach and analytics metrics are based on mathematical models of your data. They do not constitute financial, investment, or legal advice."
+      }
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "toolLimitation": {
+        "title": "Tool Limitation",
+        "content": "This platform is a journaling and data analysis tool. It is NOT a trading platform, broker, or exchange. We do not execute trades or hold user funds."
+      },
+      "accuracy": {
+        "title": "Accuracy of Data",
+        "content": "While we strive for 100% accuracy, users should verify critical calculations. We are not liable for losses resulting from data entry errors or system latency."
+      }
+    },
+    "refund": {
+      "title": "Refund Policy",
+      "cancellation": {
+        "title": "Cancellation",
+        "content": "You may cancel your subscription at any time. You will retain access until the end of the current billing cycle. No partial refunds are issued for unused time."
+      },
+      "exceptions": {
+        "title": "Exceptions",
+        "content": "Refunds may be granted within 7 days of the initial purchase if the service is technically non-functional and our support team cannot resolve the issue."
+      }
+    },
+    "contact": {
+      "title": "Contact & Legal Info",
+      "support": {
+        "title": "Support",
+        "email": "Email: support@aitradejournal.com",
+        "responseTime": "Response time: < 24 hours (Mon-Fri)"
+      },
+      "business": {
+        "title": "Business Info",
+        "company": "AITrade Intelligence Systems LLC",
+        "location": "Registered in Delaware, USA"
+      }
+    },
+    "footer": {
+      "tos": "Terms",
+      "privacy": "Privacy",
+      "risk": "Risk",
+      "disclaimer": "Disclaimer"
+    }
+  },
+  "export": {
+    "title": "Export Architect",
+    "filename": "Filename",
+    "outputFormat": "Output Format",
+    "exportFormat": "Export Format",
+    "pdfReportType": "PDF Report Type",
+    "exportFields": "Export Fields",
+    "essentials": "Essentials",
+    "all": "All",
+    "clear": "Clear",
+    "editBin": "Edit Bin",
+    "searchPlaceholder": "Search optional fields...",
+    "mandatoryFields": "Mandatory Fields",
+    "optionalDataPoints": "Optional Data Points",
+    "noFieldsMatch": "No fields match your search",
+    "selectedFormat": "Selected Format",
+    "reportDepth": "Report Depth",
+    "cancel": "Cancel",
+    "generateExport": "Generate Institutional Export"
+  }
+}

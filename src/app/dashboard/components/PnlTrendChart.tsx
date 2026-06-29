@@ -44,14 +44,18 @@ function CustomTooltip(props: CustomTooltipProps) {
   const item = payload[0];
   const point = item.payload as unknown as PnlTrendPoint;
   const isStart = point.tradeNumber === 0;
-  
+
   // Consistency: use label if available, fallback to point tradeNumber
-  const tradeNum = label !== undefined && label !== null && label !== '' ? label : point.tradeNumber;
-  
+  const tradeNum =
+    label !== undefined && label !== null && label !== '' ? label : point.tradeNumber;
+
   // Resolve color dynamically. Handle gradient URLs by falling back to semantic profit/loss colors.
-  const color = (item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url'))
-    ? item.stroke
-    : (point.cumulative >= 0 ? '#22c55e' : '#ef4444');
+  const color =
+    item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url')
+      ? item.stroke
+      : point.cumulative >= 0
+        ? '#22c55e'
+        : '#ef4444';
 
   return (
     <div className="card-elevated shadow-xl p-3 text-xs min-w-[180px] border border-border/50 rounded-md bg-background/95 backdrop-blur z-50">
@@ -61,7 +65,7 @@ function CustomTooltip(props: CustomTooltipProps) {
           {isStart ? 'Starting Point' : `Trade #${tradeNum} — ${point.date}`}
         </p>
       </div>
-      
+
       {!isStart && point.asset && point.asset !== '—' && (
         <div className="flex justify-between gap-4 mb-1">
           <span className="text-muted-foreground">Asset</span>
@@ -81,7 +85,9 @@ function CustomTooltip(props: CustomTooltipProps) {
         </div>
       )}
 
-      <div className={`flex justify-between gap-4 ${!isStart ? 'pt-1 mt-1 border-t border-border/50' : ''}`}>
+      <div
+        className={`flex justify-between gap-4 ${!isStart ? 'pt-1 mt-1 border-t border-border/50' : ''}`}
+      >
         <span className="text-muted-foreground font-medium">Running Equity</span>
         <span
           className={`font-bold font-tabular ${point.cumulative >= 0 ? 'text-green-400' : 'text-red-400'}`}
@@ -101,10 +107,10 @@ export default function PnlTrendChart() {
   const { analytics, isLoading, isEmpty } = useTrades();
   const [showTooltip, setShowTooltip] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  
+
   const pnlData: PnlTrendPoint[] = analytics.pnlTrend || [];
   const dataLength = pnlData.length;
-  
+
   // Viewport & Interaction states
   const [zoomMode, setZoomMode] = useState(false);
   const [zoomRange, setZoomRange] = useState({ start: 0, end: 100 });
@@ -135,10 +141,10 @@ export default function PnlTrendChart() {
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'a') setIsAPressed(false);
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
@@ -146,80 +152,75 @@ export default function PnlTrendChart() {
   }, []);
 
   /* ── Chart Zoom (A + Scroll) ── */
-  const handleWheel = React.useCallback((e: WheelEvent) => {
-    if (!isAPressed || !isChartHovered) return;
+  const handleWheel = React.useCallback(
+    (e: WheelEvent) => {
+      if (!isAPressed || !isChartHovered) return;
 
-    // Prevent page scroll when zooming
-    e.preventDefault();
+      // Prevent page scroll when zooming
+      e.preventDefault();
 
-    const rect = wrapperRef.current?.getBoundingClientRect();
-    if (!rect) return;
+      const rect = wrapperRef.current?.getBoundingClientRect();
+      if (!rect) return;
 
-    // Recharts margin compensation
-    const leftMargin = -20;
-    const rightMargin = 5;
-    const chartWidth = rect.width - leftMargin - rightMargin;
+      // Recharts margin compensation
+      const leftMargin = -20;
+      const rightMargin = 5;
+      const chartWidth = rect.width - leftMargin - rightMargin;
 
-    const mouseX = e.clientX - rect.left - leftMargin;
-    const mouseRatio = Math.min(Math.max(mouseX / chartWidth, 0), 1);
-    const currentRange = zoomRange.end - zoomRange.start;
+      const mouseX = e.clientX - rect.left - leftMargin;
+      const mouseRatio = Math.min(Math.max(mouseX / chartWidth, 0), 1);
+      const currentRange = zoomRange.end - zoomRange.start;
 
-    let newRange;
+      let newRange;
 
-    if (e.deltaY < 0) {
-      // ZOOM IN
-      newRange = Math.max(
-        MIN_VISIBLE_POINTS,
-        Math.floor(currentRange * 0.8)
-      );
+      if (e.deltaY < 0) {
+        // ZOOM IN
+        newRange = Math.max(MIN_VISIBLE_POINTS, Math.floor(currentRange * 0.8));
 
-      // force shrink
-      if (newRange === currentRange && currentRange > MIN_VISIBLE_POINTS) {
-        newRange = currentRange - 1;
+        // force shrink
+        if (newRange === currentRange && currentRange > MIN_VISIBLE_POINTS) {
+          newRange = currentRange - 1;
+        }
+      } else {
+        // ZOOM OUT
+        newRange = Math.min(dataLength, Math.ceil(currentRange * 1.25));
+
+        // force growth
+        if (newRange === currentRange && currentRange < dataLength) {
+          newRange = currentRange + 1;
+        }
       }
-    } else {
-      // ZOOM OUT
-      newRange = Math.min(
-        dataLength,
-        Math.ceil(currentRange * 1.25)
-      );
 
-      // force growth
-      if (newRange === currentRange && currentRange < dataLength) {
-        newRange = currentRange + 1;
+      const focusIndex = Math.round(zoomRange.start + (currentRange - 1) * mouseRatio);
+
+      // CENTER selected point in viewport
+      let newStart = Math.round(focusIndex - newRange / 2);
+
+      let newEnd = Math.round(newStart + newRange);
+
+      // left clamp
+      if (newStart < 0) {
+        newStart = 0;
+        newEnd = newRange;
       }
-    }
 
-    const focusIndex = Math.round(
-      zoomRange.start + (currentRange - 1) * mouseRatio
-    );
+      // right clamp
+      if (newEnd > dataLength) {
+        newEnd = dataLength;
+        newStart = dataLength - newRange;
+      }
 
-    // CENTER selected point in viewport
-    let newStart = Math.round(focusIndex - newRange / 2);
+      // final protection
+      newStart = Math.max(0, newStart);
+      newEnd = Math.min(dataLength, newEnd);
 
-    let newEnd = Math.round(newStart + newRange);
-
-    // left clamp
-    if (newStart < 0) {
-      newStart = 0;
-      newEnd = newRange;
-    }
-
-    // right clamp
-    if (newEnd > dataLength) {
-      newEnd = dataLength;
-      newStart = dataLength - newRange;
-    }
-
-    // final protection
-    newStart = Math.max(0, newStart);
-    newEnd = Math.min(dataLength, newEnd);
-
-    setZoomRange({
-      start: newStart,
-      end: newEnd
-    });
-  }, [isAPressed, isChartHovered, dataLength, zoomRange]);
+      setZoomRange({
+        start: newStart,
+        end: newEnd,
+      });
+    },
+    [isAPressed, isChartHovered, dataLength, zoomRange]
+  );
 
   useEffect(() => {
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -238,18 +239,18 @@ export default function PnlTrendChart() {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!zoomMode || !isDragging) return;
     const deltaX = e.clientX - dragStartX;
-    
+
     // Sensitivity: how many pixels mouse moves to shift by 1 trade point
     const windowSize = zoomRange.end - zoomRange.start;
     const sensitivity = Math.max(5, 500 / windowSize);
 
     if (Math.abs(deltaX) > sensitivity) {
       const shift = Math.round(-deltaX / sensitivity); // negative because moving mouse right means panning left
-      
+
       setZoomRange((prev) => {
         let newStart = prev.start + shift;
         let newEnd = prev.end + shift;
-        
+
         // Clamp boundaries safely
         if (newStart < 0) {
           newStart = 0;
@@ -259,10 +260,10 @@ export default function PnlTrendChart() {
           newEnd = dataLength;
           newStart = Math.max(0, newEnd - windowSize);
         }
-        
+
         return { start: newStart, end: newEnd };
       });
-      
+
       setDragStartX(e.clientX);
     }
   };
@@ -283,9 +284,9 @@ export default function PnlTrendChart() {
     const min = Math.min(...equities);
     const max = Math.max(...equities);
     const padding = (max - min) * 0.1;
-    
+
     if (padding === 0) {
-       return { domainMin: min - 100, domainMax: max + 100 };
+      return { domainMin: min - 100, domainMax: max + 100 };
     }
     return { domainMin: min - padding, domainMax: max + padding };
   }, [visibleData]);
@@ -324,7 +325,7 @@ export default function PnlTrendChart() {
       {/* Interactive Header */}
       <div className="flex flex-wrap items-center justify-end gap-2 mb-4 px-1">
         <div className="relative">
-          <button 
+          <button
             type="button"
             className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
             onMouseEnter={() => setShowTooltip(true)}
@@ -332,7 +333,7 @@ export default function PnlTrendChart() {
           >
             <Info size={16} />
           </button>
-          
+
           {showTooltip && (
             <div className="absolute top-8 right-0 bg-popover text-popover-foreground text-xs p-3 rounded-md shadow-xl border border-border w-56 whitespace-nowrap z-50">
               <p className="font-semibold mb-2">Zoom Controls:</p>
@@ -344,9 +345,9 @@ export default function PnlTrendChart() {
             </div>
           )}
         </div>
-        
-        <button 
-          type="button" 
+
+        <button
+          type="button"
           onClick={handleResetZoom}
           className="p-1.5 rounded-md bg-background/50 backdrop-blur border border-border shadow-sm hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors focus-visible:ring-2 focus-visible:ring-primary outline-none"
           title="Reset View"
@@ -354,7 +355,7 @@ export default function PnlTrendChart() {
           <RefreshCw size={14} />
         </button>
 
-        <button 
+        <button
           type="button"
           onClick={() => setZoomMode(!zoomMode)}
           className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors border flex items-center gap-1.5 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
@@ -369,11 +370,17 @@ export default function PnlTrendChart() {
       </div>
 
       {/* Chart */}
-      <div 
+      <div
         ref={wrapperRef}
         tabIndex={-1} // Make it programmatically focusable but not via tab key
         className={`w-full h-[180px] md:h-[300px] lg:h-[350px] transition-colors select-none overflow-hidden focus-visible:outline-none focus-visible:ring-0 ${
-          !zoomMode ? 'cursor-default' : isZoomActive ? 'cursor-zoom-in' : isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          !zoomMode
+            ? 'cursor-default'
+            : isZoomActive
+              ? 'cursor-zoom-in'
+              : isDragging
+                ? 'cursor-grabbing'
+                : 'cursor-grab'
         }`}
         onMouseEnter={() => setIsChartHovered(true)}
         onMouseLeave={(e) => {
@@ -404,7 +411,12 @@ export default function PnlTrendChart() {
                 })}
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.5} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--border)"
+              vertical={false}
+              opacity={0.5}
+            />
             <XAxis
               dataKey="tradeNumber"
               type="category"
@@ -429,11 +441,13 @@ export default function PnlTrendChart() {
               }
               dx={-5}
             />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={false}
+            <Tooltip content={<CustomTooltip />} cursor={false} />
+            <ReferenceLine
+              y={0}
+              stroke="var(--muted-foreground)"
+              strokeDasharray="3 3"
+              opacity={0.5}
             />
-            <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="3 3" opacity={0.5} />
             <Area
               type="monotone"
               dataKey="cumulative"

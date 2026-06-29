@@ -37,12 +37,14 @@ function AiCoachContent() {
   }
 
   // Calculate high-level stats for Hero
-  const wins = trades.filter(t => (t.trade_status || '').toLowerCase() === 'win');
+  const wins = trades.filter((t) => (t.trade_status || '').toLowerCase() === 'win');
   const winRate = trades.length > 0 ? (wins.length / trades.length) * 100 : 0;
-  
+
   // Calculate recent PnL (last 5 trades)
-  const sortedTrades = [...trades].sort((a, b) => 
-    new Date(b.trade_date || b.created_at || '').getTime() - new Date(a.trade_date || a.created_at || '').getTime()
+  const sortedTrades = [...trades].sort(
+    (a, b) =>
+      new Date(b.trade_date || b.created_at || '').getTime() -
+      new Date(a.trade_date || a.created_at || '').getTime()
   );
   const recentPnl = sortedTrades.slice(0, 5).reduce((acc, t) => {
     const pnl = parseFloat((t.pnl_amount as string) || (t as any).pnl || '0');
@@ -50,13 +52,24 @@ function AiCoachContent() {
   }, 0);
 
   // Safe fallbacks if no insights are generated yet
-  const defaultScores = { disciplineScore: 0, riskManagementScore: 0, emotionalControlScore: 0, consistencyScore: 0, overallScore: 0 };
-  const defaultEmotion = { emotionDistribution: [], emotionalTrend: [], revengeTradeCount: 0, calmTradeWinRate: 0 };
+  const defaultScores = {
+    disciplineScore: 0,
+    riskManagementScore: 0,
+    emotionalControlScore: 0,
+    consistencyScore: 0,
+    overallScore: 0,
+  };
+  const defaultEmotion = {
+    emotionDistribution: [],
+    emotionalTrend: [],
+    revengeTradeCount: 0,
+    calmTradeWinRate: 0,
+  };
 
   return (
     <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-8">
       {/* Hero Section */}
-      <AiCoachHero 
+      <AiCoachHero
         overallScore={insights?.scores?.overallScore || 0}
         winRate={winRate}
         recentPnl={recentPnl}
@@ -69,13 +82,13 @@ function AiCoachContent() {
       {/* Charts & Psychology (2/3 + 1/3 split) */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">
-          <AiChartsSection 
+          <AiChartsSection
             dayPerformance={insights?.dayPerformance || []}
             emotionalTrend={insights?.emotionAnalysis?.emotionalTrend || []}
           />
         </div>
         <div className="xl:col-span-1">
-          <AiPsychologyPanel 
+          <AiPsychologyPanel
             emotionAnalysis={insights?.emotionAnalysis || defaultEmotion}
             personality={insights?.tradingPersonality || 'New Trader'}
           />

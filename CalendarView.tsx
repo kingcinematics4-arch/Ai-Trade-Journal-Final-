@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { 
-  format, 
-  addMonths, 
-  subMonths, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
-  eachDayOfInterval, 
-  isSameMonth, 
-  isSameDay, 
-  isToday
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  isToday,
 } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -67,16 +67,23 @@ export default function CalendarView() {
 
   const getEventsForDay = (day: Date) => {
     const dateStr = format(day, 'yyyy-MM-dd');
-    return events.filter(e => e.date === dateStr).sort((a, b) => a.startTime.localeCompare(b.startTime));
+    return events
+      .filter((e) => e.date === dateStr)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
   const getColorClass = (color: string) => {
     switch (color) {
-      case 'green': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'purple': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'red': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'orange': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      default: return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'green':
+        return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'purple':
+        return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+      case 'red':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'orange':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+      default:
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
     }
   };
 
@@ -89,18 +96,40 @@ export default function CalendarView() {
             <CalendarIcon size={20} className="text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{format(currentMonth, 'MMMM yyyy')}</h1>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Trading Events & Reminders</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              {format(currentMonth, 'MMMM yyyy')}
+            </h1>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
+              Trading Events & Reminders
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="flex bg-muted/50 p-1 rounded-xl border border-border/50">
-            <button onClick={handlePrevMonth} className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"><ChevronLeft size={16} /></button>
-            <button onClick={handleToday} className="px-4 py-1.5 text-xs font-bold hover:bg-blue-500/10 rounded-lg transition-colors">Today</button>
-            <button onClick={handleNextMonth} className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"><ChevronRight size={16} /></button>
+            <button
+              onClick={handlePrevMonth}
+              className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={handleToday}
+              className="px-4 py-1.5 text-xs font-bold hover:bg-blue-500/10 rounded-lg transition-colors"
+            >
+              Today
+            </button>
+            <button
+              onClick={handleNextMonth}
+              className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
-          <button onClick={handleAddEvent} className="btn-primary flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl shadow-lg shadow-primary/20">
+          <button
+            onClick={handleAddEvent}
+            className="btn-primary flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl shadow-lg shadow-primary/20"
+          >
             <Plus size={16} />
             <span className="hidden sm:inline">Add Event</span>
           </button>
@@ -111,7 +140,12 @@ export default function CalendarView() {
       <div className="card-elevated overflow-hidden border-border/40 bg-card">
         <div className="grid grid-cols-7 border-b border-border bg-muted/20">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-            <div key={d} className="py-3 text-center text-[10px] font-black uppercase tracking-tighter text-muted-foreground">{d}</div>
+            <div
+              key={d}
+              className="py-3 text-center text-[10px] font-black uppercase tracking-tighter text-muted-foreground"
+            >
+              {d}
+            </div>
           ))}
         </div>
 
@@ -131,10 +165,10 @@ export default function CalendarView() {
                   !isCurrentMonth
                     ? 'bg-muted/5 opacity-40'
                     : isSelected
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                    : isCurrentToday
-                    ? 'bg-blue-500/10 border border-blue-500/40 text-blue-400'
-                    : 'bg-transparent text-foreground hover:bg-blue-500/10 hover:text-white'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                      : isCurrentToday
+                        ? 'bg-blue-500/10 border border-blue-500/40 text-blue-400'
+                        : 'bg-transparent text-foreground hover:bg-blue-500/10 hover:text-white'
                 )}
                 style={{
                   WebkitTapHighlightColor: 'transparent',
@@ -144,10 +178,16 @@ export default function CalendarView() {
                   boxShadow: 'none',
                 }}
               >
-                <span className={cn(
-                  "text-xs font-bold w-6 h-6 flex items-center justify-center rounded-xl transition-all duration-200",
-                  isSelected ? "text-white" : isCurrentToday ? "text-blue-400" : "text-foreground/70 group-hover:text-foreground"
-                )}>
+                <span
+                  className={cn(
+                    'text-xs font-bold w-6 h-6 flex items-center justify-center rounded-xl transition-all duration-200',
+                    isSelected
+                      ? 'text-white'
+                      : isCurrentToday
+                        ? 'text-blue-400'
+                        : 'text-foreground/70 group-hover:text-foreground'
+                  )}
+                >
                   {format(day, 'd')}
                 </span>
 
@@ -162,7 +202,9 @@ export default function CalendarView() {
                     </div>
                   ))}
                   {dayEvents.length > 3 && (
-                    <div className="text-[9px] text-muted-foreground font-bold px-1">+ {dayEvents.length - 3} more</div>
+                    <div className="text-[9px] text-muted-foreground font-bold px-1">
+                      + {dayEvents.length - 3} more
+                    </div>
                   )}
                 </div>
               </div>
@@ -182,9 +224,18 @@ export default function CalendarView() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg flex items-center gap-2">
               Events for {format(selectedDate, 'PPP')}
-              {isToday(selectedDate) && <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase">Today</span>}
+              {isToday(selectedDate) && (
+                <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase">
+                  Today
+                </span>
+              )}
             </h2>
-            <button onClick={handleAddEvent} className="text-xs font-bold text-primary hover:underline">Add Event</button>
+            <button
+              onClick={handleAddEvent}
+              className="text-xs font-bold text-primary hover:underline"
+            >
+              Add Event
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -201,18 +252,32 @@ export default function CalendarView() {
                   className="flex items-center justify-between p-4 bg-background border border-border rounded-xl hover:border-primary/40 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-1 h-10 rounded-full ${
-                      event.color === 'blue' ? 'bg-blue-500' :
-                      event.color === 'green' ? 'bg-green-500' :
-                      event.color === 'red' ? 'bg-red-500' :
-                      event.color === 'orange' ? 'bg-orange-500' : 'bg-purple-500'
-                    }`} />
+                    <div
+                      className={`w-1 h-10 rounded-full ${
+                        event.color === 'blue'
+                          ? 'bg-blue-500'
+                          : event.color === 'green'
+                            ? 'bg-green-500'
+                            : event.color === 'red'
+                              ? 'bg-red-500'
+                              : event.color === 'orange'
+                                ? 'bg-orange-500'
+                                : 'bg-purple-500'
+                      }`}
+                    />
                     <div>
-                      <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{event.title}</p>
-                      <p className="text-xs text-muted-foreground">{event.startTime} - {event.endTime}</p>
+                      <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                        {event.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {event.startTime} - {event.endTime}
+                      </p>
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ChevronRight
+                    size={16}
+                    className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                  />
                 </div>
               ))
             )}
@@ -224,7 +289,10 @@ export default function CalendarView() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={onSaveEvent}
-        onDelete={(id) => { deleteEvent(id); setIsModalOpen(false); }}
+        onDelete={(id) => {
+          deleteEvent(id);
+          setIsModalOpen(false);
+        }}
         initialDate={format(selectedDate, 'yyyy-MM-dd')}
         editingEvent={editingEvent}
       />

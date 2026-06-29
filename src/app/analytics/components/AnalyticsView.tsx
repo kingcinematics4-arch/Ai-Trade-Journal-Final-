@@ -2,19 +2,19 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart3, 
-  RefreshCw, 
-  PlusCircle, 
-  Calendar, 
-  SlidersHorizontal, 
-  BookOpen, 
-  TrendingUp, 
-  AlertTriangle, 
-  TrendingDown, 
+import {
+  BarChart3,
+  RefreshCw,
+  PlusCircle,
+  Calendar,
+  SlidersHorizontal,
+  BookOpen,
+  TrendingUp,
+  AlertTriangle,
+  TrendingDown,
   Sparkles,
   X,
-  Compass
+  Compass,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -107,10 +107,18 @@ export default function AnalyticsView() {
     // Filter by Timeframe / Date Range
     if (timeframe !== 'all') {
       const now = new Date();
-      
+
       if (timeframe === 'today') {
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        const todayEnd = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          23,
+          59,
+          59,
+          999
+        );
         result = result.filter((t) => {
           const rawDate = t.trade_date || t.created_at || '';
           const tDate = new Date(rawDate);
@@ -239,7 +247,10 @@ export default function AnalyticsView() {
         {/* Charts and Math Panel Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 card-elevated p-6 h-[380px] space-y-4">
-            <div className="flex justify-between"><Skeleton className="h-6 w-32" /><Skeleton className="h-8 w-48" /></div>
+            <div className="flex justify-between">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-8 w-48" />
+            </div>
             <Skeleton className="h-full w-full rounded-lg" />
           </div>
           <div className="card-elevated p-6 h-[380px] space-y-4">
@@ -301,7 +312,9 @@ export default function AnalyticsView() {
           </motion.div>
           <h3 className="text-xl font-semibold text-foreground mb-2">No trading records found</h3>
           <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">
-            Trading analytics requires recorded trade data. Log your trades, specify strategies, P&L amounts, and holding durations to unlock a full professional trading intelligence dashboard.
+            Trading analytics requires recorded trade data. Log your trades, specify strategies, P&L
+            amounts, and holding durations to unlock a full professional trading intelligence
+            dashboard.
           </p>
           <Link
             href="/add-trade"
@@ -318,7 +331,6 @@ export default function AnalyticsView() {
   // Active View Render
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      
       {/* 1. Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
@@ -343,7 +355,10 @@ export default function AnalyticsView() {
           >
             <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
           </button>
-          <Link href="/add-trade" className="btn-primary flex items-center gap-2 py-2 px-4 text-sm font-semibold shadow-md shadow-primary/20">
+          <Link
+            href="/add-trade"
+            className="btn-primary flex items-center gap-2 py-2 px-4 text-sm font-semibold shadow-md shadow-primary/20"
+          >
             <PlusCircle size={15} />
             Add Trade
           </Link>
@@ -359,15 +374,17 @@ export default function AnalyticsView() {
             <span>TIME RANGE FILTER</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {([
-              { value: 'all', label: 'All Time' },
-              { value: 'today', label: 'Today' },
-              { value: '7days', label: '7 Days' },
-              { value: '30days', label: '30 Days' },
-              { value: '90days', label: '90 Days' },
-              { value: 'year', label: 'This Year' },
-              { value: 'custom', label: 'Custom' },
-            ] as const).map((opt) => (
+            {(
+              [
+                { value: 'all', label: 'All Time' },
+                { value: 'today', label: 'Today' },
+                { value: '7days', label: '7 Days' },
+                { value: '30days', label: '30 Days' },
+                { value: '90days', label: '90 Days' },
+                { value: 'year', label: 'This Year' },
+                { value: 'custom', label: 'Custom' },
+              ] as const
+            ).map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => setTimeframe(opt.value)}
@@ -394,7 +411,9 @@ export default function AnalyticsView() {
               className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border/20 overflow-hidden"
             >
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Start Date (From)</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                  Start Date (From)
+                </label>
                 <input
                   type="date"
                   value={dateFrom}
@@ -403,7 +422,9 @@ export default function AnalyticsView() {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">End Date (To)</label>
+                <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                  End Date (To)
+                </label>
                 <input
                   type="date"
                   value={dateTo}
@@ -419,7 +440,9 @@ export default function AnalyticsView() {
         <div className="flex flex-wrap gap-3 items-center pt-3.5 border-t border-border/40">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <SlidersHorizontal size={13} className="text-primary" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-[10px]">Segment:</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[10px]">
+              Segment:
+            </span>
           </div>
 
           {/* Asset Dropdown */}
@@ -485,12 +508,15 @@ export default function AnalyticsView() {
           <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4 text-muted-foreground border border-border">
             <SlidersHorizontal size={24} />
           </div>
-          <h4 className="text-lg font-semibold text-foreground mb-1.5">No trades match selected filters</h4>
+          <h4 className="text-lg font-semibold text-foreground mb-1.5">
+            No trades match selected filters
+          </h4>
           <p className="text-xs text-muted-foreground max-w-xs mb-6 leading-relaxed">
-            Adjust your time range, select a different strategy or asset, or reset filters to view global stats.
+            Adjust your time range, select a different strategy or asset, or reset filters to view
+            global stats.
           </p>
-          <button 
-            onClick={handleClearFilters} 
+          <button
+            onClick={handleClearFilters}
             className="btn-secondary flex items-center gap-2 py-2 px-5 text-xs font-semibold border border-primary/20 hover:border-primary/45 transition-colors"
           >
             <X size={13} />

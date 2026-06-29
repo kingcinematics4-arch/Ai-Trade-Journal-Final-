@@ -2,7 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { X, Loader2, Globe, Twitter, Instagram, Linkedin, User, FileText, Phone, MapPin } from 'lucide-react';
+import {
+  X,
+  Loader2,
+  Globe,
+  Twitter,
+  Instagram,
+  Linkedin,
+  User,
+  FileText,
+  Phone,
+  MapPin,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
@@ -15,14 +26,69 @@ interface EditProfileModalProps {
 }
 
 const COUNTRIES = [
-  'Afghanistan','Albania','Algeria','Argentina','Australia','Austria','Bangladesh','Belgium',
-  'Brazil','Canada','Chile','China','Colombia','Croatia','Czech Republic','Denmark',
-  'Egypt','Finland','France','Germany','Ghana','Greece','Hungary','India','Indonesia',
-  'Iran','Iraq','Ireland','Israel','Italy','Japan','Jordan','Kenya','Malaysia','Mexico',
-  'Morocco','Netherlands','New Zealand','Nigeria','Norway','Pakistan','Peru','Philippines',
-  'Poland','Portugal','Romania','Russia','Saudi Arabia','Singapore','South Africa',
-  'South Korea','Spain','Sri Lanka','Sweden','Switzerland','Thailand','Turkey','UAE',
-  'Ukraine','United Kingdom','United States','Venezuela','Vietnam',
+  'Afghanistan',
+  'Albania',
+  'Algeria',
+  'Argentina',
+  'Australia',
+  'Austria',
+  'Bangladesh',
+  'Belgium',
+  'Brazil',
+  'Canada',
+  'Chile',
+  'China',
+  'Colombia',
+  'Croatia',
+  'Czech Republic',
+  'Denmark',
+  'Egypt',
+  'Finland',
+  'France',
+  'Germany',
+  'Ghana',
+  'Greece',
+  'Hungary',
+  'India',
+  'Indonesia',
+  'Iran',
+  'Iraq',
+  'Ireland',
+  'Israel',
+  'Italy',
+  'Japan',
+  'Jordan',
+  'Kenya',
+  'Malaysia',
+  'Mexico',
+  'Morocco',
+  'Netherlands',
+  'New Zealand',
+  'Nigeria',
+  'Norway',
+  'Pakistan',
+  'Peru',
+  'Philippines',
+  'Poland',
+  'Portugal',
+  'Romania',
+  'Russia',
+  'Saudi Arabia',
+  'Singapore',
+  'South Africa',
+  'South Korea',
+  'Spain',
+  'Sri Lanka',
+  'Sweden',
+  'Switzerland',
+  'Thailand',
+  'Turkey',
+  'UAE',
+  'Ukraine',
+  'United Kingdom',
+  'United States',
+  'Venezuela',
+  'Vietnam',
 ];
 
 interface FieldProps {
@@ -136,7 +202,9 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
           <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] sticky top-0 bg-slate-950 z-10">
             <div>
               <h2 className="text-lg font-bold text-foreground">Edit Profile</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Update your personal information</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Update your personal information
+              </p>
             </div>
             <button
               type="button"
@@ -162,18 +230,31 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                   Basic Info
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Full Name" error={errors.fullName?.message} icon={<User size={12} />}>
+                  <Field
+                    label="Full Name"
+                    error={errors.fullName?.message}
+                    icon={<User size={12} />}
+                  >
                     <input
-                      {...register('fullName', { maxLength: { value: 80, message: 'Max 80 characters' } })}
+                      {...register('fullName', {
+                        maxLength: { value: 80, message: 'Max 80 characters' },
+                      })}
                       placeholder="Your full name"
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Username" error={errors.username?.message} icon={<span className="text-xs font-bold">@</span>}>
+                  <Field
+                    label="Username"
+                    error={errors.username?.message}
+                    icon={<span className="text-xs font-bold">@</span>}
+                  >
                     <input
                       {...register('username', {
                         maxLength: { value: 30, message: 'Max 30 characters' },
-                        pattern: { value: /^[a-z0-9_]*$/i, message: 'Letters, numbers and underscores only' },
+                        pattern: {
+                          value: /^[a-z0-9_]*$/i,
+                          message: 'Letters, numbers and underscores only',
+                        },
                       })}
                       placeholder="your_handle"
                       className={inputClass}
@@ -181,7 +262,9 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                   </Field>
                   <Field label="Bio" error={errors.bio?.message} icon={<FileText size={12} />}>
                     <textarea
-                      {...register('bio', { maxLength: { value: 200, message: 'Max 200 characters' } })}
+                      {...register('bio', {
+                        maxLength: { value: 200, message: 'Max 200 characters' },
+                      })}
                       placeholder="Tell traders a bit about yourself…"
                       rows={3}
                       className={`${inputClass} resize-none`}
@@ -196,11 +279,17 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                         className={inputClass}
                       />
                     </Field>
-                    <Field label="Country" error={errors.country?.message} icon={<MapPin size={12} />}>
+                    <Field
+                      label="Country"
+                      error={errors.country?.message}
+                      icon={<MapPin size={12} />}
+                    >
                       <select {...register('country')} className={`${inputClass} appearance-none`}>
                         <option value="">Select country</option>
                         {COUNTRIES.map((c) => (
-                          <option key={c} value={c}>{c}</option>
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
                         ))}
                       </select>
                     </Field>

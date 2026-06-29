@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
-      
+
       logAuth(`onAuthStateChange: ${event}`, { userId: nextSession?.user?.id });
       applySession(nextSession);
       setIsLoading(false);

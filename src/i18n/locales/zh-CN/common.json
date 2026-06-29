@@ -1,0 +1,234 @@
+{
+  "appName": "AI 交易日志",
+  "loading": "加载中...",
+  "saving": "保存中...",
+  "saved": "已保存",
+  "error": "错误",
+  "success": "成功",
+  "cancel": "取消",
+  "confirm": "确认",
+  "delete": "删除",
+  "edit": "编辑",
+  "view": "查看",
+  "create": "创建",
+  "update": "更新",
+  "search": "搜索",
+  "filter": "筛选",
+  "sort": "排序",
+  "import": "导入",
+  "refresh": "刷新",
+  "close": "关闭",
+  "back": "返回",
+  "next": "下一步",
+  "previous": "上一步",
+  "submit": "提交",
+  "reset": "重置",
+  "clear": "清除",
+  "select": "选择",
+  "selectAll": "全选",
+  "deselectAll": "取消全选",
+  "noResults": "未找到结果",
+  "noData": "无可用数据",
+  "retry": "重试",
+  "or": "或",
+  "and": "和",
+  "yes": "是",
+  "no": "否",
+  "maybe": "也许",
+  "today": "今天",
+  "yesterday": "昨天",
+  "tomorrow": "明天",
+  "thisWeek": "本周",
+  "thisMonth": "本月",
+  "thisYear": "今年",
+  "lastWeek": "上周",
+  "lastMonth": "上月",
+  "lastYear": "去年",
+  "custom": "自定义",
+  "all": "全部",
+  "none": "无",
+  "enabled": "已启用",
+  "disabled": "已禁用",
+  "active": "活跃",
+  "inactive": "非活跃",
+  "on": "开",
+  "off": "关",
+  "open": "打开",
+  "closed": "关闭",
+  "pending": "待处理",
+  "completed": "已完成",
+  "inProgress": "进行中",
+  "failed": "失败",
+  "total": "总计",
+  "average": "平均",
+  "count": "计数",
+  "percentage": "百分比",
+  "currency": "货币",
+  "date": "日期",
+  "time": "时间",
+  "datetime": "日期和时间",
+  "language": "语言",
+  "theme": "主题",
+  "darkMode": "深色模式",
+  "lightMode": "浅色模式",
+  "system": "系统",
+  "settings": "设置",
+  "profile": "个人资料",
+  "logout": "退出登录",
+  "login": "登录",
+  "signup": "注册",
+  "signIn": "登录",
+  "signUp": "注册",
+  "signOut": "退出登录",
+  "email": "邮箱",
+  "password": "密码",
+  "username": "用户名",
+  "fullName": "全名",
+  "rememberMe": "记住我",
+  "forgotPassword": "忘记密码？",
+  "resetPassword": "重置密码",
+  "changePassword": "更改密码",
+  "confirmPassword": "确认密码",
+  "welcome": "欢迎",
+  "welcomeBack": "欢迎回来",
+  "goodMorning": "早上好",
+  "goodAfternoon": "下午好",
+  "goodEvening": "晚上好",
+  "goodNight": "晚安",
+  "saaSIntelligence": "SaaS 智能平台",
+  "sidebar": {
+    "sections": {
+      "trading": "交易",
+      "account": "账户"
+    },
+    "nav": {
+      "dashboard": "仪表板",
+      "addTrade": "添加交易",
+      "tradeHistory": "交易历史",
+      "analytics": "分析",
+      "calendar": "日历",
+      "strategies": "策略",
+      "aiCoach": "AI 教练",
+      "exports": "导出",
+      "goals": "目标",
+      "notifications": "通知",
+      "profile": "个人资料",
+      "settings": "设置",
+      "logout": "退出登录"
+    },
+    "aria": {
+      "openMenu": "打开菜单",
+      "closeMenu": "关闭菜单",
+      "expandSidebar": "展开侧边栏",
+      "collapseSidebar": "折叠侧边栏"
+    }
+  },
+  "legal": {
+    "title": "法律与合规",
+    "subtitle": "机构治理框架",
+    "tos": {
+      "title": "服务条款",
+      "userResponsibilities": {
+        "title": "1. 用户责任",
+        "content": "用户有责任维护其凭证的机密性，并对其账户下进行的所有活动负责。您必须在注册期间提供准确信息。"
+      },
+      "acceptableUse": {
+        "title": "2. 可接受使用",
+        "content": "该平台用于个人交易分析。严禁逆向工程、自动数据抓取或使用该服务提供未经授权的财务建议。"
+      },
+      "subscription": {
+        "title": "3. 订阅与计费",
+        "content": "访问高级功能需要有效订阅。除非退款政策中另有规定，否则费用不可退还。我们保留提前30天通知修改价格的权利。"
+      }
+    },
+    "privacy": {
+      "title": "隐私政策",
+      "dataCollection": {
+        "title": "数据收集",
+        "content": "我们收集交易数据、身份验证详细信息和平台使用指标以提供AI洞察。您的交易数据在静态和传输中均经过加密。"
+      },
+      "analytics": {
+        "title": "分析与Cookie",
+        "content": "我们使用必要的Cookie进行会话管理和匿名分析以提高性能。我们不会向第三方广告商出售用户数据。"
+      },
+      "rights": {
+        "title": "您的权利",
+        "content": "您有权导出数据（通过导出引擎）或通过设置面板随时请求永久删除账户。"
+      }
+    },
+    "risk": {
+      "title": "风险披露",
+      "warning": "高风险警告：",
+      "warningContent": "交易金融工具涉及重大损失风险。您只能使用可承受损失的资金进行交易。",
+      "educational": {
+        "title": "教育目的",
+        "content": "AITradeJournal提供用于教育用途的分析和日记工具。我们不保证盈利能力，过去的表现并不预示未来的结果。"
+      },
+      "noAdvice": {
+        "title": "无财务建议",
+        "content": "我们的AI教练和分析指标基于您数据的数学模型。它们不构成财务、投资或法律建议。"
+      }
+    },
+    "disclaimer": {
+      "title": "免责声明",
+      "toolLimitation": {
+        "title": "工具限制",
+        "content": "该平台是日记和数据分析工具。它不是交易平台、经纪商或交易所。我们不执行交易或持有用户资金。"
+      },
+      "accuracy": {
+        "title": "数据准确性",
+        "content": "虽然我们努力达到100%的准确性，但用户应验证关键计算。我们对数据输入错误或系统延迟造成的损失不承担责任。"
+      }
+    },
+    "refund": {
+      "title": "退款政策",
+      "cancellation": {
+        "title": "取消",
+        "content": "您可以随时取消订阅。您将保留访问权限直到当前计费周期结束。未使用的时间不发放部分退款。"
+      },
+      "exceptions": {
+        "title": "例外情况",
+        "content": "如果在初始购买后7天内服务在技术上无法正常运行且我们的支持团队无法解决问题，可能会给予退款。"
+      }
+    },
+    "contact": {
+      "title": "联系与法律信息",
+      "support": {
+        "title": "支持",
+        "email": "邮箱：support@aitradejournal.com",
+        "responseTime": "响应时间：< 24小时（周一至周五）"
+      },
+      "business": {
+        "title": "业务信息",
+        "company": "AITrade Intelligence Systems LLC",
+        "location": "注册于美国特拉华州"
+      }
+    },
+    "footer": {
+      "tos": "条款",
+      "privacy": "隐私",
+      "risk": "风险",
+      "disclaimer": "免责声明"
+    }
+  },
+  "export": {
+    "title": "导出架构师",
+    "filename": "文件名",
+    "outputFormat": "输出格式",
+    "exportFormat": "导出格式",
+    "pdfReportType": "PDF报告类型",
+    "exportFields": "导出字段",
+    "essentials": "基本",
+    "all": "全部",
+    "clear": "清除",
+    "editBin": "编辑回收站",
+    "searchPlaceholder": "搜索可选字段...",
+    "mandatoryFields": "必填字段",
+    "optionalDataPoints": "可选数据点",
+    "noFieldsMatch": "没有匹配的字段",
+    "selectedFormat": "选定格式",
+    "reportDepth": "报告深度",
+    "cancel": "取消",
+    "generateExport": "生成机构导出"
+  }
+}

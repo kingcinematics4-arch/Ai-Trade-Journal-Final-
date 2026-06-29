@@ -130,7 +130,8 @@ export default function StrategiesView() {
           </motion.div>
           <h3 className="text-xl font-semibold text-foreground mb-2">No trading records found</h3>
           <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">
-            Strategy analytics requires recorded trade data with strategy assignments. Log your trades and specify strategies to unlock strategy performance insights.
+            Strategy analytics requires recorded trade data with strategy assignments. Log your
+            trades and specify strategies to unlock strategy performance insights.
           </p>
           <Link
             href="/add-trade"
@@ -171,7 +172,10 @@ export default function StrategiesView() {
           >
             <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
           </button>
-          <Link href="/add-trade" className="btn-primary flex items-center gap-2 py-2 px-4 text-sm font-semibold shadow-md shadow-primary/20">
+          <Link
+            href="/add-trade"
+            className="btn-primary flex items-center gap-2 py-2 px-4 text-sm font-semibold shadow-md shadow-primary/20"
+          >
             <PlusCircle size={15} />
             Add Trade
           </Link>
@@ -181,7 +185,10 @@ export default function StrategiesView() {
       {/* Search Bar */}
       <div className="card-premium p-4">
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
             placeholder="Search strategies..."
@@ -200,7 +207,9 @@ export default function StrategiesView() {
 
       {/* Strategy Table */}
       <div className="card-premium p-6">
-        <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest opacity-50">Strategy Performance</h3>
+        <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest opacity-50">
+          Strategy Performance
+        </h3>
         <StrategyTable strategies={analytics.strategies} searchTerm={searchTerm} />
       </div>
 

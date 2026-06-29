@@ -1,7 +1,10 @@
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
-import { generateProfessionalExcelWorkbook, exportProfessionalExcel as libExport } from '@/lib/exportExcel';
+import {
+  generateProfessionalExcelWorkbook,
+  exportProfessionalExcel as libExport,
+} from '@/lib/exportExcel';
 
 /**
  * Professional Excel Export UI Component.

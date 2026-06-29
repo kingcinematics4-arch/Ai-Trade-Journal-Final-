@@ -1,0 +1,234 @@
+{
+  "appName": "AI Jurnal Trading",
+  "loading": "Memuat...",
+  "saving": "Menyimpan...",
+  "saved": "Tersimpan",
+  "error": "Kesalahan",
+  "success": "Berhasil",
+  "cancel": "Batal",
+  "confirm": "Konfirmasi",
+  "delete": "Hapus",
+  "edit": "Edit",
+  "view": "Lihat",
+  "create": "Buat",
+  "update": "Perbarui",
+  "search": "Cari",
+  "filter": "Filter",
+  "sort": "Urutkan",
+  "import": "Impor",
+  "refresh": "Refresh",
+  "close": "Tutup",
+  "back": "Kembali",
+  "next": "Selanjutnya",
+  "previous": "Sebelumnya",
+  "submit": "Kirim",
+  "reset": "Reset",
+  "clear": "Hapus",
+  "select": "Pilih",
+  "selectAll": "Pilih semua",
+  "deselectAll": "Batalkan pilihan semua",
+  "noResults": "Tidak ada hasil ditemukan",
+  "noData": "Tidak ada data tersedia",
+  "retry": "Coba lagi",
+  "or": "atau",
+  "and": "dan",
+  "yes": "Ya",
+  "no": "Tidak",
+  "maybe": "Mungkin",
+  "today": "Hari ini",
+  "yesterday": "Kemarin",
+  "tomorrow": "Besok",
+  "thisWeek": "Minggu ini",
+  "thisMonth": "Bulan ini",
+  "thisYear": "Tahun ini",
+  "lastWeek": "Minggu lalu",
+  "lastMonth": "Bulan lalu",
+  "lastYear": "Tahun lalu",
+  "custom": "Kustom",
+  "all": "Semua",
+  "none": "Tidak ada",
+  "enabled": "Diaktifkan",
+  "disabled": "Dinonaktifkan",
+  "active": "Aktif",
+  "inactive": "Tidak aktif",
+  "on": "Nyala",
+  "off": "Mati",
+  "open": "Buka",
+  "closed": "Tutup",
+  "pending": "Tertunda",
+  "completed": "Selesai",
+  "inProgress": "Sedang berlangsung",
+  "failed": "Gagal",
+  "total": "Total",
+  "average": "Rata-rata",
+  "count": "Jumlah",
+  "percentage": "Persentase",
+  "currency": "Mata uang",
+  "date": "Tanggal",
+  "time": "Waktu",
+  "datetime": "Tanggal dan waktu",
+  "language": "Bahasa",
+  "theme": "Tema",
+  "darkMode": "Mode gelap",
+  "lightMode": "Mode terang",
+  "system": "Sistem",
+  "settings": "Pengaturan",
+  "profile": "Profil",
+  "logout": "Keluar",
+  "login": "Masuk",
+  "signup": "Daftar",
+  "signIn": "Masuk",
+  "signUp": "Daftar",
+  "signOut": "Keluar",
+  "email": "Email",
+  "password": "Kata sandi",
+  "username": "Nama pengguna",
+  "fullName": "Nama lengkap",
+  "rememberMe": "Ingat saya",
+  "forgotPassword": "Lupa kata sandi?",
+  "resetPassword": "Reset kata sandi",
+  "changePassword": "Ubah kata sandi",
+  "confirmPassword": "Konfirmasi kata sandi",
+  "welcome": "Selamat datang",
+  "welcomeBack": "Selamat datang kembali",
+  "goodMorning": "Selamat pagi",
+  "goodAfternoon": "Selamat siang",
+  "goodEvening": "Selamat malam",
+  "goodNight": "Selamat malam",
+  "saaSIntelligence": "Kecerdasan SaaS",
+  "sidebar": {
+    "sections": {
+      "trading": "Trading",
+      "account": "Akun"
+    },
+    "nav": {
+      "dashboard": "Dasbor",
+      "addTrade": "Tambah Trading",
+      "tradeHistory": "Riwayat Trading",
+      "analytics": "Analitik",
+      "calendar": "Kalender",
+      "strategies": "Strategi",
+      "aiCoach": "Pelatih AI",
+      "exports": "Ekspor",
+      "goals": "Tujuan",
+      "notifications": "Notifikasi",
+      "profile": "Profil",
+      "settings": "Pengaturan",
+      "logout": "Keluar"
+    },
+    "aria": {
+      "openMenu": "Buka menu",
+      "closeMenu": "Tutup menu",
+      "expandSidebar": "Perluas sidebar",
+      "collapseSidebar": "Ciutkan sidebar"
+    }
+  },
+  "legal": {
+    "title": "LEGAL DAN KEPATUHAN",
+    "subtitle": "Kerangka Tata Kelola Institusional",
+    "tos": {
+      "title": "Syarat Layanan",
+      "userResponsibilities": {
+        "title": "1. Tanggung Jawab Pengguna",
+        "content": "Pengguna bertanggung jawab untuk menjaga kerahasiaan kredensial mereka dan untuk semua aktivitas yang dilakukan melalui akun mereka. Anda harus memberikan informasi yang akurat selama pendaftaran."
+      },
+      "acceptableUse": {
+        "title": "2. Penggunaan yang Dapat Diterima",
+        "content": "Platform ini untuk analisis trading pribadi. Reverse engineering, pengikisan data otomatis, atau penggunaan layanan untuk memberikan saran keuangan yang tidak sah secara ketat dilarang."
+      },
+      "subscription": {
+        "title": "3. Berlangganan dan Penagihan",
+        "content": "Akses ke fitur premium memerlukan langganan yang valid. Biaya tidak dapat dikembalikan kecuali ditentukan dalam Kebijakan Pengembalian Dana. Kami berhak mengubah harga dengan pemberitahuan 30 hari."
+      }
+    },
+    "privacy": {
+      "title": "Kebijakan Privasi",
+      "dataCollection": {
+        "title": "Pengumpulan Data",
+        "content": "Kami mengumpulkan data trading, detail otentikasi, dan metrik penggunaan platform untuk memberikan wawasan AI. Data trading Anda dienkripsi saat diam dan saat transit."
+      },
+      "analytics": {
+        "title": "Analitik dan Cookie",
+        "content": "Kami menggunakan cookie penting untuk manajemen sesi dan analitik anonim untuk meningkatkan kinerja. Kami tidak menjual data pengguna ke pengiklan pihak ketiga."
+      },
+      "rights": {
+        "title": "Hak Anda",
+        "content": "Anda memiliki hak untuk mengekspor data Anda (melalui Mesin Ekspor) atau meminta penghapusan akun permanen kapan saja melalui panel pengaturan."
+      }
+    },
+    "risk": {
+      "title": "Pengungkapan Risiko",
+      "warning": "Peringatan Risiko Tinggi:",
+      "warningContent": "Trading instrumen keuangan melibatkan risiko kerugian yang signifikan. Anda hanya harus trading dengan modal yang Anda mampu kehilangan.",
+      "educational": {
+        "title": "Tujuan Pendidikan",
+        "content": "AITradeJournal menyediakan alat analisis dan jurnal untuk penggunaan pendidikan. Kami tidak menjamin profitabilitas, dan kinerja masa lalu tidak indikatif hasil masa depan."
+      },
+      "noAdvice": {
+        "title": "Tanpa Saran Keuangan",
+        "content": "Pelatih AI dan metrik analitik kami berdasarkan model matematika dari data Anda. Mereka tidak merupakan saran keuangan, investasi, atau hukum."
+      }
+    },
+    "disclaimer": {
+      "title": "Penafian",
+      "toolLimitation": {
+        "title": "Batasan Alat",
+        "content": "Platform ini adalah alat jurnal dan analisis data. BUKAN platform trading, broker, atau exchange. Kami tidak mengeksekusi trading atau menyimpan dana pengguna."
+      },
+      "accuracy": {
+        "title": "Akurasi Data",
+        "content": "Meskipun kami berusaha untuk akurasi 100%, pengguna harus memverifikasi perhitungan kritis. Kami tidak bertanggung jawab atas kerugian yang disebabkan oleh kesalahan entri data atau latensi sistem."
+      }
+    },
+    "refund": {
+      "title": "Kebijakan Pengembalian Dana",
+      "cancellation": {
+        "title": "Pembatalan",
+        "content": "Anda dapat membatalkan langganan Anda kapan saja. Anda akan mempertahankan akses sampai akhir siklus penagihan saat ini. Tidak ada pengembalian dana parsial yang diterbitkan untuk waktu yang tidak digunakan."
+      },
+      "exceptions": {
+        "title": "Pengecualian",
+        "content": "Pengembalian dana dapat diberikan dalam 7 hari setelah pembelian awal jika layanan secara teknis tidak berfungsi dan tim dukungan kami tidak dapat menyelesaikan masalah."
+      }
+    },
+    "contact": {
+      "title": "Kontak dan Info Legal",
+      "support": {
+        "title": "Dukungan",
+        "email": "Email: support@aitradejournal.com",
+        "responseTime": "Waktu respons: < 24 jam (Sen-Jum)"
+      },
+      "business": {
+        "title": "Info Bisnis",
+        "company": "AITrade Intelligence Systems LLC",
+        "location": "Terdaftar di Delaware, USA"
+      }
+    },
+    "footer": {
+      "tos": "Syarat",
+      "privacy": "Privasi",
+      "risk": "Risiko",
+      "disclaimer": "Penafian"
+    }
+  },
+  "export": {
+    "title": "Arsitek Ekspor",
+    "filename": "Nama File",
+    "outputFormat": "Format Output",
+    "exportFormat": "Format Ekspor",
+    "pdfReportType": "Tipe Laporan PDF",
+    "exportFields": "Bidang Ekspor",
+    "essentials": "Esensial",
+    "all": "Semua",
+    "clear": "Hapus",
+    "editBin": "Edit Tempat Sampah",
+    "searchPlaceholder": "Cari bidang opsional...",
+    "mandatoryFields": "Bidang Wajib",
+    "optionalDataPoints": "Titik Data Opsional",
+    "noFieldsMatch": "Tidak ada bidang yang cocok",
+    "selectedFormat": "Format Terpilih",
+    "reportDepth": "Kedalaman Laporan",
+    "cancel": "Batal",
+    "generateExport": "Buat Ekspor Institusional"
+  }
+}

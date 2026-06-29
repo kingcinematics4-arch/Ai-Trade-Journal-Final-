@@ -1,0 +1,75 @@
+{
+  "hero": {
+    "title": "Maîtrisez votre Trading avec des Insights IA",
+    "subtitle": "Suivez, analysez et optimisez vos performances de trading avec un journal intelligent et une analyse IA",
+    "cta": "Commencer l'essai gratuit",
+    "secondaryCta": "Voir la démo"
+  },
+  "features": {
+    "title": "Tout ce dont vous avez besoin pour trader plus intelligemment",
+    "subtitle": "Fonctionnalités puissantes conçues pour les traders sérieux qui veulent améliorer leurs performances",
+    "tradeJournal": {
+      "title": "Journal de Trading",
+      "description": "Enregistrez chaque transaction avec l'entrée, la sortie, les notes, les émotions et les détails d'exécution dans un journal structuré."
+    },
+    "aiCoach": {
+      "title": "Coach IA",
+      "description": "Analyse de psychologie et de performance de trading alimentée par l'IA qui identifie les forces, les faiblesses et les modèles comportementaux."
+    },
+    "strategyManagement": {
+      "title": "Gestion de Stratégies",
+      "description": "Créez, organisez, testez et suivez les stratégies de trading avec des statistiques de performance détaillées et des résultats historiques."
+    },
+    "advancedAnalytics": {
+      "title": "Analyse Avancée",
+      "description": "Analyse approfondie incluant la courbe d'équité, le taux de gain, le facteur de profit, le drawdown, l'espérance et les métriques de performance."
+    },
+    "riskManagement": {
+      "title": "Gestion des Risques",
+      "description": "Surveillez le R-multiple et la chaleur du portefeuille. Assurez la survie avec une supervision des risques de niveau institutionnel."
+    },
+    "exportEngine": {
+      "title": "Moteur d'Export",
+      "description": "Générez des rapports professionnels en PDF ou XLSX pour les revues de performance ou la conformité fiscale."
+    }
+  },
+  "testimonials": {
+    "title": "Approuvé par les Traders Professionnels",
+    "subtitle": "Voyez ce que les traders disent de AI Trade Journal",
+    "items": [
+      {
+        "name": "Sarah Mitchell",
+        "role": "Day Trader Professionnel",
+        "content": "AI Trade Journal a complètement transformé ma façon d'aborder le trading. Les insights IA m'ont aidé à identifier des modèles que je n'avais jamais remarqués."
+      },
+      {
+        "name": "James Rodriguez",
+        "role": "Swing Trader",
+        "content": "Les fonctionnalités complètes d'analyse et de journalisation m'ont aidé à améliorer mon taux de gain de 15% en seulement 3 mois."
+      },
+      {
+        "name": "Emily Chen",
+        "role": "Trader Algorithme",
+        "content": "Enfin, un journal qui comprend les besoins des traders sérieux. Les outils de backtesting et d'analyse de stratégies sont incroyables."
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Tarification Simple et Transparente",
+    "subtitle": "Choisissez le plan qui correspond à vos besoins de trading",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "popular": "Le Plus Populaire",
+    "choosePlan": "Choisir le Plan"
+  },
+  "footer": {
+    "about": "À propos",
+    "product": "Produit",
+    "resources": "Ressources",
+    "legal": "Légal",
+    "contact": "Contact",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'Utilisation",
+    "copyright": "© 2024 AI Trade Journal. Tous droits réservés."
+  }
+}

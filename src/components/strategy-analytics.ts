@@ -60,7 +60,7 @@ export function calculateStrategyAnalytics(trades: any[]) {
     stats.totalTrades++;
     stats.netPnL += pnl;
     stats.trades.push(trade);
-    
+
     if (new Date(date) > new Date(stats.lastUsed)) stats.lastUsed = date;
 
     if (pnl > 0) {
@@ -85,7 +85,8 @@ export function calculateStrategyAnalytics(trades: any[]) {
     const winRate = s.totalTrades > 0 ? (s.wins / s.totalTrades) * 100 : 0;
     const avgProfit = s.wins > 0 ? s.totalProfit / s.wins : 0;
     const avgLoss = s.losses > 0 ? s.totalLoss / s.losses : 0;
-    const profitFactor = s.totalLoss > 0 ? s.totalProfit / s.totalLoss : s.totalProfit > 0 ? 100 : 0;
+    const profitFactor =
+      s.totalLoss > 0 ? s.totalProfit / s.totalLoss : s.totalProfit > 0 ? 100 : 0;
 
     return {
       ...s,
@@ -108,6 +109,6 @@ export function calculateStrategyAnalytics(trades: any[]) {
   return {
     strategies: finalizedStrategies.sort((a, b) => b.totalTrades - a.totalTrades),
     timeline: finalizedTimeline,
-    totalAssigned: trades.filter(t => !!t.strategy_used).length
+    totalAssigned: trades.filter((t) => !!t.strategy_used).length,
   };
 }

@@ -23,8 +23,22 @@ const COLORS: { value: EventColor; class: string }[] = [
   { value: 'orange', class: 'bg-orange-500' },
 ];
 
-export default function EventModal({ isOpen, onClose, onSave, onDelete, initialDate, editingEvent }: EventModalProps) {
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm({
+export default function EventModal({
+  isOpen,
+  onClose,
+  onSave,
+  onDelete,
+  initialDate,
+  editingEvent,
+}: EventModalProps) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: editingEvent || {
       title: '',
       description: '',
@@ -32,21 +46,23 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
       startTime: '09:00',
       endTime: '10:00',
       color: 'blue' as EventColor,
-    }
+    },
   });
 
   const selectedColor = watch('color');
 
   useEffect(() => {
     if (isOpen) {
-      reset(editingEvent || {
-        title: '',
-        description: '',
-        date: initialDate || new Date().toISOString().split('T')[0],
-        startTime: '09:00',
-        endTime: '10:00',
-        color: 'blue' as EventColor,
-      });
+      reset(
+        editingEvent || {
+          title: '',
+          description: '',
+          date: initialDate || new Date().toISOString().split('T')[0],
+          startTime: '09:00',
+          endTime: '10:00',
+          color: 'blue' as EventColor,
+        }
+      );
     }
   }, [isOpen, editingEvent, initialDate, reset]);
 
@@ -72,19 +88,29 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
 
           <form onSubmit={handleSubmit(onSave)} className="p-6 space-y-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Event Title</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                Event Title
+              </label>
               <input
                 {...register('title', { required: 'Title is required' })}
                 placeholder="e.g., Weekly Market Review"
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors"
               />
-              {errors.title && <p className="text-[10px] text-red-500 mt-1">{errors.title.message as string}</p>}
+              {errors.title && (
+                <p className="text-[10px] text-red-500 mt-1">{errors.title.message as string}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">Date</label>
-                <input type="date" {...register('date', { required: true })} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none" />
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  {...register('date', { required: true })}
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none"
+                />
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1">
@@ -108,13 +134,21 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1">
                   <Clock size={12} /> Start Time
                 </label>
-                <input type="time" {...register('startTime')} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none" />
+                <input
+                  type="time"
+                  {...register('startTime')}
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none"
+                />
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center gap-1">
                   <Clock size={12} /> End Time
                 </label>
-                <input type="time" {...register('endTime')} className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none" />
+                <input
+                  type="time"
+                  {...register('endTime')}
+                  className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm outline-none"
+                />
               </div>
             </div>
 
@@ -140,7 +174,9 @@ export default function EventModal({ isOpen, onClose, onSave, onDelete, initialD
                   <Trash2 size={14} />
                   Delete
                 </button>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
 
               <div className="flex gap-3">
                 <button

@@ -6,6 +6,6 @@ export function useNotificationSettings() {
   return {
     settings,
     updateSettings,
-    requestBrowserPermission
+    requestBrowserPermission,
   };
 }

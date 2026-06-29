@@ -19,7 +19,7 @@ export interface AdvancedAnalytics {
   currentStreak: { type: 'win' | 'loss' | 'none'; count: number };
   maxWinningStreak: number;
   maxLosingStreak: number;
-  
+
   // Advanced Math
   expectancy: number;
   sharpeRatio: number;
@@ -27,7 +27,7 @@ export interface AdvancedAnalytics {
   recoveryFactor: number;
   averageHoldingTime: string;
   roi: number;
-  
+
   // Aggregated charts datasets
   dailyPerformance: { day: string; pnl: number; trades: number }[];
   monthlyPerformance: { month: string; pnl: number; trades: number }[];
@@ -41,7 +41,7 @@ export interface AdvancedAnalytics {
 export function parseDurationToMinutes(durationStr: string | null | undefined): number | null {
   if (!durationStr) return null;
   const str = durationStr.toLowerCase().trim();
-  
+
   let totalMinutes = 0;
   let matched = false;
 
@@ -55,7 +55,7 @@ export function parseDurationToMinutes(durationStr: string | null | undefined): 
     matched = true;
   }
   dayRegex.lastIndex = 0; // Reset state
-  
+
   while ((match = hourRegex.exec(str)) !== null) {
     totalMinutes += parseFloat(match[1]) * 60;
     matched = true;
@@ -83,7 +83,7 @@ export function parseDurationToMinutes(durationStr: string | null | undefined): 
 
 export function formatMinutesToDuration(totalMinutes: number): string {
   if (totalMinutes <= 0) return '—';
-  
+
   const d = Math.floor(totalMinutes / (24 * 60));
   const h = Math.floor((totalMinutes % (24 * 60)) / 60);
   const m = Math.round(totalMinutes % 60);
@@ -168,7 +168,7 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
   let peakEquity = 0;
   let maxDrawdown = 0;
   const equityCurve: AdvancedAnalytics['equityCurve'] = [
-    { tradeNumber: 0, date: 'Start', cumulative: 0, pnl: 0 }
+    { tradeNumber: 0, date: 'Start', cumulative: 0, pnl: 0 },
   ];
 
   chronologicalTrades.forEach((t, index) => {
@@ -212,7 +212,7 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
         date: new Date(t.trade_date || t.created_at || '').toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
-          year: 'numeric'
+          year: 'numeric',
         }),
       };
     }
@@ -224,7 +224,7 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
         date: new Date(t.trade_date || t.created_at || '').toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
-          year: 'numeric'
+          year: 'numeric',
         }),
       };
     }
@@ -276,9 +276,10 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
   const totalDecided = winCount + lossCount;
   const winRate = totalTrades ? (winCount / totalTrades) * 100 : 0;
   const lossRate = totalTrades ? (lossCount / totalTrades) * 100 : 0;
-  
+
   const absLossSum = Math.abs(lossPnlSum);
-  const profitFactor = absLossSum > 0 ? Number((winPnlSum / absLossSum).toFixed(2)) : winPnlSum > 0 ? 10.0 : 0;
+  const profitFactor =
+    absLossSum > 0 ? Number((winPnlSum / absLossSum).toFixed(2)) : winPnlSum > 0 ? 10.0 : 0;
 
   const avgRr = rrCount ? Number((rrSum / rrCount).toFixed(2)) : 0;
   const averageWin = winCount ? Number((winPnlSum / winCount).toFixed(2)) : 0;
@@ -286,7 +287,9 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
 
   // Expectancy calculation
   // (Win% * AvgWin) + (Loss% * AvgLoss) -> since AvgLoss is negative, it correctly subtracts
-  const expectancy = Number(((winRate / 100) * averageWin + (lossRate / 100) * averageLoss).toFixed(2));
+  const expectancy = Number(
+    ((winRate / 100) * averageWin + (lossRate / 100) * averageLoss).toFixed(2)
+  );
 
   // Sharpe Ratio
   // Sharpe = average trade P&L / standard deviation of P&Ls
@@ -300,7 +303,8 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
   }
 
   // Recovery Factor
-  const recoveryFactor = maxDrawdown > 0 ? Number((totalPnl / maxDrawdown).toFixed(2)) : totalPnl > 0 ? 10.0 : 0;
+  const recoveryFactor =
+    maxDrawdown > 0 ? Number((totalPnl / maxDrawdown).toFixed(2)) : totalPnl > 0 ? 10.0 : 0;
 
   // ROI
   const roi = totalRiskAmount > 0 ? Number(((totalPnl / totalRiskAmount) * 100).toFixed(1)) : 0;
@@ -312,7 +316,10 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
 
   // Current Streak at end of timeline
   // We already computed this sequentially, so currentStreak holds chronological ending streak
-  const lastStatus = trades.length > 0 ? normalizeStatus(chronologicalTrades[chronologicalTrades.length - 1].trade_status) : 'breakeven';
+  const lastStatus =
+    trades.length > 0
+      ? normalizeStatus(chronologicalTrades[chronologicalTrades.length - 1].trade_status)
+      : 'breakeven';
   let finalStreakType: 'win' | 'loss' | 'none' = 'none';
   let finalStreakCount = 0;
 
@@ -374,9 +381,13 @@ export function computeAdvancedAnalytics(trades: DbTrade[]): AdvancedAnalytics {
   const frequencyMap = new Map<string, { count: number; sortKey: number }>();
   trades.forEach((t) => {
     const date = new Date(t.trade_date || t.created_at || '');
-    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const dateStr = date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
     const sortKey = date.getTime();
-    
+
     const entry = frequencyMap.get(dateStr) ?? { count: 0, sortKey };
     entry.count++;
     frequencyMap.set(dateStr, entry);

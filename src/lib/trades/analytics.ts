@@ -72,10 +72,7 @@ export function buildEquity(trades: any[]): PnlTrendPoint[] {
     const dateB = new Date(b.trade_date ?? b.created_at ?? 0).getTime();
     if (dateA !== dateB) return dateA - dateB;
     // Same trade_date → use created_at as tiebreaker (oldest entry first)
-    return (
-      new Date(a.created_at ?? 0).getTime() -
-      new Date(b.created_at ?? 0).getTime()
-    );
+    return new Date(a.created_at ?? 0).getTime() - new Date(b.created_at ?? 0).getTime();
   });
 
   let runningTotal = 0;
@@ -111,27 +108,15 @@ export const normalizeStatus = (status?: string | null) => {
 
   const value = status.toLowerCase().trim();
 
-  if (
-    value === 'win' ||
-    value === 'profit' ||
-    value === 'tp'
-  ) {
+  if (value === 'win' || value === 'profit' || value === 'tp') {
     return 'win';
   }
 
-  if (
-    value === 'loss' ||
-    value === 'lose' ||
-    value === 'sl'
-  ) {
+  if (value === 'loss' || value === 'lose' || value === 'sl') {
     return 'loss';
   }
 
-  if (
-    value === 'breakeven' ||
-    value === 'break-even' ||
-    value === 'be'
-  ) {
+  if (value === 'breakeven' || value === 'break-even' || value === 'be') {
     return 'breakeven';
   }
 

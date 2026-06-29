@@ -7,15 +7,17 @@ import { formatCurrency } from '@/lib/trades/analytics';
 import { KpiCardSkeleton } from '@/components/ui/LoadingSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import KpiCard from './KpiCard';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 export default function KpiBentoGrid() {
+  const { t } = useTranslation();
   const { analytics, isLoading, isEmpty } = useTrades();
 
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 lg:gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={`kpi-skel-${i}`} className={(i === 0 || i === 5) ? 'col-span-2' : 'col-span-1'}>
+          <div key={`kpi-skel-${i}`} className={i === 0 || i === 5 ? 'col-span-2' : 'col-span-1'}>
             <KpiCardSkeleton />
           </div>
         ))}
@@ -28,9 +30,9 @@ export default function KpiBentoGrid() {
       <div className="card-premium p-8">
         <EmptyState
           icon={<Inbox size={28} />}
-          title="No performance data yet"
-          description="Log your first trade to see P&L, win rate, streaks, and other analytics on your dashboard."
-          actionLabel="Log your first trade"
+          title={t('dashboard.emptyState.title')}
+          description={t('dashboard.emptyState.description')}
+          actionLabel={t('dashboard.emptyState.actionLabel')}
           actionHref="/add-trade"
         />
       </div>
@@ -48,19 +50,25 @@ export default function KpiBentoGrid() {
 
   const streakSubtext =
     currentStreak.type === 'none'
-      ? 'No active streak'
-      : `${currentStreak.count} consecutive ${currentStreak.type === 'win' ? 'wins' : 'losses'}`;
+      ? t('dashboard.streak.noActive')
+      : t('dashboard.streak.consecutive', {
+          count: currentStreak.count,
+          type:
+            currentStreak.type === 'win'
+              ? t('dashboard.streak.wins')
+              : t('dashboard.streak.losses'),
+        });
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 lg:gap-6 w-full min-w-0">
       <div className="col-span-2 lg:col-span-2">
         <KpiCard
           id="kpi-total-pnl"
-          label="Total P&L"
+          label={t('dashboard.kpi.totalPnl')}
           value={pnlFormatted}
-          subtext={`${analytics.totalTrades} trade${analytics.totalTrades === 1 ? '' : 's'} logged`}
+          subtext={`${analytics.totalTrades} ${t('dashboard.kpi.tradeLogged', { count: analytics.totalTrades })}`}
           trend={totalPnl >= 0 ? 'up' : 'down'}
-          trendValue={analytics.totalTrades > 0 ? 'All time' : '—'}
+          trendValue={analytics.totalTrades > 0 ? t('dashboard.kpi.allTime') : '—'}
           icon={<TrendingUp size={20} />}
           variant={pnlVariant}
           isHero
@@ -70,11 +78,11 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-win-rate"
-          label="Win Rate"
+          label={t('dashboard.kpi.winRate')}
           value={`${winRate.toFixed(1)}%`}
-          subtext={`${winCount} wins / ${lossCount} losses`}
+          subtext={`${winCount} ${t('dashboard.kpi.wins')} / ${lossCount} ${t('dashboard.kpi.losses')}`}
           trend={winRate >= 50 ? 'up' : winRate > 0 ? 'down' : 'neutral'}
-          trendValue={winCount + lossCount > 0 ? 'Closed trades' : '—'}
+          trendValue={winCount + lossCount > 0 ? t('dashboard.kpi.closedTrades') : '—'}
           icon={<Target size={18} />}
           variant="info"
         />
@@ -83,9 +91,9 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-rr-ratio"
-          label="Avg RR Ratio"
+          label={t('dashboard.kpi.avgRrRatio')}
           value={avgRr > 0 ? avgRr.toFixed(2) : '—'}
-          subtext={avgRr > 0 ? 'Across logged trades' : 'No RR data yet'}
+          subtext={avgRr > 0 ? t('dashboard.kpi.acrossLoggedTrades') : t('dashboard.kpi.noRrData')}
           trend="neutral"
           trendValue="—"
           icon={<BarChart2 size={18} />}
@@ -96,13 +104,13 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-streak"
-          label="Current Streak"
+          label={t('dashboard.kpi.currentStreak')}
           value={streakLabel}
           subtext={streakSubtext}
           trend={
             currentStreak.type === 'win' ? 'up' : currentStreak.type === 'loss' ? 'down' : 'neutral'
           }
-          trendValue={currentStreak.type === 'none' ? '—' : 'Latest trades'}
+          trendValue={currentStreak.type === 'none' ? '—' : t('dashboard.kpi.latestTrades')}
           icon={<Flame size={18} />}
           variant={
             currentStreak.type === 'win'
@@ -117,9 +125,13 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-best-trade"
-          label="Best Trade"
+          label={t('dashboard.kpi.bestTrade')}
           value={bestTrade ? formatCurrency(bestTrade.pnl, { showSign: true }) : '—'}
-          subtext={bestTrade ? `${bestTrade.asset} — ${bestTrade.strategy}` : 'No trades yet'}
+          subtext={
+            bestTrade
+              ? `${bestTrade.asset} — ${bestTrade.strategy}`
+              : t('dashboard.kpi.noTradesYet')
+          }
           trend={bestTrade && bestTrade.pnl > 0 ? 'up' : 'neutral'}
           trendValue={bestTrade?.date ?? '—'}
           icon={<Trophy size={18} />}
@@ -130,11 +142,11 @@ export default function KpiBentoGrid() {
       <div className="col-span-2 lg:col-span-2">
         <KpiCard
           id="kpi-discipline"
-          label="Journal Activity"
+          label={t('dashboard.kpi.journalActivity')}
           value={`${analytics.totalTrades}`}
-          subtext="Trades in your journal — keep logging for deeper insights"
+          subtext={t('dashboard.kpi.journalActivitySubtext')}
           trend="neutral"
-          trendValue="All time"
+          trendValue={t('dashboard.kpi.allTime')}
           icon={<AlertTriangle size={18} />}
           variant="neutral"
         />

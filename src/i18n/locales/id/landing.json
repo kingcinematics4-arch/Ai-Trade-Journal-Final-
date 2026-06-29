@@ -1,0 +1,75 @@
+{
+  "hero": {
+    "title": "Kuasai Trading Anda dengan Wawasan Berbasis AI",
+    "subtitle": "Lacak, analisis, dan optimalkan performa trading Anda dengan pencatatan cerdas dan analisis berbasis AI",
+    "cta": "Mulai Uji Coba Gratis",
+    "secondaryCta": "Lihat Demo"
+  },
+  "features": {
+    "title": "Semua yang Anda Butuhkan untuk Trading Lebih Cerdas",
+    "subtitle": "Fitur canggih yang dirancang untuk trader serius yang ingin meningkatkan performa mereka",
+    "tradeJournal": {
+      "title": "Jurnal Trading",
+      "description": "Catat setiap trade dengan entri, keluar, catatan, emosi, dan detail eksekusi dalam jurnal terstruktur."
+    },
+    "aiCoach": {
+      "title": "Pelatih AI",
+      "description": "Analisis psikologi dan performa trading berbasis AI yang mengidentifikasi kekuatan, kelemahan, dan pola perilaku."
+    },
+    "strategyManagement": {
+      "title": "Manajemen Strategi",
+      "description": "Buat, atur, uji, dan lacak strategi trading dengan statistik performa detail dan hasil historis."
+    },
+    "advancedAnalytics": {
+      "title": "Analitik Lanjutan",
+      "description": "Analisis mendalam termasuk kurva ekuitas, tingkat kemenangan, faktor keuntungan, drawdown, ekspektasi, dan metrik performa."
+    },
+    "riskManagement": {
+      "title": "Manajemen Risiko",
+      "description": "Pantau R-multiple dan panas portofolio. Pastikan kelangsungan dengan pengawasan risiko tingkat institusional."
+    },
+    "exportEngine": {
+      "title": "Mesin Ekspor",
+      "description": "Buat laporan profesional dalam PDF atau XLSX untuk tinjauan performa atau kepatuhan pajak."
+    }
+  },
+  "testimonials": {
+    "title": "Dipercaya oleh Trader Profesional",
+    "subtitle": "Lihat apa yang dikatakan trader tentang AI Trade Journal",
+    "items": [
+      {
+        "name": "Sarah Mitchell",
+        "role": "Day Trader Profesional",
+        "content": "AI Trade Journal telah mengubah sepenuhnya cara saya mendekati trading. Wawasan AI membantu saya mengidentifikasi pola yang belum pernah saya perhatikan sebelumnya."
+      },
+      {
+        "name": "James Rodriguez",
+        "role": "Swing Trader",
+        "content": "Fitur analisis dan pencatatan lengkap membantu saya meningkatkan tingkat kemenangan sebesar 15% hanya dalam 3 bulan."
+      },
+      {
+        "name": "Emily Chen",
+        "role": "Trader Algoritmik",
+        "content": "Akhirnya, jurnal yang memahami kebutuhan trader serius. Alat backtesting dan analisis strategi luar biasa."
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Harga Sederhana dan Transparan",
+    "subtitle": "Pilih paket yang sesuai dengan kebutuhan trading Anda",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "popular": "Paling Populer",
+    "choosePlan": "Pilih Paket"
+  },
+  "footer": {
+    "about": "Tentang",
+    "product": "Produk",
+    "resources": "Sumber Daya",
+    "legal": "Legal",
+    "contact": "Kontak",
+    "privacy": "Kebijakan Privasi",
+    "terms": "Syarat Layanan",
+    "copyright": "© 2024 AI Trade Journal. Hak Cipta Dilindungi."
+  }
+}

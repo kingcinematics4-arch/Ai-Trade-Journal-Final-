@@ -32,7 +32,9 @@ export default function ProfilePage() {
             <div className="rounded-2xl border border-white/[0.07] bg-card/30 backdrop-blur-md overflow-hidden">
               <div className="px-6 py-4 border-b border-white/[0.05]">
                 <h2 className="text-sm font-bold text-foreground">Social Links</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Your connected profiles and websites</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Your connected profiles and websites
+                </p>
               </div>
               <div className="p-6">
                 <SocialLinks />

@@ -10,12 +10,12 @@ export function buildProfessionalJson(data: any[], context: Record<string, any> 
 
   const generatedDate = new Date();
   const isoDateStr = generatedDate.toISOString();
-  
+
   const analytics = calculateReportAnalytics(data);
 
   // Group trades by strategy for the strategies section if not provided in context
   const strategyStats: Record<string, any> = {};
-  data.forEach(trade => {
+  data.forEach((trade) => {
     const strat = trade.strategy_used || 'Uncategorized';
     if (!strategyStats[strat]) {
       strategyStats[strat] = { trades: 0, wins: 0, losses: 0, pnl: 0 };
@@ -27,13 +27,14 @@ export function buildProfessionalJson(data: any[], context: Record<string, any> 
     strategyStats[strat].pnl += pnl;
   });
 
-  const strategiesList = Object.keys(strategyStats).map(name => ({
+  const strategiesList = Object.keys(strategyStats).map((name) => ({
     name,
     totalTrades: strategyStats[name].trades,
-    winRate: strategyStats[name].trades > 0 
-      ? (strategyStats[name].wins / strategyStats[name].trades) * 100 
-      : 0,
-    netPnl: strategyStats[name].pnl
+    winRate:
+      strategyStats[name].trades > 0
+        ? (strategyStats[name].wins / strategyStats[name].trades) * 100
+        : 0,
+    netPnl: strategyStats[name].pnl,
   }));
 
   // Build the structured API-style JSON payload
@@ -60,12 +61,12 @@ export function buildProfessionalJson(data: any[], context: Record<string, any> 
       averageWin: analytics.avgWin,
       averageLoss: analytics.avgLoss,
       maxWin: analytics.maxWin,
-      maxLoss: analytics.maxLoss
+      maxLoss: analytics.maxLoss,
     },
     strategies: context.strategyData || strategiesList,
     goals: context.goals || [],
     tasks: context.tasks || [],
-    trades: data.map(trade => trade)
+    trades: data.map((trade) => trade),
   };
 
   return JSON.stringify(jsonPayload, null, 2);

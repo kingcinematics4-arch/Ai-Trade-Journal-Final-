@@ -23,7 +23,10 @@ export default function AnalyticsSummary({ analytics }: AnalyticsSummaryProps) {
       label: 'Win Rate',
       value: `${analytics.winRate.toFixed(1)}%`,
       icon: <Target size={18} />,
-      iconBg: analytics.winRate >= 50 ? 'bg-green-500/15 text-green-400' : 'bg-amber-500/15 text-amber-400',
+      iconBg:
+        analytics.winRate >= 50
+          ? 'bg-green-500/15 text-green-400'
+          : 'bg-amber-500/15 text-amber-400',
       gradient: analytics.winRate >= 50 ? 'gradient-profit' : 'gradient-warning',
       subtitle: `${analytics.winCount}W / ${analytics.lossCount}L`,
     },
@@ -31,7 +34,8 @@ export default function AnalyticsSummary({ analytics }: AnalyticsSummaryProps) {
       label: 'Total P&L',
       value: formatCurrency(analytics.totalPnl, { showSign: true }),
       icon: analytics.totalPnl >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />,
-      iconBg: analytics.totalPnl >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
+      iconBg:
+        analytics.totalPnl >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
       gradient: analytics.totalPnl >= 0 ? 'gradient-profit' : 'gradient-loss',
       valueColor: analytics.totalPnl >= 0 ? 'text-green-400' : 'text-red-400',
     },

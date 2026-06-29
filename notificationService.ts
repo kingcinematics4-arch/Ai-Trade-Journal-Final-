@@ -26,21 +26,19 @@ export const notificationService = {
       .select('*')
       .eq('user_id', userId)
       .single();
-    
+
     if (error && error.code !== 'PGRST116') throw error;
     return data as NotificationSettings | null;
   },
 
   async updateSettings(userId: string, settings: Partial<NotificationSettings>) {
     const supabase = createClient();
-    const { error } = await supabase
-      .from('notification_settings')
-      .upsert({ 
-        user_id: userId,
-        ...settings, 
-        updated_at: new Date().toISOString() 
-      });
-    
+    const { error } = await supabase.from('notification_settings').upsert({
+      user_id: userId,
+      ...settings,
+      updated_at: new Date().toISOString(),
+    });
+
     if (error) throw error;
   },
 
@@ -49,14 +47,22 @@ export const notificationService = {
     if (!settings.notifications_enabled || settings.do_not_disturb) return false;
 
     switch (type) {
-      case 'trade': return settings.trade_alerts;
-      case 'analytics': return settings.pnl_alerts;
-      case 'warning': return settings.security_alerts;
-      case 'system': return settings.system_updates;
-      case 'achievement': return settings.activity_alerts;
-      case 'admin': return settings.message_alerts;
-      case 'ai': return settings.system_updates;
-      default: return true;
+      case 'trade':
+        return settings.trade_alerts;
+      case 'analytics':
+        return settings.pnl_alerts;
+      case 'warning':
+        return settings.security_alerts;
+      case 'system':
+        return settings.system_updates;
+      case 'achievement':
+        return settings.activity_alerts;
+      case 'admin':
+        return settings.message_alerts;
+      case 'ai':
+        return settings.system_updates;
+      default:
+        return true;
     }
   },
 
@@ -68,7 +74,7 @@ export const notificationService = {
       message: 'This is a test notification to verify sounds, popups, and vibration.',
       type: 'system',
       link: '/dashboard',
-      metadata: { is_test: true }
+      metadata: { is_test: true },
     });
-  }
+  },
 };

@@ -42,20 +42,20 @@ const defaultLabels: Record<BadgeVariant, string> = {
   info: 'Info',
 };
 
-export default function StatusBadge({ 
-  variant, 
-  label, 
-  size = 'sm', 
-  className, 
-  ...props 
+export default function StatusBadge({
+  variant,
+  label,
+  size = 'sm',
+  className,
+  ...props
 }: StatusBadgeProps) {
   const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm';
   return (
-    <span 
+    <span
       className={cn(
-        'status-badge font-medium rounded-full', 
-        variantMap[variant], 
-        sizeClass, 
+        'status-badge font-medium rounded-full',
+        variantMap[variant],
+        sizeClass,
         className
       )}
       {...props}

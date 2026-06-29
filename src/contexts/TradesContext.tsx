@@ -74,21 +74,21 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
-  const updateTrade = useCallback(async (id: string, updates: any) => {
-    try {
-      const supabase = createClient();
-      const { error: updateError } = await supabase
-        .from('trades')
-        .update(updates)
-        .eq('id', id);
+  const updateTrade = useCallback(
+    async (id: string, updates: any) => {
+      try {
+        const supabase = createClient();
+        const { error: updateError } = await supabase.from('trades').update(updates).eq('id', id);
 
-      if (updateError) throw updateError;
-      await fetchTrades();
-    } catch (err: any) {
-      console.error('Error updating trade:', err);
-      toast.error('Failed to update trade record');
-    }
-  }, [fetchTrades]);
+        if (updateError) throw updateError;
+        await fetchTrades();
+      } catch (err: any) {
+        console.error('Error updating trade:', err);
+        toast.error('Failed to update trade record');
+      }
+    },
+    [fetchTrades]
+  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -114,7 +114,17 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
       refetch: fetchTrades,
       updateTrade,
     }),
-    [trades, tradeRows, analytics, insights, authLoading, isLoading, error, fetchTrades, updateTrade]
+    [
+      trades,
+      tradeRows,
+      analytics,
+      insights,
+      authLoading,
+      isLoading,
+      error,
+      fetchTrades,
+      updateTrade,
+    ]
   );
 
   return <TradesContext.Provider value={value}>{children}</TradesContext.Provider>;

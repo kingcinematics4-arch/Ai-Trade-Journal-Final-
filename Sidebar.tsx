@@ -3,13 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Calendar as CalendarIcon, 
-  TrendingUp, 
-  Brain, 
+import {
+  LayoutDashboard,
+  Calendar as CalendarIcon,
+  TrendingUp,
+  Brain,
   Settings,
-  PlusSquare
+  PlusSquare,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -42,8 +42,8 @@ export default function Sidebar() {
               key={item.name}
               href={item.href}
               className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all group ${
-                isActive 
-                  ? 'text-primary bg-primary/10 shadow-sm' 
+                isActive
+                  ? 'text-primary bg-primary/10 shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
             >
@@ -51,10 +51,15 @@ export default function Sidebar() {
                 <motion.div
                   layoutId="active-nav"
                   className="absolute left-0 w-1 h-6 bg-primary rounded-r-full"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 />
               )}
-              <item.icon size={18} className={isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'} />
+              <item.icon
+                size={18}
+                className={
+                  isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                }
+              />
               {item.name}
             </Link>
           );
@@ -63,7 +68,9 @@ export default function Sidebar() {
 
       <div className="p-4">
         <div className="bg-muted/30 rounded-2xl p-4 border border-border/50">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mb-2">Account</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mb-2">
+            Account
+          </p>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30" />
             <div>

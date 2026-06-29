@@ -45,9 +45,7 @@ export default function ProfileHeader() {
                 </div>
 
                 {/* Username */}
-                {username && (
-                  <p className="text-sm text-muted-foreground mt-0.5">@{username}</p>
-                )}
+                {username && <p className="text-sm text-muted-foreground mt-0.5">@{username}</p>}
 
                 {/* Meta row */}
                 <div className="flex items-center flex-wrap gap-3 mt-2">
@@ -69,9 +67,7 @@ export default function ProfileHeader() {
                     </a>
                   )}
                   {user?.email && (
-                    <span className="text-xs text-muted-foreground/60 truncate">
-                      {user.email}
-                    </span>
+                    <span className="text-xs text-muted-foreground/60 truncate">{user.email}</span>
                   )}
                 </div>
 

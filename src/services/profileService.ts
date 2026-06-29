@@ -15,18 +15,14 @@ const AVATAR_BUCKET = 'avatars';
 export async function getProfile(userId: string): Promise<Profile | null> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
   if (error) {
     console.error('[profileService] Supabase Error Details:', {
       message: error.message,
       details: error.details,
       hint: error.hint,
-      code: error.code
+      code: error.code,
     });
     // PGRST116 or 406 = no rows returned
     if (error.code === 'PGRST116' || error.code === '406') return null;
@@ -117,10 +113,7 @@ async function compressImage(file: File, maxSide = 512, quality = 0.82): Promise
  * Validate + compress + upload an avatar file to Supabase storage.
  * Returns the public URL and storage path.
  */
-export async function uploadAvatar(
-  userId: string,
-  file: File
-): Promise<AvatarUploadResult> {
+export async function uploadAvatar(userId: string, file: File): Promise<AvatarUploadResult> {
   // Validate type
   if (!ALLOWED_TYPES.includes(file.type)) {
     throw new Error('Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.');
@@ -157,9 +150,7 @@ export async function uploadAvatar(
     throw new Error(uploadError.message);
   }
 
-  const { data: urlData } = supabase.storage
-    .from(AVATAR_BUCKET)
-    .getPublicUrl(storagePath);
+  const { data: urlData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(storagePath);
 
   // Update DB
   await upsertProfile(userId, { avatar_url: urlData.publicUrl });

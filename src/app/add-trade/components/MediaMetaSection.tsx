@@ -1,6 +1,7 @@
 'use client';
 import React, { useRef, useState, useEffect } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { TradeFormData } from './AddTradeForm';
 import { Upload, X, Camera, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -49,6 +50,7 @@ function ImageUploadZone({
   onRemove,
   zoneId,
 }: ImageUploadZoneProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -97,9 +99,9 @@ function ImageUploadZone({
           </div>
           <div>
             <p className="text-xs font-medium text-foreground">
-              Drop images here or click to upload
+              {t('trading.addTrade.media.dropOrClick')}
             </p>
-            <p className="text-xs text-muted-foreground">PNG, JPG, WebP up to 10MB each</p>
+            <p className="text-xs text-muted-foreground">{t('trading.addTrade.media.fileTypes')}</p>
           </div>
         </div>
       </div>
@@ -114,7 +116,7 @@ function ImageUploadZone({
                 type="button"
                 onClick={() => onRemove(i)}
                 className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                aria-label={`Remove image ${i + 1}`}
+                aria-label={t('trading.addTrade.media.removeImage', { index: i + 1 })}
               >
                 <X size={10} className="text-white" />
               </button>
@@ -137,6 +139,7 @@ function StarRating({
   label: string;
   description: string;
 }) {
+  const { t } = useTranslation();
   const [hovered, setHovered] = useState(0);
 
   return (
@@ -152,7 +155,10 @@ function StarRating({
             onMouseLeave={() => setHovered(0)}
             onClick={() => onChange(star)}
             className="text-2xl transition-all duration-200 hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-md"
-            aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+            aria-label={t('trading.addTrade.media.rateStars', {
+              star,
+              plural: star > 1 ? 's' : '',
+            })}
           >
             <span
               className={`${
@@ -174,6 +180,7 @@ function StarRating({
 }
 
 function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
 
   const addTag = (raw: string) => {
@@ -205,8 +212,8 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
 
   return (
     <div>
-      <label className="form-label">Tags</label>
-      <p className="form-helper mb-2">Add up to 10 tags for filtering and pattern recognition</p>
+      <label className="form-label">{t('trading.addTrade.media.tags')}</label>
+      <p className="form-helper mb-2">{t('trading.addTrade.media.tagsHelper')}</p>
 
       {/* Tag chips */}
       <div className="flex flex-wrap gap-1.5 mb-2 min-h-[28px]">
@@ -220,7 +227,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
               type="button"
               onClick={() => removeTag(tag)}
               className="hover:text-red-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-400 rounded-full"
-              aria-label={`Remove tag ${tag}`}
+              aria-label={t('trading.addTrade.media.removeTag', { tag })}
             >
               <X size={10} />
             </button>
@@ -245,7 +252,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
             }
           }}
           className="form-input flex-1 text-sm focus-visible:ring-2 focus-visible:ring-primary"
-          placeholder="Type tag and press Enter or comma"
+          placeholder={t('trading.addTrade.media.tagPlaceholder')}
           maxLength={30}
         />
         <button
@@ -254,13 +261,15 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
           disabled={!input.trim()}
           className="btn-secondary text-sm px-3 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-primary"
         >
-          Add
+          {t('trading.addTrade.media.add')}
         </button>
       </div>
 
       {/* Suggestions */}
       <div className="flex flex-wrap gap-1.5 mt-2">
-        <span className="text-xs text-muted-foreground">Suggestions:</span>
+        <span className="text-xs text-muted-foreground">
+          {t('trading.addTrade.media.suggestions')}:
+        </span>
         {suggestions
           .filter((s) => !tags.includes(s))
           .slice(0, 6)
@@ -288,6 +297,7 @@ export default function MediaMetaSection({
   chartImages,
   setChartImages,
 }: MediaMetaSectionProps) {
+  const { t } = useTranslation();
   const { watch, setValue, control } = form;
   const tags = watch('tags');
   const confidenceLevel = watch('confidenceLevel');
@@ -299,8 +309,8 @@ export default function MediaMetaSection({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ImageUploadZone
           zoneId="upload-entry"
-          label="Entry Screenshot"
-          description="Chart at trade entry point"
+          label={t('trading.addTrade.media.entryScreenshot')}
+          description={t('trading.addTrade.media.entryDescription')}
           icon={<TrendingUp size={16} />}
           files={entryImages}
           onAdd={(files) => setEntryImages((prev) => [...prev, ...files])}
@@ -308,8 +318,8 @@ export default function MediaMetaSection({
         />
         <ImageUploadZone
           zoneId="upload-exit"
-          label="Exit Screenshot"
-          description="Chart at trade exit point"
+          label={t('trading.addTrade.media.exitScreenshot')}
+          description={t('trading.addTrade.media.exitDescription')}
           icon={<TrendingDown size={16} />}
           files={exitImages}
           onAdd={(files) => setExitImages((prev) => [...prev, ...files])}
@@ -317,8 +327,8 @@ export default function MediaMetaSection({
         />
         <ImageUploadZone
           zoneId="upload-chart"
-          label="Full Chart Image"
-          description="Broader context / analysis chart"
+          label={t('trading.addTrade.media.fullChart')}
+          description={t('trading.addTrade.media.fullChartDescription')}
           icon={<Camera size={16} />}
           files={chartImages}
           onAdd={(files) => setChartImages((prev) => [...prev, ...files])}
@@ -338,18 +348,16 @@ export default function MediaMetaSection({
         {/* Confidence Slider */}
         <div>
           <label className="form-label" htmlFor="confidence-level">
-            Confidence Level
+            {t('trading.addTrade.media.confidenceLevel')}
           </label>
-          <p className="form-helper mb-3">
-            How confident were you before entering? (1 = very uncertain, 10 = very confident)
-          </p>
+          <p className="form-helper mb-3">{t('trading.addTrade.media.confidenceHelper')}</p>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>1 — Uncertain</span>
+              <span>{t('trading.addTrade.media.uncertain')}</span>
               <span className="text-foreground font-semibold font-tabular text-base">
                 {confidenceLevel}/10
               </span>
-              <span>10 — Certain</span>
+              <span>{t('trading.addTrade.media.certain')}</span>
             </div>
             <input
               id="confidence-level"
@@ -377,8 +385,8 @@ export default function MediaMetaSection({
         <StarRating
           value={tradeRating}
           onChange={(v) => setValue('tradeRating', v, { shouldDirty: true })}
-          label="Trade Quality Rating"
-          description="Rate the overall quality of your trade execution"
+          label={t('trading.addTrade.media.tradeRating')}
+          description={t('trading.addTrade.media.tradeRatingHelper')}
         />
       </div>
     </div>

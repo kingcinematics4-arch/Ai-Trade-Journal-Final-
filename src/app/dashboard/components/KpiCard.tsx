@@ -32,9 +32,9 @@ const iconBgStyles: Record<string, string> = {
 
 const valueStyles: Record<string, string> = {
   profit: 'text-green-400', // Consistent green-400
-  loss: 'text-red-400',     // Consistent red-400
-  info: 'text-blue-400',    // Consistent blue-400
-  warning: 'text-amber-400',// Consistent amber-400
+  loss: 'text-red-400', // Consistent red-400
+  info: 'text-blue-400', // Consistent blue-400
+  warning: 'text-amber-400', // Consistent amber-400
   neutral: 'text-foreground',
 };
 
@@ -88,7 +88,9 @@ export default function KpiCard({
 
       <div className="flex items-center gap-4">
         <p className="text-sm font-semibold text-muted-foreground/40 truncate flex-1">{subtext}</p>
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[13px] font-bold ${trendColor}`}>
+        <div
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[13px] font-bold ${trendColor}`}
+        >
           {trendIcon}
           <span>{trendValue}</span>
         </div>

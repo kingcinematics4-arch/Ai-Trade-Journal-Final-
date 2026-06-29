@@ -27,14 +27,14 @@ export default function StrategyOverview({ analytics }: { analytics: any }) {
       value: `${bestWr.winRate.toFixed(1)}%`,
       sub: bestWr.name,
       icon: <TrendingUp size={20} className="text-emerald-500" />,
-      trend: 'up'
+      trend: 'up',
     },
     {
       label: 'Worst Win Rate',
       value: `${worstWr.winRate.toFixed(1)}%`,
       sub: worstWr.name,
       icon: <TrendingDown size={20} className="text-rose-500" />,
-      trend: 'down'
+      trend: 'down',
     },
     {
       label: 'Strategy PnL',
@@ -47,7 +47,7 @@ export default function StrategyOverview({ analytics }: { analytics: any }) {
       value: leastUsed.name,
       sub: `${leastUsed.totalTrades} Trades`,
       icon: <Target size={20} className="text-slate-500" />,
-    }
+    },
   ];
 
   return (
@@ -65,13 +65,17 @@ export default function StrategyOverview({ analytics }: { analytics: any }) {
               {card.icon}
             </div>
             {card.trend && (
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${card.trend === 'up' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+              <span
+                className={`text-[10px] font-black px-2 py-0.5 rounded-full ${card.trend === 'up' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}
+              >
                 {card.trend === 'up' ? 'TOP' : 'LOW'}
               </span>
             )}
           </div>
           <div>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{card.label}</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">
+              {card.label}
+            </p>
             <h4 className="text-base font-bold text-white truncate">{card.value}</h4>
             <p className="text-xs text-muted-foreground/60 font-medium mt-1 truncate">{card.sub}</p>
           </div>

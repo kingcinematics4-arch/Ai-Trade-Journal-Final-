@@ -62,9 +62,7 @@ export default function UserProfileSummary({
     <div
       className={cn(
         'min-w-0 flex items-center gap-2.5 sm:gap-3',
-        isStacked
-        ? 'flex-col items-center gap-2 text-center'
-        : '',
+        isStacked ? 'flex-col items-center gap-2 text-center' : '',
         className
       )}
     >

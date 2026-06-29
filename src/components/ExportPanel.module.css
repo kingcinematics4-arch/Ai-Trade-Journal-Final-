@@ -67,12 +67,13 @@
 }
 
 .inputGroup {
-  display: flex; 
+  display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.label, .fieldLabel {
+.label,
+.fieldLabel {
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
@@ -80,7 +81,8 @@
   color: #475569;
 }
 
-.input, .select {
+.input,
+.select {
   background-color: #02040a;
   border: 1px solid #1f2937;
   border-radius: 12px;
@@ -92,7 +94,8 @@
   outline: none;
 }
 
-.input:focus, .select:focus {
+.input:focus,
+.select:focus {
   border-color: #3b82f6;
   background-color: #050814;
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);

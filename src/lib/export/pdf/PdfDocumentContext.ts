@@ -43,10 +43,19 @@ export class PdfDocumentContext {
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(8);
     this.doc.setTextColor(...PDF_THEME.muted);
-    this.doc.text('AI Trade Journal — Confidential Trading Report', PDF_LAYOUT.marginX, PDF_LAYOUT.footerY);
-    this.doc.text(`Page ${this.pageNumber}`, this.pageWidth - PDF_LAYOUT.marginX, PDF_LAYOUT.footerY, {
-      align: 'right',
-    });
+    this.doc.text(
+      'AI Trade Journal — Confidential Trading Report',
+      PDF_LAYOUT.marginX,
+      PDF_LAYOUT.footerY
+    );
+    this.doc.text(
+      `Page ${this.pageNumber}`,
+      this.pageWidth - PDF_LAYOUT.marginX,
+      PDF_LAYOUT.footerY,
+      {
+        align: 'right',
+      }
+    );
   }
 
   addPage(continuationLabel?: string): void {
@@ -71,7 +80,7 @@ export class PdfDocumentContext {
       10,
       PDF_LAYOUT.cardRadius,
       PDF_LAYOUT.cardRadius,
-      'F',
+      'F'
     );
     this.doc.setFont('helvetica', 'bold');
     this.doc.setFontSize(9);
@@ -84,7 +93,8 @@ export class PdfDocumentContext {
   ensureSpace(requiredHeight: number, continuationLabel?: string): void {
     if (this.y + requiredHeight <= this.maxY) return;
 
-    const label = continuationLabel ?? (this.sectionTitle ? `${this.sectionTitle} (continued)` : undefined);
+    const label =
+      continuationLabel ?? (this.sectionTitle ? `${this.sectionTitle} (continued)` : undefined);
     this.addPage(label);
   }
 

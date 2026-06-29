@@ -1,0 +1,234 @@
+{
+  "appName": "AI Journal de Trading",
+  "loading": "Chargement...",
+  "saving": "Enregistrement...",
+  "saved": "Enregistré",
+  "error": "Erreur",
+  "success": "Succès",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "view": "Voir",
+  "create": "Créer",
+  "update": "Mettre à jour",
+  "search": "Rechercher",
+  "filter": "Filtrer",
+  "sort": "Trier",
+  "import": "Importer",
+  "refresh": "Actualiser",
+  "close": "Fermer",
+  "back": "Retour",
+  "next": "Suivant",
+  "previous": "Précédent",
+  "submit": "Soumettre",
+  "reset": "Réinitialiser",
+  "clear": "Effacer",
+  "select": "Sélectionner",
+  "selectAll": "Tout sélectionner",
+  "deselectAll": "Tout désélectionner",
+  "noResults": "Aucun résultat trouvé",
+  "noData": "Aucune donnée disponible",
+  "retry": "Réessayer",
+  "or": "ou",
+  "and": "et",
+  "yes": "Oui",
+  "no": "Non",
+  "maybe": "Peut-être",
+  "today": "Aujourd'hui",
+  "yesterday": "Hier",
+  "tomorrow": "Demain",
+  "thisWeek": "Cette semaine",
+  "thisMonth": "Ce mois",
+  "thisYear": "Cette année",
+  "lastWeek": "La semaine dernière",
+  "lastMonth": "Le mois dernier",
+  "lastYear": "L'année dernière",
+  "custom": "Personnalisé",
+  "all": "Tout",
+  "none": "Aucun",
+  "enabled": "Activé",
+  "disabled": "Désactivé",
+  "active": "Actif",
+  "inactive": "Inactif",
+  "on": "Marche",
+  "off": "Arrêt",
+  "open": "Ouvert",
+  "closed": "Fermé",
+  "pending": "En attente",
+  "completed": "Terminé",
+  "inProgress": "En cours",
+  "failed": "Échoué",
+  "total": "Total",
+  "average": "Moyenne",
+  "count": "Nombre",
+  "percentage": "Pourcentage",
+  "currency": "Devise",
+  "date": "Date",
+  "time": "Heure",
+  "datetime": "Date et heure",
+  "language": "Langue",
+  "theme": "Thème",
+  "darkMode": "Mode sombre",
+  "lightMode": "Mode clair",
+  "system": "Système",
+  "settings": "Paramètres",
+  "profile": "Profil",
+  "logout": "Déconnexion",
+  "login": "Connexion",
+  "signup": "Inscription",
+  "signIn": "Connexion",
+  "signUp": "Inscription",
+  "signOut": "Déconnexion",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "username": "Nom d'utilisateur",
+  "fullName": "Nom complet",
+  "rememberMe": "Se souvenir de moi",
+  "forgotPassword": "Mot de passe oublié ?",
+  "resetPassword": "Réinitialiser le mot de passe",
+  "changePassword": "Changer le mot de passe",
+  "confirmPassword": "Confirmer le mot de passe",
+  "welcome": "Bienvenue",
+  "welcomeBack": "Bon retour",
+  "goodMorning": "Bonjour",
+  "goodAfternoon": "Bon après-midi",
+  "goodEvening": "Bonne soirée",
+  "goodNight": "Bonne nuit",
+  "saaSIntelligence": "Intelligence SaaS",
+  "sidebar": {
+    "sections": {
+      "trading": "Trading",
+      "account": "Compte"
+    },
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "addTrade": "Ajouter un trade",
+      "tradeHistory": "Historique des trades",
+      "analytics": "Analyses",
+      "calendar": "Calendrier",
+      "strategies": "Stratégies",
+      "aiCoach": "Coach IA",
+      "exports": "Exportations",
+      "goals": "Objectifs",
+      "notifications": "Notifications",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    },
+    "aria": {
+      "openMenu": "Ouvrir le menu",
+      "closeMenu": "Fermer le menu",
+      "expandSidebar": "Agrandir la barre latérale",
+      "collapseSidebar": "Réduire la barre latérale"
+    }
+  },
+  "legal": {
+    "title": "LÉGAL ET CONFORMITÉ",
+    "subtitle": "Cadre de Gouvernance Institutionnelle",
+    "tos": {
+      "title": "Conditions d'Utilisation",
+      "userResponsibilities": {
+        "title": "1. Responsabilités de l'Utilisateur",
+        "content": "Les utilisateurs sont responsables de maintenir la confidentialité de leurs identifiants et de toutes les activités effectuées via leur compte. Vous devez fournir des informations précises lors de l'inscription."
+      },
+      "acceptableUse": {
+        "title": "2. Utilisation Acceptable",
+        "content": "La plateforme est destinée à l'analyse de trading personnel. L'ingénierie inverse, le scraping de données automatisé ou l'utilisation du service pour fournir des conseils financiers non autorisés est strictement interdit."
+      },
+      "subscription": {
+        "title": "3. Abonnement et Facturation",
+        "content": "L'accès aux fonctionnalités premium nécessite un abonnement valide. Les frais ne sont pas remboursables sauf indication contraire dans la Politique de Remboursement. Nous nous réservons le droit de modifier les tarifs avec un préavis de 30 jours."
+      }
+    },
+    "privacy": {
+      "title": "Politique de Confidentialité",
+      "dataCollection": {
+        "title": "Collecte de Données",
+        "content": "Nous collectons les données de trading, les détails d'authentification et les métriques d'utilisation de la plateforme pour fournir des insights IA. Vos données de trading sont chiffrées au repos et en transit."
+      },
+      "analytics": {
+        "title": "Analytique et Cookies",
+        "content": "Nous utilisons des cookies essentiels pour la gestion des sessions et l'analytique anonymisée pour améliorer les performances. Nous ne vendons pas les données des utilisateurs aux annonceurs tiers."
+      },
+      "rights": {
+        "title": "Vos Droits",
+        "content": "Vous avez le droit d'exporter vos données (via le Moteur d'Export) ou de demander la suppression permanente de votre compte à tout moment via le panneau de paramètres."
+      }
+    },
+    "risk": {
+      "title": "Divulgation des Risques",
+      "warning": "Avertissement de Risque Élevé:",
+      "warningContent": "Le trading d'instruments financiers implique un risque significatif de perte. Vous ne devez trader qu'avec du capital que vous pouvez vous permettre de perdre.",
+      "educational": {
+        "title": "Fins Éducatifs",
+        "content": "AITradeJournal fournit des outils d'analyse et de journalisation pour un usage éducatif. Nous ne garantissons pas la rentabilité, et les performances passées ne sont pas indicatives des résultats futurs."
+      },
+      "noAdvice": {
+        "title": "Pas de Conseil Financier",
+        "content": "Notre Coach IA et nos métriques d'analyse sont basés sur des modèles mathématiques de vos données. Ils ne constituent pas des conseils financiers, d'investissement ou juridiques."
+      }
+    },
+    "disclaimer": {
+      "title": "Avertissement",
+      "toolLimitation": {
+        "title": "Limitation de l'Outil",
+        "content": "Cette plateforme est un outil de journalisation et d'analyse de données. Ce n'est PAS une plateforme de trading, un courtier ou un exchange. Nous n'exécutons pas de trades et ne détenons pas de fonds utilisateurs."
+      },
+      "accuracy": {
+        "title": "Précision des Données",
+        "content": "Bien que nous nous efforcions d'atteindre une précision de 100%, les utilisateurs doivent vérifier les calculs critiques. Nous ne sommes pas responsables des pertes résultant d'erreurs de saisie de données ou de latence du système."
+      }
+    },
+    "refund": {
+      "title": "Politique de Remboursement",
+      "cancellation": {
+        "title": "Annulation",
+        "content": "Vous pouvez annuler votre abonnement à tout moment. Vous conserverez l'accès jusqu'à la fin du cycle de facturation actuel. Aucun remboursement partiel n'est émis pour le temps non utilisé."
+      },
+      "exceptions": {
+        "title": "Exceptions",
+        "content": "Les remboursements peuvent être accordés dans les 7 jours suivant l'achat initial si le service est techniquement non fonctionnel et notre équipe de support ne peut pas résoudre le problème."
+      }
+    },
+    "contact": {
+      "title": "Contact et Informations Légales",
+      "support": {
+        "title": "Support",
+        "email": "Email: support@aitradejournal.com",
+        "responseTime": "Temps de réponse: < 24 heures (Lun-Ven)"
+      },
+      "business": {
+        "title": "Informations Entreprise",
+        "company": "AITrade Intelligence Systems LLC",
+        "location": "Enregistré au Delaware, USA"
+      }
+    },
+    "footer": {
+      "tos": "Conditions",
+      "privacy": "Confidentialité",
+      "risk": "Risque",
+      "disclaimer": "Avertissement"
+    }
+  },
+  "export": {
+    "title": "Architecte d'Export",
+    "filename": "Nom de Fichier",
+    "outputFormat": "Format de Sortie",
+    "exportFormat": "Format d'Export",
+    "pdfReportType": "Type de Rapport PDF",
+    "exportFields": "Champs d'Export",
+    "essentials": "Essentiels",
+    "all": "Tout",
+    "clear": "Effacer",
+    "editBin": "Modifier la Corbeille",
+    "searchPlaceholder": "Rechercher des champs optionnels...",
+    "mandatoryFields": "Champs Obligatoires",
+    "optionalDataPoints": "Points de Données Optionnels",
+    "noFieldsMatch": "Aucun champ ne correspond",
+    "selectedFormat": "Format Sélectionné",
+    "reportDepth": "Profondeur du Rapport",
+    "cancel": "Annuler",
+    "generateExport": "Générer Export Institutionnel"
+  }
+}

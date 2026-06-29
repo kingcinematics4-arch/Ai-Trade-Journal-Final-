@@ -1,0 +1,75 @@
+{
+  "hero": {
+    "title": "通过AI驱动的洞察掌握您的交易",
+    "subtitle": "通过智能日志记录和AI驱动的分析来跟踪、分析和优化您的交易表现",
+    "cta": "开始免费试用",
+    "secondaryCta": "观看演示"
+  },
+  "features": {
+    "title": "更聪明交易所需的一切",
+    "subtitle": "为想要提高表现的专业交易员设计的强大功能",
+    "tradeJournal": {
+      "title": "交易日志",
+      "description": "在结构化日志中记录每笔交易的入场、出场、笔记、情绪和执行细节。"
+    },
+    "aiCoach": {
+      "title": "AI 教练",
+      "description": "AI 驱动的交易心理学和绩效分析，识别优势、弱点和行为模式。"
+    },
+    "strategyManagement": {
+      "title": "策略管理",
+      "description": "创建、组织、测试和跟踪交易策略，具有详细的绩效统计和历史结果。"
+    },
+    "advancedAnalytics": {
+      "title": "高级分析",
+      "description": "深度分析，包括权益曲线、胜率、利润因子、回撤、期望值和绩效指标。"
+    },
+    "riskManagement": {
+      "title": "风险管理",
+      "description": "监控 R 倍数和投资组合热度。通过机构级风险监督确保生存。"
+    },
+    "exportEngine": {
+      "title": "导出引擎",
+      "description": "生成专业的 PDF 或 XLSX 报告，用于绩效审查或税务合规。"
+    }
+  },
+  "testimonials": {
+    "title": "受专业交易员信赖",
+    "subtitle": "看看交易员对AI交易日志的评价",
+    "items": [
+      {
+        "name": "Sarah Mitchell",
+        "role": "专业日内交易员",
+        "content": "AI交易日志彻底改变了我对待交易的方式。AI洞察帮助我发现了以前从未注意到的模式。"
+      },
+      {
+        "name": "James Rodriguez",
+        "role": "波段交易员",
+        "content": "全面的分析和日志记录功能帮助我在短短3个月内将胜率提高了15%。"
+      },
+      {
+        "name": "Emily Chen",
+        "role": "算法交易员",
+        "content": "终于有一个理解严肃交易员需求的日志了。回测和策略分析工具令人难以置信。"
+      }
+    ]
+  },
+  "pricing": {
+    "title": "简单透明的定价",
+    "subtitle": "选择适合您交易需求的计划",
+    "monthly": "按月",
+    "yearly": "按年",
+    "popular": "最受欢迎",
+    "choosePlan": "选择计划"
+  },
+  "footer": {
+    "about": "关于",
+    "product": "产品",
+    "resources": "资源",
+    "legal": "法律",
+    "contact": "联系",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "copyright": "© 2024 AI交易日志。保留所有权利。"
+  }
+}

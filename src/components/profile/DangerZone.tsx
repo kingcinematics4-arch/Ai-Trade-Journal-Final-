@@ -108,7 +108,10 @@ export default function DangerZone() {
         <>
           <div
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
-            onClick={() => { setDeleteConfirmOpen(false); setConfirmText(''); }}
+            onClick={() => {
+              setDeleteConfirmOpen(false);
+              setConfirmText('');
+            }}
             aria-hidden
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -125,18 +128,23 @@ export default function DangerZone() {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-foreground">Delete Account</h3>
-                  <p className="text-xs text-muted-foreground">This action is permanent and irreversible.</p>
+                  <p className="text-xs text-muted-foreground">
+                    This action is permanent and irreversible.
+                  </p>
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground mb-4">
                 All your trades, analytics, goals, and profile data will be permanently deleted.
-                Your account for <span className="text-foreground font-semibold">{user?.email}</span> cannot be recovered.
+                Your account for{' '}
+                <span className="text-foreground font-semibold">{user?.email}</span> cannot be
+                recovered.
               </p>
 
               <div className="space-y-2 mb-5">
                 <label className="text-xs font-semibold text-muted-foreground">
-                  Type <span className="text-red-400 font-bold font-mono">{CONFIRM_PHRASE}</span> to confirm:
+                  Type <span className="text-red-400 font-bold font-mono">{CONFIRM_PHRASE}</span> to
+                  confirm:
                 </label>
                 <input
                   type="text"
@@ -151,7 +159,10 @@ export default function DangerZone() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => { setDeleteConfirmOpen(false); setConfirmText(''); }}
+                  onClick={() => {
+                    setDeleteConfirmOpen(false);
+                    setConfirmText('');
+                  }}
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/[0.05] border border-white/[0.07] transition-all"
                 >
                   Cancel

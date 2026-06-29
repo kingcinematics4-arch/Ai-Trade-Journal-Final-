@@ -11,9 +11,7 @@ function AuthCallbackContent() {
   const supabase = useMemo(() => createClient(), []);
 
   const handled = useRef(false);
-  const [statusMessage, setStatusMessage] = useState(
-    'Finalizing security authorization...'
-  );
+  const [statusMessage, setStatusMessage] = useState('Finalizing security authorization...');
 
   useEffect(() => {
     if (handled.current) return;
@@ -37,8 +35,7 @@ function AuthCallbackContent() {
         if (code) {
           setStatusMessage('Exchanging credentials...');
 
-          const { error } =
-            await supabase.auth.exchangeCodeForSession(code);
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
 
           if (error) {
             console.error('[auth] exchange error:', error);
@@ -49,8 +46,7 @@ function AuthCallbackContent() {
 
         setStatusMessage('Checking session...');
 
-        const { data, error: sessionError } =
-          await supabase.auth.getSession();
+        const { data, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
           console.error('[auth] session error:', sessionError);

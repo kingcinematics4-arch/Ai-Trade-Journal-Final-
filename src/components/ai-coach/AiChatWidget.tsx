@@ -6,23 +6,29 @@ import { MessageSquare, X, Send, Bot } from 'lucide-react';
 export default function AiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'ai' | 'user'; text: string }[]>([
-    { role: 'ai', text: "Hello! I'm your AI Trading Coach. I've analyzed your recent trades. What would you like to know?" }
+    {
+      role: 'ai',
+      text: "Hello! I'm your AI Trading Coach. I've analyzed your recent trades. What would you like to know?",
+    },
   ]);
   const [input, setInput] = useState('');
 
   const handleSend = () => {
     if (!input.trim()) return;
-    
+
     // Add user message
-    setMessages(prev => [...prev, { role: 'user', text: input }]);
+    setMessages((prev) => [...prev, { role: 'user', text: input }]);
     setInput('');
 
     // Simulate AI response
     setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'ai', 
-        text: "I'm a simulated widget for now. Connect me to an LLM backend to answer specific questions about your trading data!" 
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'ai',
+          text: "I'm a simulated widget for now. Connect me to an LLM backend to answer specific questions about your trading data!",
+        },
+      ]);
     }, 1000);
   };
 
@@ -43,7 +49,7 @@ export default function AiChatWidget() {
                 <Bot className="w-5 h-5" />
                 <h3 className="font-semibold">AI Assistant</h3>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 hover:bg-black/10 rounded-md transition-colors"
               >
@@ -54,12 +60,17 @@ export default function AiChatWidget() {
             {/* Chat Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
               {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-                    msg.role === 'user' 
-                      ? 'bg-primary text-primary-foreground rounded-br-sm' 
-                      : 'bg-muted text-foreground rounded-bl-sm border border-border'
-                  }`}>
+                <div
+                  key={i}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
+                      msg.role === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-br-sm'
+                        : 'bg-muted text-foreground rounded-bl-sm border border-border'
+                    }`}
+                  >
                     {msg.text}
                   </div>
                 </div>

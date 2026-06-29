@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { TradeFormData } from './AddTradeForm';
 import SearchableSelect from './SearchableSelect';
 
@@ -54,6 +55,7 @@ const defaultMistakes = [
 ];
 
 export default function PsychologySection({ form }: PsychologySectionProps) {
+  const { t } = useTranslation();
   const {
     register,
     watch,
@@ -71,16 +73,23 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
 
   useEffect(() => {
     const s = localStorage.getItem('v2-strategies');
-    setStrategies(s ? JSON.parse(s) : defaultStrategies.map(x => ({ id: x, label: x, value: x })));
-    
+    setStrategies(
+      s ? JSON.parse(s) : defaultStrategies.map((x) => ({ id: x, label: x, value: x }))
+    );
+
     const m = localStorage.getItem('v2-mistakes');
-    setMistakes(m ? JSON.parse(m) : defaultMistakes.map(x => ({ id: x, label: x, value: x })));
-    
+    setMistakes(m ? JSON.parse(m) : defaultMistakes.map((x) => ({ id: x, label: x, value: x })));
+
     const e = localStorage.getItem('v2-emotions');
-    setEmotions(e ? JSON.parse(e) : defaultEmotions.map(x => ({ id: x, label: x, value: x })));
+    setEmotions(e ? JSON.parse(e) : defaultEmotions.map((x) => ({ id: x, label: x, value: x })));
   }, []);
 
-  const handleAdd = (val: string, setter: any, storageKey: string, setValueKey: keyof TradeFormData) => {
+  const handleAdd = (
+    val: string,
+    setter: any,
+    storageKey: string,
+    setValueKey: keyof TradeFormData
+  ) => {
     const name = val?.trim();
     if (!name) return;
     const newItem = { id: crypto.randomUUID(), label: name, value: name };
@@ -93,14 +102,20 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
     setValue(setValueKey, name, { shouldDirty: true, shouldValidate: true });
   };
 
-  const handleDelete = (item: any, setter: any, storageKey: string, setValueKeys: (keyof TradeFormData)[]) => {
-    if (!window.confirm(`Remove "${item.label}" from options?`)) return;
+  const handleDelete = (
+    item: any,
+    setter: any,
+    storageKey: string,
+    setValueKeys: (keyof TradeFormData)[]
+  ) => {
+    if (!window.confirm(t('trading.addTrade.psychology.confirmRemove', { item: item.label })))
+      return;
     setter((prev: any) => {
       const updated = prev.filter((x: any) => x.id !== item.id);
       localStorage.setItem(storageKey, JSON.stringify(updated));
       return updated;
     });
-    setValueKeys.forEach(key => {
+    setValueKeys.forEach((key) => {
       if (watch(key) === item.value) {
         setValue(key, '', { shouldDirty: true, shouldValidate: true });
       }
@@ -111,8 +126,8 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SearchableSelect
-          label="Strategy Used"
-          helperText="Which trading strategy was applied"
+          label={t('trading.addTrade.psychology.strategyUsed')}
+          helperText={t('trading.addTrade.psychology.strategyHelper')}
           items={strategies}
           value={selectedStrategy}
           onSelect={(val) => setValue('strategyUsed', val, { shouldDirty: true })}
@@ -122,8 +137,8 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
         />
 
         <SearchableSelect
-          label="Mistake Category"
-          helperText="Identify what went wrong (if anything)"
+          label={t('trading.addTrade.psychology.mistakeCategory')}
+          helperText={t('trading.addTrade.psychology.mistakeHelper')}
           items={mistakes}
           value={selectedMistake}
           onSelect={(val) => setValue('mistakeCategory', val, { shouldDirty: true })}
@@ -136,23 +151,27 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
       {/* Emotions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SearchableSelect
-          label="Emotion Before Trade"
-          helperText="How were you feeling when you entered?"
+          label={t('trading.addTrade.psychology.emotionBefore')}
+          helperText={t('trading.addTrade.psychology.emotionBeforeHelper')}
           items={emotions}
           value={selectedEmotionBefore}
           onSelect={(val) => setValue('emotionBefore', val, { shouldDirty: true })}
-          onDelete={(item) => handleDelete(item, setEmotions, 'v2-emotions', ['emotionBefore', 'emotionAfter'])}
+          onDelete={(item) =>
+            handleDelete(item, setEmotions, 'v2-emotions', ['emotionBefore', 'emotionAfter'])
+          }
           onAddCustom={(val) => handleAdd(val, setEmotions, 'v2-emotions', 'emotionBefore')}
           error={errors.emotionBefore?.message}
         />
 
         <SearchableSelect
-          label="Emotion After Trade"
-          helperText="How did you feel after closing?"
+          label={t('trading.addTrade.psychology.emotionAfter')}
+          helperText={t('trading.addTrade.psychology.emotionAfterHelper')}
           items={emotions}
           value={selectedEmotionAfter}
           onSelect={(val) => setValue('emotionAfter', val, { shouldDirty: true })}
-          onDelete={(item) => handleDelete(item, setEmotions, 'v2-emotions', ['emotionBefore', 'emotionAfter'])}
+          onDelete={(item) =>
+            handleDelete(item, setEmotions, 'v2-emotions', ['emotionBefore', 'emotionAfter'])
+          }
           onAddCustom={(val) => handleAdd(val, setEmotions, 'v2-emotions', 'emotionAfter')}
           error={errors.emotionAfter?.message}
         />
@@ -161,16 +180,14 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
       {/* Lessons Learned */}
       <div>
         <label className="form-label" htmlFor="lessons-learned">
-          Lessons Learned
+          {t('trading.addTrade.psychology.lessonsLearned')}
         </label>
-        <p className="form-helper">
-          What would you do differently? This feeds AI coaching analysis.
-        </p>
+        <p className="form-helper">{t('trading.addTrade.psychology.lessonsHelper')}</p>
         <textarea
           id="lessons-learned"
           rows={3}
           className="form-input mt-1.5 resize-none transition-all"
-          placeholder="e.g. I should have waited for a confirmed close above resistance before entering. The volume wasn't supporting the breakout."
+          placeholder={t('trading.addTrade.psychology.lessonsPlaceholder')}
           {...register('lessonsLearned')}
         />
       </div>
@@ -178,14 +195,14 @@ export default function PsychologySection({ form }: PsychologySectionProps) {
       {/* Notes */}
       <div>
         <label className="form-label" htmlFor="trade-notes">
-          Additional Notes
+          {t('trading.addTrade.psychology.notes')}
         </label>
-        <p className="form-helper">Market context, news events, or anything else relevant</p>
+        <p className="form-helper">{t('trading.addTrade.psychology.notesHelper')}</p>
         <textarea
           id="trade-notes"
           rows={2}
           className="form-input mt-1.5 resize-none transition-all"
-          placeholder="e.g. Fed announcement at 2PM caused unexpected volatility. News-driven move, not pure technical."
+          placeholder={t('trading.addTrade.psychology.notesPlaceholder')}
           {...register('notes')}
         />
       </div>

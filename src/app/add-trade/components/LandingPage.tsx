@@ -2,72 +2,78 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  BookOpen, 
-  BrainCircuit, 
-  Target, 
-  BarChart3, 
-  ShieldCheck, 
-  Download, 
-  ArrowRight, 
+import {
+  BookOpen,
+  BrainCircuit,
+  Target,
+  BarChart3,
+  ShieldCheck,
+  Download,
+  ArrowRight,
   TrendingUp,
   Activity,
   Users,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const features = [
   {
-    title: "Trade Logging",
-    description: "Intuitive interface designed for institutional speed. Record entries, exits, and context in seconds.",
+    title: 'Trade Logging',
+    description:
+      'Intuitive interface designed for institutional speed. Record entries, exits, and context in seconds.',
     icon: <BookOpen className="text-blue-400" />,
   },
   {
-    title: "AI Analysis",
-    description: "Identify hidden patterns. Our neural engine detects emotional triggers and execution flaws automatically.",
+    title: 'AI Analysis',
+    description:
+      'Identify hidden patterns. Our neural engine detects emotional triggers and execution flaws automatically.',
     icon: <BrainCircuit className="text-emerald-400" />,
   },
   {
-    title: "Strategy Tracking",
-    description: "Compare performance across different setups. Isolate your true edge with granular data tagging.",
+    title: 'Strategy Tracking',
+    description:
+      'Compare performance across different setups. Isolate your true edge with granular data tagging.',
     icon: <Target className="text-indigo-400" />,
   },
   {
-    title: "Advanced Analytics",
-    description: "Visual summaries of Expectancy, Profit Factor, and Drawdown. Professional metrics, simplified.",
+    title: 'Advanced Analytics',
+    description:
+      'Visual summaries of Expectancy, Profit Factor, and Drawdown. Professional metrics, simplified.',
     icon: <BarChart3 className="text-purple-400" />,
   },
   {
-    title: "Risk Management",
-    description: "Monitor R-multiple and portfolio heat. Ensure survival with institutional-grade risk oversight.",
+    title: 'Risk Management',
+    description:
+      'Monitor R-multiple and portfolio heat. Ensure survival with institutional-grade risk oversight.',
     icon: <ShieldCheck className="text-rose-400" />,
   },
   {
-    title: "Institutional Export",
-    description: "Generate professional PDF or XLSX reports for performance reviews or tax compliance.",
+    title: 'Institutional Export',
+    description:
+      'Generate professional PDF or XLSX reports for performance reviews or tax compliance.',
     icon: <Download className="text-amber-400" />,
-  }
+  },
 ];
 
 const stats = [
-  { label: "Trades Tracked", value: "2.4M+", icon: <Activity size={16} /> },
-  { label: "Avg. Edge Growth", value: "18.5%", icon: <TrendingUp size={16} /> },
-  { label: "Active Traders", value: "12k+", icon: <Users size={16} /> },
-  { label: "Success Rate", value: "99.9%", icon: <CheckCircle2 size={16} /> },
+  { label: 'Trades Tracked', value: '2.4M+', icon: <Activity size={16} /> },
+  { label: 'Avg. Edge Growth', value: '18.5%', icon: <TrendingUp size={16} /> },
+  { label: 'Active Traders', value: '12k+', icon: <Users size={16} /> },
+  { label: 'Success Rate', value: '99.9%', icon: <CheckCircle2 size={16} /> },
 ];
 
 export default function LandingPage() {
@@ -84,21 +90,21 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 overflow-hidden">
         {/* Animated Background Gradients */}
         <div className="absolute inset-0 z-0">
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3] 
+              opacity: [0.3, 0.5, 0.3],
             }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-600/20 blur-[120px]" 
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-600/20 blur-[120px]"
           />
-          <motion.div 
-            animate={{ 
+          <motion.div
+            animate={{
               scale: [1.2, 1, 1.2],
-              opacity: [0.2, 0.4, 0.2] 
+              opacity: [0.2, 0.4, 0.2],
             }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/20 blur-[120px]" 
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/20 blur-[120px]"
           />
         </div>
 
@@ -109,10 +115,12 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
           >
             <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Institutional Terminal v1.4</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">
+              Institutional Terminal v1.4
+            </span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.8 }}
@@ -124,22 +132,23 @@ export default function LandingPage() {
             </span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
             className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl font-medium leading-relaxed mb-12"
           >
-            Transform your trading data into a competitive edge. Our AI-powered journal isolates execution flaws and psychological triggers before they become habits.
+            Transform your trading data into a competitive edge. Our AI-powered journal isolates
+            execution flaws and psychological triggers before they become habits.
           </motion.p>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
           >
-            <button 
+            <button
               onClick={scrollToAuth}
               className="w-full sm:w-auto px-10 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs rounded-2xl hover:bg-blue-500 hover:text-white transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3"
             >
@@ -159,15 +168,15 @@ export default function LandingPage() {
             <div className="relative rounded-[32px] border border-white/10 bg-[#070911]/80 backdrop-blur-3xl p-2 shadow-2xl">
               <div className="rounded-[24px] overflow-hidden border border-white/5 bg-[#0b0f1a]">
                 <div className="aspect-video w-full bg-gradient-to-br from-slate-900 to-black flex items-center justify-center p-12">
-                   {/* Abstract Dashboard Mockup Elements */}
-                   <div className="w-full h-full grid grid-cols-3 gap-4">
-                      <div className="col-span-2 h-full rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                      <div className="space-y-4">
-                        <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                        <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                        <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-                      </div>
-                   </div>
+                  {/* Abstract Dashboard Mockup Elements */}
+                  <div className="w-full h-full grid grid-cols-3 gap-4">
+                    <div className="col-span-2 h-full rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
+                    <div className="space-y-4">
+                      <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
+                      <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
+                      <div className="h-1/3 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -180,7 +189,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
             {stats.map((stat, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -190,9 +199,13 @@ export default function LandingPage() {
               >
                 <div className="flex items-center gap-2 text-blue-500 mb-2">
                   {stat.icon}
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">{stat.label}</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                    {stat.label}
+                  </span>
                 </div>
-                <span className="text-4xl md:text-5xl font-black tracking-tighter">{stat.value}</span>
+                <span className="text-4xl md:text-5xl font-black tracking-tighter">
+                  {stat.value}
+                </span>
               </motion.div>
             ))}
           </div>
@@ -203,11 +216,15 @@ export default function LandingPage() {
       <section className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">THE ARCHITECTURE OF EDGE</h2>
-            <p className="text-slate-500 font-medium uppercase tracking-[0.3em] text-[10px]">Professional tools for disciplined execution</p>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">
+              THE ARCHITECTURE OF EDGE
+            </h2>
+            <p className="text-slate-500 font-medium uppercase tracking-[0.3em] text-[10px]">
+              Professional tools for disciplined execution
+            </p>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             variants={staggerContainer}
             initial="initial"
             whileInView="animate"
@@ -236,7 +253,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="py-32 px-6">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -244,11 +261,14 @@ export default function LandingPage() {
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2" />
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]">READY TO MASTER <br /> YOUR PERFORMANCE?</h2>
+            <h2 className="text-4xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.9]">
+              READY TO MASTER <br /> YOUR PERFORMANCE?
+            </h2>
             <p className="text-white/70 text-lg md:text-xl font-medium max-w-xl mx-auto mb-12 leading-relaxed">
-              Join 12,000+ traders using AI to eliminate emotional bias and achieve consistent profitability.
+              Join 12,000+ traders using AI to eliminate emotional bias and achieve consistent
+              profitability.
             </p>
-            <button 
+            <button
               onClick={scrollToAuth}
               className="px-12 py-6 bg-white text-black font-black uppercase tracking-[0.2em] text-sm rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl"
             >

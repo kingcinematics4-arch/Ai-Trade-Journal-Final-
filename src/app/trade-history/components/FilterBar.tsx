@@ -67,7 +67,10 @@ export default function FilterBar({
       {/* Row 1: Search + Status + Direction */}
       <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
         <div className="relative flex-grow max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
             placeholder="Search assets or notes..."

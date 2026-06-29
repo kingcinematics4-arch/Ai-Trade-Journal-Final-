@@ -1,12 +1,27 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Mail, Lock, Bell, Shield, Moon, Sun, Monitor, ChevronRight, Loader2, Check, Globe, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Mail,
+  Lock,
+  Bell,
+  Shield,
+  Moon,
+  Sun,
+  Monitor,
+  ChevronRight,
+  Loader2,
+  Check,
+  Globe,
+  Clock,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { sendPasswordReset, updateEmail } from '@/services/profileService';
 import { NotificationSettings } from '@/services/notificationService';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
+import { locales, localeNames, localeFlags } from '@/i18n/config';
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
 
@@ -23,14 +38,10 @@ function ToggleRow({ id, label, description, checked, onChange, icon }: ToggleRo
   return (
     <div className="flex items-center justify-between gap-4 py-3.5">
       <div className="flex items-start gap-3 min-w-0">
-        {icon && (
-          <span className="mt-0.5 text-muted-foreground/60 flex-shrink-0">{icon}</span>
-        )}
+        {icon && <span className="mt-0.5 text-muted-foreground/60 flex-shrink-0">{icon}</span>}
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">{label}</p>
-          {description && (
-            <p className="text-xs text-muted-foreground/60 mt-0.5">{description}</p>
-          )}
+          {description && <p className="text-xs text-muted-foreground/60 mt-0.5">{description}</p>}
         </div>
       </div>
       <button
@@ -86,16 +97,10 @@ const TIMEZONES = [
   { value: 'Asia/Dubai', label: 'Dubai (GST)' },
 ];
 
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Español' },
-  { value: 'fr', label: 'Français' },
-  { value: 'de', label: 'Deutsch' },
-];
-
 export default function AccountSettings() {
   const { user } = useAuth();
   const { settings, updateSettings } = useNotifications();
+  const { locale, setLocale } = useTranslation();
 
   // Email change
   const [newEmail, setNewEmail] = useState('');
@@ -153,7 +158,9 @@ export default function AccountSettings() {
               <Mail size={16} className="mt-0.5 text-muted-foreground/60 flex-shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">Email Address</p>
-                <p className="text-xs text-muted-foreground/60 truncate mt-0.5">{user?.email ?? '—'}</p>
+                <p className="text-xs text-muted-foreground/60 truncate mt-0.5">
+                  {user?.email ?? '—'}
+                </p>
               </div>
             </div>
             <button
@@ -161,7 +168,11 @@ export default function AccountSettings() {
               onClick={() => setShowEmailForm(!showEmailForm)}
               className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
             >
-              Change <ChevronRight size={13} className={`transition-transform ${showEmailForm ? 'rotate-90' : ''}`} />
+              Change{' '}
+              <ChevronRight
+                size={13}
+                className={`transition-transform ${showEmailForm ? 'rotate-90' : ''}`}
+              />
             </button>
           </div>
 
@@ -212,17 +223,61 @@ export default function AccountSettings() {
 
       {/* Notifications */}
       <Section title="Notifications">
-        <ToggleRow id="notif-enabled" label="Push Notifications" description="Toggle all app alerts" checked={settings?.notifications_enabled ?? true} onChange={(v) => handleToggle('notifications_enabled', v)} icon={<Bell size={14} />} />
-        <ToggleRow id="notif-trade" label="Trade Alerts" description="Get notified on trade events" checked={settings?.trade_alerts ?? true} onChange={(v) => handleToggle('trade_alerts', v)} />
-        <ToggleRow id="notif-pnl" label="Performance Alerts" description="Alerts for P&L milestones" checked={settings?.pnl_alerts ?? true} onChange={(v) => handleToggle('pnl_alerts', v)} />
-        <ToggleRow id="notif-system" label="System Updates" description="Major app updates and news" checked={settings?.system_updates ?? true} onChange={(v) => handleToggle('system_updates', v)} />
-        <ToggleRow id="notif-activity" label="Activity Alerts" description="Notifications for account activity" checked={settings?.activity_alerts ?? true} onChange={(v) => handleToggle('activity_alerts', v)} />
+        <ToggleRow
+          id="notif-enabled"
+          label="Push Notifications"
+          description="Toggle all app alerts"
+          checked={settings?.notifications_enabled ?? true}
+          onChange={(v) => handleToggle('notifications_enabled', v)}
+          icon={<Bell size={14} />}
+        />
+        <ToggleRow
+          id="notif-trade"
+          label="Trade Alerts"
+          description="Get notified on trade events"
+          checked={settings?.trade_alerts ?? true}
+          onChange={(v) => handleToggle('trade_alerts', v)}
+        />
+        <ToggleRow
+          id="notif-pnl"
+          label="Performance Alerts"
+          description="Alerts for P&L milestones"
+          checked={settings?.pnl_alerts ?? true}
+          onChange={(v) => handleToggle('pnl_alerts', v)}
+        />
+        <ToggleRow
+          id="notif-system"
+          label="System Updates"
+          description="Major app updates and news"
+          checked={settings?.system_updates ?? true}
+          onChange={(v) => handleToggle('system_updates', v)}
+        />
+        <ToggleRow
+          id="notif-activity"
+          label="Activity Alerts"
+          description="Notifications for account activity"
+          checked={settings?.activity_alerts ?? true}
+          onChange={(v) => handleToggle('activity_alerts', v)}
+        />
       </Section>
 
       {/* Privacy */}
       <Section title="Privacy">
-        <ToggleRow id="privacy-public" label="Public Profile" description="Allow others to view your profile" checked={settings?.profile_public ?? false} onChange={(v) => handleToggle('profile_public', v)} icon={<Shield size={14} />} />
-        <ToggleRow id="privacy-stats" label="Show Trading Stats" description="Display your stats publicly" checked={settings?.show_stats ?? true} onChange={(v) => handleToggle('show_stats', v)} />
+        <ToggleRow
+          id="privacy-public"
+          label="Public Profile"
+          description="Allow others to view your profile"
+          checked={settings?.profile_public ?? false}
+          onChange={(v) => handleToggle('profile_public', v)}
+          icon={<Shield size={14} />}
+        />
+        <ToggleRow
+          id="privacy-stats"
+          label="Show Trading Stats"
+          description="Display your stats publicly"
+          checked={settings?.show_stats ?? true}
+          onChange={(v) => handleToggle('show_stats', v)}
+        />
       </Section>
 
       {/* Theme */}
@@ -238,13 +293,16 @@ export default function AccountSettings() {
                 <Globe size={13} /> Language
               </label>
               <select
-                value={settings?.language || 'en'}
-                onChange={(e) => updateSettings({ language: e.target.value })}
+                value={locale}
+                onChange={async (e) => {
+                  const newLocale = e.target.value as typeof locales[number];
+                  await setLocale(newLocale);
+                }}
                 className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
               >
-                {LANGUAGES.map((lang) => (
-                  <option key={lang.value} value={lang.value} className="bg-neutral-900">
-                    {lang.label}
+                {locales.map((loc) => (
+                  <option key={loc} value={loc} className="bg-neutral-900">
+                    {localeFlags[loc]} {localeNames[loc]}
                   </option>
                 ))}
               </select>

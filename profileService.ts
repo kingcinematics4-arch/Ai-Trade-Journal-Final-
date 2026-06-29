@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase';
 
 /**
- * Updates the user's email address. 
+ * Updates the user's email address.
  * Supabase will send a confirmation email to both the old and new addresses by default.
  */
 export async function updateEmail(newEmail: string) {

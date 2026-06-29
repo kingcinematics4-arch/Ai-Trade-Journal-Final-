@@ -35,14 +35,14 @@ export async function exportProfessionalPdf(
     doc.setFont('helvetica', 'normal');
     doc.text('Institutional-Grade Performance Audit', 14, 26);
     doc.text(`Audit Timestamp: ${format(new Date(), 'PPP p')}`, 14, 31);
-    
+
     doc.setDrawColor(226, 232, 240);
     doc.line(14, 36, pageWidth - 14, 36);
 
     // 3. Grouping Logic
     const tradesByMonth = new Map<string, Map<string, any[]>>();
 
-    sortedData.forEach(trade => {
+    sortedData.forEach((trade) => {
       const d = new Date(trade.trade_date);
       const mKey = format(d, 'MMMM yyyy').toUpperCase();
       const dKey = format(d, 'dd MMM yyyy');
@@ -58,7 +58,10 @@ export async function exportProfessionalPdf(
     // 4. Render Monthly and Daily Summaries
     for (const [month, days] of tradesByMonth) {
       // Page break check for new month
-      if (cursorY > 180) { doc.addPage(); cursorY = 20; }
+      if (cursorY > 180) {
+        doc.addPage();
+        cursorY = 20;
+      }
 
       // ====================================================
       // 1. MONTH HEADER
@@ -75,8 +78,10 @@ export async function exportProfessionalPdf(
       const allMonthTrades = Array.from(days.values()).flat();
       const totalTrades = allMonthTrades.length;
       const netPnL = allMonthTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
-      const wins = allMonthTrades.filter(t => normalizeStatus(t.trade_status) === 'win').length;
-      const losses = allMonthTrades.filter(t => normalizeStatus(t.trade_status) === 'loss').length;
+      const wins = allMonthTrades.filter((t) => normalizeStatus(t.trade_status) === 'win').length;
+      const losses = allMonthTrades.filter(
+        (t) => normalizeStatus(t.trade_status) === 'loss'
+      ).length;
       const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
 
       autoTable(doc, {
@@ -84,7 +89,13 @@ export async function exportProfessionalPdf(
         head: [['MONTHLY SUMMARY', 'VALUE']],
         body: [
           ['Total Trades', totalTrades.toString()],
-          ['Net P&L', { content: formatCurrency(netPnL), styles: { textColor: netPnL >= 0 ? [5, 150, 105] : [220, 38, 38], fontStyle: 'bold' } }],
+          [
+            'Net P&L',
+            {
+              content: formatCurrency(netPnL),
+              styles: { textColor: netPnL >= 0 ? [5, 150, 105] : [220, 38, 38], fontStyle: 'bold' },
+            },
+          ],
           ['Win Rate', `${winRate.toFixed(1)}% (${wins} Wins / ${losses} Losses)`],
         ],
         theme: 'striped',
@@ -100,11 +111,14 @@ export async function exportProfessionalPdf(
       // 3. DAILY SUMMARY CARDS (Structural grouping)
       // ====================================================
       for (const [day, dayTrades] of days) {
-        if (cursorY > 240) { doc.addPage(); cursorY = 20; }
+        if (cursorY > 240) {
+          doc.addPage();
+          cursorY = 20;
+        }
 
         const dayPnL = dayTrades.reduce((sum, t) => sum + getTradePnL(t), 0);
-        const assets = Array.from(new Set(dayTrades.map(t => t.asset_name || t.symbol || 'N/A')));
-        const strategies = Array.from(new Set(dayTrades.map(t => t.strategy_used || 'N/A')));
+        const assets = Array.from(new Set(dayTrades.map((t) => t.asset_name || t.symbol || 'N/A')));
+        const strategies = Array.from(new Set(dayTrades.map((t) => t.strategy_used || 'N/A')));
 
         // Card Separator Lines
         doc.setDrawColor(203, 213, 225); // Slate 300
@@ -123,12 +137,12 @@ export async function exportProfessionalPdf(
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(71, 85, 105);
-        
+
         doc.text(`Trades Today: ${dayTrades.length}`, 14, cursorY);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(dayPnL >= 0 ? 5 : 220, dayPnL >= 0 ? 150 : 38, dayPnL >= 0 ? 105 : 38);
         doc.text(`Net P&L Today: ${formatCurrency(dayPnL)}`, 60, cursorY);
-        
+
         cursorY += 7;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(71, 85, 105);
@@ -152,7 +166,7 @@ export async function exportProfessionalPdf(
     autoTable(doc, {
       startY: 28,
       head: [['Date', 'Asset', 'Strategy', 'Risk', 'PnL', 'Status']],
-      body: sortedData.map(t => {
+      body: sortedData.map((t) => {
         const pnl = getTradePnL(t);
         const result = normalizeStatus(t.trade_status);
         return [
@@ -160,8 +174,22 @@ export async function exportProfessionalPdf(
           t.asset_name || t.symbol || 'N/A',
           t.strategy_used || 'N/A',
           formatCurrency(t.risk_amount || 0),
-          { content: formatCurrency(pnl), styles: { textColor: pnl >= 0 ? [5, 150, 105] : [220, 38, 38] } },
-          { content: result.toUpperCase(), styles: { fontStyle: 'bold', textColor: result === 'win' ? [5, 150, 105] : result === 'loss' ? [220, 38, 38] : [100, 116, 139] } }
+          {
+            content: formatCurrency(pnl),
+            styles: { textColor: pnl >= 0 ? [5, 150, 105] : [220, 38, 38] },
+          },
+          {
+            content: result.toUpperCase(),
+            styles: {
+              fontStyle: 'bold',
+              textColor:
+                result === 'win'
+                  ? [5, 150, 105]
+                  : result === 'loss'
+                    ? [220, 38, 38]
+                    : [100, 116, 139],
+            },
+          },
         ];
       }),
       styles: { fontSize: 8, cellPadding: 3 },

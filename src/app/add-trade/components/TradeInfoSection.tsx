@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useGoalsStore } from '@/stores/useGoalsStore';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { TradeFormData } from './AddTradeForm';
 import SearchableSelect from './SearchableSelect';
 
@@ -35,6 +36,7 @@ const durations = [
 ];
 
 export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
+  const { t } = useTranslation();
   const {
     register,
     watch,
@@ -56,24 +58,36 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
 
   useEffect(() => {
     const m = localStorage.getItem('v2-markets');
-    setMarkets(m ? JSON.parse(m) : marketTypes.map(x => ({ id: x, label: x, value: x })));
-    
+    setMarkets(m ? JSON.parse(m) : marketTypes.map((x) => ({ id: x, label: x, value: x })));
+
     const a = localStorage.getItem('v2-assets');
     setAssets(a ? JSON.parse(a) : []);
 
     const d = localStorage.getItem('v2-durations');
-    setDurationsList(d ? JSON.parse(d) : durations.map(x => ({ id: x, label: x, value: x })));
+    setDurationsList(d ? JSON.parse(d) : durations.map((x) => ({ id: x, label: x, value: x })));
 
     const hg = localStorage.getItem('v2-hidden-goals');
     if (hg) setHiddenGoalIds(JSON.parse(hg));
   }, []);
 
-  const handleAdd = (val: string, setter: any, storageKey: string, setValueKey: keyof TradeFormData, extraProps = {}) => {
+  const handleAdd = (
+    val: string,
+    setter: any,
+    storageKey: string,
+    setValueKey: keyof TradeFormData,
+    extraProps = {}
+  ) => {
     const name = val?.trim();
     if (!name) return;
     const newItem = { id: crypto.randomUUID(), label: name, value: name, ...extraProps };
     setter((prev: any) => {
-      if (prev.some((x: any) => x.value === name && (!extraProps || (x as any).market === (extraProps as any).market))) return prev;
+      if (
+        prev.some(
+          (x: any) =>
+            x.value === name && (!extraProps || (x as any).market === (extraProps as any).market)
+        )
+      )
+        return prev;
       const updated = [newItem, ...prev];
       localStorage.setItem(storageKey, JSON.stringify(updated));
       return updated;
@@ -81,8 +95,14 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
     setValue(setValueKey, name, { shouldDirty: true });
   };
 
-  const handleDelete = (item: any, setter: any, storageKey: string, setValueKey: keyof TradeFormData) => {
-    if (!window.confirm(`Remove "${item.label}" from list?`)) return;
+  const handleDelete = (
+    item: any,
+    setter: any,
+    storageKey: string,
+    setValueKey: keyof TradeFormData
+  ) => {
+    if (!window.confirm(t('trading.addTrade.tradeInfo.confirmRemove', { item: item.label })))
+      return;
     setter((prev: any) => {
       const updated = prev.filter((x) => x.id !== item.id);
       localStorage.setItem(storageKey, JSON.stringify(updated));
@@ -94,7 +114,8 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
   };
 
   const onDeleteGoal = (item: any) => {
-    if (!window.confirm(`Hide goal "${item.label}" from this list?`)) return;
+    if (!window.confirm(t('trading.addTrade.tradeInfo.confirmHideGoal', { item: item.label })))
+      return;
     const updated = [...hiddenGoalIds, item.id];
     setHiddenGoalIds(updated);
     localStorage.setItem('v2-hidden-goals', JSON.stringify(updated));
@@ -103,12 +124,20 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
 
   const assetSuggestions = useMemo(() => {
     const customs = assets.filter((s) => s.market === selectedMarket);
-    const defaults = selectedMarket && popularAssets[selectedMarket]
-      ? popularAssets[selectedMarket].map(s => ({ id: s, label: s, value: s, market: selectedMarket }))
-      : [];
-    
+    const defaults =
+      selectedMarket && popularAssets[selectedMarket]
+        ? popularAssets[selectedMarket].map((s) => ({
+            id: s,
+            label: s,
+            value: s,
+            market: selectedMarket,
+          }))
+        : [];
+
     // Filter out items that are logically deleted (if you wanted to support deleting defaults)
-    return [...customs, ...defaults].filter((v, i, a) => a.findIndex(t => t.value === v.value) === i);
+    return [...customs, ...defaults].filter(
+      (v, i, a) => a.findIndex((t) => t.value === v.value) === i
+    );
   }, [selectedMarket, assets]);
 
   const filteredGoals = useMemo(() => {
@@ -123,27 +152,27 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="form-label" htmlFor="trade-title">
-            Trade Title
+            {t('trading.addTrade.tradeInfo.title')}
           </label>
-          <p className="form-helper">Optional label for quick identification</p>
+          <p className="form-helper">{t('trading.addTrade.tradeInfo.titleHelper')}</p>
           <input
             id="trade-title"
             type="text"
             className="form-input mt-1.5"
-            placeholder="e.g. BTC Breakout Long — May 8"
+            placeholder={t('trading.addTrade.tradeInfo.titlePlaceholder')}
             {...register('tradeTitle')}
           />
         </div>
         <div>
           <label className="form-label" htmlFor="trade-date">
-            Trade Date
+            {t('trading.addTrade.tradeInfo.date')}
           </label>
-          <p className="form-helper">Date the trade was executed</p>
+          <p className="form-helper">{t('trading.addTrade.tradeInfo.dateHelper')}</p>
           <input
             id="trade-date"
             type="date"
             className="form-input mt-1.5"
-            {...register('tradeDate', { required: 'Trade date is required' })}
+            {...register('tradeDate', { required: t('trading.addTrade.tradeInfo.dateRequired') })}
           />
           {errors.tradeDate && <p className="form-error">{errors.tradeDate.message}</p>}
         </div>
@@ -152,8 +181,8 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
       {/* Row 2: Market + Asset */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SearchableSelect
-          label="Market Type"
-          helperText="Asset class of this trade"
+          label={t('trading.addTrade.tradeInfo.marketType')}
+          helperText={t('trading.addTrade.tradeInfo.marketTypeHelper')}
           items={markets}
           value={selectedMarket || ''}
           onSelect={(val) => {
@@ -166,22 +195,28 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
         />
 
         <SearchableSelect
-          label="Asset Symbol"
-          helperText={selectedMarket && popularAssets[selectedMarket] ? `Quick: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...` : 'e.g. BTC/USDT'}
-          placeholder="Enter symbol"
+          label={t('trading.addTrade.tradeInfo.assetSymbol')}
+          helperText={
+            selectedMarket && popularAssets[selectedMarket]
+              ? `${t('trading.addTrade.tradeInfo.quick')}: ${popularAssets[selectedMarket].slice(0, 3).join(', ')}...`
+              : t('trading.addTrade.tradeInfo.assetPlaceholder')
+          }
+          placeholder={t('trading.addTrade.tradeInfo.enterSymbol')}
           items={assetSuggestions}
           value={watchedAssetName || ''}
           onSelect={(val) => setValue('assetName', val, { shouldDirty: true })}
           onDelete={(item) => handleDelete(item, setAssets, 'v2-assets', 'assetName')}
-          onAddCustom={(val) => handleAdd(val, setAssets, 'v2-assets', 'assetName', { market: selectedMarket })}
+          onAddCustom={(val) =>
+            handleAdd(val, setAssets, 'v2-assets', 'assetName', { market: selectedMarket })
+          }
           error={errors.assetName?.message}
         />
       </div>
 
       {/* Row 3: Direction */}
       <div>
-        <label className="form-label">Trade Direction</label>
-        <p className="form-helper">Whether you went long (buy) or short (sell)</p>
+        <label className="form-label">{t('trading.addTrade.tradeInfo.direction')}</label>
+        <p className="form-helper">{t('trading.addTrade.tradeInfo.directionHelper')}</p>
         <div className="flex gap-3 mt-1.5">
           {(['buy', 'sell'] as const).map((dir) => (
             <button
@@ -198,7 +233,9 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
                   : 'border-border text-muted-foreground hover:border-zinc-600 hover:text-foreground'
               }`}
             >
-              {dir === 'buy' ? '▲ Long (Buy)' : '▼ Short (Sell)'}
+              {dir === 'buy'
+                ? `▲ ${t('trading.addTrade.tradeInfo.long')}`
+                : `▼ ${t('trading.addTrade.tradeInfo.short')}`}
             </button>
           ))}
         </div>
@@ -211,7 +248,7 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
           <label className="form-label" htmlFor="entry-price">
-            Entry Price
+            {t('trading.addTrade.tradeInfo.entryPrice')}
           </label>
           <input
             id="entry-price"
@@ -220,15 +257,15 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
             className="form-input"
             placeholder="0.00"
             {...register('entryPrice', {
-              required: 'Entry price is required',
-              min: { value: 0.000001, message: 'Must be positive' },
+              required: t('trading.addTrade.tradeInfo.entryPriceRequired'),
+              min: { value: 0.000001, message: t('trading.addTrade.tradeInfo.mustBePositive') },
             })}
           />
           {errors.entryPrice && <p className="form-error">{errors.entryPrice.message}</p>}
         </div>
         <div>
           <label className="form-label" htmlFor="exit-price">
-            Exit Price
+            {t('trading.addTrade.tradeInfo.exitPrice')}
           </label>
           <input
             id="exit-price"
@@ -237,15 +274,15 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
             className="form-input"
             placeholder="0.00"
             {...register('exitPrice', {
-              required: 'Exit price is required',
-              min: { value: 0.000001, message: 'Must be positive' },
+              required: t('trading.addTrade.tradeInfo.exitPriceRequired'),
+              min: { value: 0.000001, message: t('trading.addTrade.tradeInfo.mustBePositive') },
             })}
           />
           {errors.exitPrice && <p className="form-error">{errors.exitPrice.message}</p>}
         </div>
         <div>
           <label className="form-label" htmlFor="stop-loss">
-            Stop Loss
+            {t('trading.addTrade.tradeInfo.stopLoss')}
           </label>
           <input
             id="stop-loss"
@@ -253,13 +290,15 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
             step="any"
             className="form-input"
             placeholder="0.00"
-            {...register('stopLoss', { required: 'Stop loss is required' })}
+            {...register('stopLoss', {
+              required: t('trading.addTrade.tradeInfo.stopLossRequired'),
+            })}
           />
           {errors.stopLoss && <p className="form-error">{errors.stopLoss.message}</p>}
         </div>
         <div>
           <label className="form-label" htmlFor="take-profit">
-            Take Profit
+            {t('trading.addTrade.tradeInfo.takeProfit')}
           </label>
           <input
             id="take-profit"
@@ -276,9 +315,9 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="form-label" htmlFor="lot-size">
-            Lot Size / Quantity
+            {t('trading.addTrade.tradeInfo.lotSize')}
           </label>
-          <p className="form-helper">Number of units, contracts, or shares</p>
+          <p className="form-helper">{t('trading.addTrade.tradeInfo.lotSizeHelper')}</p>
           <input
             id="lot-size"
             type="number"
@@ -286,17 +325,17 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
             className="form-input mt-1.5"
             placeholder="1"
             {...register('lotSize', {
-              required: 'Lot size is required',
-              min: { value: 0.01, message: 'Must be at least 0.01' },
+              required: t('trading.addTrade.tradeInfo.lotSizeRequired'),
+              min: { value: 0.01, message: t('trading.addTrade.tradeInfo.lotSizeMin') },
             })}
           />
           {errors.lotSize && <p className="form-error">{errors.lotSize.message}</p>}
         </div>
         <div>
           <label className="form-label" htmlFor="risk-amount">
-            Risk Amount ($)
+            {t('trading.addTrade.tradeInfo.riskAmount')}
           </label>
-          <p className="form-helper">Dollar amount risked on this trade</p>
+          <p className="form-helper">{t('trading.addTrade.tradeInfo.riskAmountHelper')}</p>
           <input
             id="risk-amount"
             type="number"
@@ -304,15 +343,15 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
             className="form-input mt-1.5"
             placeholder="100.00"
             {...register('riskAmount', {
-              required: 'Risk amount is required',
-              min: { value: 0.01, message: 'Must be positive' },
+              required: t('trading.addTrade.tradeInfo.riskAmountRequired'),
+              min: { value: 0.01, message: t('trading.addTrade.tradeInfo.mustBePositive') },
             })}
           />
           {errors.riskAmount && <p className="form-error">{errors.riskAmount.message}</p>}
         </div>
         <SearchableSelect
-          label="Trade Duration"
-          helperText="How long the trade was held"
+          label={t('trading.addTrade.tradeInfo.duration')}
+          helperText={t('trading.addTrade.tradeInfo.durationHelper')}
           items={durationsList}
           value={selectedDuration || ''}
           onSelect={(val) => setValue('tradeDuration', val, { shouldDirty: true })}
@@ -323,9 +362,12 @@ export default function TradeInfoSection({ form }: TradeInfoSectionProps) {
 
       {/* Row 6: Goal Assignment */}
       <SearchableSelect
-        label="Assign To Goal"
-        helperText="Link this trade's profit to a specific active goal"
-        items={[{ id: '', label: 'No Goal', value: '' }, ...filteredGoals]}
+        label={t('trading.addTrade.tradeInfo.assignToGoal')}
+        helperText={t('trading.addTrade.tradeInfo.assignToGoalHelper')}
+        items={[
+          { id: '', label: t('trading.addTrade.tradeInfo.noGoal'), value: '' },
+          ...filteredGoals,
+        ]}
         value={selectedGoalId || ''}
         onSelect={(val) => setValue('goalId', val, { shouldDirty: true, shouldValidate: true })}
         onDelete={onDeleteGoal}

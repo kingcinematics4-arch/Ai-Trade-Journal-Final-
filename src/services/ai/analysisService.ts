@@ -22,7 +22,7 @@ export function deriveScores(analytics: AdvancedAnalytics) {
   const disciplineScore = Math.min(100, Math.max(0, analytics.maxWinningStreak * 5)); // placeholder
   const riskScore = analytics.riskConsistency?.score ?? 0;
   const emotionalScore = analytics.emotionalLosses?.score ?? 0;
-  const consistencyScore = analytics.maxWinningStreak / (analytics.maxLosingStreak + 1) * 10;
+  const consistencyScore = (analytics.maxWinningStreak / (analytics.maxLosingStreak + 1)) * 10;
   return {
     disciplineScore: Math.round(disciplineScore),
     riskScore: Math.round(riskScore),

@@ -6,7 +6,7 @@ import {
   flattenAndFormatTrade,
   formatCurrency,
   formatPercentage,
-  getProfessionalColumnOrder
+  getProfessionalColumnOrder,
 } from './export/exportFormatting';
 
 /**
@@ -16,23 +16,29 @@ export function buildProfessionalCsv(data: any[]): string {
   if (!data || data.length === 0) return '';
 
   // 1. Flatten and Format Data
-  const processedData = data.map(item => flattenAndFormatTrade(item));
-  processedData.sort((a, b) => new Date(a.trade_date || a.date || 0).getTime() - new Date(b.trade_date || b.date || 0).getTime());
+  const processedData = data.map((item) => flattenAndFormatTrade(item));
+  processedData.sort(
+    (a, b) =>
+      new Date(a.trade_date || a.date || 0).getTime() -
+      new Date(b.trade_date || b.date || 0).getTime()
+  );
 
   // 2. Determine Columns and Formatting
   const allKeys = Array.from(new Set(processedData.flatMap(Object.keys)));
   const columnOrder = getProfessionalColumnOrder(allKeys, true);
 
   // Format specific financial columns as strings with currency/percent for CSV readability
-  const finalData = processedData.map(row => {
+  const finalData = processedData.map((row) => {
     const formattedRow: Record<string, any> = {};
-    columnOrder.forEach(key => {
+    columnOrder.forEach((key) => {
       let val = row[key];
       if (typeof val === 'number' || (typeof val === 'string' && !isNaN(parseFloat(val)))) {
-        if (key.match(/pnl|amount|price|loss|cost|value|risk|equity|fees|commission|spread|slippage/i)) {
-           val = formatCurrency(val);
+        if (
+          key.match(/pnl|amount|price|loss|cost|value|risk|equity|fees|commission|spread|slippage/i)
+        ) {
+          val = formatCurrency(val);
         } else if (key.match(/rate|progress|percent/i)) {
-           val = formatPercentage(val);
+          val = formatPercentage(val);
         }
       }
       formattedRow[key] = val !== undefined ? val : '';
@@ -41,8 +47,12 @@ export function buildProfessionalCsv(data: any[]): string {
   });
 
   // 3. Human-readable headers
-  const humanHeaders = columnOrder.map(key => 
-    key.replace(/[._]/g, ' ').replace(/([A-Z])/g, ' $1').trim().toUpperCase()
+  const humanHeaders = columnOrder.map((key) =>
+    key
+      .replace(/[._]/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .toUpperCase()
   );
 
   // 4. Calculate Analytics for Metadata Header
@@ -59,13 +69,9 @@ export function buildProfessionalCsv(data: any[]): string {
     ['', '', '', '', ''], // Blank spacer row
   ];
 
-  const dataRows = finalData.map(row => columnOrder.map(key => row[key]));
+  const dataRows = finalData.map((row) => columnOrder.map((key) => row[key]));
 
-  const csvContentArray = [
-    ...metadataRows,
-    humanHeaders,
-    ...dataRows
-  ];
+  const csvContentArray = [...metadataRows, humanHeaders, ...dataRows];
 
   return Papa.unparse(csvContentArray);
 }
@@ -81,21 +87,24 @@ export async function exportProfessionalCsv(
   if (!data || data.length === 0) return false;
 
   try {
-
     // 2. Determine Columns and Formatting
     const allKeys = Array.from(new Set(processedData.flatMap(Object.keys)));
     const columnOrder = getProfessionalColumnOrder(allKeys, true);
 
     // Format specific financial columns as strings with currency/percent for CSV readability
-    const finalData = processedData.map(row => {
+    const finalData = processedData.map((row) => {
       const formattedRow: Record<string, any> = {};
-      columnOrder.forEach(key => {
+      columnOrder.forEach((key) => {
         let val = row[key];
         if (typeof val === 'number' || (typeof val === 'string' && !isNaN(parseFloat(val)))) {
-          if (key.match(/pnl|amount|price|loss|cost|value|risk|equity|fees|commission|spread|slippage/i)) {
-             val = formatCurrency(val);
+          if (
+            key.match(
+              /pnl|amount|price|loss|cost|value|risk|equity|fees|commission|spread|slippage/i
+            )
+          ) {
+            val = formatCurrency(val);
           } else if (key.match(/rate|progress|percent/i)) {
-             val = formatPercentage(val);
+            val = formatPercentage(val);
           }
         }
         formattedRow[key] = val !== undefined ? val : '';

@@ -16,7 +16,6 @@ export interface NotificationSettings {
   profile_public: boolean;
   show_stats: boolean;
   timezone: string;
-  language: string;
   security_alerts: boolean;
   system_updates: boolean;
   message_alerts: boolean;
@@ -37,7 +36,6 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   profile_public: false,
   show_stats: true,
   timezone: 'UTC',
-  language: 'en',
   pnl_alerts: true,
   security_alerts: true,
   system_updates: true,
@@ -46,7 +44,10 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
 };
 
 export const notificationService = {
-  async getNotifications(userId: string, limit = 20): Promise<{ data: DbNotification[] | null; error: any }> {
+  async getNotifications(
+    userId: string,
+    limit = 20
+  ): Promise<{ data: DbNotification[] | null; error: any }> {
     const supabase = createClient();
     return await supabase
       .from('notifications')
@@ -65,17 +66,21 @@ export const notificationService = {
     metadata?: Record<string, any>;
   }) {
     const supabase = createClient();
-    const { data, error } = await supabase.from('notifications').insert({
-      user_id: params.userId,
-      title: params.title,
-      message: params.message,
-      type: params.type,
-      link: params.link,
-      metadata: params.metadata || {},
-      is_read: false,
-      created_at: new Date().toISOString()
-    }).select().single();
-    
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: params.userId,
+        title: params.title,
+        message: params.message,
+        type: params.type,
+        link: params.link,
+        metadata: params.metadata || {},
+        is_read: false,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
     return { data, error };
   },
 
@@ -86,7 +91,11 @@ export const notificationService = {
 
   async markAllAsRead(userId: string) {
     const supabase = createClient();
-    return await supabase.from('notifications').update({ is_read: true }).eq('user_id', userId).eq('is_read', false);
+    return await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('user_id', userId)
+      .eq('is_read', false);
   },
 
   async deleteNotification(id: string) {
@@ -101,7 +110,7 @@ export const notificationService = {
       .select('*')
       .eq('user_id', userId)
       .single();
-    
+
     if (error && error.code !== 'PGRST116' && error.code !== '406') throw error;
     return data as NotificationSettings | null;
   },
@@ -112,47 +121,76 @@ export const notificationService = {
 
   async updateSettings(userId: string, settings: Partial<NotificationSettings>) {
     const supabase = createClient();
-    
+
     // Filter settings to only include valid database columns to avoid "invalid payload" errors
     const validColumns = [
-      'notifications_enabled', 'sound_enabled', 'vibration_enabled', 
-      'floating_enabled', 'desktop_enabled', 'popup_preview_enabled', 
-      'do_not_disturb', 'volume', 'theme', 'trade_alerts', 'pnl_alerts',
-      'security_alerts', 'system_updates', 'message_alerts', 'activity_alerts',
-      'profile_public', 'show_stats', 'timezone', 'language'
+      'notifications_enabled',
+      'sound_enabled',
+      'vibration_enabled',
+      'floating_enabled',
+      'desktop_enabled',
+      'popup_preview_enabled',
+      'do_not_disturb',
+      'volume',
+      'theme',
+      'trade_alerts',
+      'pnl_alerts',
+      'security_alerts',
+      'system_updates',
+      'message_alerts',
+      'activity_alerts',
+      'profile_public',
+      'show_stats',
+      'timezone',
     ];
 
-    const filteredSettings = Object.entries(settings).reduce((acc, [key, value]) => {
-      if (validColumns.includes(key)) {
-        acc[key] = key === 'volume' ? Number(value) : value;
-      }
-      return acc;
-    }, {} as Record<string, any>);
+    const filteredSettings = Object.entries(settings).reduce(
+      (acc, [key, value]) => {
+        if (validColumns.includes(key)) {
+          acc[key] = key === 'volume' ? Number(value) : value;
+        }
+        return acc;
+      },
+      {} as Record<string, any>
+    );
 
-    const { error } = await supabase
-      .from('notification_settings')
-      .upsert({ 
+    const { error } = await supabase.from('notification_settings').upsert(
+      {
         user_id: userId,
-        ...filteredSettings, 
-        updated_at: new Date().toISOString() 
-      }, { onConflict: 'user_id' });
-    
+        ...filteredSettings,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
+    );
+
     if (error) throw error;
   },
 
   isTypeEnabled(type: NotificationType, settings: NotificationSettings | null): boolean {
     const currentSettings = settings ?? DEFAULT_NOTIFICATION_SETTINGS;
-    if (!currentSettings.notifications_enabled || (currentSettings.do_not_disturb && type !== 'warning')) return false;
+    if (
+      !currentSettings.notifications_enabled ||
+      (currentSettings.do_not_disturb && type !== 'warning')
+    )
+      return false;
 
     switch (type) {
-      case 'trade': return currentSettings.trade_alerts;
-      case 'analytics': return currentSettings.pnl_alerts;
-      case 'warning': return currentSettings.security_alerts;
-      case 'system': return currentSettings.system_updates;
-      case 'achievement': return currentSettings.activity_alerts;
-      case 'admin': return currentSettings.message_alerts;
-      case 'ai': return currentSettings.system_updates;
-      default: return true;
+      case 'trade':
+        return currentSettings.trade_alerts;
+      case 'analytics':
+        return currentSettings.pnl_alerts;
+      case 'warning':
+        return currentSettings.security_alerts;
+      case 'system':
+        return currentSettings.system_updates;
+      case 'achievement':
+        return currentSettings.activity_alerts;
+      case 'admin':
+        return currentSettings.message_alerts;
+      case 'ai':
+        return currentSettings.system_updates;
+      default:
+        return true;
     }
   },
 
@@ -165,8 +203,8 @@ export const notificationService = {
       message: 'If you see this, the realtime flow is working perfectly!',
       type: 'system',
       link: '/dashboard',
-      metadata: { is_test: true }
+      metadata: { is_test: true },
     });
     return { error };
-  }
+  },
 };

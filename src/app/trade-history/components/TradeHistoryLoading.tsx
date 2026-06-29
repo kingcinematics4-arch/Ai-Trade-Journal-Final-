@@ -42,10 +42,22 @@ export default function TradeHistoryLoading() {
               <Skeleton className="h-6 w-16 rounded-full" />
             </div>
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div><Skeleton className="h-3 w-14 mb-1" /><Skeleton className="h-5 w-20" /></div>
-              <div><Skeleton className="h-3 w-14 mb-1" /><Skeleton className="h-5 w-20" /></div>
-              <div><Skeleton className="h-3 w-14 mb-1" /><Skeleton className="h-5 w-20" /></div>
-              <div><Skeleton className="h-3 w-14 mb-1" /><Skeleton className="h-5 w-20" /></div>
+              <div>
+                <Skeleton className="h-3 w-14 mb-1" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              <div>
+                <Skeleton className="h-3 w-14 mb-1" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              <div>
+                <Skeleton className="h-3 w-14 mb-1" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              <div>
+                <Skeleton className="h-3 w-14 mb-1" />
+                <Skeleton className="h-5 w-20" />
+              </div>
             </div>
             <Skeleton className="h-3 w-full mb-1" />
             <Skeleton className="h-3 w-3/4" />

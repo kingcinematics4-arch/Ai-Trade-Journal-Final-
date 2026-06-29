@@ -2,31 +2,31 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  Cell, 
-  PieChart, 
-  Pie, 
-  Legend, 
-  ReferenceLine 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+  PieChart,
+  Pie,
+  Legend,
+  ReferenceLine,
 } from 'recharts';
 import type { TooltipProps } from 'recharts';
 import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
-import { 
-  BarChart3, 
-  Calendar, 
-  TrendingUp, 
-  Clock, 
-  PieChart as PieIcon, 
-  Tag as TagIcon 
+import {
+  BarChart3,
+  Calendar,
+  TrendingUp,
+  Clock,
+  PieChart as PieIcon,
+  Tag as TagIcon,
 } from 'lucide-react';
 import type { AdvancedAnalytics } from '@/lib/trades/analyticsEngine';
 import type { PnlTrendPoint } from '@/lib/trades/types';
@@ -49,7 +49,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     { name: 'Wins', value: stats.winCount, color: '#22c55e' },
     { name: 'Losses', value: stats.lossCount, color: '#ef4444' },
     { name: 'Breakevens', value: stats.breakevenCount, color: '#71717a' },
-  ].filter(d => d.value > 0);
+  ].filter((d) => d.value > 0);
 
   type TooltipPayloadItem = {
     value?: ValueType;
@@ -74,11 +74,15 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     const item = payload[0];
     const data = item.payload as unknown as PnlTrendPoint;
     const isStart = data.tradeNumber === 0;
-    const tradeNum = (label !== undefined && label !== null && label !== '') ? label : data.tradeNumber;
+    const tradeNum =
+      label !== undefined && label !== null && label !== '' ? label : data.tradeNumber;
     const title = isStart ? 'Starting Point' : `Trade #${tradeNum} — ${data.date || '—'}`;
-    const color = (item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url')) 
-      ? item.stroke 
-      : (data.cumulative >= 0 ? '#22c55e' : '#ef4444');
+    const color =
+      item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url')
+        ? item.stroke
+        : data.cumulative >= 0
+          ? '#22c55e'
+          : '#ef4444';
 
     return (
       <div className="card-elevated shadow-xl p-3 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50 min-w-[160px]">
@@ -97,14 +101,20 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
         {!isStart && (
           <div className="flex justify-between gap-4 mb-1">
             <span className="text-muted-foreground">Trade Return</span>
-            <span className={`font-bold font-tabular ${(data.pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <span
+              className={`font-bold font-tabular ${(data.pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}
+            >
               {formatCurrency(data.pnl, { showSign: true })}
             </span>
           </div>
         )}
-        <div className={`flex justify-between gap-4 ${!isStart ? 'border-t border-border/50 pt-1.5 mt-0.5' : ''}`}>
+        <div
+          className={`flex justify-between gap-4 ${!isStart ? 'border-t border-border/50 pt-1.5 mt-0.5' : ''}`}
+        >
           <span className="text-muted-foreground">Account P&L</span>
-          <span className={`font-black font-tabular ${(data.cumulative || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          <span
+            className={`font-black font-tabular ${(data.cumulative || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}
+          >
             {formatCurrency(data.cumulative, { showSign: true })}
           </span>
         </div>
@@ -130,10 +140,11 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     };
     const color = item.fill || item.stroke || item.color || 'var(--primary)';
 
-    const title = (label !== undefined && label !== null && label !== '') 
-      ? String(label) 
-      : (data.day || data.month || data.pair || data.strategy || 'Performance');
-      
+    const title =
+      label !== undefined && label !== null && label !== ''
+        ? String(label)
+        : data.day || data.month || data.pair || data.strategy || 'Performance';
+
     const val = typeof item.value === 'number' ? item.value : Number(item.value ?? data.pnl ?? 0);
 
     return (
@@ -144,14 +155,20 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
         </div>
         <div className="flex justify-between gap-4 mb-1">
           <span className="text-muted-foreground">Performance</span>
-          <span className={`font-bold font-tabular ${val >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          <span
+            className={`font-bold font-tabular ${val >= 0 ? 'text-green-400' : 'text-red-400'}`}
+          >
             {formatCurrency(val, { showSign: true })}
           </span>
         </div>
-        {(data.trades !== undefined || data.totalTrades !== undefined || data.tradesCount !== undefined) && (
+        {(data.trades !== undefined ||
+          data.totalTrades !== undefined ||
+          data.tradesCount !== undefined) && (
           <div className="flex justify-between gap-4 mt-1">
             <span className="text-muted-foreground">Trades Logged</span>
-            <span className="font-semibold text-foreground font-tabular">{data.trades ?? data.totalTrades ?? data.tradesCount}</span>
+            <span className="font-semibold text-foreground font-tabular">
+              {data.trades ?? data.totalTrades ?? data.tradesCount}
+            </span>
           </div>
         )}
       </div>
@@ -174,11 +191,14 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     const total = stats.winCount + stats.lossCount + stats.breakevenCount;
     const value = Number(item.value ?? data.value ?? 0);
     const percentage = total > 0 ? (value / total) * 100 : 0;
-    
+
     return (
       <div className="card-elevated shadow-xl p-3 text-xs border border-border rounded-md bg-background/95 backdrop-blur z-50 min-w-[140px]">
         <div className="flex items-center gap-2 mb-2 border-b border-border/50 pb-1.5">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill || item.color || item.stroke || data.color }} />
+          <div
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: item.fill || item.color || item.stroke || data.color }}
+          />
           <p className="text-muted-foreground font-semibold">{data.name}</p>
         </div>
         <div className="flex justify-between gap-4">
@@ -200,7 +220,8 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
         <div>
           <h3 className="text-base font-semibold text-foreground">Performance Charts</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Interactive visual analysis of your trading equity curves, session frequencies, and market skews
+            Interactive visual analysis of your trading equity curves, session frequencies, and
+            market skews
           </p>
         </div>
 
@@ -238,20 +259,30 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               <div className="lg:col-span-2 space-y-2 order-2 lg:order-1">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Equity Growth Curve</h4>
-                  <p className="text-[11px] text-muted-foreground">Cumulative running P&L across trades</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Cumulative running P&L across trades
+                  </p>
                 </div>
                 <div className="h-[280px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={stats.equityCurve} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <AreaChart
+                      data={stats.equityCurve}
+                      margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                    >
                       <defs>
                         <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
                           <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
-                      <XAxis 
-                        dataKey="tradeNumber" 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border)"
+                        vertical={false}
+                        opacity={0.3}
+                      />
+                      <XAxis
+                        dataKey="tradeNumber"
                         tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                         tickLine={false}
                         axisLine={false}
@@ -261,7 +292,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                           return point && point.tradeNumber !== 0 ? point.date : '';
                         }}
                       />
-                      <YAxis 
+                      <YAxis
                         tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                         tickLine={false}
                         axisLine={false}
@@ -272,15 +303,25 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                       />
                       <Tooltip content={<CustomPnlTooltip />} />
                       <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                      <Area 
-                        type="monotone" 
-                        dataKey="cumulative" 
-                        stroke="#3b82f6" 
-                        strokeWidth={2} 
-                        fillOpacity={1} 
-                        fill="url(#growthGradient)" 
-                        dot={{ r: 2.5, fill: 'var(--background)', stroke: '#3b82f6', strokeWidth: 1.5 }}
-                        activeDot={{ r: 5, fill: '#3b82f6', stroke: 'var(--foreground)', strokeWidth: 1.5 }}
+                      <Area
+                        type="monotone"
+                        dataKey="cumulative"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#growthGradient)"
+                        dot={{
+                          r: 2.5,
+                          fill: 'var(--background)',
+                          stroke: '#3b82f6',
+                          strokeWidth: 1.5,
+                        }}
+                        activeDot={{
+                          r: 5,
+                          fill: '#3b82f6',
+                          stroke: 'var(--foreground)',
+                          strokeWidth: 1.5,
+                        }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -291,7 +332,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               <div className="space-y-2 flex flex-col justify-between order-1 lg:order-2">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Win / Loss Ratio</h4>
-                  <p className="text-[11px] text-muted-foreground">Distribution of profit, loss, and BE trades</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Distribution of profit, loss, and BE trades
+                  </p>
                 </div>
                 {winLossData.length === 0 ? (
                   <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground italic">
@@ -318,7 +361,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute text-center">
-                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Win Rate</p>
+                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                        Win Rate
+                      </p>
                       <p className="text-2xl font-black text-foreground font-tabular">
                         {stats.winRate.toFixed(0)}%
                       </p>
@@ -359,21 +404,31 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Day of Week Performance</h4>
-                  <p className="text-[11px] text-muted-foreground">Cumulative P&L grouped by weekdays</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Cumulative P&L grouped by weekdays
+                  </p>
                 </div>
                 <div className="h-[260px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.dailyPerformance} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
-                      <XAxis 
-                        dataKey="day" 
+                    <BarChart
+                      data={stats.dailyPerformance}
+                      margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border)"
+                        vertical={false}
+                        opacity={0.3}
+                      />
+                      <XAxis
+                        dataKey="day"
                         tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                         tickLine={false}
                         axisLine={false}
                         dy={8}
                         tickFormatter={(val: string) => val.slice(0, 3)}
                       />
-                      <YAxis 
+                      <YAxis
                         tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                         tickLine={false}
                         axisLine={false}
@@ -382,14 +437,11 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                       />
                       <Tooltip content={<CustomBarTooltip />} />
                       <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                      <Bar 
-                        dataKey="pnl" 
-                        radius={[4, 4, 0, 0] as any}
-                      >
+                      <Bar dataKey="pnl" radius={[4, 4, 0, 0] as any}>
                         {stats.dailyPerformance.map((entry, idx) => (
-                          <Cell 
-                            key={`daily-bar-${idx}`} 
-                            fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} 
+                          <Cell
+                            key={`daily-bar-${idx}`}
+                            fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'}
                             fillOpacity={0.85}
                           />
                         ))}
@@ -403,7 +455,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Monthly P&L Curve</h4>
-                  <p className="text-[11px] text-muted-foreground">Net performance grouped by calendar months</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Net performance grouped by calendar months
+                  </p>
                 </div>
                 {stats.monthlyPerformance.length === 0 ? (
                   <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground italic">
@@ -412,16 +466,24 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 ) : (
                   <div className="h-[260px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.monthlyPerformance} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
-                        <XAxis 
-                          dataKey="month" 
+                      <BarChart
+                        data={stats.monthlyPerformance}
+                        margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--border)"
+                          vertical={false}
+                          opacity={0.3}
+                        />
+                        <XAxis
+                          dataKey="month"
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
                           dy={8}
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
@@ -430,14 +492,11 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                         />
                         <Tooltip content={<CustomBarTooltip />} />
                         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                        <Bar 
-                          dataKey="pnl" 
-                          radius={[4, 4, 0, 0] as any}
-                        >
+                        <Bar dataKey="pnl" radius={[4, 4, 0, 0] as any}>
                           {stats.monthlyPerformance.map((entry, idx) => (
-                            <Cell 
-                              key={`monthly-bar-${idx}`} 
-                              fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'} 
+                            <Cell
+                              key={`monthly-bar-${idx}`}
+                              fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'}
                               fillOpacity={0.85}
                             />
                           ))}
@@ -463,7 +522,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Asset Pair Net P&L</h4>
-                  <p className="text-[11px] text-muted-foreground">Cumulative trade return ranked by symbols</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Cumulative trade return ranked by symbols
+                  </p>
                 </div>
                 {stats.pairPerformance.length === 0 ? (
                   <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground italic">
@@ -472,16 +533,24 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 ) : (
                   <div className="h-[260px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.pairPerformance} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
-                        <XAxis 
-                          dataKey="pair" 
+                      <BarChart
+                        data={stats.pairPerformance}
+                        margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--border)"
+                          vertical={false}
+                          opacity={0.3}
+                        />
+                        <XAxis
+                          dataKey="pair"
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
                           dy={8}
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
@@ -490,14 +559,11 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                         />
                         <Tooltip content={<CustomBarTooltip />} />
                         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                        <Bar 
-                          dataKey="pnl" 
-                          radius={[4, 4, 0, 0] as any}
-                        >
+                        <Bar dataKey="pnl" radius={[4, 4, 0, 0] as any}>
                           {stats.pairPerformance.map((entry, idx) => (
-                            <Cell 
-                              key={`pair-bar-${idx}`} 
-                              fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} 
+                            <Cell
+                              key={`pair-bar-${idx}`}
+                              fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'}
                               fillOpacity={0.85}
                             />
                           ))}
@@ -512,7 +578,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">Strategy Net Return</h4>
-                  <p className="text-[11px] text-muted-foreground">Cumulative trade P&L grouped by strategies used</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Cumulative trade P&L grouped by strategies used
+                  </p>
                 </div>
                 {stats.strategyPerformance.length === 0 ? (
                   <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground italic">
@@ -521,17 +589,27 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 ) : (
                   <div className="h-[260px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.strategyPerformance} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
-                        <XAxis 
-                          dataKey="strategy" 
+                      <BarChart
+                        data={stats.strategyPerformance}
+                        margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--border)"
+                          vertical={false}
+                          opacity={0.3}
+                        />
+                        <XAxis
+                          dataKey="strategy"
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
                           dy={8}
-                          tickFormatter={(val: string) => val.length > 8 ? `${val.slice(0, 8)}…` : val}
+                          tickFormatter={(val: string) =>
+                            val.length > 8 ? `${val.slice(0, 8)}…` : val
+                          }
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
                           tickLine={false}
                           axisLine={false}
@@ -540,14 +618,11 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                         />
                         <Tooltip content={<CustomBarTooltip />} />
                         <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" />
-                        <Bar 
-                          dataKey="pnl" 
-                          radius={[4, 4, 0, 0] as any}
-                        >
+                        <Bar dataKey="pnl" radius={[4, 4, 0, 0] as any}>
                           {stats.strategyPerformance.map((entry, idx) => (
-                            <Cell 
-                              key={`strategy-bar-${idx}`} 
-                              fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'} 
+                            <Cell
+                              key={`strategy-bar-${idx}`}
+                              fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'}
                               fillOpacity={0.85}
                             />
                           ))}

@@ -2,13 +2,13 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  BrainCircuit, 
-  CheckCircle2, 
-  AlertTriangle, 
-  TrendingDown, 
+import {
+  BrainCircuit,
+  CheckCircle2,
+  AlertTriangle,
+  TrendingDown,
   Lightbulb,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import type { AdvancedAnalytics } from '@/lib/trades/analyticsEngine';
 import { formatCurrency } from '@/lib/trades/analytics';
@@ -148,7 +148,9 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
     return (
       <div className="card-elevated p-5 flex flex-col items-center justify-center text-center py-10">
         <BrainCircuit size={32} className="text-violet-400 mb-3 animate-pulse" />
-        <h4 className="font-semibold text-foreground text-sm mb-1">Generating Performance Insights</h4>
+        <h4 className="font-semibold text-foreground text-sm mb-1">
+          Generating Performance Insights
+        </h4>
         <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
           Log at least 2 trades with P&L information to unlock automated dynamic insights.
         </p>
@@ -165,7 +167,9 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
           </div>
           <div>
             <h4 className="text-sm font-semibold text-foreground">AI Performance Insights</h4>
-            <p className="text-[10px] text-muted-foreground">Pattern-based recommendations from your logged data</p>
+            <p className="text-[10px] text-muted-foreground">
+              Pattern-based recommendations from your logged data
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-violet-500/10 text-violet-400 text-[10px] font-bold rounded-full border border-violet-500/20">
@@ -185,12 +189,8 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
           >
             <span className="flex-shrink-0 mt-0.5">{typeIcons[insight.type]}</span>
             <div className="space-y-1">
-              <p className="text-xs font-bold text-foreground leading-normal">
-                {insight.title}
-              </p>
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                {insight.text}
-              </p>
+              <p className="text-xs font-bold text-foreground leading-normal">{insight.title}</p>
+              <p className="text-[11px] leading-relaxed text-muted-foreground">{insight.text}</p>
             </div>
           </motion.div>
         ))}

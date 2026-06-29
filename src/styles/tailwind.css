@@ -1,4 +1,4 @@
-  @tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -27,7 +27,9 @@
     --info: #3b82f6;
   }
 
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     box-sizing: border-box;
     border: 0 solid rgba(255, 255, 255, 0.06);
   }
@@ -258,13 +260,13 @@
     background-color: rgba(255, 255, 255, 0.03);
     opacity: 1;
   }
-  
+
   .nav-item-active {
     @apply text-white;
     background-color: rgba(255, 255, 255, 0.05);
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.02);
   }
-  
+
   .input-action-btn {
     @apply absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground 
            hover:text-foreground transition-all duration-150 cursor-pointer;
@@ -281,4 +283,4 @@
     border-color: rgba(255, 255, 255, 0.06);
   }
 }
-/* Premium visuals enabled: removed previous rules that disabled elements with blur, glow, or orb in class names */   
+/* Premium visuals enabled: removed previous rules that disabled elements with blur, glow, or orb in class names */

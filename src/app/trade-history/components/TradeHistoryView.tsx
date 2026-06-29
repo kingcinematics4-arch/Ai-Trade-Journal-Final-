@@ -149,7 +149,16 @@ export default function TradeHistoryView() {
     });
 
     return result;
-  }, [trades, searchQuery, statusFilter, directionFilter, pairFilter, dateFrom, dateTo, sortOption]);
+  }, [
+    trades,
+    searchQuery,
+    statusFilter,
+    directionFilter,
+    pairFilter,
+    dateFrom,
+    dateTo,
+    sortOption,
+  ]);
 
   // Paginated trades
   const paginatedTrades = useMemo(() => {
@@ -231,9 +240,12 @@ export default function TradeHistoryView() {
           <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4 text-muted-foreground">
             <SlidersHorizontal size={20} />
           </div>
-          <h4 className="text-base font-semibold text-foreground mb-1">No trades match your filters</h4>
+          <h4 className="text-base font-semibold text-foreground mb-1">
+            No trades match your filters
+          </h4>
           <p className="text-xs text-muted-foreground max-w-xs mb-4 leading-relaxed">
-            Try adjusting your search term, changing status or direction, or expanding the date range.
+            Try adjusting your search term, changing status or direction, or expanding the date
+            range.
           </p>
           <button onClick={handleClearFilters} className="btn-secondary py-1.5 px-4 text-xs">
             Reset All Filters

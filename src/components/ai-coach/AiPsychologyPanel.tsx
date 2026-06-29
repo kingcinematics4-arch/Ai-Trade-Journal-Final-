@@ -9,12 +9,15 @@ interface AiPsychologyPanelProps {
   personality: string;
 }
 
-export default function AiPsychologyPanel({ emotionAnalysis, personality }: AiPsychologyPanelProps) {
+export default function AiPsychologyPanel({
+  emotionAnalysis,
+  personality,
+}: AiPsychologyPanelProps) {
   const topEmotion = emotionAnalysis.emotionDistribution[0] || { emotion: 'Neutral', count: 0 };
   const revengeCount = emotionAnalysis.revengeTradeCount;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
@@ -31,7 +34,9 @@ export default function AiPsychologyPanel({ emotionAnalysis, personality }: AiPs
           <div className="absolute top-0 right-0 p-2 opacity-10">
             <BrainCircuit className="w-16 h-16" />
           </div>
-          <p className="text-xs text-purple-400 font-semibold mb-1 uppercase tracking-wider">Trading Persona</p>
+          <p className="text-xs text-purple-400 font-semibold mb-1 uppercase tracking-wider">
+            Trading Persona
+          </p>
           <h4 className="text-xl font-bold text-foreground relative z-10">{personality}</h4>
         </div>
 
@@ -45,9 +50,11 @@ export default function AiPsychologyPanel({ emotionAnalysis, personality }: AiPs
               <span className="font-semibold text-foreground capitalize">{topEmotion.emotion}</span>
             </div>
             <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-              <div 
-                className="bg-primary h-full rounded-full transition-all duration-1000" 
-                style={{ width: `${Math.min(100, (topEmotion.count / (emotionAnalysis.emotionDistribution.reduce((a, b) => a + b.count, 0) || 1)) * 100)}%` }} 
+              <div
+                className="bg-primary h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${Math.min(100, (topEmotion.count / (emotionAnalysis.emotionDistribution.reduce((a, b) => a + b.count, 0) || 1)) * 100)}%`,
+                }}
               />
             </div>
           </div>
@@ -57,14 +64,16 @@ export default function AiPsychologyPanel({ emotionAnalysis, personality }: AiPs
               <span className="text-muted-foreground flex items-center gap-1">
                 <Flame className="w-4 h-4" /> Revenge Trades
               </span>
-              <span className={`font-semibold ${revengeCount > 0 ? 'text-loss' : 'text-emerald-500'}`}>
+              <span
+                className={`font-semibold ${revengeCount > 0 ? 'text-loss' : 'text-emerald-500'}`}
+              >
                 {revengeCount} detected
               </span>
             </div>
             <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-              <div 
-                className={`h-full rounded-full transition-all duration-1000 ${revengeCount > 2 ? 'bg-loss' : revengeCount > 0 ? 'bg-warning' : 'bg-emerald-500'}`} 
-                style={{ width: `${Math.min(100, revengeCount * 10)}%` }} 
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${revengeCount > 2 ? 'bg-loss' : revengeCount > 0 ? 'bg-warning' : 'bg-emerald-500'}`}
+                style={{ width: `${Math.min(100, revengeCount * 10)}%` }}
               />
             </div>
           </div>
@@ -74,12 +83,14 @@ export default function AiPsychologyPanel({ emotionAnalysis, personality }: AiPs
               <span className="text-muted-foreground flex items-center gap-1">
                 <Frown className="w-4 h-4" /> Calm Trade Win Rate
               </span>
-              <span className="font-semibold text-foreground">{emotionAnalysis.calmTradeWinRate}%</span>
+              <span className="font-semibold text-foreground">
+                {emotionAnalysis.calmTradeWinRate}%
+              </span>
             </div>
             <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
-              <div 
-                className="bg-accent h-full rounded-full transition-all duration-1000" 
-                style={{ width: `${emotionAnalysis.calmTradeWinRate}%` }} 
+              <div
+                className="bg-accent h-full rounded-full transition-all duration-1000"
+                style={{ width: `${emotionAnalysis.calmTradeWinRate}%` }}
               />
             </div>
           </div>
