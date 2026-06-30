@@ -1,5 +1,7 @@
 {
   "title": "Perfil",
+  "mobileTitle": "Meu Perfil",
+  "mobileSubtitle": "Gerencie sua conta, avatar e configurações",
   "edit": "Editar Perfil",
   "save": "Salvar Alterações",
   "cancel": "Cancelar",
@@ -30,6 +32,15 @@
   "deleteAccount": "Excluir Conta",
   "deleteAccountWarning": "Esta ação não pode ser desfeita. Todos os seus dados serão excluídos permanentemente.",
   "confirmDelete": "Entendo, excluir minha conta",
+  "socialLinks": "Links Sociais",
+  "socialLinksSubtitle": "Seus perfis conectados e sites",
+  "active": "Ativo",
+  "noBioAdded": "Nenhuma biografia adicionada ainda. Clique em \"Editar Perfil\" para adicionar uma.",
+  "noSocialLinks": "Nenhum link social adicionado ainda.",
+  "website": "Site",
+  "twitter": "Twitter / X",
+  "instagram": "Instagram",
+  "linkedin": "LinkedIn",
   "success": {
     "profileUpdated": "Perfil atualizado com sucesso",
     "passwordChanged": "Senha alterada com sucesso",

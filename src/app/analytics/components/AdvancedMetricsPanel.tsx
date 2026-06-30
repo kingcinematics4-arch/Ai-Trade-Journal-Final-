@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import {
   Percent,
   HelpCircle,
@@ -20,20 +21,21 @@ interface AdvancedMetricsPanelProps {
 }
 
 export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProps) {
+  const { t } = useTranslation();
   const advancedItems = [
     {
-      title: 'Expectancy',
+      title: t('analytics.advanced.expectancy'),
       value: formatCurrency(stats.expectancy, { showSign: true }),
-      desc: 'The average amount of money you expect to make (or lose) per trade.',
+      desc: t('analytics.advanced.expectancyDesc'),
       icon: <Percent size={16} />,
       iconBg:
         stats.expectancy >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
       valueColor: stats.expectancy >= 0 ? 'text-green-400' : 'text-red-400',
     },
     {
-      title: 'Sharpe Ratio',
+      title: t('analytics.advanced.sharpeRatio'),
       value: stats.sharpeRatio.toFixed(2),
-      desc: 'Measures risk-adjusted performance. Above 1.0 is good, above 2.0 is excellent.',
+      desc: t('analytics.advanced.sharpeRatioDesc'),
       icon: <Award size={16} />,
       iconBg:
         stats.sharpeRatio >= 1.0
@@ -49,17 +51,17 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
             : 'text-red-400',
     },
     {
-      title: 'Max Drawdown',
+      title: t('analytics.advanced.maxDrawdown'),
       value: formatCurrency(-stats.maxDrawdown),
-      desc: 'The peak-to-trough drop in your equity curve — the largest dollar decline.',
+      desc: t('analytics.advanced.maxDrawdownDesc'),
       icon: <ShieldAlert size={16} />,
       iconBg: 'bg-red-500/15 text-red-400',
       valueColor: 'text-red-400',
     },
     {
-      title: 'Recovery Factor',
+      title: t('analytics.advanced.recoveryFactor'),
       value: stats.recoveryFactor.toFixed(2),
-      desc: 'Measures how quickly your account recovers from drawdowns (Total P&L / Max DD).',
+      desc: t('analytics.advanced.recoveryFactorDesc'),
       icon: <TrendingUp size={16} />,
       iconBg:
         stats.recoveryFactor >= 2.0
@@ -70,17 +72,17 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
       valueColor: stats.recoveryFactor >= 2.0 ? 'text-green-400' : 'text-foreground',
     },
     {
-      title: 'Average Holding Time',
+      title: t('analytics.advanced.avgHoldingTime'),
       value: stats.averageHoldingTime,
-      desc: 'The average duration of your trades, parsed from your logged journal entries.',
+      desc: t('analytics.advanced.avgHoldingTimeDesc'),
       icon: <Hourglass size={16} />,
       iconBg: 'bg-blue-500/15 text-blue-400',
       valueColor: 'text-foreground',
     },
     {
-      title: 'ROI % (Capital Risked)',
+      title: t('analytics.advanced.roi'),
       value: `${stats.roi.toFixed(1)}%`,
-      desc: 'Return on Investment computed as your cumulative P&L divided by total risked capital.',
+      desc: t('analytics.advanced.roiDesc'),
       icon: <Percent size={16} />,
       iconBg: stats.roi >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
       valueColor: stats.roi >= 0 ? 'text-green-400' : 'text-red-400',
@@ -91,10 +93,9 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
     <div className="card-elevated p-6 space-y-6">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">Advanced Trading Metrics</h3>
+          <h3 className="text-base font-semibold text-foreground">{t('analytics.advanced.title')}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Mathematical statistics assessing system expectancy, risk adjustments, and capital
-            returns
+            {t('analytics.advanced.description')}
           </p>
         </div>
       </div>

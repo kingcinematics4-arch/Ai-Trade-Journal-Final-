@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import {
   AreaChart,
   Area,
@@ -37,12 +38,13 @@ interface AnalyticsChartsGridProps {
 }
 
 export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'pnl' | 'time' | 'market'>('pnl');
 
   const tabOptions = [
-    { id: 'pnl', label: 'Equity & Distribution', icon: <TrendingUp size={13} /> },
-    { id: 'time', label: 'Time Performance', icon: <Calendar size={13} /> },
-    { id: 'market', label: 'Assets & Strategies', icon: <TagIcon size={13} /> },
+    { id: 'pnl', label: t('analytics.charts.tabEquity'), icon: <TrendingUp size={13} /> },
+    { id: 'time', label: t('analytics.charts.tabTime'), icon: <Calendar size={13} /> },
+    { id: 'market', label: t('analytics.charts.tabMarket'), icon: <TagIcon size={13} /> },
   ] as const;
 
   const winLossData = [
@@ -76,7 +78,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     const isStart = data.tradeNumber === 0;
     const tradeNum =
       label !== undefined && label !== null && label !== '' ? label : data.tradeNumber;
-    const title = isStart ? 'Starting Point' : `Trade #${tradeNum} — ${data.date || '—'}`;
+    const title = isStart ? t('analytics.charts.tooltip.startingPoint') : t('analytics.charts.tooltip.tradeNumber', { number: tradeNum, date: data.date || '—' });
     const color =
       item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url')
         ? item.stroke
@@ -93,14 +95,14 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
 
         {!isStart && data.asset && data.asset !== '—' && (
           <div className="flex justify-between gap-4 mb-1">
-            <span className="text-muted-foreground">Asset</span>
+            <span className="text-muted-foreground">{t('analytics.charts.tooltip.asset')}</span>
             <span className="font-semibold text-foreground">{data.asset}</span>
           </div>
         )}
 
         {!isStart && (
           <div className="flex justify-between gap-4 mb-1">
-            <span className="text-muted-foreground">Trade Return</span>
+            <span className="text-muted-foreground">{t('analytics.charts.tooltip.tradeReturn')}</span>
             <span
               className={`font-bold font-tabular ${(data.pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}
             >
@@ -111,7 +113,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
         <div
           className={`flex justify-between gap-4 ${!isStart ? 'border-t border-border/50 pt-1.5 mt-0.5' : ''}`}
         >
-          <span className="text-muted-foreground">Account P&L</span>
+          <span className="text-muted-foreground">{t('analytics.charts.tooltip.accountPnl')}</span>
           <span
             className={`font-black font-tabular ${(data.cumulative || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}
           >
@@ -154,7 +156,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
           <p className="text-muted-foreground font-bold truncate font-tabular">{title}</p>
         </div>
         <div className="flex justify-between gap-4 mb-1">
-          <span className="text-muted-foreground">Performance</span>
+          <span className="text-muted-foreground">{t('analytics.charts.tooltip.performance')}</span>
           <span
             className={`font-bold font-tabular ${val >= 0 ? 'text-green-400' : 'text-red-400'}`}
           >
@@ -165,7 +167,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
           data.totalTrades !== undefined ||
           data.tradesCount !== undefined) && (
           <div className="flex justify-between gap-4 mt-1">
-            <span className="text-muted-foreground">Trades Logged</span>
+            <span className="text-muted-foreground">{t('analytics.charts.tooltip.tradesLogged')}</span>
             <span className="font-semibold text-foreground font-tabular">
               {data.trades ?? data.totalTrades ?? data.tradesCount}
             </span>
@@ -202,11 +204,11 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
           <p className="text-muted-foreground font-semibold">{data.name}</p>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Occurrences</span>
-          <span className="font-bold text-foreground font-tabular">{value} trades</span>
+          <span className="text-muted-foreground">{t('analytics.charts.tooltip.occurrences')}</span>
+          <span className="font-bold text-foreground font-tabular">{value}{t('analytics.charts.tooltip.tradesSuffix')}</span>
         </div>
         <div className="flex justify-between gap-4 mt-1">
-          <span className="text-muted-foreground">Distribution</span>
+          <span className="text-muted-foreground">{t('analytics.charts.tooltip.distribution')}</span>
           <span className="font-bold text-foreground font-tabular">{percentage.toFixed(1)}%</span>
         </div>
       </div>
@@ -218,10 +220,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
       {/* Dynamic Tabs */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between border-b border-border pb-4 gap-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">Performance Charts</h3>
+          <h3 className="text-base font-semibold text-foreground">{t('analytics.charts.title')}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Interactive visual analysis of your trading equity curves, session frequencies, and
-            market skews
+            {t('analytics.charts.description')}
           </p>
         </div>
 
@@ -258,9 +259,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Equity curve */}
               <div className="lg:col-span-2 space-y-2 order-2 lg:order-1">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Equity Growth Curve</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.equityGrowth')}</h4>
                   <p className="text-[11px] text-muted-foreground">
-                    Cumulative running P&L across trades
+                    {t('analytics.charts.equityGrowthDesc')}
                   </p>
                 </div>
                 <div className="h-[280px] w-full">
@@ -331,14 +332,14 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Pie distribution chart */}
               <div className="space-y-2 flex flex-col justify-between order-1 lg:order-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Win / Loss Ratio</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.winLossRatio')}</h4>
                   <p className="text-[11px] text-muted-foreground">
-                    Distribution of profit, loss, and BE trades
+                    {t('analytics.charts.winLossRatioDesc')}
                   </p>
                 </div>
                 {winLossData.length === 0 ? (
                   <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground italic">
-                    No data
+                    {t('analytics.charts.noData')}
                   </div>
                 ) : (
                   <div className="h-[220px] w-full relative flex items-center justify-center">
@@ -362,7 +363,7 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                     </ResponsiveContainer>
                     <div className="absolute text-center">
                       <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                        Win Rate
+                        {t('analytics.charts.winRate')}
                       </p>
                       <p className="text-2xl font-black text-foreground font-tabular">
                         {stats.winRate.toFixed(0)}%
@@ -374,16 +375,16 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
                 <div className="flex justify-center gap-4 text-xs font-semibold text-muted-foreground border-t border-border/40 pt-3">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
-                    Wins ({stats.winCount})
+                    {t('analytics.charts.winsLabel', { count: stats.winCount })}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-                    Losses ({stats.lossCount})
+                    {t('analytics.charts.lossesLabel', { count: stats.lossCount })}
                   </span>
                   {stats.breakevenCount > 0 && (
                     <span className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-zinc-500 inline-block" />
-                      BE ({stats.breakevenCount})
+                      {t('analytics.charts.beLabel', { count: stats.breakevenCount })}
                     </span>
                   )}
                 </div>
@@ -403,9 +404,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Daily day of week performance */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Day of Week Performance</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.dayOfWeek')}</h4>
                   <p className="text-[11px] text-muted-foreground">
-                    Cumulative P&L grouped by weekdays
+                    {t('analytics.charts.dayOfWeekDesc')}
                   </p>
                 </div>
                 <div className="h-[260px] w-full">
@@ -454,14 +455,14 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Monthly P&L performance */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Monthly P&L Curve</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.monthlyPnl')}</h4>
                   <p className="text-[11px] text-muted-foreground">
-                    Net performance grouped by calendar months
+                    {t('analytics.charts.monthlyPnlDesc')}
                   </p>
                 </div>
                 {stats.monthlyPerformance.length === 0 ? (
                   <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground italic">
-                    No monthly data available
+                    {t('analytics.charts.noMonthlyData')}
                   </div>
                 ) : (
                   <div className="h-[260px] w-full">
@@ -521,14 +522,14 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Pair performance breakdown */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Asset Pair Net P&L</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.assetPairPnl')}</h4>
                   <p className="text-[11px] text-muted-foreground">
-                    Cumulative trade return ranked by symbols
+                    {t('analytics.charts.assetPairPnlDesc')}
                   </p>
                 </div>
                 {stats.pairPerformance.length === 0 ? (
                   <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground italic">
-                    No asset pair data logged
+                    {t('analytics.charts.noAssetData')}
                   </div>
                 ) : (
                   <div className="h-[260px] w-full">
@@ -577,14 +578,14 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Strategy performance breakdown */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Strategy Net Return</h4>
+                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.strategyReturn')}</h4>
                   <p className="text-[11px] text-muted-foreground">
-                    Cumulative trade P&L grouped by strategies used
+                    {t('analytics.charts.strategyReturnDesc')}
                   </p>
                 </div>
                 {stats.strategyPerformance.length === 0 ? (
                   <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground italic">
-                    No strategy data logged
+                    {t('analytics.charts.noStrategyData')}
                   </div>
                 ) : (
                   <div className="h-[260px] w-full">

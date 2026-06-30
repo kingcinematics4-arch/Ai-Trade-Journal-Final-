@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import {
   BrainCircuit,
   CheckCircle2,
@@ -25,6 +26,7 @@ interface InsightItem {
 }
 
 export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps) {
+  const { t } = useTranslation();
   const insights = useMemo(() => {
     const list: InsightItem[] = [];
 
@@ -37,8 +39,13 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
         list.push({
           id: 'insight-best-pair',
           type: 'positive',
-          title: `Asset Optimization — ${best.pair}`,
-          text: `You perform exceptionally well on ${best.pair}. It is your top asset, generating a net return of ${formatCurrency(best.pnl)} over ${best.totalTrades} trades with an accurate win rate of ${best.winRate.toFixed(1)}%. Consider focusing more on setups in this market.`,
+          title: t('analytics.insights.assetOptimization', { pair: best.pair }),
+          text: t('analytics.insights.assetOptimizationText', {
+            pair: best.pair,
+            pnl: formatCurrency(best.pnl),
+            trades: best.totalTrades,
+            winRate: best.winRate.toFixed(1)
+          }),
         });
       }
     }
@@ -49,15 +56,15 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
         list.push({
           id: 'insight-r-ratio-high',
           type: 'positive',
-          title: 'Outstanding Risk Management',
-          text: `Your average reward-to-risk ratio is ${stats.avgRr.toFixed(2)}R. This is mathematically superior and guarantees that your account stays profitable even during brief drawdowns or low win-rate environments.`,
+          title: t('analytics.insights.outstandingRisk'),
+          text: t('analytics.insights.outstandingRiskText', { ratio: stats.avgRr.toFixed(2) }),
         });
       } else if (stats.avgRr < 1.1) {
         list.push({
           id: 'insight-r-ratio-low',
           type: 'warning',
-          title: 'Risk/Reward Ratio Alert',
-          text: `Your average reward-to-risk ratio is currently ${stats.avgRr.toFixed(2)}R. With an R-ratio below 1.0, your losing trades are bigger than your winners. Try squeezing more target yield out of high-confidence setups or setting tighter, structure-based stop losses.`,
+          title: t('analytics.insights.rrRatioAlert'),
+          text: t('analytics.insights.rrRatioAlertText', { ratio: stats.avgRr.toFixed(2) }),
         });
       }
     }
@@ -70,15 +77,23 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
         list.push({
           id: 'insight-win-loss-ratio',
           type: 'positive',
-          title: 'Strong Win/Loss Skewness',
-          text: `Superb scaling! Your average winning trade (${formatCurrency(stats.averageWin)}) is ${ratio.toFixed(1)}x larger than your average losing trade (${formatCurrency(stats.averageLoss)}). This positive skewness represents professional risk-reward management.`,
+          title: t('analytics.insights.strongWinLoss'),
+          text: t('analytics.insights.strongWinLossText', {
+            avgWin: formatCurrency(stats.averageWin),
+            avgLoss: formatCurrency(stats.averageLoss),
+            ratio: ratio.toFixed(1)
+          }),
         });
       } else if (ratio < 0.9) {
         list.push({
           id: 'insight-win-loss-ratio-low',
           type: 'negative',
-          title: 'Negative Profit Distribution',
-          text: `Warning: Your average losing trade (${formatCurrency(stats.averageLoss)}) is larger than your average winning trade (${formatCurrency(stats.averageWin)}) by ${((1 / ratio) * 100).toFixed(0)}%. You are cutting winners too short or holding losers too long. Practice taking partial profits at targets and strictly cutting trades at stop-loss structure.`,
+          title: t('analytics.insights.negativeDistribution'),
+          text: t('analytics.insights.negativeDistributionText', {
+            avgLoss: formatCurrency(stats.averageLoss),
+            avgWin: formatCurrency(stats.averageWin),
+            percent: ((1 / ratio) * 100).toFixed(0)
+          }),
         });
       }
     }
@@ -90,8 +105,12 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
         list.push({
           id: 'insight-worst-pair',
           type: 'warning',
-          title: `Market Friction — ${worst.pair}`,
-          text: `You are experiencing friction trading ${worst.pair}, resulting in a net loss of ${formatCurrency(worst.pnl)} across ${worst.totalTrades} trades. Consider lowering your trade size on this specific asset, checking for spread friction, or adapting strategy entry points.`,
+          title: t('analytics.insights.marketFriction', { pair: worst.pair }),
+          text: t('analytics.insights.marketFrictionText', {
+            pair: worst.pair,
+            pnl: formatCurrency(worst.pnl),
+            trades: worst.totalTrades
+          }),
         });
       }
     }
@@ -103,8 +122,12 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
         list.push({
           id: 'insight-worst-strategy',
           type: 'warning',
-          title: `Strategy Adaptation — ${worstStrat.strategy}`,
-          text: `Your strategy "${worstStrat.strategy}" is currently underperforming with a total loss of ${formatCurrency(worstStrat.pnl)} and a win rate of ${worstStrat.winRate.toFixed(1)}%. Review whether market conditions (e.g. range vs. trend) are mismatching your setup parameters.`,
+          title: t('analytics.insights.strategyAdaptation', { strategy: worstStrat.strategy }),
+          text: t('analytics.insights.strategyAdaptationText', {
+            strategy: worstStrat.strategy,
+            pnl: formatCurrency(worstStrat.pnl),
+            winRate: worstStrat.winRate.toFixed(1)
+          }),
         });
       }
     }
@@ -114,8 +137,8 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
       list.push({
         id: 'insight-losing-streak',
         type: 'negative',
-        title: 'Drawdown Resilience Check',
-        text: `You encountered a consecutive streak of ${stats.maxLosingStreak} losses. When entering a streak of 3+ consecutive losses, consider taking a 24-hour cooling-off period to prevent emotional trading (revenge trading) and preserve capital.`,
+        title: t('analytics.insights.drawdownResilience'),
+        text: t('analytics.insights.drawdownResilienceText', { streak: stats.maxLosingStreak }),
       });
     }
 
@@ -124,8 +147,8 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
       list.push({
         id: 'insight-expectancy-positive',
         type: 'positive',
-        title: 'Mathematically Viable System',
-        text: `Your overall system expectancy is positive at ${formatCurrency(stats.expectancy)} per trade. Your trading rules and executions represent a mathematically sound edge over the market. Trust your system and stick to your strict execution rules.`,
+        title: t('analytics.insights.viableSystem'),
+        text: t('analytics.insights.viableSystemText', { expectancy: formatCurrency(stats.expectancy) }),
       });
     }
 
@@ -149,10 +172,10 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
       <div className="card-elevated p-5 flex flex-col items-center justify-center text-center py-10">
         <BrainCircuit size={32} className="text-violet-400 mb-3 animate-pulse" />
         <h4 className="font-semibold text-foreground text-sm mb-1">
-          Generating Performance Insights
+          {t('analytics.insights.generating')}
         </h4>
         <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
-          Log at least 2 trades with P&L information to unlock automated dynamic insights.
+          {t('analytics.insights.generatingDesc')}
         </p>
       </div>
     );
@@ -166,15 +189,15 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
             <BrainCircuit size={16} className="text-violet-400 animate-pulse" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-foreground">AI Performance Insights</h4>
+            <h4 className="text-sm font-semibold text-foreground">{t('analytics.insights.title')}</h4>
             <p className="text-[10px] text-muted-foreground">
-              Pattern-based recommendations from your logged data
+              {t('analytics.insights.description')}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-violet-500/10 text-violet-400 text-[10px] font-bold rounded-full border border-violet-500/20">
           <Sparkles size={11} />
-          COACH ACTIVE
+          {t('analytics.insights.coachActive')}
         </div>
       </div>
 

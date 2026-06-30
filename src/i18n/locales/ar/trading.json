@@ -217,5 +217,50 @@
       "noMatches": "لم يتم العثور على مطابقات",
       "addCustom": "إضافة \"{{term}}\" كمخصص"
     }
+  },
+  "tradeHistory": {
+    "title": "سجل الصفقات",
+    "description": "تصفح، فلترة، وتحليل جميع صفقاتك",
+    "aria": {
+      "backToDashboard": "العودة إلى لوحة التحكم",
+      "refreshTrades": "تحديث الصفقات"
+    },
+    "refreshSuccess": "تم تحديث بيانات الصفقات بنجاح",
+    "refreshFailed": "فشل تحديث بيانات الصفقات",
+    "addTrade": "إضافة صفقة",
+    "filterBar": {
+      "searchPlaceholder": "البحث عن الأصول أو الملاحظات...",
+      "statusLabel": "الحالة:",
+      "typeLabel": "النوع:",
+      "filtersLabel": "الفلاتر:",
+      "allStatuses": "جميع الحالات",
+      "allTypes": "جميع الأنواع",
+      "allPairs": "جميع الأزواج",
+      "from": "من",
+      "to": "إلى",
+      "resetFilters": "إعادة تعيين الفلاتر",
+      "sortOptions": {
+        "newest": "الأحدث أولاً",
+        "oldest": "الأقدم أولاً",
+        "highestProfit": "أعلى ربح",
+        "biggestLoss": "أكبر خسارة"
+      }
+    },
+    "tradeCard": {
+      "unknown": "غير معروف",
+      "short": "▼ بيع",
+      "long": "▲ شراء",
+      "entry": "الدخول",
+      "exit": "الخروج",
+      "pnl": "الربح والخسارة",
+      "rrRatio": "نسبة المخاطرة/العائد",
+      "tradeScreenshot": "لقطة الصفقة",
+      "moreImages": "+{{count}} أكثر"
+    },
+    "empty": {
+      "title": "لم تتم إضافة صفقات بعد",
+      "description": "ابدأ في بناء دفتر يومية التداول الخاص بك عن طريق تسجيل أول صفقة. تتبع أدائك، وحلل الأنماط، وحسّن استراتيجيتك بمرور الوقت.",
+      "logFirstTrade": "تسجيل أول صفقة"
+    }
   }
 }

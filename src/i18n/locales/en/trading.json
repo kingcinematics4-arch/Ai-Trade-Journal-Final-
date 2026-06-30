@@ -217,5 +217,50 @@
       "noMatches": "No matches found",
       "addCustom": "Add \"{{term}}\" as custom"
     }
+  },
+  "tradeHistory": {
+    "title": "Trade History",
+    "description": "Browse, filter, and analyze all your trades",
+    "aria": {
+      "backToDashboard": "Back to Dashboard",
+      "refreshTrades": "Refresh trades"
+    },
+    "refreshSuccess": "Trade data refreshed successfully",
+    "refreshFailed": "Failed to refresh trade data",
+    "addTrade": "Add Trade",
+    "filterBar": {
+      "searchPlaceholder": "Search assets or notes...",
+      "statusLabel": "Status:",
+      "typeLabel": "Type:",
+      "filtersLabel": "Filters:",
+      "allStatuses": "All Statuses",
+      "allTypes": "All Types",
+      "allPairs": "All Pairs",
+      "from": "From",
+      "to": "To",
+      "resetFilters": "Reset Filters",
+      "sortOptions": {
+        "newest": "Newest First",
+        "oldest": "Oldest First",
+        "highestProfit": "Highest Profit",
+        "biggestLoss": "Biggest Loss"
+      }
+    },
+    "tradeCard": {
+      "unknown": "Unknown",
+      "short": "▼ Short",
+      "long": "▲ Long",
+      "entry": "Entry",
+      "exit": "Exit",
+      "pnl": "P&L",
+      "rrRatio": "RR Ratio",
+      "tradeScreenshot": "Trade screenshot",
+      "moreImages": "+{{count}} more"
+    },
+    "empty": {
+      "title": "No trades added yet",
+      "description": "Start building your trading journal by logging your first trade. Track your performance, analyze patterns, and improve your strategy over time.",
+      "logFirstTrade": "Log Your First Trade"
+    }
   }
 }

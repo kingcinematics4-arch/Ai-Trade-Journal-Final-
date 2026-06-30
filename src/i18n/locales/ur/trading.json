@@ -217,5 +217,50 @@
       "noMatches": "کوئی مماثل نہیں ملا",
       "addCustom": "\"{{term}}\" کو کسٹم کے طور پر شامل کریں"
     }
+  },
+  "tradeHistory": {
+    "title": "ٹریڈ کی تاریخ",
+    "description": "اپنے تمام ٹریڈز کو براؤز، فلٹر اور تجزیہ کریں",
+    "aria": {
+      "backToDashboard": "ڈیش بورڈ پر واپس جائیں",
+      "refreshTrades": "ٹریڈز ریفریش کریں"
+    },
+    "refreshSuccess": "ٹریڈ ڈیٹا کامیابی سے ریفریش ہو گیا",
+    "refreshFailed": "ٹریڈ ڈیٹا ریفریش کرنے میں ناکام",
+    "addTrade": "ٹریڈ شامل کریں",
+    "filterBar": {
+      "searchPlaceholder": "اثاثے یا نوٹس تلاش کریں...",
+      "statusLabel": "حالت:",
+      "typeLabel": "قسم:",
+      "filtersLabel": "فلٹر:",
+      "allStatuses": "تمام حالات",
+      "allTypes": "تمام اقسام",
+      "allPairs": "تمام جوڑے",
+      "from": "سے",
+      "to": "تک",
+      "resetFilters": "فلٹر ری سیٹ کریں",
+      "sortOptions": {
+        "newest": "نئے پہلے",
+        "oldest": "پرانے پہلے",
+        "highestProfit": "سب سے زیادہ منافع",
+        "biggestLoss": "سب سے بڑی نقصان"
+      }
+    },
+    "tradeCard": {
+      "unknown": "نامعلوم",
+      "short": "▼ شارٹ",
+      "long": "▲ لانگ",
+      "entry": "انٹری",
+      "exit": "ایگزٹ",
+      "pnl": "منافہ نقصان",
+      "rrRatio": "RR تناسب",
+      "tradeScreenshot": "ٹریڈ اسکرین شاٹ",
+      "moreImages": "+{{count}} مزید"
+    },
+    "empty": {
+      "title": "ابھی تک کوئی ٹریڈ شامل نہیں کیا گیا",
+      "description": "اپنا پہلا ٹریڈ لاگ کر کے اپنے ٹریڈنگ جرنل بنانا شروع کریں۔ اپنی کارکردگی ٹریک کریں، پیٹرن کا تجزیہ کریں، اور وقت کے ساتھ اپنی حکمت عملی میں بہتری لائیں۔",
+      "logFirstTrade": "اپنا پہلا ٹریڈ لاگ کریں"
+    }
   }
 }

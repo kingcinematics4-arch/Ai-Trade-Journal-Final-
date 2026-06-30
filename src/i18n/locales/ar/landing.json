@@ -10,28 +10,80 @@
     "subtitle": "ميزات قوية مصممة للمتداولين الجادين الذين يرغبون في تحسين أدائهم",
     "tradeJournal": {
       "title": "سجل التداول",
-      "description": "سجل كل صفقة مع الدخول والخروج والملاحظات والمشاعر وتفاصيل التنفيذ في سجل منظم."
+      "description": "سجل كل صفقة مع الدخول والخروج والملاحظات والمشاعر وتفاصيل التنفيذ في سجل منظم.",
+      "preview": {
+        "recentTrades": "الصفقات الأخيرة",
+        "btcUsdLong": "BTC/USD Long +$120",
+        "ethUsdtShort": "ETH/USDT Short -$50",
+        "journalNote": "الدخول كان مثالياً، لكن خرجت مبكراً جداً بسبب FOMO. أحتاج إلى الثقة بالخطة أكثر...",
+        "tags": {
+          "breakout": "#breakout",
+          "fomo": "#fomo",
+          "long": "#long"
+        }
+      }
     },
     "aiCoach": {
       "title": "مدرب الذكاء الاصطناعي",
-      "description": "تحليل نفسية وأداء التداول المدعوم بالذكاء الاصطناعي الذي يحدد نقاط القوة والضعف والأنماط السلوكية."
+      "description": "تحليل نفسية وأداء التداول المدعوم بالذكاء الاصطناعي الذي يحدد نقاط القوة والضعف والأنماط السلوكية.",
+      "preview": {
+        "aiInsights": "رؤى الذكاء الاصطناعي",
+        "strongDiscipline": "انضباط قوي في الدخول.",
+        "overtrading": "تداول مفرط يوم الثلاثاء.",
+        "psychologyScore": "درجة علم النفس"
+      }
     },
     "strategyManagement": {
       "title": "إدارة الاستراتيجيات",
-      "description": "أنشئ ونظم واختبر وتتبع استراتيجيات التداول مع إحصائيات أداء مفصلة ونتائج تاريخية."
+      "description": "أنشئ ونظم واختبر وتتبع استراتيجيات التداول مع إحصائيات أداء مفصلة ونتائج تاريخية.",
+      "preview": {
+        "topStrategies": "أفضل الاستراتيجيات",
+        "breakout": "Breakout",
+        "trendFollow": "Trend Follow",
+        "winRate": "WR",
+        "backtest": "Backtest",
+        "active": "نشط"
+      }
     },
     "advancedAnalytics": {
       "title": "التحليل المتقدم",
-      "description": "تحليل عميق يشمل منحنى الأسهم ومعدل الفوز وعامل الربح والسحب والتوقعات ومقاييس الأداء."
+      "description": "تحليل عميق يشمل منحنى الأسهم ومعدل الفوز وعامل الربح والسحب والتوقعات ومقاييس الأداء.",
+      "preview": {
+        "equityCurve": "منحنى الأسهم",
+        "winRate": "معدل الفوز",
+        "maxDd": "أقصى انخفاض"
+      }
     },
     "riskManagement": {
       "title": "إدارة المخاطر",
-      "description": "راقب R-مضاعف وحرارة المحفظة. تأكد من البقاء مع إشراف المخاطر على مستوى مؤسسي."
+      "description": "راقب R-مضاعف وحرارة المحفظة. تأكد من البقاء مع إشراف المخاطر على مستوى مؤسسي.",
+      "preview": {
+        "riskMetrics": "مقاييس المخاطر",
+        "avgRMultiple": "متوسط R-مضاعف",
+        "maxLoss": "أقصى خسارة",
+        "portfolioHeat": "حرارة المحفظة"
+      }
     },
     "exportEngine": {
       "title": "محرك التصدير",
-      "description": "إنشاء تقارير احترافية بتنسيق PDF أو XLSX لمراجعات الأداء أو الامتثال الضريبي."
+      "description": "إنشاء تقارير احترافية بتنسيق PDF أو XLSX لمراجعات الأداء أو الامتثال الضريبي.",
+      "preview": {
+        "exportOptions": "خيارات التصدير",
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "json": "JSON",
+        "fileName": "اسم الملف",
+        "tradesReport": "Trades_Report.xlsx"
+      }
     }
+  },
+  "preview": {
+    "platform": "منصة AI Trade Journal",
+    "tradeTracking": "تتبع الصفقات",
+    "performanceAnalytics": "تحليل الأداء",
+    "strategyInsights": "رؤى الاستراتيجيات",
+    "exportReports": "تصدير التقارير"
   },
   "testimonials": {
     "title": "موثوق من قبل المتداولين المحترفين",

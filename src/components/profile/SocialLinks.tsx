@@ -3,6 +3,7 @@
 import React from 'react';
 import { Globe, AtSign, Camera, Briefcase, ExternalLink } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 interface SocialLinkRowProps {
   icon: React.ReactNode;
@@ -38,6 +39,7 @@ function SocialLinkRow({ icon, label, href, display, color }: SocialLinkRowProps
 
 export default function SocialLinks() {
   const { dbProfile } = useProfileContext();
+  const { t } = useTranslation();
 
   if (!dbProfile) return null;
 
@@ -47,7 +49,7 @@ export default function SocialLinks() {
   if (!hasAnySocial) {
     return (
       <div className="text-center py-6 text-muted-foreground/50 text-sm">
-        No social links added yet.
+        {t('profile.noSocialLinks')}
       </div>
     );
   }
@@ -56,28 +58,28 @@ export default function SocialLinks() {
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
       <SocialLinkRow
         icon={<Globe size={16} />}
-        label="Website"
+        label={t('profile.website')}
         href={website}
         display={website?.replace(/^https?:\/\//, '') ?? ''}
         color="text-sky-400"
       />
       <SocialLinkRow
         icon={<AtSign size={16} />}
-        label="Twitter / X"
+        label={t('profile.twitter')}
         href={twitter ? `https://twitter.com/${twitter.replace('@', '')}` : null}
         display={twitter ? (twitter.startsWith('@') ? twitter : `@${twitter}`) : ''}
         color="text-sky-500"
       />
       <SocialLinkRow
         icon={<Camera size={16} />}
-        label="Instagram"
+        label={t('profile.instagram')}
         href={instagram ? `https://instagram.com/${instagram.replace('@', '')}` : null}
         display={instagram ? (instagram.startsWith('@') ? instagram : `@${instagram}`) : ''}
         color="text-pink-400"
       />
       <SocialLinkRow
         icon={<Briefcase size={16} />}
-        label="LinkedIn"
+        label={t('profile.linkedin')}
         href={linkedin}
         display={linkedin?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') ?? ''}
         color="text-blue-400"

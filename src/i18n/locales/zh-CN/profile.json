@@ -1,5 +1,7 @@
 {
   "title": "个人资料",
+  "mobileTitle": "我的资料",
+  "mobileSubtitle": "管理您的账户、头像和设置",
   "edit": "编辑资料",
   "save": "保存更改",
   "cancel": "取消",
@@ -30,6 +32,15 @@
   "deleteAccount": "删除账户",
   "deleteAccountWarning": "此操作无法撤销。您的所有数据将被永久删除。",
   "confirmDelete": "我理解，删除我的账户",
+  "socialLinks": "社交链接",
+  "socialLinksSubtitle": "您的关联资料和网站",
+  "active": "活跃",
+  "noBioAdded": "尚未添加简介。点击\"编辑资料\"添加。",
+  "noSocialLinks": "尚未添加社交链接。",
+  "website": "网站",
+  "twitter": "推特 / X",
+  "instagram": "Instagram",
+  "linkedin": "领英",
   "success": {
     "profileUpdated": "个人资料更新成功",
     "passwordChanged": "密码更改成功",

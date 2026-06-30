@@ -217,5 +217,50 @@
       "noMatches": "未找到匹配项",
       "addCustom": "添加 \"{{term}}\" 为自定义"
     }
+  },
+  "tradeHistory": {
+    "title": "交易历史",
+    "description": "浏览、筛选和分析您的所有交易",
+    "aria": {
+      "backToDashboard": "返回仪表板",
+      "refreshTrades": "刷新交易"
+    },
+    "refreshSuccess": "交易数据刷新成功",
+    "refreshFailed": "刷新交易数据失败",
+    "addTrade": "添加交易",
+    "filterBar": {
+      "searchPlaceholder": "搜索资产或笔记...",
+      "statusLabel": "状态:",
+      "typeLabel": "类型:",
+      "filtersLabel": "筛选:",
+      "allStatuses": "所有状态",
+      "allTypes": "所有类型",
+      "allPairs": "所有交易对",
+      "from": "从",
+      "to": "到",
+      "resetFilters": "重置筛选",
+      "sortOptions": {
+        "newest": "最新优先",
+        "oldest": "最旧优先",
+        "highestProfit": "最高盈利",
+        "biggestLoss": "最大亏损"
+      }
+    },
+    "tradeCard": {
+      "unknown": "未知",
+      "short": "▼ 做空",
+      "long": "▲ 做多",
+      "entry": "入场",
+      "exit": "出场",
+      "pnl": "盈亏",
+      "rrRatio": "风险回报比",
+      "tradeScreenshot": "交易截图",
+      "moreImages": "+{{count}} 更多"
+    },
+    "empty": {
+      "title": "尚未添加交易",
+      "description": "通过记录您的第一笔交易开始建立您的交易日志。跟踪您的表现，分析模式，并随着时间改进您的策略。",
+      "logFirstTrade": "记录您的第一笔交易"
+    }
   }
 }

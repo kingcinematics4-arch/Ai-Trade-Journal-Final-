@@ -10,28 +10,80 @@
     "subtitle": "Fonctionnalités puissantes conçues pour les traders sérieux qui veulent améliorer leurs performances",
     "tradeJournal": {
       "title": "Journal de Trading",
-      "description": "Enregistrez chaque transaction avec l'entrée, la sortie, les notes, les émotions et les détails d'exécution dans un journal structuré."
+      "description": "Enregistrez chaque transaction avec l'entrée, la sortie, les notes, les émotions et les détails d'exécution dans un journal structuré.",
+      "preview": {
+        "recentTrades": "Trades Récents",
+        "btcUsdLong": "BTC/USD Long +$120",
+        "ethUsdtShort": "ETH/USDT Short -$50",
+        "journalNote": "L'entrée était parfaite, mais je suis sorti trop tôt à cause du FOMO. Dois faire plus confiance au plan...",
+        "tags": {
+          "breakout": "#breakout",
+          "fomo": "#fomo",
+          "long": "#long"
+        }
+      }
     },
     "aiCoach": {
       "title": "Coach IA",
-      "description": "Analyse de psychologie et de performance de trading alimentée par l'IA qui identifie les forces, les faiblesses et les modèles comportementaux."
+      "description": "Analyse de psychologie et de performance de trading alimentée par l'IA qui identifie les forces, les faiblesses et les modèles comportementaux.",
+      "preview": {
+        "aiInsights": "Insights IA",
+        "strongDiscipline": "Discipline forte sur les entrées.",
+        "overtrading": "Sur-trading les mardis.",
+        "psychologyScore": "Score de Psychologie"
+      }
     },
     "strategyManagement": {
       "title": "Gestion de Stratégies",
-      "description": "Créez, organisez, testez et suivez les stratégies de trading avec des statistiques de performance détaillées et des résultats historiques."
+      "description": "Créez, organisez, testez et suivez les stratégies de trading avec des statistiques de performance détaillées et des résultats historiques.",
+      "preview": {
+        "topStrategies": "Meilleures Stratégies",
+        "breakout": "Breakout",
+        "trendFollow": "Trend Follow",
+        "winRate": "WR",
+        "backtest": "Backtest",
+        "active": "actives"
+      }
     },
     "advancedAnalytics": {
       "title": "Analyse Avancée",
-      "description": "Analyse approfondie incluant la courbe d'équité, le taux de gain, le facteur de profit, le drawdown, l'espérance et les métriques de performance."
+      "description": "Analyse approfondie incluant la courbe d'équité, le taux de gain, le facteur de profit, le drawdown, l'espérance et les métriques de performance.",
+      "preview": {
+        "equityCurve": "Courbe d'Équité",
+        "winRate": "Taux de Gain",
+        "maxDd": "DD Max"
+      }
     },
     "riskManagement": {
       "title": "Gestion des Risques",
-      "description": "Surveillez le R-multiple et la chaleur du portefeuille. Assurez la survie avec une supervision des risques de niveau institutionnel."
+      "description": "Surveillez le R-multiple et la chaleur du portefeuille. Assurez la survie avec une supervision des risques de niveau institutionnel.",
+      "preview": {
+        "riskMetrics": "Métriques de Risque",
+        "avgRMultiple": "R-Multiple Moyen",
+        "maxLoss": "Perte Maximale",
+        "portfolioHeat": "Chaleur du Portefeuille"
+      }
     },
     "exportEngine": {
       "title": "Moteur d'Export",
-      "description": "Générez des rapports professionnels en PDF ou XLSX pour les revues de performance ou la conformité fiscale."
+      "description": "Générez des rapports professionnels en PDF ou XLSX pour les revues de performance ou la conformité fiscale.",
+      "preview": {
+        "exportOptions": "Options d'Export",
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "json": "JSON",
+        "fileName": "Nom de Fichier",
+        "tradesReport": "Trades_Report.xlsx"
+      }
     }
+  },
+  "preview": {
+    "platform": "Plateforme AI Trade Journal",
+    "tradeTracking": "Suivi des trades",
+    "performanceAnalytics": "Analyse de performance",
+    "strategyInsights": "Insights de stratégies",
+    "exportReports": "Exporter les rapports"
   },
   "testimonials": {
     "title": "Approuvé par les Traders Professionnels",

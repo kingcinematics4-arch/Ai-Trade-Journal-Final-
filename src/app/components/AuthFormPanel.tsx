@@ -40,34 +40,6 @@ interface SignupFormData {
   country: string;
 }
 
-const experienceLevels = [
-  { value: 'beginner', label: 'Beginner (< 1 year)' },
-  { value: 'intermediate', label: 'Intermediate (1–3 yrs)' },
-  { value: 'advanced', label: 'Advanced (3–5 yrs)' },
-  { value: 'professional', label: 'Professional (5+ yrs)' },
-];
-
-const tradingStyles = [
-  { value: 'scalping', label: 'Scalping' },
-  { value: 'day-trading', label: 'Day Trading' },
-  { value: 'swing-trading', label: 'Swing Trading' },
-  { value: 'position-trading', label: 'Position' },
-  { value: 'algo-trading', label: 'Algo Trading' },
-];
-
-const countries = [
-  'United States',
-  'United Kingdom',
-  'Canada',
-  'Australia',
-  'Germany',
-  'Singapore',
-  'India',
-  'UAE',
-  'Japan',
-  'Other',
-];
-
 // Shared spring used for the hero layout transition
 const LAYOUT_SPRING = {
   type: 'spring' as const,
@@ -112,6 +84,35 @@ const scrollbarHideStyle = `
 
 export default function AuthFormPanel() {
   const { t } = useTranslation();
+  
+  const experienceLevels = [
+    { value: 'beginner', label: t('auth.signup.experienceLevels.beginner') },
+    { value: 'intermediate', label: t('auth.signup.experienceLevels.intermediate') },
+    { value: 'advanced', label: t('auth.signup.experienceLevels.advanced') },
+    { value: 'professional', label: t('auth.signup.experienceLevels.professional') },
+  ];
+
+  const tradingStyles = [
+    { value: 'scalping', label: t('auth.signup.tradingStyles.scalping') },
+    { value: 'day-trading', label: t('auth.signup.tradingStyles.dayTrading') },
+    { value: 'swing-trading', label: t('auth.signup.tradingStyles.swingTrading') },
+    { value: 'position-trading', label: t('auth.signup.tradingStyles.positionTrading') },
+    { value: 'algo-trading', label: t('auth.signup.tradingStyles.algoTrading') },
+  ];
+
+  const countries = [
+    t('auth.signup.countries.unitedStates'),
+    t('auth.signup.countries.unitedKingdom'),
+    t('auth.signup.countries.canada'),
+    t('auth.signup.countries.australia'),
+    t('auth.signup.countries.germany'),
+    t('auth.signup.countries.singapore'),
+    t('auth.signup.countries.india'),
+    t('auth.signup.countries.uae'),
+    t('auth.signup.countries.japan'),
+    t('auth.signup.countries.other'),
+  ];
+
   const [activeTab, setActiveTab] = useState<AuthTab>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -184,7 +185,7 @@ export default function AuthFormPanel() {
       });
       if (error) {
         loginForm.setError('email', { message: error.message });
-        toast.error(error.message || 'Failed to sign in');
+        toast.error(error.message || t('auth.login.error.signInFailed'));
         return;
       }
       if (process.env.NODE_ENV === 'development') {
@@ -193,10 +194,10 @@ export default function AuthFormPanel() {
           email: authData.user?.email,
         });
       }
-      toast.success('Welcome back!');
+      toast.success(t('auth.login.welcomeBack'));
       router.push('/dashboard');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to sign in');
+      toast.error(err.message || t('auth.login.error.signInFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -204,8 +205,8 @@ export default function AuthFormPanel() {
 
   const handleSignupSubmit = async (data: SignupFormData) => {
     if (data.password !== data.confirmPassword) {
-      signupForm.setError('confirmPassword', { message: 'Passwords do not match' });
-      toast.error('Passwords do not match');
+      signupForm.setError('confirmPassword', { message: t('auth.signup.error.passwordsDoNotMatch') });
+      toast.error(t('auth.signup.error.passwordsDoNotMatch'));
       return;
     }
     setIsLoading(true);
@@ -226,7 +227,7 @@ export default function AuthFormPanel() {
       });
       if (error) {
         signupForm.setError('email', { message: error.message });
-        toast.error(error.message || 'Failed to create account');
+        toast.error(error.message || t('auth.signup.error.createAccountFailed'));
         return;
       }
       if (process.env.NODE_ENV === 'development') {
@@ -236,13 +237,13 @@ export default function AuthFormPanel() {
         });
       }
       if (authData.session) {
-        toast.success('Account created! Welcome aboard.');
+        toast.success(t('auth.signup.accountCreated'));
         router.push('/dashboard');
       } else {
-        toast.success('Account created! Check your email to confirm.');
+        toast.success(t('auth.signup.accountCreatedCheckEmail'));
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create account');
+      toast.error(err.message || t('auth.signup.error.createAccountFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -250,14 +251,14 @@ export default function AuthFormPanel() {
 
   const handleSocialLogin = async (provider: string) => {
     if (provider.toLowerCase() !== 'google') {
-      toast.error(`Unsupported provider: ${provider}`);
+      toast.error(`${t('auth.signup.unsupportedProvider')} ${provider}`);
       return;
     }
     if (isGoogleLoading) return;
     setIsGoogleLoading(true);
     try {
       const redirectTo = `${window.location.origin}/auth/callback`;
-      toast.info('Connecting to Google...');
+      toast.info(t('auth.signup.connectingToGoogle'));
       if (process.env.NODE_ENV === 'development') {
         console.debug('[auth] Google OAuth redirect destination:', redirectTo);
       }
@@ -269,11 +270,11 @@ export default function AuthFormPanel() {
       if (data?.url) {
         window.location.href = data.url;
       } else {
-        throw new Error('Failed to initialize Google authentication flow');
+        throw new Error(t('auth.signup.googleAuthInitFailed'));
       }
     } catch (err: any) {
       console.error('[auth] Google login error:', err);
-      toast.error(err.message || 'Failed to authenticate using Google');
+      toast.error(err.message || t('auth.signup.googleAuthFailed'));
       setIsGoogleLoading(false);
     }
   };
@@ -283,7 +284,7 @@ export default function AuthFormPanel() {
     <div
       className="relative flex bg-slate-950/80 border border-white/[0.05] p-1 rounded-xl mb-5"
       role="tablist"
-      aria-label="Authentication mode"
+      aria-label={t('auth.common.authenticationMode')}
     >
       {(['login', 'signup'] as AuthTab[]).map((tab) => (
         <button
@@ -379,11 +380,11 @@ export default function AuthFormPanel() {
                     id="login-email"
                     type="email"
                     autoComplete="email"
-                    placeholder="name@domain.com"
+                    placeholder={t('auth.login.emailPlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...loginForm.register('email', {
-                      required: 'Email is required',
-                      pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email format' },
+                      required: t('auth.login.error.emailRequired'),
+                      pattern: { value: /^\S+@\S+\.\S+$/, message: t('auth.common.invalidEmailFormat') },
                     })}
                   />
                 </div>
@@ -411,18 +412,18 @@ export default function AuthFormPanel() {
                     id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
-                    placeholder="Enter your security credentials"
+                    placeholder={t('auth.login.passwordPlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...loginForm.register('password', {
-                      required: 'Password is required',
-                      minLength: { value: 8, message: 'Must be at least 8 characters' },
+                      required: t('auth.login.error.passwordRequired'),
+                      minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
                     })}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -448,10 +449,10 @@ export default function AuthFormPanel() {
                 </label>
                 <button
                   type="button"
-                  onClick={() => toast.info('Password recovery link dispatched.')}
+                  onClick={() => toast.info(t('auth.login.passwordRecoverySent'))}
                   className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-sm"
                 >
-                  Forgot password?
+                  {t('auth.login.forgotPassword')}
                 </button>
               </div>
 
@@ -508,11 +509,11 @@ export default function AuthFormPanel() {
                     id="signup-fullname"
                     type="text"
                     autoComplete="name"
-                    placeholder="John Doe"
+                    placeholder={t('auth.signup.fullNamePlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...signupForm.register('fullName', {
-                      required: 'Full name is required',
-                      minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                      required: t('auth.signup.error.fullNameRequired'),
+                      minLength: { value: 2, message: t('auth.signup.error.fullNameMinLength') },
                     })}
                   />
                 </div>
@@ -540,14 +541,14 @@ export default function AuthFormPanel() {
                     id="signup-username"
                     type="text"
                     autoComplete="username"
-                    placeholder="traderpro99"
+                    placeholder={t('auth.signup.usernamePlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...signupForm.register('username', {
-                      required: 'Username is required',
-                      minLength: { value: 3, message: 'Username must be at least 3 characters' },
+                      required: t('auth.signup.error.usernameRequired'),
+                      minLength: { value: 3, message: t('auth.signup.error.usernameMinLength') },
                       pattern: {
                         value: /^[a-zA-Z0-9_]+$/,
-                        message: 'Only letters, numbers, underscores',
+                        message: t('auth.signup.error.usernameInvalid'),
                       },
                     })}
                   />
@@ -576,11 +577,11 @@ export default function AuthFormPanel() {
                     id="signup-email"
                     type="email"
                     autoComplete="email"
-                    placeholder="name@domain.com"
+                    placeholder={t('auth.login.emailPlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...signupForm.register('email', {
-                      required: 'Email is required',
-                      pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email format' },
+                      required: t('auth.login.error.emailRequired'),
+                      pattern: { value: /^\S+@\S+\.\S+$/, message: t('auth.common.invalidEmailFormat') },
                     })}
                   />
                 </div>
@@ -608,18 +609,18 @@ export default function AuthFormPanel() {
                     id="signup-password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    placeholder="Min. 8 characters"
+                    placeholder={t('auth.signup.passwordPlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...signupForm.register('password', {
-                      required: 'Password is required',
-                      minLength: { value: 8, message: 'Must be at least 8 characters' },
+                      required: t('auth.login.error.passwordRequired'),
+                      minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
                     })}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -648,10 +649,10 @@ export default function AuthFormPanel() {
                     id="signup-confirm-password"
                     type={showConfirmPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    placeholder="Re-enter your password"
+                    placeholder={t('auth.signup.confirmPasswordPlaceholder')}
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...signupForm.register('confirmPassword', {
-                      required: 'Please confirm your password',
+                      required: t('auth.signup.error.confirmPasswordRequired'),
                     })}
                   />
                   <button
@@ -659,7 +660,7 @@ export default function AuthFormPanel() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                     aria-label={
-                      showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
+                      showConfirmPassword ? t('auth.common.hideConfirmPassword') : t('auth.common.showConfirmPassword')
                     }
                   >
                     {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -689,10 +690,10 @@ export default function AuthFormPanel() {
                     <select
                       id="signup-experience"
                       className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                      {...signupForm.register('experienceLevel', { required: 'Required' })}
+                      {...signupForm.register('experienceLevel', { required: t('auth.signup.error.experienceRequired') })}
                     >
                       <option value="" className="bg-slate-900">
-                        Select level
+                        {t('auth.signup.selectLevel')}
                       </option>
                       {experienceLevels.map((lvl) => (
                         <option key={lvl.value} value={lvl.value} className="bg-slate-900">
@@ -713,7 +714,7 @@ export default function AuthFormPanel() {
                     className="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
                     htmlFor="signup-style"
                   >
-                    Style
+                    {t('auth.styleLabel')}
                   </label>
                   <div className="relative flex items-center group/input">
                     <ChevronDown
@@ -723,10 +724,10 @@ export default function AuthFormPanel() {
                     <select
                       id="signup-style"
                       className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                      {...signupForm.register('tradingStyle', { required: 'Required' })}
+                      {...signupForm.register('tradingStyle', { required: t('auth.signup.error.styleRequired') })}
                     >
                       <option value="" className="bg-slate-900">
-                        Select style
+                        {t('auth.signup.selectStyle')}
                       </option>
                       {tradingStyles.map((style) => (
                         <option key={style.value} value={style.value} className="bg-slate-900">
@@ -1015,13 +1016,13 @@ export default function AuthFormPanel() {
                               id="login-email"
                               type="email"
                               autoComplete="email"
-                              placeholder="name@domain.com"
+                              placeholder={t('auth.login.emailPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...loginForm.register('email', {
-                                required: 'Email is required',
+                                required: t('auth.login.error.emailRequired'),
                                 pattern: {
                                   value: /^\S+@\S+\.\S+$/,
-                                  message: 'Invalid email format',
+                                  message: t('auth.common.invalidEmailFormat'),
                                 },
                               })}
                             />
@@ -1050,18 +1051,18 @@ export default function AuthFormPanel() {
                               id="login-password"
                               type={showPassword ? 'text' : 'password'}
                               autoComplete="current-password"
-                              placeholder="Enter your security credentials"
+                              placeholder={t('auth.login.passwordPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...loginForm.register('password', {
-                                required: 'Password is required',
-                                minLength: { value: 8, message: 'Must be at least 8 characters' },
+                                required: t('auth.login.error.passwordRequired'),
+                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1082,15 +1083,15 @@ export default function AuthFormPanel() {
                               {...loginForm.register('rememberMe')}
                             />
                             <span className="text-[11px] sm:text-xs text-slate-400 font-semibold">
-                              Remember me
+                              {t('auth.rememberMe')}
                             </span>
                           </label>
                           <button
                             type="button"
-                            onClick={() => toast.info('Password recovery link dispatched.')}
+                            onClick={() => toast.info(t('auth.login.passwordRecoverySent'))}
                             className="text-[11px] sm:text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-sm"
                           >
-                            Forgot password?
+                            {t('auth.login.forgotPassword')}
                           </button>
                         </div>
 
@@ -1150,13 +1151,13 @@ export default function AuthFormPanel() {
                               id="signup-fullname"
                               type="text"
                               autoComplete="name"
-                              placeholder="John Doe"
+                              placeholder={t('auth.signup.fullNamePlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('fullName', {
-                                required: 'Full name is required',
+                                required: t('auth.signup.error.fullNameRequired'),
                                 minLength: {
                                   value: 2,
-                                  message: 'Name must be at least 2 characters',
+                                  message: t('auth.signup.error.fullNameMinLength'),
                                 },
                               })}
                             />
@@ -1185,17 +1186,17 @@ export default function AuthFormPanel() {
                               id="signup-username"
                               type="text"
                               autoComplete="username"
-                              placeholder="traderpro99"
+                              placeholder={t('auth.signup.usernamePlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('username', {
-                                required: 'Username is required',
+                                required: t('auth.signup.error.usernameRequired'),
                                 minLength: {
                                   value: 3,
-                                  message: 'Username must be at least 3 characters',
+                                  message: t('auth.signup.error.usernameMinLength'),
                                 },
                                 pattern: {
                                   value: /^[a-zA-Z0-9_]+$/,
-                                  message: 'Only letters, numbers, underscores',
+                                  message: t('auth.signup.error.usernameInvalid'),
                                 },
                               })}
                             />
@@ -1224,13 +1225,13 @@ export default function AuthFormPanel() {
                               id="signup-email"
                               type="email"
                               autoComplete="email"
-                              placeholder="name@domain.com"
+                              placeholder={t('auth.login.emailPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('email', {
-                                required: 'Email is required',
+                                required: t('auth.login.error.emailRequired'),
                                 pattern: {
                                   value: /^\S+@\S+\.\S+$/,
-                                  message: 'Invalid email format',
+                                  message: t('auth.common.invalidEmailFormat'),
                                 },
                               })}
                             />
@@ -1259,18 +1260,18 @@ export default function AuthFormPanel() {
                               id="signup-password"
                               type={showPassword ? 'text' : 'password'}
                               autoComplete="new-password"
-                              placeholder="Min. 8 characters"
+                              placeholder={t('auth.signup.passwordPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('password', {
-                                required: 'Password is required',
-                                minLength: { value: 8, message: 'Must be at least 8 characters' },
+                                required: t('auth.login.error.passwordRequired'),
+                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1299,10 +1300,10 @@ export default function AuthFormPanel() {
                               id="signup-confirm-password"
                               type={showConfirmPassword ? 'text' : 'password'}
                               autoComplete="new-password"
-                              placeholder="Re-enter your password"
+                              placeholder={t('auth.signup.confirmPasswordPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('confirmPassword', {
-                                required: 'Please confirm your password',
+                                required: t('auth.signup.error.confirmPasswordRequired'),
                               })}
                             />
                             <button
@@ -1311,8 +1312,8 @@ export default function AuthFormPanel() {
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                               aria-label={
                                 showConfirmPassword
-                                  ? 'Hide confirm password'
-                                  : 'Show confirm password'
+                                  ? t('auth.common.hideConfirmPassword')
+                                  : t('auth.common.showConfirmPassword')
                               }
                             >
                               {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -1343,11 +1344,11 @@ export default function AuthFormPanel() {
                                 id="signup-experience"
                                 className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
                                 {...signupForm.register('experienceLevel', {
-                                  required: 'Required',
+                                  required: t('auth.signup.error.experienceRequired'),
                                 })}
                               >
                                 <option value="" className="bg-slate-900">
-                                  Select level
+                                  {t('auth.signup.selectLevel')}
                                 </option>
                                 {experienceLevels.map((lvl) => (
                                   <option
@@ -1372,7 +1373,7 @@ export default function AuthFormPanel() {
                               className="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
                               htmlFor="signup-style"
                             >
-                              Style
+                              {t('auth.styleLabel')}
                             </label>
                             <div className="relative flex items-center group/input">
                               <ChevronDown
@@ -1382,10 +1383,10 @@ export default function AuthFormPanel() {
                               <select
                                 id="signup-style"
                                 className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('tradingStyle', { required: 'Required' })}
+                                {...signupForm.register('tradingStyle', { required: t('auth.signup.error.styleRequired') })}
                               >
                                 <option value="" className="bg-slate-900">
-                                  Select style
+                                  {t('auth.signup.selectStyle')}
                                 </option>
                                 {tradingStyles.map((style) => (
                                   <option
@@ -1652,13 +1653,13 @@ export default function AuthFormPanel() {
                               id="login-email-focused"
                               type="email"
                               autoComplete="email"
-                              placeholder="name@domain.com"
+                              placeholder={t('auth.login.emailPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...loginForm.register('email', {
-                                required: 'Email is required',
+                                required: t('auth.login.error.emailRequired'),
                                 pattern: {
                                   value: /^\S+@\S+\.\S+$/,
-                                  message: 'Invalid email format',
+                                  message: t('auth.common.invalidEmailFormat'),
                                 },
                               })}
                             />
@@ -1685,18 +1686,18 @@ export default function AuthFormPanel() {
                               id="login-password-focused"
                               type={showPassword ? 'text' : 'password'}
                               autoComplete="current-password"
-                              placeholder="Enter your security credentials"
+                              placeholder={t('auth.login.passwordPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...loginForm.register('password', {
-                                required: 'Password is required',
-                                minLength: { value: 8, message: 'Must be at least 8 characters' },
+                                required: t('auth.login.error.passwordRequired'),
+                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1715,15 +1716,15 @@ export default function AuthFormPanel() {
                               {...loginForm.register('rememberMe')}
                             />
                             <span className="text-[11px] sm:text-xs text-slate-400 font-semibold">
-                              Remember me
+                              {t('auth.rememberMe')}
                             </span>
                           </label>
                           <button
                             type="button"
-                            onClick={() => toast.info('Password recovery link dispatched.')}
+                            onClick={() => toast.info(t('auth.login.passwordRecoverySent'))}
                             className="text-[11px] sm:text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-sm"
                           >
-                            Forgot password?
+                            {t('auth.login.forgotPassword')}
                           </button>
                         </div>
                         <motion.button
@@ -1780,13 +1781,13 @@ export default function AuthFormPanel() {
                               id="signup-fullname-focused"
                               type="text"
                               autoComplete="name"
-                              placeholder="John Doe"
+                              placeholder={t('auth.signup.fullNamePlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('fullName', {
-                                required: 'Full name is required',
+                                required: t('auth.signup.error.fullNameRequired'),
                                 minLength: {
                                   value: 2,
-                                  message: 'Name must be at least 2 characters',
+                                  message: t('auth.signup.error.fullNameMinLength'),
                                 },
                               })}
                             />
@@ -1813,17 +1814,17 @@ export default function AuthFormPanel() {
                               id="signup-username-focused"
                               type="text"
                               autoComplete="username"
-                              placeholder="traderpro99"
+                              placeholder={t('auth.signup.usernamePlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('username', {
-                                required: 'Username is required',
+                                required: t('auth.signup.error.usernameRequired'),
                                 minLength: {
                                   value: 3,
-                                  message: 'Username must be at least 3 characters',
+                                  message: t('auth.signup.error.usernameMinLength'),
                                 },
                                 pattern: {
                                   value: /^[a-zA-Z0-9_]+$/,
-                                  message: 'Only letters, numbers, underscores',
+                                  message: t('auth.signup.error.usernameInvalid'),
                                 },
                               })}
                             />
@@ -1850,13 +1851,13 @@ export default function AuthFormPanel() {
                               id="signup-email-focused"
                               type="email"
                               autoComplete="email"
-                              placeholder="name@domain.com"
+                              placeholder={t('auth.login.emailPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('email', {
-                                required: 'Email is required',
+                                required: t('auth.login.error.emailRequired'),
                                 pattern: {
                                   value: /^\S+@\S+\.\S+$/,
-                                  message: 'Invalid email format',
+                                  message: t('auth.common.invalidEmailFormat'),
                                 },
                               })}
                             />
@@ -1883,18 +1884,18 @@ export default function AuthFormPanel() {
                               id="signup-password-focused"
                               type={showPassword ? 'text' : 'password'}
                               autoComplete="new-password"
-                              placeholder="Min. 8 characters"
+                              placeholder={t('auth.signup.passwordPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('password', {
-                                required: 'Password is required',
-                                minLength: { value: 8, message: 'Must be at least 8 characters' },
+                                required: t('auth.login.error.passwordRequired'),
+                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1921,10 +1922,10 @@ export default function AuthFormPanel() {
                               id="signup-confirm-password-focused"
                               type={showConfirmPassword ? 'text' : 'password'}
                               autoComplete="new-password"
-                              placeholder="Re-enter your password"
+                              placeholder={t('auth.signup.confirmPasswordPlaceholder')}
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('confirmPassword', {
-                                required: 'Please confirm your password',
+                                required: t('auth.signup.error.confirmPasswordRequired'),
                               })}
                             />
                             <button
@@ -1933,8 +1934,8 @@ export default function AuthFormPanel() {
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                               aria-label={
                                 showConfirmPassword
-                                  ? 'Hide confirm password'
-                                  : 'Show confirm password'
+                                  ? t('auth.common.hideConfirmPassword')
+                                  : t('auth.common.showConfirmPassword')
                               }
                             >
                               {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -1963,11 +1964,11 @@ export default function AuthFormPanel() {
                                 id="signup-experience-focused"
                                 className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
                                 {...signupForm.register('experienceLevel', {
-                                  required: 'Required',
+                                  required: t('auth.signup.error.experienceRequired'),
                                 })}
                               >
                                 <option value="" className="bg-slate-900">
-                                  Select level
+                                  {t('auth.signup.selectLevel')}
                                 </option>
                                 {experienceLevels.map((lvl) => (
                                   <option
@@ -1991,7 +1992,7 @@ export default function AuthFormPanel() {
                               className="block text-[10px] font-bold uppercase tracking-widest text-slate-400"
                               htmlFor="signup-style-focused"
                             >
-                              Style
+                              {t('auth.styleLabel')}
                             </label>
                             <div className="relative flex items-center group/input">
                               <ChevronDown
@@ -2001,10 +2002,10 @@ export default function AuthFormPanel() {
                               <select
                                 id="signup-style-focused"
                                 className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('tradingStyle', { required: 'Required' })}
+                                {...signupForm.register('tradingStyle', { required: t('auth.signup.error.styleRequired') })}
                               >
                                 <option value="" className="bg-slate-900">
-                                  Select style
+                                  {t('auth.signup.selectStyle')}
                                 </option>
                                 {tradingStyles.map((style) => (
                                   <option

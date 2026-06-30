@@ -2,6 +2,20 @@
   "title": "Dashboard",
   "welcome": "Welcome back, {{name}} — here is your trading performance overview",
   "overview": "Overview",
+  "timeframes": {
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "last3Months": "Last 3 Months",
+    "allTime": "All Time"
+  },
+  "header": {
+    "refreshSuccess": "Dashboard data refreshed",
+    "refreshFailed": "Failed to refresh dashboard data",
+    "refreshAnalytics": "Refresh analytics",
+    "notifications": "Notifications",
+    "addTrade": "Add Trade"
+  },
   "emptyState": {
     "title": "No performance data yet",
     "description": "Log your first trade to see P&L, win rate, streaks, and other analytics on your dashboard.",

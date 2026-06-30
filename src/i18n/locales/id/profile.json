@@ -1,5 +1,7 @@
 {
   "title": "Profil",
+  "mobileTitle": "Profil Saya",
+  "mobileSubtitle": "Kelola akun, avatar, dan pengaturan Anda",
   "edit": "Edit Profil",
   "save": "Simpan Perubahan",
   "cancel": "Batal",
@@ -30,6 +32,15 @@
   "deleteAccount": "Hapus Akun",
   "deleteAccountWarning": "Tindakan ini tidak dapat dibatalkan. Semua data Anda akan dihapus secara permanen.",
   "confirmDelete": "Saya mengerti, hapus akun saya",
+  "socialLinks": "Tautan Sosial",
+  "socialLinksSubtitle": "Profil dan situs terhubung Anda",
+  "active": "Aktif",
+  "noBioAdded": "Belum ada biografi ditambahkan. Klik \"Edit Profil\" untuk menambahkan.",
+  "noSocialLinks": "Belum ada tautan sosial ditambahkan.",
+  "website": "Situs",
+  "twitter": "Twitter / X",
+  "instagram": "Instagram",
+  "linkedin": "LinkedIn",
   "success": {
     "profileUpdated": "Profil berhasil diperbarui",
     "passwordChanged": "Kata sandi berhasil diubah",

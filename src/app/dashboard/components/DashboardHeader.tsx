@@ -12,14 +12,20 @@ import { useNotifications } from '@/hooks/useNotifications';
 import NotificationPanel from './NotificationPanel';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 
-const timeframes = ['Today', 'This Week', 'This Month', 'Last 3 Months', 'All Time'];
+const timeframes = [
+  'dashboard.timeframes.today',
+  'dashboard.timeframes.thisWeek',
+  'dashboard.timeframes.thisMonth',
+  'dashboard.timeframes.last3Months',
+  'dashboard.timeframes.allTime'
+];
 
 export default function DashboardHeader() {
   const { t } = useTranslation();
   const { displayName, isLoading } = useAuth();
   const { refetch } = useTrades();
   const { unreadCount } = useNotifications();
-  const [selectedTimeframe, setSelectedTimeframe] = useState('This Month');
+  const [selectedTimeframe, setSelectedTimeframe] = useState(t('dashboard.timeframes.thisMonth'));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showTimeframeDropdown, setShowTimeframeDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -30,9 +36,9 @@ export default function DashboardHeader() {
     setIsRefreshing(true);
     try {
       await refetch();
-      toast?.success('Dashboard data refreshed');
+      toast?.success(t('dashboard.header.refreshSuccess'));
     } catch (error) {
-      toast?.error('Failed to refresh dashboard data');
+      toast?.error(t('dashboard.header.refreshFailed'));
     } finally {
       setIsRefreshing(false);
     }
@@ -72,7 +78,7 @@ export default function DashboardHeader() {
               onClick={() => setShowTimeframeDropdown(!showTimeframeDropdown)}
               className="flex items-center justify-between w-full sm:w-auto gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 bg-card/40 backdrop-blur-md border border-white/[0.1] rounded-xl text-sm font-bold text-white hover:bg-white/[0.05] transition-all active:scale-[0.98] outline-none whitespace-nowrap"
             >
-              {selectedTimeframe}
+              {t(selectedTimeframe)}
               <ChevronDown
                 size={14}
                 className={`transition-transform duration-150 ${showTimeframeDropdown ? 'rotate-180' : ''}`}
@@ -94,7 +100,7 @@ export default function DashboardHeader() {
                         : 'text-foreground hover:bg-muted'
                     }`}
                   >
-                    {tf}
+                    {t(tf)}
                   </button>
                 ))}
               </div>
@@ -105,7 +111,7 @@ export default function DashboardHeader() {
             onClick={handleRefresh}
             disabled={isRefreshing}
             className="flex items-center justify-center p-2.5 bg-card/40 backdrop-blur-md border border-white/[0.1] rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/[0.05] transition-all duration-150 disabled:opacity-50 flex-shrink-0"
-            aria-label="Refresh analytics"
+            aria-label={t('dashboard.header.refreshAnalytics')}
           >
             <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
           </button>
@@ -114,7 +120,7 @@ export default function DashboardHeader() {
               type="button"
               onClick={() => setShowNotifications(!showNotifications)}
               className={`relative flex items-center justify-center p-2.5 bg-card/40 backdrop-blur-md border border-white/[0.1] rounded-xl transition-all duration-150 flex-shrink-0 ${showNotifications ? 'text-primary bg-white/[0.05]' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05]'}`}
-              aria-label="Notifications"
+              aria-label={t('dashboard.header.notifications')}
             >
               <Bell size={16} />
               {unreadCount > 0 && (
@@ -130,7 +136,7 @@ export default function DashboardHeader() {
             className="btn-primary flex-shrink-0 flex items-center justify-center gap-2 py-2.5 px-4 sm:px-5 text-sm font-bold shadow-xl shadow-primary/20 rounded-xl transition-all active:scale-[0.98] whitespace-nowrap"
           >
             <PlusCircle size={15} />
-            Add Trade
+            {t('dashboard.header.addTrade')}
           </Link>
         </div>
       </div>

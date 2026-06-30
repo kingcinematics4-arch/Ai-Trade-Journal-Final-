@@ -217,5 +217,50 @@
       "noMatches": "Nenhuma correspondência encontrada",
       "addCustom": "Adicionar \"{{term}}\" como personalizado"
     }
+  },
+  "tradeHistory": {
+    "title": "Histórico de Trades",
+    "description": "Navegue, filtre e analise todos os seus trades",
+    "aria": {
+      "backToDashboard": "Voltar ao Painel",
+      "refreshTrades": "Atualizar trades"
+    },
+    "refreshSuccess": "Dados de trades atualizados com sucesso",
+    "refreshFailed": "Falha ao atualizar dados de trades",
+    "addTrade": "Adicionar Trade",
+    "filterBar": {
+      "searchPlaceholder": "Buscar ativos ou notas...",
+      "statusLabel": "Status:",
+      "typeLabel": "Tipo:",
+      "filtersLabel": "Filtros:",
+      "allStatuses": "Todos os Status",
+      "allTypes": "Todos os Tipos",
+      "allPairs": "Todos os Pares",
+      "from": "De",
+      "to": "Até",
+      "resetFilters": "Redefinir Filtros",
+      "sortOptions": {
+        "newest": "Mais Recentes Primeiro",
+        "oldest": "Mais Antigos Primeiro",
+        "highestProfit": "Maior Lucro",
+        "biggestLoss": "Maior Perda"
+      }
+    },
+    "tradeCard": {
+      "unknown": "Desconhecido",
+      "short": "▼ Curto",
+      "long": "▲ Longo",
+      "entry": "Entrada",
+      "exit": "Saída",
+      "pnl": "P&L",
+      "rrRatio": "Ratio RR",
+      "tradeScreenshot": "Captura de trade",
+      "moreImages": "+{{count}} mais"
+    },
+    "empty": {
+      "title": "Nenhum trade adicionado ainda",
+      "description": "Comece a construir seu diário de trading registrando seu primeiro trade. Acompanhe seu desempenho, analise padrões e melhore sua estratégia ao longo do tempo.",
+      "logFirstTrade": "Registrar Seu Primeiro Trade"
+    }
   }
 }

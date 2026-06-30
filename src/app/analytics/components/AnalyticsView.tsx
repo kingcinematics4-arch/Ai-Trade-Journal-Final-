@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import {
   BarChart3,
   RefreshCw,
@@ -31,6 +32,7 @@ import AdvancedMetricsPanel from './AdvancedMetricsPanel';
 type TimeframeOption = 'all' | 'today' | '7days' | '30days' | '90days' | 'year' | 'custom';
 
 export default function AnalyticsView() {
+  const { t } = useTranslation();
   const { trades, isLoading, isEmpty, error, refetch } = useTrades();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -47,9 +49,9 @@ export default function AnalyticsView() {
     setIsRefreshing(true);
     try {
       await refetch();
-      setTimeout(() => toast.success('Analytics data re-synced successfully'), 0);
+      setTimeout(() => toast.success(t('analytics.view.refreshSuccess')), 0);
     } catch (err) {
-      setTimeout(() => toast.error('Failed to sync trade records'), 0);
+      setTimeout(() => toast.error(t('analytics.view.refreshFailed')), 0);
     } finally {
       setIsRefreshing(false);
     }
@@ -267,12 +269,12 @@ export default function AnalyticsView() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Performance Analytics</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('analytics.view.title')}</h1>
         </div>
         <div className="card-elevated border-red-500/20 bg-red-500/5 p-6 rounded-xl flex items-center gap-4">
           <AlertTriangle className="text-red-400 flex-shrink-0" size={24} />
           <div>
-            <h3 className="font-semibold text-foreground text-sm">Engine Connection Interrupted</h3>
+            <h3 className="font-semibold text-foreground text-sm">{t('analytics.view.engineInterrupted')}</h3>
             <p className="text-xs text-muted-foreground mt-1">{error}</p>
           </div>
         </div>
@@ -288,10 +290,10 @@ export default function AnalyticsView() {
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <BarChart3 className="text-primary" size={24} />
-              Trading Analytics
+              {t('analytics.view.title')}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Deep statistical insights, performance curves, and strategy metrics
+              {t('analytics.view.description')}
             </p>
           </div>
         </div>
@@ -310,18 +312,16 @@ export default function AnalyticsView() {
           >
             <Compass size={36} className="text-primary" />
           </motion.div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">No trading records found</h3>
+          <h3 className="text-xl font-semibold text-foreground mb-2">{t('analytics.view.noTradingRecords')}</h3>
           <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">
-            Trading analytics requires recorded trade data. Log your trades, specify strategies, P&L
-            amounts, and holding durations to unlock a full professional trading intelligence
-            dashboard.
+            {t('analytics.view.noTradingRecordsDesc')}
           </p>
           <Link
             href="/add-trade"
             className="btn-primary flex items-center gap-2 py-2.5 px-6 text-sm font-semibold shadow-md shadow-primary/20"
           >
             <PlusCircle size={16} />
-            Log Your First Trade
+            {t('analytics.view.logFirstTrade')}
           </Link>
         </motion.div>
       </div>
@@ -338,9 +338,9 @@ export default function AnalyticsView() {
             <BarChart3 size={20} className="text-primary animate-pulse" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-foreground">Trading Analytics</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t('analytics.view.title')}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Deep statistical insights, performance curves, and strategy metrics
+              {t('analytics.view.description')}
             </p>
           </div>
         </div>
@@ -351,7 +351,7 @@ export default function AnalyticsView() {
             onClick={handleRefresh}
             disabled={isRefreshing}
             className="p-2 bg-card border border-border rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150 disabled:opacity-50"
-            aria-label="Synchronize Analytics"
+            aria-label={t('analytics.view.aria.syncAnalytics')}
           >
             <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
           </button>
@@ -360,7 +360,7 @@ export default function AnalyticsView() {
             className="btn-primary flex items-center gap-2 py-2 px-4 text-sm font-semibold shadow-md shadow-primary/20"
           >
             <PlusCircle size={15} />
-            Add Trade
+            {t('analytics.view.addTrade')}
           </Link>
         </div>
       </div>
@@ -371,18 +371,18 @@ export default function AnalyticsView() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
             <Calendar size={13} className="text-primary" />
-            <span>TIME RANGE FILTER</span>
+            <span>{t('analytics.view.timeRangeFilter')}</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {(
               [
-                { value: 'all', label: 'All Time' },
-                { value: 'today', label: 'Today' },
-                { value: '7days', label: '7 Days' },
-                { value: '30days', label: '30 Days' },
-                { value: '90days', label: '90 Days' },
-                { value: 'year', label: 'This Year' },
-                { value: 'custom', label: 'Custom' },
+                { value: 'all', label: t('analytics.view.allTime') },
+                { value: 'today', label: t('analytics.view.today') },
+                { value: '7days', label: t('analytics.view.7days') },
+                { value: '30days', label: t('analytics.view.30days') },
+                { value: '90days', label: t('analytics.view.90days') },
+                { value: 'year', label: t('analytics.view.thisYear') },
+                { value: 'custom', label: t('analytics.view.custom') },
               ] as const
             ).map((opt) => (
               <button
@@ -412,7 +412,7 @@ export default function AnalyticsView() {
             >
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
-                  Start Date (From)
+                  {t('analytics.view.startDate')}
                 </label>
                 <input
                   type="date"
@@ -423,7 +423,7 @@ export default function AnalyticsView() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
-                  End Date (To)
+                  {t('analytics.view.endDate')}
                 </label>
                 <input
                   type="date"
@@ -441,7 +441,7 @@ export default function AnalyticsView() {
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <SlidersHorizontal size={13} className="text-primary" />
             <span className="text-xs font-semibold uppercase tracking-wider text-[10px]">
-              Segment:
+              {t('analytics.view.segment')}
             </span>
           </div>
 
@@ -451,7 +451,7 @@ export default function AnalyticsView() {
             onChange={(e) => setPairFilter(e.target.value)}
             className="form-input py-1.5 text-xs w-auto min-w-[130px] bg-card font-medium"
           >
-            <option value="">All Assets</option>
+            <option value="">{t('analytics.view.allAssets')}</option>
             {availablePairs.map((pair) => (
               <option key={pair} value={pair}>
                 {pair}
@@ -465,7 +465,7 @@ export default function AnalyticsView() {
             onChange={(e) => setStrategyFilter(e.target.value)}
             className="form-input py-1.5 text-xs w-auto min-w-[140px] bg-card font-medium"
           >
-            <option value="">All Strategies</option>
+            <option value="">{t('analytics.view.allStrategies')}</option>
             {availableStrategies.map((strategy) => (
               <option key={strategy} value={strategy}>
                 {strategy}
@@ -479,9 +479,9 @@ export default function AnalyticsView() {
             onChange={(e) => setDirectionFilter(e.target.value as any)}
             className="form-input py-1.5 text-xs w-auto min-w-[110px] bg-card font-medium"
           >
-            <option value="all">All Directions</option>
-            <option value="buy">Long (Buys)</option>
-            <option value="sell">Short (Sells)</option>
+            <option value="all">{t('analytics.view.allDirections')}</option>
+            <option value="buy">{t('analytics.view.longBuys')}</option>
+            <option value="sell">{t('analytics.view.shortSells')}</option>
           </select>
 
           {/* Active filters clear option */}
@@ -491,7 +491,7 @@ export default function AnalyticsView() {
               className="ml-auto btn-secondary flex items-center gap-1.5 py-1.5 px-3 text-xs text-red-400 hover:text-red-300 border-red-500/20 hover:border-red-500/35 transition-colors"
             >
               <X size={12} />
-              Reset Filters
+              {t('analytics.view.resetFilters')}
             </button>
           )}
         </div>
@@ -509,18 +509,17 @@ export default function AnalyticsView() {
             <SlidersHorizontal size={24} />
           </div>
           <h4 className="text-lg font-semibold text-foreground mb-1.5">
-            No trades match selected filters
+            {t('analytics.view.noTradesMatch')}
           </h4>
           <p className="text-xs text-muted-foreground max-w-xs mb-6 leading-relaxed">
-            Adjust your time range, select a different strategy or asset, or reset filters to view
-            global stats.
+            {t('analytics.view.noTradesMatchDesc')}
           </p>
           <button
             onClick={handleClearFilters}
             className="btn-secondary flex items-center gap-2 py-2 px-5 text-xs font-semibold border border-primary/20 hover:border-primary/45 transition-colors"
           >
             <X size={13} />
-            Reset All Filters
+            {t('analytics.view.resetAllFilters')}
           </button>
         </motion.div>
       ) : (

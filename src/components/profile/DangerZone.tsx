@@ -6,10 +6,12 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { signOutEverywhere, deleteAccount } from '@/services/profileService';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 export default function DangerZone() {
   const { signOut, user } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -21,10 +23,10 @@ export default function DangerZone() {
     setSigningOut(true);
     try {
       await signOutEverywhere();
-      toast.success('Signed out from all devices.');
+      toast.success(t('settings.logOutAll'));
       router.push('/login');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to sign out');
+      toast.error(err instanceof Error ? err.message : t('settings.error'));
     } finally {
       setSigningOut(false);
     }
@@ -38,10 +40,10 @@ export default function DangerZone() {
     setDeleting(true);
     try {
       await deleteAccount();
-      toast.success('Account deleted. Goodbye!');
+      toast.success(t('settings.deleteMyAccount'));
       router.push('/');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete account');
+      toast.error(err instanceof Error ? err.message : t('settings.error'));
     } finally {
       setDeleting(false);
       setDeleteConfirmOpen(false);
@@ -53,7 +55,7 @@ export default function DangerZone() {
       {/* Header */}
       <div className="px-6 py-4 border-b border-red-500/10 flex items-center gap-2">
         <AlertTriangle size={15} className="text-red-400 flex-shrink-0" />
-        <h2 className="text-sm font-bold text-red-400">Danger Zone</h2>
+        <h2 className="text-sm font-bold text-red-400">{t('settings.dangerZone')}</h2>
       </div>
 
       <div className="px-6 divide-y divide-red-500/[0.08]">
@@ -62,9 +64,9 @@ export default function DangerZone() {
           <div className="flex items-start gap-3 min-w-0">
             <LogOut size={16} className="mt-0.5 text-muted-foreground/60 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-foreground">Log Out Everywhere</p>
+              <p className="text-sm font-semibold text-foreground">{t('settings.logOutEverywhere')}</p>
               <p className="text-xs text-muted-foreground/60 mt-0.5">
-                Revoke all active sessions across all devices. You'll be logged out here too.
+                {t('settings.logOutEverywhereDesc')}
               </p>
             </div>
           </div>
@@ -76,7 +78,7 @@ export default function DangerZone() {
             className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-orange-500/30 text-orange-400 text-xs font-bold hover:bg-orange-500/10 transition-all disabled:opacity-50"
           >
             {signingOut ? <Loader2 size={12} className="animate-spin" /> : <LogOut size={12} />}
-            {signingOut ? 'Signing out…' : 'Log Out All'}
+            {signingOut ? t('settings.signingOut') : t('settings.logOutAll')}
           </button>
         </div>
 
@@ -85,9 +87,9 @@ export default function DangerZone() {
           <div className="flex items-start gap-3 min-w-0">
             <Trash2 size={16} className="mt-0.5 text-muted-foreground/60 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-foreground">Delete Account</p>
+              <p className="text-sm font-semibold text-foreground">{t('settings.deleteAccount')}</p>
               <p className="text-xs text-muted-foreground/60 mt-0.5">
-                Permanently remove your account and all associated data. This cannot be undone.
+                {t('settings.deleteAccountDesc')}
               </p>
             </div>
           </div>
@@ -98,7 +100,7 @@ export default function DangerZone() {
             className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/10 transition-all"
           >
             <Trash2 size={12} />
-            Delete
+            {t('settings.delete')}
           </button>
         </div>
       </div>
@@ -120,31 +122,29 @@ export default function DangerZone() {
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
-              aria-label="Confirm account deletion"
+              aria-label={t('settings.confirmAccountDeletion')}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
                   <Trash2 size={18} className="text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-foreground">Delete Account</h3>
+                  <h3 className="text-base font-bold text-foreground">{t('settings.deleteAccount')}</h3>
                   <p className="text-xs text-muted-foreground">
-                    This action is permanent and irreversible.
+                    {t('settings.thisActionIsPermanent')}
                   </p>
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground mb-4">
-                All your trades, analytics, goals, and profile data will be permanently deleted.
+                {t('settings.allDataWillBeDeleted')}
                 Your account for{' '}
-                <span className="text-foreground font-semibold">{user?.email}</span> cannot be
-                recovered.
+                <span className="text-foreground font-semibold">{user?.email}</span> {t('settings.accountCannotBeRecovered')}
               </p>
 
               <div className="space-y-2 mb-5">
                 <label className="text-xs font-semibold text-muted-foreground">
-                  Type <span className="text-red-400 font-bold font-mono">{CONFIRM_PHRASE}</span> to
-                  confirm:
+                  {t('settings.typeToConfirm')} <span className="text-red-400 font-bold font-mono">{CONFIRM_PHRASE}</span> {t('settings.toConfirm')}
                 </label>
                 <input
                   type="text"
@@ -165,7 +165,7 @@ export default function DangerZone() {
                   }}
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/[0.05] border border-white/[0.07] transition-all"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="button"
@@ -175,7 +175,7 @@ export default function DangerZone() {
                   id="confirm-delete-btn"
                 >
                   {deleting && <Loader2 size={13} className="animate-spin" />}
-                  {deleting ? 'Deleting…' : 'Delete My Account'}
+                  {deleting ? t('settings.deleting') : t('settings.deleteMyAccount')}
                 </button>
               </div>
             </div>

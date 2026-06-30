@@ -1,5 +1,7 @@
 {
   "title": "Profile",
+  "mobileTitle": "My Profile",
+  "mobileSubtitle": "Manage your account, avatar, and settings",
   "edit": "Edit Profile",
   "save": "Save Changes",
   "cancel": "Cancel",
@@ -30,6 +32,15 @@
   "deleteAccount": "Delete Account",
   "deleteAccountWarning": "This action cannot be undone. All your data will be permanently deleted.",
   "confirmDelete": "I understand, delete my account",
+  "socialLinks": "Social Links",
+  "socialLinksSubtitle": "Your connected profiles and websites",
+  "active": "Active",
+  "noBioAdded": "No bio added yet. Click \"Edit Profile\" to add one.",
+  "noSocialLinks": "No social links added yet.",
+  "website": "Website",
+  "twitter": "Twitter / X",
+  "instagram": "Instagram",
+  "linkedin": "LinkedIn",
   "success": {
     "profileUpdated": "Profile updated successfully",
     "passwordChanged": "Password changed successfully",

@@ -8,10 +8,12 @@ import { getProfileDisplayName } from '@/types/profile';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import ProfileStats from '@/components/profile/ProfileStats';
 import EditProfileModal from '@/components/profile/EditProfileModal';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 export default function ProfileHeader() {
   const { user } = useAuth();
   const { dbProfile, isLoading } = useProfileContext();
+  const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
 
   const displayName = getProfileDisplayName(dbProfile, user?.email);
@@ -40,7 +42,7 @@ export default function ProfileHeader() {
                   </h1>
                   <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
                     <CheckCircle2 size={10} />
-                    Active
+                    {t('profile.active')}
                   </span>
                 </div>
 
@@ -78,7 +80,7 @@ export default function ProfileHeader() {
                   </p>
                 ) : (
                   <p className="mt-3 text-sm text-muted-foreground/40 italic">
-                    No bio added yet. Click "Edit Profile" to add one.
+                    {t('profile.noBioAdded')}
                   </p>
                 )}
               </div>
@@ -91,7 +93,7 @@ export default function ProfileHeader() {
                 id="edit-profile-btn"
               >
                 <Edit2 size={14} />
-                Edit Profile
+                {t('profile.edit')}
               </button>
             </div>
 

@@ -10,28 +10,80 @@
     "subtitle": "Características potentes diseñadas para traders serios que quieren mejorar su rendimiento",
     "tradeJournal": {
       "title": "Diario de Trading",
-      "description": "Registre cada operación con entrada, salida, notas, emociones y detalles de ejecución en un diario estructurado."
+      "description": "Registre cada operación con entrada, salida, notas, emociones y detalles de ejecución en un diario estructurado.",
+      "preview": {
+        "recentTrades": "Operaciones Recientes",
+        "btcUsdLong": "BTC/USD Long +$120",
+        "ethUsdtShort": "ETH/USDT Short -$50",
+        "journalNote": "La entrada fue perfecta, pero salí demasiado temprano debido al FOMO. Necesito confiar más en el plan...",
+        "tags": {
+          "breakout": "#breakout",
+          "fomo": "#fomo",
+          "long": "#long"
+        }
+      }
     },
     "aiCoach": {
       "title": "Entrenador IA",
-      "description": "Análisis de psicología y rendimiento de trading impulsado por IA que identifica fortalezas, debilidades y patrones de comportamiento."
+      "description": "Análisis de psicología y rendimiento de trading impulsado por IA que identifica fortalezas, debilidades y patrones de comportamiento.",
+      "preview": {
+        "aiInsights": "Insights de IA",
+        "strongDiscipline": "Fuerte disciplina en las entradas.",
+        "overtrading": "Sobretrading los martes.",
+        "psychologyScore": "Puntuación de Psicología"
+      }
     },
     "strategyManagement": {
       "title": "Gestión de Estrategias",
-      "description": "Cree, organice, pruebe y rastree estrategias de trading con estadísticas de rendimiento detalladas y resultados históricos."
+      "description": "Cree, organice, pruebe y rastree estrategias de trading con estadísticas de rendimiento detalladas y resultados históricos.",
+      "preview": {
+        "topStrategies": "Estrategias Principales",
+        "breakout": "Breakout",
+        "trendFollow": "Trend Follow",
+        "winRate": "WR",
+        "backtest": "Backtest",
+        "active": "activas"
+      }
     },
     "advancedAnalytics": {
       "title": "Análisis Avanzado",
-      "description": "Análisis profundo que incluye curva de equity, tasa de victoria, factor de beneficio, drawdown, expectativa y métricas de rendimiento."
+      "description": "Análisis profundo que incluye curva de equity, tasa de victoria, factor de beneficio, drawdown, expectativa y métricas de rendimiento.",
+      "preview": {
+        "equityCurve": "Curva de Equity",
+        "winRate": "Tasa de Victoria",
+        "maxDd": "DD Máx"
+      }
     },
     "riskManagement": {
       "title": "Gestión de Riesgos",
-      "description": "Monitoree el R-múltiplo y el calor del portafolio. Asegure la supervivencia con supervisión de riesgos de nivel institucional."
+      "description": "Monitoree el R-múltiplo y el calor del portafolio. Asegure la supervivencia con supervisión de riesgos de nivel institucional.",
+      "preview": {
+        "riskMetrics": "Métricas de Riesgo",
+        "avgRMultiple": "R-Múltiplo Promedio",
+        "maxLoss": "Pérdida Máxima",
+        "portfolioHeat": "Calor del Portafolio"
+      }
     },
     "exportEngine": {
       "title": "Motor de Exportación",
-      "description": "Genere informes profesionales en PDF o XLSX para revisiones de rendimiento o cumplimiento fiscal."
+      "description": "Genere informes profesionales en PDF o XLSX para revisiones de rendimiento o cumplimiento fiscal.",
+      "preview": {
+        "exportOptions": "Opciones de Exportación",
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "json": "JSON",
+        "fileName": "Nombre de Archivo",
+        "tradesReport": "Reporte_Operaciones.xlsx"
+      }
     }
+  },
+  "preview": {
+    "platform": "Plataforma AI Trade Journal",
+    "tradeTracking": "Seguimiento de operaciones",
+    "performanceAnalytics": "Análisis de rendimiento",
+    "strategyInsights": "Insights de estrategias",
+    "exportReports": "Exportar reportes"
   },
   "testimonials": {
     "title": "Confiado por Traders Profesionales",

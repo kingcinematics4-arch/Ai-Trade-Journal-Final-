@@ -1,5 +1,7 @@
 {
   "title": "Perfil",
+  "mobileTitle": "Mi Perfil",
+  "mobileSubtitle": "Administra tu cuenta, avatar y configuración",
   "edit": "Editar Perfil",
   "save": "Guardar Cambios",
   "cancel": "Cancelar",
@@ -30,6 +32,8 @@
   "deleteAccount": "Eliminar Cuenta",
   "deleteAccountWarning": "Esta acción no se puede deshacer. Todos tus datos serán eliminados permanentemente.",
   "confirmDelete": "Entiendo, eliminar mi cuenta",
+  "socialLinks": "Enlaces Sociales",
+  "socialLinksSubtitle": "Tus perfiles y sitios web conectados",
   "success": {
     "profileUpdated": "Perfil actualizado exitosamente",
     "passwordChanged": "Contraseña cambiada exitosamente",

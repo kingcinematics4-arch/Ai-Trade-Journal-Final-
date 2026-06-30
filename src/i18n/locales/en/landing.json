@@ -10,28 +10,80 @@
     "subtitle": "Powerful features designed for serious traders who want to improve their performance",
     "tradeJournal": {
       "title": "Trade Journal",
-      "description": "Record every trade with entry, exit, notes, emotions and execution details in a structured journal."
+      "description": "Record every trade with entry, exit, notes, emotions and execution details in a structured journal.",
+      "preview": {
+        "recentTrades": "Recent Trades",
+        "btcUsdLong": "BTC/USD Long +$120",
+        "ethUsdtShort": "ETH/USDT Short -$50",
+        "journalNote": "Entry was perfect, but exited too early due to FOMO. Need to trust the plan more...",
+        "tags": {
+          "breakout": "#breakout",
+          "fomo": "#fomo",
+          "long": "#long"
+        }
+      }
     },
     "aiCoach": {
       "title": "AI Coach",
-      "description": "AI-powered trading psychology and performance analysis that identifies strengths, weaknesses and behavioral patterns."
+      "description": "AI-powered trading psychology and performance analysis that identifies strengths, weaknesses and behavioral patterns.",
+      "preview": {
+        "aiInsights": "AI Insights",
+        "strongDiscipline": "Strong discipline on entries.",
+        "overtrading": "Overtrading on Tuesdays.",
+        "psychologyScore": "Psychology Score"
+      }
     },
     "strategyManagement": {
       "title": "Strategy Management",
-      "description": "Create, organize, test and track trading strategies with detailed performance statistics and historical results."
+      "description": "Create, organize, test and track trading strategies with detailed performance statistics and historical results.",
+      "preview": {
+        "topStrategies": "Top Strategies",
+        "breakout": "Breakout",
+        "trendFollow": "Trend Follow",
+        "winRate": "WR",
+        "backtest": "Backtest",
+        "active": "active"
+      }
     },
     "advancedAnalytics": {
       "title": "Advanced Analytics",
-      "description": "Deep analytics including equity curve, win rate, profit factor, drawdown, expectancy and performance metrics."
+      "description": "Deep analytics including equity curve, win rate, profit factor, drawdown, expectancy and performance metrics.",
+      "preview": {
+        "equityCurve": "Equity Curve",
+        "winRate": "Win Rate",
+        "maxDd": "Max DD"
+      }
     },
     "riskManagement": {
       "title": "Risk Management",
-      "description": "Monitor R-multiple and portfolio heat. Ensure survival with institutional-grade risk oversight."
+      "description": "Monitor R-multiple and portfolio heat. Ensure survival with institutional-grade risk oversight.",
+      "preview": {
+        "riskMetrics": "Risk Metrics",
+        "avgRMultiple": "Avg R-Multiple",
+        "maxLoss": "Max Loss",
+        "portfolioHeat": "Portfolio Heat"
+      }
     },
     "exportEngine": {
       "title": "Export Engine",
-      "description": "Generate professional PDF or XLSX reports for performance reviews or tax compliance."
+      "description": "Generate professional PDF or XLSX reports for performance reviews or tax compliance.",
+      "preview": {
+        "exportOptions": "Export Options",
+        "excel": "Excel",
+        "pdf": "PDF",
+        "csv": "CSV",
+        "json": "JSON",
+        "fileName": "File Name",
+        "tradesReport": "Trades_Report.xlsx"
+      }
     }
+  },
+  "preview": {
+    "platform": "AI Trade Journal Platform",
+    "tradeTracking": "Trade tracking",
+    "performanceAnalytics": "Performance analytics",
+    "strategyInsights": "Strategy insights",
+    "exportReports": "Export reports"
   },
   "testimonials": {
     "title": "Trusted by Professional Traders",

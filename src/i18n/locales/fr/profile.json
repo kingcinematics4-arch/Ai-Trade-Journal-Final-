@@ -1,5 +1,7 @@
 {
   "title": "Profil",
+  "mobileTitle": "Mon Profil",
+  "mobileSubtitle": "Gérez votre compte, votre avatar et vos paramètres",
   "edit": "Modifier le Profil",
   "save": "Enregistrer les Modifications",
   "cancel": "Annuler",
@@ -30,6 +32,8 @@
   "deleteAccount": "Supprimer le Compte",
   "deleteAccountWarning": "Cette action ne peut être annulée. Toutes vos données seront supprimées définitivement.",
   "confirmDelete": "Je comprends, supprimer mon compte",
+  "socialLinks": "Liens Sociaux",
+  "socialLinksSubtitle": "Vos profils et sites web connectés",
   "success": {
     "profileUpdated": "Profil mis à jour avec succès",
     "passwordChanged": "Mot de passe changé avec succès",

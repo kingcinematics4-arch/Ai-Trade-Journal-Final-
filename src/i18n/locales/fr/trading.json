@@ -217,5 +217,50 @@
       "noMatches": "Aucune correspondance trouvée",
       "addCustom": "Ajouter \"{{term}}\" comme personnalisé"
     }
+  },
+  "tradeHistory": {
+    "title": "Historique des Trades",
+    "description": "Parcourir, filtrer et analyser tous vos trades",
+    "aria": {
+      "backToDashboard": "Retour au tableau de bord",
+      "refreshTrades": "Actualiser les trades"
+    },
+    "refreshSuccess": "Données de trades actualisées avec succès",
+    "refreshFailed": "Échec de l'actualisation des données de trades",
+    "addTrade": "Ajouter un Trade",
+    "filterBar": {
+      "searchPlaceholder": "Rechercher des actifs ou des notes...",
+      "statusLabel": "Statut:",
+      "typeLabel": "Type:",
+      "filtersLabel": "Filtres:",
+      "allStatuses": "Tous les Statuts",
+      "allTypes": "Tous les Types",
+      "allPairs": "Toutes les Paires",
+      "from": "De",
+      "to": "À",
+      "resetFilters": "Réinitialiser les Filtres",
+      "sortOptions": {
+        "newest": "Plus Récents d'Abord",
+        "oldest": "Plus Anciens d'Abord",
+        "highestProfit": "Profit le Plus Élevé",
+        "biggestLoss": "Perte la Plus Importante"
+      }
+    },
+    "tradeCard": {
+      "unknown": "Inconnu",
+      "short": "▼ Short",
+      "long": "▲ Long",
+      "entry": "Entrée",
+      "exit": "Sortie",
+      "pnl": "P&L",
+      "rrRatio": "Ratio RR",
+      "tradeScreenshot": "Capture de trade",
+      "moreImages": "+{{count}} plus"
+    },
+    "empty": {
+      "title": "Aucun trade ajouté pour le moment",
+      "description": "Commencez à construire votre journal de trading en enregistrant votre premier trade. Suivez vos performances, analysez les modèles et améliorez votre stratégie au fil du temps.",
+      "logFirstTrade": "Enregistrer Votre Premier Trade"
+    }
   }
 }

@@ -67,206 +67,215 @@ const bounceIn = {
   },
 };
 
-const features = [
-  // 1. Trade Journal (Replaces "Trade Logging")
-  {
-    title: 'landing.features.tradeJournal.title',
-    description: 'landing.features.tradeJournal.description',
-    icon: <BookOpen className="text-blue-400" />,
-    preview: (
-      <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-slate-300">Recent Trades</span>
-          <div className="w-2 h-2 rounded-full bg-blue-500" />
-        </div>
-        <div className="space-y-1 mb-2">
-          <div className="flex items-center gap-2 p-1.5 bg-slate-800 rounded-md">
-            <div className="w-3 h-3 bg-emerald-500/20 rounded-sm" />
-            <span className="text-[9px] font-medium text-slate-400">BTC/USD Long +$120</span>
-          </div>
-          <div className="flex items-center gap-2 p-1.5 bg-slate-800 rounded-md">
-            <div className="w-3 h-3 bg-red-500/20 rounded-sm" />
-            <span className="text-[9px] font-medium text-slate-400">ETH/USDT Short -$50</span>
-          </div>
-        </div>
-        <div className="flex-1 bg-slate-800 rounded-md p-2 text-[9px] text-slate-500 leading-tight">
-          "Entry was perfect, but exited too early due to FOMO. Need to trust the plan more..."
-        </div>
-        <div className="flex flex-wrap gap-1 mt-2">
-          {['#breakout', '#fomo', '#long'].map((tag, i) => (
-            <span
-              key={i}
-              className="text-[8px] bg-blue-500/10 text-blue-300 px-1 py-0.5 rounded-full"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    ),
-  },
-  // 2. AI Coach (Replaces "AI Analysis")
-  {
-    title: 'landing.features.aiCoach.title',
-    description: 'landing.features.aiCoach.description',
-    icon: <BrainCircuit className="text-emerald-400" />,
-    preview: (
-      <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-slate-300">AI Insights</span>
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        </div>
-        <div className="space-y-1.5 mb-2">
-          <div className="flex items-center gap-2 p-1.5 bg-emerald-500/10 rounded-md text-[9px] text-emerald-300">
-            <CheckCircle2 size={11} />
-            <span className="font-medium">Strong discipline on entries.</span>
-          </div>
-          <div className="flex items-center gap-2 p-1.5 bg-red-500/10 rounded-md text-[9px] text-red-300">
-            <TrendingDown size={11} />
-            <span className="font-medium">Overtrading on Tuesdays.</span>
-          </div>
-        </div>
-        <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
-          <span className="text-[9px] text-slate-500 uppercase font-bold">Psychology Score</span>
-          <span className="text-sm font-bold text-emerald-400">85/100</span>
-        </div>
-      </div>
-    ),
-  },
-  // 3. Strategy Management (Replaces "Strategy Tracking")
-  {
-    title: 'landing.features.strategyManagement.title',
-    description: 'landing.features.strategyManagement.description',
-    icon: <Layers className="text-indigo-400" />, // Changed icon from Target to Layers
-    preview: (
-      <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-slate-300">Top Strategies</span>
-          <div className="w-2 h-2 rounded-full bg-indigo-500" />
-        </div>
-        <div className="space-y-1.5 mb-2">
-          <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-            <span className="text-[9px] font-medium text-slate-400">Breakout</span>
-            <span className="text-[9px] font-bold text-emerald-400">68% WR</span>
-          </div>
-          <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-            <span className="text-[9px] font-medium text-slate-400">Trend Follow</span>
-            <span className="text-[9px] font-bold text-blue-400">55% WR</span>
-          </div>
-        </div>
-        <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
-          <span className="text-[9px] text-slate-500 uppercase font-bold">Backtest</span>
-          <span className="text-xs font-bold text-white">3 active</span>
-        </div>
-      </div>
-    ),
-  },
-  // 4. Advanced Analytics
-  {
-    title: 'landing.features.advancedAnalytics.title',
-    description: 'landing.features.advancedAnalytics.description',
-    icon: <BarChart3 className="text-purple-400" />,
-    preview: (
-      <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-slate-300">Equity Curve</span>
-          <div className="w-2 h-2 rounded-full bg-purple-500" />
-        </div>
-        <div className="relative h-24 w-full mb-2">
-          <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="w-full h-full">
-            <path
-              d="M0,40 L10,35 L20,38 L30,30 L40,32 L50,25 L60,28 L70,20 L80,22 L90,15 L100,18"
-              fill="none"
-              stroke="url(#equityGradient)"
-              strokeWidth="1.5"
-            />
-            <defs>
-              <linearGradient id="equityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8B5CF6" />
-                <stop offset="100%" stopColor="#EC4899" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t border-slate-800">
-          <div className="flex flex-col">
-            <span className="text-[9px] text-slate-500 uppercase font-bold">Win Rate</span>
-            <span className="text-sm font-bold text-emerald-400">62%</span>
-          </div>
-          <div className="flex flex-col text-right">
-            <span className="text-[9px] text-slate-500 uppercase font-bold">Max DD</span>
-            <span className="text-sm font-bold text-red-400">-$500</span>
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  // 5. Risk Management
-  {
-    title: 'landing.features.riskManagement.title',
-    description: 'landing.features.riskManagement.description',
-    icon: <ShieldCheck className="text-rose-400" />,
-    preview: (
-      <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-slate-300">Risk Metrics</span>
-          <div className="w-2 h-2 rounded-full bg-rose-500" />
-        </div>
-        <div className="space-y-1.5 mb-2">
-          <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-            <span className="text-[9px] font-medium text-slate-400">Avg R-Multiple</span>
-            <span className="text-[9px] font-bold text-emerald-400">1.8R</span>
-          </div>
-          <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-            <span className="text-[9px] font-medium text-slate-400">Max Loss</span>
-            <span className="text-[9px] font-bold text-red-400">-$150</span>
-          </div>
-        </div>
-        <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
-          <span className="text-[9px] text-slate-500 uppercase font-bold">Portfolio Heat</span>
-          <span className="text-sm font-bold text-white">2.5%</span>
-        </div>
-      </div>
-    ),
-  },
-  // 6. Export Engine (Replaces "Institutional Export")
-  {
-    title: 'landing.features.exportEngine.title',
-    description: 'landing.features.exportEngine.description',
-    icon: <Download className="text-amber-400" />,
-    preview: (
-      <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs font-bold text-slate-300">Export Options</span>
-          <div className="flex gap-1">
-            <div className="w-2 h-2 rounded-full bg-amber-500" />
-            <div className="w-2 h-2 rounded-full bg-slate-500" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-1.5 mb-2">
-          {['Excel', 'PDF', 'CSV', 'JSON'].map((format, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-1 p-1.5 bg-slate-800 rounded-md text-[9px] font-medium text-slate-400"
-            >
-              <span className="w-3 h-3 bg-blue-500/20 rounded-sm flex items-center justify-center text-blue-400">
-                {format === 'Excel' ? 'X' : format === 'PDF' ? 'P' : format === 'CSV' ? 'C' : 'J'}
-              </span>
-              {format}
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-800">
-          <span className="text-[9px] text-slate-500 uppercase font-bold">File Name</span>
-          <span className="text-xs font-bold text-white">Trades_Report.xlsx</span>
-        </div>
-      </div>
-    ),
-  },
-];
-
 export default function LandingPage() {
   const { t } = useTranslation();
+
+  const features = [
+    // 1. Trade Journal (Replaces "Trade Logging")
+    {
+      title: 'landing.features.tradeJournal.title',
+      description: 'landing.features.tradeJournal.description',
+      icon: <BookOpen className="text-blue-400" />,
+      preview: (
+        <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-slate-300">{t('landing.features.tradeJournal.preview.recentTrades')}</span>
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
+          </div>
+          <div className="space-y-1 mb-2">
+            <div className="flex items-center gap-2 p-1.5 bg-slate-800 rounded-md">
+              <div className="w-3 h-3 bg-emerald-500/20 rounded-sm" />
+              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.tradeJournal.preview.btcUsdLong')}</span>
+            </div>
+            <div className="flex items-center gap-2 p-1.5 bg-slate-800 rounded-md">
+              <div className="w-3 h-3 bg-red-500/20 rounded-sm" />
+              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.tradeJournal.preview.ethUsdtShort')}</span>
+            </div>
+          </div>
+          <div className="flex-1 bg-slate-800 rounded-md p-2 text-[9px] text-slate-500 leading-tight">
+            {t('landing.features.tradeJournal.preview.journalNote')}
+          </div>
+          <div className="flex flex-wrap gap-1 mt-2">
+            {[
+              t('landing.features.tradeJournal.preview.tags.breakout'),
+              t('landing.features.tradeJournal.preview.tags.fomo'),
+              t('landing.features.tradeJournal.preview.tags.long')
+            ].map((tag, i) => (
+              <span
+                key={i}
+                className="text-[8px] bg-blue-500/10 text-blue-300 px-1 py-0.5 rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    // 2. AI Coach (Replaces "AI Analysis")
+    {
+      title: 'landing.features.aiCoach.title',
+      description: 'landing.features.aiCoach.description',
+      icon: <BrainCircuit className="text-emerald-400" />,
+      preview: (
+        <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-slate-300">{t('landing.features.aiCoach.preview.aiInsights')}</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
+          <div className="space-y-1.5 mb-2">
+            <div className="flex items-center gap-2 p-1.5 bg-emerald-500/10 rounded-md text-[9px] text-emerald-300">
+              <CheckCircle2 size={11} />
+              <span className="font-medium">{t('landing.features.aiCoach.preview.strongDiscipline')}</span>
+            </div>
+            <div className="flex items-center gap-2 p-1.5 bg-red-500/10 rounded-md text-[9px] text-red-300">
+              <TrendingDown size={11} />
+              <span className="font-medium">{t('landing.features.aiCoach.preview.overtrading')}</span>
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
+            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.aiCoach.preview.psychologyScore')}</span>
+            <span className="text-sm font-bold text-emerald-400">85/100</span>
+          </div>
+        </div>
+      ),
+    },
+    // 3. Strategy Management (Replaces "Strategy Tracking")
+    {
+      title: 'landing.features.strategyManagement.title',
+      description: 'landing.features.strategyManagement.description',
+      icon: <Layers className="text-indigo-400" />,
+      preview: (
+        <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-slate-300">{t('landing.features.strategyManagement.preview.topStrategies')}</span>
+            <div className="w-2 h-2 rounded-full bg-indigo-500" />
+          </div>
+          <div className="space-y-1.5 mb-2">
+            <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
+              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.strategyManagement.preview.breakout')}</span>
+              <span className="text-[9px] font-bold text-emerald-400">68% WR</span>
+            </div>
+            <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
+              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.strategyManagement.preview.trendFollow')}</span>
+              <span className="text-[9px] font-bold text-blue-400">55% WR</span>
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
+            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.strategyManagement.preview.backtest')}</span>
+            <span className="text-xs font-bold text-white">3 {t('landing.features.strategyManagement.preview.active')}</span>
+          </div>
+        </div>
+      ),
+    },
+    // 4. Advanced Analytics
+    {
+      title: 'landing.features.advancedAnalytics.title',
+      description: 'landing.features.advancedAnalytics.description',
+      icon: <BarChart3 className="text-purple-400" />,
+      preview: (
+        <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-slate-300">{t('landing.features.advancedAnalytics.preview.equityCurve')}</span>
+            <div className="w-2 h-2 rounded-full bg-purple-500" />
+          </div>
+          <div className="relative h-24 w-full mb-2">
+            <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="w-full h-full">
+              <path
+                d="M0,40 L10,35 L20,38 L30,30 L40,32 L50,25 L60,28 L70,20 L80,22 L90,15 L100,18"
+                fill="none"
+                stroke="url(#equityGradient)"
+                strokeWidth="1.5"
+              />
+              <defs>
+                <linearGradient id="equityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#8B5CF6" />
+                  <stop offset="100%" stopColor="#EC4899" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t border-slate-800">
+            <div className="flex flex-col">
+              <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.advancedAnalytics.preview.winRate')}</span>
+              <span className="text-sm font-bold text-emerald-400">62%</span>
+            </div>
+            <div className="flex flex-col text-right">
+              <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.advancedAnalytics.preview.maxDd')}</span>
+              <span className="text-sm font-bold text-red-400">-$500</span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    // 5. Risk Management
+    {
+      title: 'landing.features.riskManagement.title',
+      description: 'landing.features.riskManagement.description',
+      icon: <ShieldCheck className="text-rose-400" />,
+      preview: (
+        <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-slate-300">{t('landing.features.riskManagement.preview.riskMetrics')}</span>
+            <div className="w-2 h-2 rounded-full bg-rose-500" />
+          </div>
+          <div className="space-y-1.5 mb-2">
+            <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
+              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.riskManagement.preview.avgRMultiple')}</span>
+              <span className="text-[9px] font-bold text-emerald-400">1.8R</span>
+            </div>
+            <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
+              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.riskManagement.preview.maxLoss')}</span>
+              <span className="text-[9px] font-bold text-red-400">-$150</span>
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
+            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.riskManagement.preview.portfolioHeat')}</span>
+            <span className="text-sm font-bold text-white">2.5%</span>
+          </div>
+        </div>
+      ),
+    },
+    // 6. Export Engine (Replaces "Institutional Export")
+    {
+      title: 'landing.features.exportEngine.title',
+      description: 'landing.features.exportEngine.description',
+      icon: <Download className="text-amber-400" />,
+      preview: (
+        <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-slate-300">{t('landing.features.exportEngine.preview.exportOptions')}</span>
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <div className="w-2 h-2 rounded-full bg-slate-500" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5 mb-2">
+            {[
+              t('landing.features.exportEngine.preview.excel'),
+              t('landing.features.exportEngine.preview.pdf'),
+              t('landing.features.exportEngine.preview.csv'),
+              t('landing.features.exportEngine.preview.json')
+            ].map((format, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1 p-1.5 bg-slate-800 rounded-md text-[9px] font-medium text-slate-400"
+              >
+                <span className="w-3 h-3 bg-blue-500/20 rounded-sm flex items-center justify-center text-blue-400">
+                  {format === t('landing.features.exportEngine.preview.excel') ? 'X' : format === t('landing.features.exportEngine.preview.pdf') ? 'P' : format === t('landing.features.exportEngine.preview.csv') ? 'C' : 'J'}
+                </span>
+                {format}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-800">
+            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.exportEngine.preview.fileName')}</span>
+            <span className="text-xs font-bold text-white">{t('landing.features.exportEngine.preview.tradesReport')}</span>
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   // Scroll-reactive refs
   const heroRef = useRef(null);
@@ -383,16 +392,16 @@ export default function LandingPage() {
                           <BrainCircuit size={18} className="text-blue-400" />
                         </div>
                         <h2 className="text-[14px] font-black uppercase tracking-[0.25em] text-blue-400">
-                          AI Trade Journal Platform
+                          {t('landing.preview.platform')}
                         </h2>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         {[
-                          { label: 'Trade tracking', icon: <TrendingUp size={14} /> },
-                          { label: 'Performance analytics', icon: <BarChart3 size={14} /> },
-                          { label: 'Strategy insights', icon: <BrainCircuit size={14} /> },
-                          { label: 'Export reports', icon: <Download size={14} /> },
+                          { label: t('landing.preview.tradeTracking'), icon: <TrendingUp size={14} /> },
+                          { label: t('landing.preview.performanceAnalytics'), icon: <BarChart3 size={14} /> },
+                          { label: t('landing.preview.strategyInsights'), icon: <BrainCircuit size={14} /> },
+                          { label: t('landing.preview.exportReports'), icon: <Download size={14} /> },
                         ].map((item) => (
                           <div
                             key={item.label}

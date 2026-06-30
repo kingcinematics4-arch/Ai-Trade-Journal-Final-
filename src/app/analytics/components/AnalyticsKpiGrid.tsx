@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import {
   Activity,
   TrendingUp,
@@ -21,16 +22,17 @@ interface AnalyticsKpiGridProps {
 }
 
 export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
+  const { t } = useTranslation();
   const cards = [
     {
-      label: 'Total Trades',
+      label: t('analytics.kpi.totalTrades'),
       value: String(stats.totalTrades),
       icon: <Activity size={18} />,
       iconBg: 'bg-blue-500/15 text-blue-400',
       gradient: 'gradient-primary',
     },
     {
-      label: 'Total P&L',
+      label: t('analytics.kpi.totalPnl'),
       value: formatCurrency(stats.totalPnl, { showSign: true }),
       icon: stats.totalPnl >= 0 ? <TrendingUp size={18} /> : <TrendingDown size={18} />,
       iconBg: stats.totalPnl >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400',
@@ -38,23 +40,23 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       valueColor: stats.totalPnl >= 0 ? 'text-green-400' : 'text-red-400',
     },
     {
-      label: 'Win Rate %',
+      label: t('analytics.kpi.winRate'),
       value: `${stats.winRate.toFixed(1)}%`,
       icon: <Target size={18} />,
       iconBg: 'bg-green-500/15 text-green-400',
       gradient: 'gradient-profit', // Keep gradient
-      subtitle: `${stats.winCount} Wins`,
+      subtitle: `${stats.winCount} ${t('analytics.kpi.wins')}`,
     },
     {
-      label: 'Loss Rate %',
+      label: t('analytics.kpi.lossRate'),
       value: `${stats.lossRate.toFixed(1)}%`,
       icon: <Target size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
       gradient: 'gradient-loss', // Keep gradient
-      subtitle: `${stats.lossCount} Losses`,
+      subtitle: `${stats.lossCount} ${t('analytics.kpi.losses')}`,
     },
     {
-      label: 'Profit Factor',
+      label: t('analytics.kpi.profitFactor'),
       value: stats.profitFactor >= 10 ? '10.0+' : stats.profitFactor.toFixed(2),
       icon: <Scale size={18} />,
       iconBg:
@@ -72,14 +74,14 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
             : 'text-red-400',
     },
     {
-      label: 'Average R-Ratio',
+      label: t('analytics.kpi.avgRr'),
       value: `${stats.avgRr.toFixed(2)}R`,
       icon: <Percent size={18} />,
       iconBg: 'bg-blue-500/15 text-blue-400',
       gradient: 'gradient-primary', // Keep gradient
     },
     {
-      label: 'Average Win',
+      label: t('analytics.kpi.avgWin'),
       value: formatCurrency(stats.averageWin),
       icon: <TrendingUp size={18} />,
       iconBg: 'bg-green-500/15 text-green-400',
@@ -87,7 +89,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       valueColor: 'text-green-400',
     },
     {
-      label: 'Average Loss',
+      label: t('analytics.kpi.avgLoss'),
       value: formatCurrency(stats.averageLoss),
       icon: <TrendingDown size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
@@ -95,7 +97,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       valueColor: 'text-red-400',
     },
     {
-      label: 'Best Trade',
+      label: t('analytics.kpi.bestTrade'),
       value: formatCurrency(stats.bestTrade?.pnl ?? 0, { showSign: true }),
       icon: <Trophy size={18} />,
       iconBg: 'bg-green-500/15 text-green-400',
@@ -104,7 +106,7 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       subtitle: stats.bestTrade?.asset ?? '—',
     },
     {
-      label: 'Worst Trade',
+      label: t('analytics.kpi.worstTrade'),
       value: formatCurrency(stats.worstTrade?.pnl ?? 0, { showSign: true }),
       icon: <AlertTriangle size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
@@ -113,26 +115,26 @@ export default function AnalyticsKpiGrid({ stats }: AnalyticsKpiGridProps) {
       subtitle: stats.worstTrade?.asset ?? '—',
     },
     {
-      label: 'Winning Streak',
-      value: `${stats.maxWinningStreak} wins`,
+      label: t('analytics.kpi.winningStreak'),
+      value: `${stats.maxWinningStreak}${t('analytics.kpi.winsSuffix')}`,
       icon: <Flame size={18} />,
       iconBg: 'bg-amber-500/15 text-amber-400',
       gradient: 'gradient-warning', // Keep gradient
       subtitle:
         stats.currentStreak.type === 'win'
-          ? `Current: ${stats.currentStreak.count} active`
-          : 'No active streak',
+          ? t('analytics.kpi.currentStreak', { count: stats.currentStreak.count })
+          : t('analytics.kpi.noActiveStreak'),
     },
     {
-      label: 'Losing Streak',
-      value: `${stats.maxLosingStreak} losses`,
+      label: t('analytics.kpi.losingStreak'),
+      value: `${stats.maxLosingStreak}${t('analytics.kpi.lossesSuffix')}`,
       icon: <Flame size={18} />,
       iconBg: 'bg-red-500/15 text-red-400',
       gradient: 'gradient-loss', // Keep gradient
       subtitle:
         stats.currentStreak.type === 'loss'
-          ? `Current: ${stats.currentStreak.count} active`
-          : 'No active streak',
+          ? t('analytics.kpi.currentStreak', { count: stats.currentStreak.count })
+          : t('analytics.kpi.noActiveStreak'),
     },
   ];
 

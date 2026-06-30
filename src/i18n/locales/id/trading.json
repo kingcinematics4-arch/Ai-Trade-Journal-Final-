@@ -217,5 +217,50 @@
       "noMatches": "Tidak ada kecocokan ditemukan",
       "addCustom": "Tambahkan \"{{term}}\" sebagai kustom"
     }
+  },
+  "tradeHistory": {
+    "title": "Riwayat Trade",
+    "description": "Telusuri, filter, dan analisis semua trade Anda",
+    "aria": {
+      "backToDashboard": "Kembali ke Dasbor",
+      "refreshTrades": "Refresh trade"
+    },
+    "refreshSuccess": "Data trade berhasil di-refresh",
+    "refreshFailed": "Gagal me-refresh data trade",
+    "addTrade": "Tambah Trade",
+    "filterBar": {
+      "searchPlaceholder": "Cari aset atau catatan...",
+      "statusLabel": "Status:",
+      "typeLabel": "Tipe:",
+      "filtersLabel": "Filter:",
+      "allStatuses": "Semua Status",
+      "allTypes": "Semua Tipe",
+      "allPairs": "Semua Pair",
+      "from": "Dari",
+      "to": "Ke",
+      "resetFilters": "Reset Filter",
+      "sortOptions": {
+        "newest": "Terbaru Dulu",
+        "oldest": "Terlama Dulu",
+        "highestProfit": "Profit Tertinggi",
+        "biggestLoss": "Kerugian Terbesar"
+      }
+    },
+    "tradeCard": {
+      "unknown": "Tidak Diketahui",
+      "short": "▼ Short",
+      "long": "▲ Long",
+      "entry": "Masuk",
+      "exit": "Keluar",
+      "pnl": "P&L",
+      "rrRatio": "Rasio RR",
+      "tradeScreenshot": "Screenshot trade",
+      "moreImages": "+{{count}} lagi"
+    },
+    "empty": {
+      "title": "Belum ada trade yang ditambahkan",
+      "description": "Mulai bangun jurnal trading Anda dengan mencatat trade pertama Anda. Lacak kinerja Anda, analisis pola, dan tingkatkan strategi Anda seiring waktu.",
+      "logFirstTrade": "Catat Trade Pertama Anda"
+    }
   }
 }

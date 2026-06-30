@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -23,26 +24,6 @@ interface FilterBarProps {
   onClearFilters: () => void;
 }
 
-const statusOptions: { value: FilterBarProps['statusFilter']; label: string }[] = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'win', label: 'Win' },
-  { value: 'loss', label: 'Loss' },
-  { value: 'breakeven', label: 'B/E' },
-];
-
-const directionOptions: { value: FilterBarProps['directionFilter']; label: string }[] = [
-  { value: 'all', label: 'All Types' },
-  { value: 'buy', label: 'Long' },
-  { value: 'sell', label: 'Short' },
-];
-
-const sortOptions = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'oldest', label: 'Oldest First' },
-  { value: 'highest-profit', label: 'Highest Profit' },
-  { value: 'biggest-loss', label: 'Biggest Loss' },
-];
-
 export default function FilterBar({
   searchQuery,
   onSearchChange,
@@ -62,6 +43,28 @@ export default function FilterBar({
   hasActiveFilters,
   onClearFilters,
 }: FilterBarProps) {
+  const { t } = useTranslation();
+
+  const statusOptions: { value: FilterBarProps['statusFilter']; label: string }[] = [
+    { value: 'all', label: t('trading.tradeHistory.filterBar.allStatuses') },
+    { value: 'win', label: t('trading.win') },
+    { value: 'loss', label: t('trading.loss') },
+    { value: 'breakeven', label: t('trading.breakEven') },
+  ];
+
+  const directionOptions: { value: FilterBarProps['directionFilter']; label: string }[] = [
+    { value: 'all', label: t('trading.tradeHistory.filterBar.allTypes') },
+    { value: 'buy', label: t('trading.long') },
+    { value: 'sell', label: t('trading.short') },
+  ];
+
+  const sortOptions = [
+    { value: 'newest', label: t('trading.tradeHistory.filterBar.sortOptions.newest') },
+    { value: 'oldest', label: t('trading.tradeHistory.filterBar.sortOptions.oldest') },
+    { value: 'highest-profit', label: t('trading.tradeHistory.filterBar.sortOptions.highestProfit') },
+    { value: 'biggest-loss', label: t('trading.tradeHistory.filterBar.sortOptions.biggestLoss') },
+  ];
+
   return (
     <div className="card-elevated p-4 space-y-4">
       {/* Row 1: Search + Status + Direction */}
@@ -73,7 +76,7 @@ export default function FilterBar({
           />
           <input
             type="text"
-            placeholder="Search assets or notes..."
+            placeholder={t('trading.tradeHistory.filterBar.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="form-input pl-9 py-2 text-sm w-full"
@@ -91,7 +94,7 @@ export default function FilterBar({
         <div className="h-8 w-px bg-border hidden lg:block" />
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">Status:</span>
+          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">{t('trading.tradeHistory.filterBar.statusLabel')}</span>
           {statusOptions.map((opt) => (
             <button
               key={opt.value}
@@ -110,7 +113,7 @@ export default function FilterBar({
         <div className="h-8 w-px bg-border hidden lg:block" />
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">Type:</span>
+          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">{t('trading.tradeHistory.filterBar.typeLabel')}</span>
           {directionOptions.map((opt) => (
             <button
               key={opt.value}
@@ -131,7 +134,7 @@ export default function FilterBar({
       <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-border/40">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <SlidersHorizontal size={13} />
-          <span className="text-xs font-medium">Filters:</span>
+          <span className="text-xs font-medium">{t('trading.tradeHistory.filterBar.filtersLabel')}</span>
         </div>
 
         <select
@@ -139,7 +142,7 @@ export default function FilterBar({
           onChange={(e) => onPairFilterChange(e.target.value)}
           className="form-input py-1.5 text-sm w-auto min-w-[130px] bg-card"
         >
-          <option value="">All Pairs</option>
+          <option value="">{t('trading.tradeHistory.filterBar.allPairs')}</option>
           {availablePairs.map((pair) => (
             <option key={pair} value={pair}>
               {pair}
@@ -153,7 +156,7 @@ export default function FilterBar({
             value={dateFrom}
             onChange={(e) => onDateFromChange(e.target.value)}
             className="form-input py-1.5 text-sm flex-1 sm:w-auto bg-card"
-            placeholder="From"
+            placeholder={t('trading.tradeHistory.filterBar.from')}
           />
           <span className="text-muted-foreground text-xs">—</span>
           <input
@@ -161,7 +164,7 @@ export default function FilterBar({
             value={dateTo}
             onChange={(e) => onDateToChange(e.target.value)}
             className="form-input py-1.5 text-sm flex-1 sm:w-auto bg-card"
-            placeholder="To"
+            placeholder={t('trading.tradeHistory.filterBar.to')}
           />
         </div>
 
@@ -185,7 +188,7 @@ export default function FilterBar({
             className="btn-secondary flex items-center gap-1.5 py-1.5 px-3.5 text-xs text-red-400 hover:text-red-300 border-red-500/20 hover:border-red-500/35"
           >
             <X size={12} />
-            Reset Filters
+            {t('trading.tradeHistory.filterBar.resetFilters')}
           </button>
         )}
       </div>

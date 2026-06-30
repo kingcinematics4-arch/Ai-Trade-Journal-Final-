@@ -2,6 +2,20 @@
   "title": "Panel",
   "welcome": "Bienvenido de nuevo, {{name}} — aquí está su resumen de rendimiento de trading",
   "overview": "Resumen",
+  "timeframes": {
+    "today": "Hoy",
+    "thisWeek": "Esta Semana",
+    "thisMonth": "Este Mes",
+    "last3Months": "Últimos 3 Meses",
+    "allTime": "Todo el Tiempo"
+  },
+  "header": {
+    "refreshSuccess": "Datos del panel actualizados",
+    "refreshFailed": "Error al actualizar datos del panel",
+    "refreshAnalytics": "Actualizar análisis",
+    "notifications": "Notificaciones",
+    "addTrade": "Agregar Operación"
+  },
   "emptyState": {
     "title": "Aún no hay datos de rendimiento",
     "description": "Registre su primera operación para ver P&L, tasa de victoria, rachas y otros análisis en su panel.",

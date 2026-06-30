@@ -2,6 +2,20 @@
   "title": "Tableau de bord",
   "welcome": "Bon retour, {{name}} — voici un aperçu de vos performances de trading",
   "overview": "Vue d'ensemble",
+  "timeframes": {
+    "today": "Aujourd'hui",
+    "thisWeek": "Cette Semaine",
+    "thisMonth": "Ce Mois",
+    "last3Months": "Derniers 3 Mois",
+    "allTime": "Tout le Temps"
+  },
+  "header": {
+    "refreshSuccess": "Données du tableau de bord actualisées",
+    "refreshFailed": "Échec de l'actualisation des données du tableau de bord",
+    "refreshAnalytics": "Actualiser les analyses",
+    "notifications": "Notifications",
+    "addTrade": "Ajouter un Trade"
+  },
   "emptyState": {
     "title": "Aucune donnée de performance pour le moment",
     "description": "Enregistrez votre premier trade pour voir le P&L, le taux de gain, les séries et autres analyses sur votre tableau de bord.",
