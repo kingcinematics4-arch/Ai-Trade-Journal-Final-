@@ -273,11 +273,21 @@ export default function RecentTradesTable() {
                   trades.map((trade) => (
                     <tr
                       key={trade.id}
-                      className={`border-b border-white/[0.03] transition-colors duration-200 ${
+                      className={`border-b border-white/[0.03] transition-colors duration-200 cursor-pointer hover:bg-muted/30 ${
                         hoveredRow === trade.id ? 'bg-muted/30' : ''
                       }`}
                       onMouseEnter={() => setHoveredRow(trade.id)}
                       onMouseLeave={() => setHoveredRow(null)}
+                      onClick={() => setSelectedTradeId(trade.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedTradeId(trade.id);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`View details for ${trade.asset} trade`}
                     >
                       <td className="px-4 py-3">
                         <div>

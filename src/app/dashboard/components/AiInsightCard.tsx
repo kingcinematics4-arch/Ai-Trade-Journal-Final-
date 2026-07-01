@@ -32,6 +32,11 @@ export default function AiInsightCard() {
   const [expanded, setExpanded] = useState(false);
   const visibleInsights = expanded ? insights : insights.slice(0, 2);
 
+  const handleInsightClick = (insight: any) => {
+    // Could open a modal with full insight details or navigate to AI Coach
+    console.log('Insight clicked:', insight);
+  };
+
   if (isLoading) {
     return (
       <div className="card-elevated p-3 sm:p-4 space-y-3">
@@ -84,7 +89,17 @@ export default function AiInsightCard() {
         {visibleInsights.map((insight) => (
           <div
             key={insight.id}
-            className={`flex items-start gap-2.5 p-2.5 rounded-lg ${typeStyles[insight.type]}`}
+            onClick={() => handleInsightClick(insight)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleInsightClick(insight);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={`View ${insight.type} insight details`}
+            className={`flex items-start gap-2.5 p-2.5 rounded-lg cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background ${typeStyles[insight.type]}`}
           >
             <span className="flex-shrink-0 mt-1">{typeIcons[insight.type]}</span>
             <p className="text-xs leading-[1.6] tracking-tight">{insight.text}</p>

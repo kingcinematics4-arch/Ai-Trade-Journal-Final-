@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import Link from 'next/link';
 
 interface KpiCardProps {
   id: string;
@@ -12,6 +13,8 @@ interface KpiCardProps {
   variant: 'profit' | 'loss' | 'info' | 'warning' | 'neutral';
   isHero?: boolean;
   isAlert?: boolean;
+  onClick?: () => void;
+  href?: string;
 }
 
 const variantStyles: Record<string, string> = {
@@ -49,6 +52,8 @@ export default function KpiCard({
   variant,
   isHero = false,
   isAlert = false,
+  onClick,
+  href,
 }: KpiCardProps) {
   const trendIcon =
     trend === 'up' ? (
@@ -62,13 +67,8 @@ export default function KpiCard({
   const trendColor =
     trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-muted-foreground';
 
-  return (
-    <div
-      id={id}
-      className={`relative card-premium h-full p-7 overflow-hidden ${
-        isAlert ? 'border-amber-500/30' : ''
-      }`}
-    >
+  const cardContent = (
+    <>
       <div className="flex items-start justify-between mb-6">
         <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
           {label}
@@ -101,6 +101,47 @@ export default function KpiCard({
           <p className="text-xs text-amber-400 font-medium">⚠ Action needed — check AI Coach</p>
         </div>
       )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        id={id}
+        href={href}
+        className={`relative card-premium h-full p-7 overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background ${
+          isAlert ? 'border-amber-500/30' : ''
+        }`}
+        aria-label={`View ${label} details`}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        id={id}
+        onClick={onClick}
+        className={`relative card-premium h-full p-7 overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background text-left w-full ${
+          isAlert ? 'border-amber-500/30' : ''
+        }`}
+        aria-label={`View ${label} details`}
+      >
+        {cardContent}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      id={id}
+      className={`relative card-premium h-full p-7 overflow-hidden ${
+        isAlert ? 'border-amber-500/30' : ''
+      }`}
+    >
+      {cardContent}
     </div>
   );
 }

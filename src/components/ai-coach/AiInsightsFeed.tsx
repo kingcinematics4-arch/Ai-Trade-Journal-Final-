@@ -6,9 +6,10 @@ import type { AiCoachFeedback } from '@/types/ai';
 
 interface AiInsightsFeedProps {
   feedback: AiCoachFeedback[];
+  onInsightClick?: (insight: AiCoachFeedback) => void;
 }
 
-export default function AiInsightsFeed({ feedback }: AiInsightsFeedProps) {
+export default function AiInsightsFeed({ feedback, onInsightClick }: AiInsightsFeedProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -72,7 +73,17 @@ export default function AiInsightsFeed({ feedback }: AiInsightsFeedProps) {
             <motion.div
               key={index}
               variants={itemVariants}
-              className={`flex items-start gap-4 p-4 rounded-xl border backdrop-blur-sm transition-all hover:bg-background/80 ${getBorderColor(item.type)}`}
+              onClick={() => onInsightClick?.(item)}
+              className={`flex items-start gap-4 p-4 rounded-xl border backdrop-blur-sm transition-all hover:bg-background/80 cursor-pointer hover:scale-[1.01] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background ${getBorderColor(item.type)}`}
+              role={onInsightClick ? 'button' : undefined}
+              tabIndex={onInsightClick ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (onInsightClick && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  onInsightClick(item);
+                }
+              }}
+              aria-label={onInsightClick ? `View ${item.category} insight details` : undefined}
             >
               <div className="mt-0.5 shrink-0">{getIcon(item.type)}</div>
               <div className="flex-1">

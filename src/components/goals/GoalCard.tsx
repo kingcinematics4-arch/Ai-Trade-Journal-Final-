@@ -8,9 +8,10 @@ interface GoalCardProps {
   goal: Goal;
   onEdit?: () => void;
   onDelete?: () => void;
+  onClick?: () => void;
 }
 
-export default function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
+export default function GoalCard({ goal, onEdit, onDelete, onClick }: GoalCardProps) {
   const getIcon = () => {
     switch (goal.category) {
       case 'performance':
@@ -62,7 +63,19 @@ export default function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
       layout
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-card border border-border rounded-2xl p-5 shadow-sm relative overflow-hidden group"
+      onClick={onClick}
+      className={`bg-card border border-border rounded-2xl p-5 shadow-sm relative overflow-hidden group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background ${
+        onClick ? '' : 'cursor-default'
+      }`}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      aria-label={onClick ? `View details for ${goal.title}` : undefined}
     >
       <div className="flex justify-between items-start mb-4 relative z-10">
         <div className="flex items-center gap-3">
@@ -79,12 +92,24 @@ export default function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
 
         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           {onEdit && (
-            <button onClick={onEdit} className="text-xs text-muted-foreground hover:text-primary">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="text-xs text-muted-foreground hover:text-primary"
+            >
               Edit
             </button>
           )}
           {onDelete && (
-            <button onClick={onDelete} className="text-xs text-muted-foreground hover:text-loss">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-xs text-muted-foreground hover:text-loss"
+            >
               Delete
             </button>
           )}

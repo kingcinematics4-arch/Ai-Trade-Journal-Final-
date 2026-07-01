@@ -129,7 +129,7 @@ export default function CalendarView() {
     setSelectedDate(today);
   };
 
-  const handleDayDoubleClick = (day: Date) => {
+  const handleDayClick = (day: Date) => {
     setSelectedDate(day);
     setIsDayDetailsOpen(true);
   };
@@ -363,8 +363,16 @@ export default function CalendarView() {
             return (
               <div
                 key={day.toISOString()}
-                onClick={() => setSelectedDate(day)}
-                onDoubleClick={() => handleDayDoubleClick(day)}
+                onClick={() => handleDayClick(day)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleDayClick(day);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`View details for ${format(day, 'MMMM d, yyyy')}`}
                 className={cn(
                   'relative flex flex-col justify-start gap-3 p-4 transition-all duration-300 ease-out cursor-pointer select-none group border border-white/[0.07] shadow-[0_15px_50px_rgba(0,0,0,0.50)] rounded-[28px] backdrop-blur-2xl bg-[linear-gradient(180deg,rgba(22,28,45,0.92)_0%,rgba(10,14,24,0.98)_100%)]',
                   'h-auto',
