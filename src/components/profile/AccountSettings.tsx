@@ -75,14 +75,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const TIMEZONES = [
-  { value: 'UTC', label: 'UTC (GMT+0)' },
-  { value: 'America/New_York', label: 'Eastern Time (EST/EDT)' },
-  { value: 'Europe/London', label: 'London (GMT/BST)' },
-  { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
-  { value: 'Asia/Dubai', label: 'Dubai (GST)' },
-];
-
 export default function AccountSettings() {
   const { user } = useAuth();
   const { settings, updateSettings } = useNotifications();
@@ -268,7 +260,7 @@ export default function AccountSettings() {
 
       {/* Preferences */}
       <Section title={t('settings.appearance')}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+        <div className="py-4">
           {/* Language Selection */}
           <SimpleSelect
             label={t('settings.language')}
@@ -283,19 +275,6 @@ export default function AccountSettings() {
               await setLocale(newLocale);
             }}
             placeholder={t('settings.language')}
-          />
-
-          {/* Timezone Selection */}
-          <SimpleSelect
-            label={t('settings.timezone')}
-            items={TIMEZONES.map((tz) => ({
-              id: tz.value,
-              label: tz.label,
-              value: tz.value,
-            }))}
-            value={settings?.timezone || 'UTC'}
-            onSelect={(value) => updateSettings({ timezone: value })}
-            placeholder={t('settings.timezone')}
           />
         </div>
       </Section>
