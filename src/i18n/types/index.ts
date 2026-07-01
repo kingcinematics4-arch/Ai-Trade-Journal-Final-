@@ -379,7 +379,6 @@ export interface SettingsTranslations {
   general: string;
   appearance: string;
   language: string;
-  theme: string;
   timezone: string;
   dateFormat: string;
   timeFormat: string;

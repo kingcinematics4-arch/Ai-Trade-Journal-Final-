@@ -70,9 +70,6 @@ export interface PrivacySettings {
   showStats: boolean;
 }
 
-/** Theme preference */
-export type ThemePreference = 'dark' | 'light' | 'system';
-
 /** Map a DbProfile row → camelCase Profile */
 export function mapDbProfile(row: DbProfile): Profile {
   return {

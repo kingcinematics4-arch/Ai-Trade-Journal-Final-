@@ -6,9 +6,6 @@ import {
   Lock,
   Bell,
   Shield,
-  Moon,
-  Sun,
-  Monitor,
   ChevronRight,
   Loader2,
   Check,
@@ -91,15 +88,6 @@ export default function AccountSettings() {
   const { user } = useAuth();
   const { settings, updateSettings } = useNotifications();
   const { locale, setLocale, t } = useTranslation();
-
-  // Theme selector
-  type Theme = 'dark' | 'light' | 'system';
-  
-  const THEMES: { value: Theme; label: string; icon: React.ReactNode }[] = [
-    { value: 'dark', label: t('settings.dark'), icon: <Moon size={14} /> },
-    { value: 'light', label: t('settings.light'), icon: <Sun size={14} /> },
-    { value: 'system', label: t('settings.system'), icon: <Monitor size={14} /> },
-  ];
 
   // Email change
   const [newEmail, setNewEmail] = useState('');
@@ -279,79 +267,49 @@ export default function AccountSettings() {
         />
       </Section>
 
-      {/* Theme */}
-      <div className="rounded-2xl border border-white/[0.07] bg-card/30 backdrop-blur-md overflow-hidden">
-        <div className="px-6 py-4 border-b border-white/[0.05]">
-          <h2 className="text-sm font-bold text-foreground">{t('settings.appearance')}</h2>
-        </div>
-        <div className="px-6 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Language Selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
-                <Globe size={13} /> {t('settings.language')}
-              </label>
-              <select
-                value={locale}
-                onChange={async (e) => {
-                  const newLocale = e.target.value as typeof locales[number];
-                  await setLocale(newLocale);
-                }}
-                className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
-              >
-                {locales.map((loc) => (
-                  <option key={loc} value={loc} className="bg-neutral-900">
-                    {localeFlags[loc]} {localeNames[loc]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Timezone Selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
-                <Clock size={13} /> {t('settings.timezone')}
-              </label>
-              <select
-                value={settings?.timezone || 'UTC'}
-                onChange={(e) => updateSettings({ timezone: e.target.value })}
-                className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
-              >
-                {TIMEZONES.map((tz) => (
-                  <option key={tz.value} value={tz.value} className="bg-neutral-900">
-                    {tz.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Preferences */}
+      <Section title={t('settings.appearance')}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+          {/* Language Selection */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+              <Globe size={13} /> {t('settings.language')}
+            </label>
+            <select
+              value={locale}
+              onChange={async (e) => {
+                const newLocale = e.target.value as typeof locales[number];
+                await setLocale(newLocale);
+              }}
+              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
+            >
+              {locales.map((loc) => (
+                <option key={loc} value={loc} className="bg-neutral-900">
+                  {localeFlags[loc]} {localeNames[loc]}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <p className="text-xs font-semibold text-muted-foreground mb-3">{t('settings.themePreference')}</p>
-          <div className="flex flex-wrap gap-2">
-            {THEMES.map(({ value, label, icon }) => (
-              <button
-                key={value}
-                type="button"
-                id={`theme-${value}`}
-                onClick={() => updateSettings({ theme: value })}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                  (settings?.theme || 'dark') === value
-                    ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20'
-                    : 'bg-white/[0.03] text-muted-foreground border-white/[0.07] hover:bg-white/[0.06]'
-                }`}
-              >
-                {icon}
-                {label}
-              </button>
-            ))}
+          {/* Timezone Selection */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+              <Clock size={13} /> {t('settings.timezone')}
+            </label>
+            <select
+              value={settings?.timezone || 'UTC'}
+              onChange={(e) => updateSettings({ timezone: e.target.value })}
+              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
+            >
+              {TIMEZONES.map((tz) => (
+                <option key={tz.value} value={tz.value} className="bg-neutral-900">
+                  {tz.label}
+                </option>
+              ))}
+            </select>
           </div>
-          {(settings?.theme || 'dark') !== 'dark' && (
-            <p className="text-xs text-amber-400/80 mt-3 flex items-center gap-1.5">
-              <span>⚠</span> {t('settings.themeComingSoon')}
-            </p>
-          )}
         </div>
-      </div>
+      </Section>
     </div>
   );
 }
