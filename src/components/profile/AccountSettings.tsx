@@ -9,8 +9,6 @@ import {
   ChevronRight,
   Loader2,
   Check,
-  Globe,
-  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +17,7 @@ import { sendPasswordReset, updateEmail } from '@/services/profileService';
 import { NotificationSettings } from '@/services/notificationService';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { locales, localeNames, localeFlags } from '@/i18n/config';
+import SimpleSelect from '@/components/ui/SimpleSelect';
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
 
@@ -65,7 +64,7 @@ function ToggleRow({ id, label, description, checked, onChange, icon }: ToggleRo
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-card/30 backdrop-blur-md overflow-hidden">
+    <div className="rounded-2xl border border-white/[0.07] bg-card/30 backdrop-blur-md overflow-visible">
       <div className="px-6 py-4 border-b border-white/[0.05]">
         <h2 className="text-sm font-bold text-foreground">{title}</h2>
       </div>
@@ -271,43 +270,33 @@ export default function AccountSettings() {
       <Section title={t('settings.appearance')}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           {/* Language Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
-              <Globe size={13} /> {t('settings.language')}
-            </label>
-            <select
-              value={locale}
-              onChange={async (e) => {
-                const newLocale = e.target.value as typeof locales[number];
-                await setLocale(newLocale);
-              }}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
-            >
-              {locales.map((loc) => (
-                <option key={loc} value={loc} className="bg-neutral-900">
-                  {localeFlags[loc]} {localeNames[loc]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SimpleSelect
+            label={t('settings.language')}
+            items={locales.map((loc) => ({
+              id: loc,
+              label: `${localeFlags[loc]} ${localeNames[loc]}`,
+              value: loc,
+            }))}
+            value={locale}
+            onSelect={async (value) => {
+              const newLocale = value as typeof locales[number];
+              await setLocale(newLocale);
+            }}
+            placeholder={t('settings.language')}
+          />
 
           {/* Timezone Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
-              <Clock size={13} /> {t('settings.timezone')}
-            </label>
-            <select
-              value={settings?.timezone || 'UTC'}
-              onChange={(e) => updateSettings({ timezone: e.target.value })}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/60 transition-all appearance-none"
-            >
-              {TIMEZONES.map((tz) => (
-                <option key={tz.value} value={tz.value} className="bg-neutral-900">
-                  {tz.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SimpleSelect
+            label={t('settings.timezone')}
+            items={TIMEZONES.map((tz) => ({
+              id: tz.value,
+              label: tz.label,
+              value: tz.value,
+            }))}
+            value={settings?.timezone || 'UTC'}
+            onSelect={(value) => updateSettings({ timezone: value })}
+            placeholder={t('settings.timezone')}
+          />
         </div>
       </Section>
     </div>

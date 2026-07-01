@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Search, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
@@ -39,6 +40,8 @@ export default function SearchableSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -50,11 +53,120 @@ export default function SearchableSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [isOpen]);
+
   const filteredItems = items.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedItem = items.find((i) => i.value === value || i.id === value);
+
+  const dropdownContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -4, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -4, scale: 0.99 }}
+          transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+          className="fixed z-[9999] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden"
+          style={{
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+          }}
+        >
+          <div className="p-2 border-b border-zinc-800 flex items-center gap-2 bg-zinc-900">
+            <Search size={14} className="text-zinc-500" />
+            <input
+              autoFocus
+              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder:text-zinc-600 p-1"
+              placeholder={t('trading.addTrade.searchable.searchOrAdd')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchTerm && onAddCustom) {
+                  onAddCustom(searchTerm);
+                  setSearchTerm('');
+                }
+              }}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="text-zinc-500 hover:text-white"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className="max-h-60 overflow-y-auto p-1 bg-zinc-900">
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <div
+                  key={item.id}
+                  className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                    value === item.value || value === item.id
+                      ? 'bg-zinc-800 text-white'
+                      : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                  }`}
+                  onClick={() => {
+                    onSelect(item.value);
+                    setIsOpen(false);
+                    setSearchTerm('');
+                  }}
+                >
+                  <span className="text-sm">{item.label}</span>
+                  {onDelete && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(item);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 text-red-400 rounded transition-all"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center">
+                <p className="text-xs text-zinc-500">
+                  {t('trading.addTrade.searchable.noMatches')}
+                </p>
+                {onAddCustom && searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onAddCustom(searchTerm);
+                      setSearchTerm('');
+                    }}
+                    className="mt-2 text-xs text-blue-400 hover:underline"
+                  >
+                    {t('trading.addTrade.searchable.addCustom', { term: searchTerm })}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div className="relative" ref={containerRef}>
@@ -79,95 +191,7 @@ export default function SearchableSelect({
 
       {error && <p className="form-error mt-1 text-red-500 text-xs">{error}</p>}
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.99 }}
-            transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-            className="absolute z-[100] w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden"
-          >
-            <div className="p-2 border-b border-zinc-800 flex items-center gap-2 bg-zinc-900">
-              <Search size={14} className="text-zinc-500" />
-              <input
-                autoFocus
-                className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder:text-zinc-600 p-1"
-                placeholder={t('trading.addTrade.searchable.searchOrAdd')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && searchTerm && onAddCustom) {
-                    onAddCustom(searchTerm);
-                    setSearchTerm('');
-                  }
-                }}
-              />
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm('')}
-                  className="text-zinc-500 hover:text-white"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            <div className="max-h-60 overflow-y-auto p-1 bg-zinc-900">
-              {filteredItems.length > 0 ? (
-                filteredItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`group flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                      value === item.value || value === item.id
-                        ? 'bg-zinc-800 text-white'
-                        : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
-                    }`}
-                    onClick={() => {
-                      onSelect(item.value);
-                      setIsOpen(false);
-                      setSearchTerm('');
-                    }}
-                  >
-                    <span className="text-sm">{item.label}</span>
-                    {onDelete && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete(item);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 text-red-400 rounded transition-all"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 text-center">
-                  <p className="text-xs text-zinc-500">
-                    {t('trading.addTrade.searchable.noMatches')}
-                  </p>
-                  {onAddCustom && searchTerm && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onAddCustom(searchTerm);
-                        setSearchTerm('');
-                      }}
-                      className="mt-2 text-xs text-blue-400 hover:underline"
-                    >
-                      {t('trading.addTrade.searchable.addCustom', { term: searchTerm })}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {typeof window !== 'undefined' && createPortal(dropdownContent, document.body)}
     </div>
   );
 }
