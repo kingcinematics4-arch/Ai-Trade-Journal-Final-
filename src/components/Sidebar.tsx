@@ -193,7 +193,7 @@ export default function Sidebar({ activePath }: SidebarProps) {
         <aside
           className={`
             fixed inset-y-0 left-0 z-50 w-72 bg-slate-950 border-r border-white/[0.05] 
-            flex flex-col h-full transition-transform duration-300 ease-in-out
+            flex flex-col h-screen transition-transform duration-300 ease-in-out overflow-hidden
             ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
           `}
         >
@@ -215,8 +215,8 @@ export default function Sidebar({ activePath }: SidebarProps) {
       {/* Desktop Sidebar (Permanent) */}
       <aside
         className={`
-          hidden lg:flex flex-col h-full bg-card/20 backdrop-blur-3xl border-r border-white/[0.05] 
-          sidebar-transition relative flex-shrink-0
+          hidden lg:flex flex-col h-screen bg-card/20 backdrop-blur-3xl border-r border-white/[0.05] 
+          sidebar-transition relative flex-shrink-0 overflow-hidden
           ${collapsed ? 'w-16' : 'w-64'}
         `}
       >
@@ -312,7 +312,7 @@ function SidebarContent({
         </Link>
       )}
 
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-none">
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-thin">
         {!collapsed && (
           <p className="px-4 py-2 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">
             {t('sidebar.sections.trading')}
