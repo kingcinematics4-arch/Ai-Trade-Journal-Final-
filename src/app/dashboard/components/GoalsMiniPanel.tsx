@@ -25,7 +25,7 @@ export default function GoalsMiniPanel() {
   }, [goals]);
 
   return (
-    <div className="card-elevated p-4 flex flex-col h-full">
+    <div className="card-elevated p-4 flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Target size={15} className="text-primary" />
