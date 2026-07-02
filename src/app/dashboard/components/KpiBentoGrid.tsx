@@ -63,7 +63,7 @@ export default function KpiBentoGrid() {
       <div className="col-span-2 lg:col-span-2">
         <KpiCard
           id="kpi-total-pnl"
-          label={t('dashboard.kpi.totalPnl')}
+          label="TOTAL P&L"
           value={pnlFormatted}
           subtext={`${analytics.totalTrades} trades`}
           trend={totalPnl >= 0 ? 'up' : 'down'}
@@ -77,7 +77,7 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-win-rate"
-          label={t('dashboard.kpi.winRate')}
+          label="WIN RATE"
           value={`${winRate.toFixed(1)}%`}
           subtext={`${winCount}W / ${lossCount}L`}
           trend={winRate >= 50 ? 'up' : winRate > 0 ? 'down' : 'neutral'}
@@ -90,9 +90,9 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-rr-ratio"
-          label={t('dashboard.kpi.avgRrRatio')}
-          value={avgRr > 0 ? avgRr.toFixed(2) : '0.00'}
-          subtext="Average risk/reward"
+          label="RISK/REWARD"
+          value={avgRr > 0 ? `1 : ${avgRr.toFixed(1)}` : '1 : 0.0'}
+          subtext="Portfolio average"
           trend={avgRr > 1.5 ? 'up' : avgRr > 0 ? 'neutral' : 'neutral'}
           trendValue={avgRr > 0 ? t('dashboard.kpi.allTime') : ''}
           icon={<BarChart2 size={18} />}
@@ -103,7 +103,7 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-streak"
-          label={t('dashboard.kpi.currentStreak')}
+          label="STREAK"
           value={streakLabel}
           subtext={currentStreak.type === 'none' ? 'No active streak' : streakSubtext}
           trend={
@@ -124,7 +124,7 @@ export default function KpiBentoGrid() {
       <div className="col-span-1">
         <KpiCard
           id="kpi-best-trade"
-          label={t('dashboard.kpi.bestTrade')}
+          label="BEST TRADE"
           value={bestTrade ? formatCurrency(bestTrade.pnl, { showSign: true }) : '$0.00'}
           subtext={bestTrade ? bestTrade.asset : t('dashboard.kpi.noTradesYet')}
           trend={bestTrade && bestTrade.pnl > 0 ? 'up' : 'neutral'}
@@ -137,9 +137,9 @@ export default function KpiBentoGrid() {
       <div className="col-span-2 lg:col-span-2">
         <KpiCard
           id="kpi-discipline"
-          label={t('dashboard.kpi.journalActivity')}
+          label="TOTAL TRADES"
           value={`${analytics.totalTrades}`}
-          subtext="Total trades logged"
+          subtext="Journal activity"
           trend="neutral"
           trendValue={analytics.totalTrades > 0 ? t('dashboard.kpi.allTime') : ''}
           icon={<AlertTriangle size={18} />}

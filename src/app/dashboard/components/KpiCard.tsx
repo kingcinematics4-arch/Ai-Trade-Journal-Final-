@@ -20,24 +20,24 @@ interface KpiCardProps {
 
 /**
  * Adaptive font sizing based on value length
- * Returns appropriate Tailwind text size class
+ * Returns appropriate CSS clamp for responsive typography
  */
 function getAdaptiveFontSize(value: string, isHero: boolean = false): string {
   const length = value.length;
 
   if (isHero) {
-    // Hero cards (larger base size)
-    if (length <= 8) return 'text-5xl';
-    if (length <= 12) return 'text-4xl';
-    if (length <= 16) return 'text-3xl';
-    return 'text-2xl';
+    // Hero cards (larger base size with responsive clamp)
+    if (length <= 8) return 'text-[clamp(2rem,5vw,3rem)]';
+    if (length <= 12) return 'text-[clamp(1.75rem,4.5vw,2.5rem)]';
+    if (length <= 16) return 'text-[clamp(1.5rem,4vw,2rem)]';
+    return 'text-[clamp(1.25rem,3.5vw,1.5rem)]';
   }
 
-  // Standard cards
-  if (length <= 6) return 'text-4xl';
-  if (length <= 10) return 'text-3xl';
-  if (length <= 14) return 'text-2xl';
-  return 'text-xl';
+  // Standard cards with responsive clamp
+  if (length <= 6) return 'text-[clamp(1.5rem,4vw,2.25rem)]';
+  if (length <= 10) return 'text-[clamp(1.25rem,3.5vw,1.875rem)]';
+  if (length <= 14) return 'text-[clamp(1rem,3vw,1.5rem)]';
+  return 'text-[clamp(0.875rem,2.5vw,1.25rem)]';
 }
 
 /**
@@ -119,7 +119,7 @@ export default function KpiCard({
 
       <p
         className={cn(
-          'font-tabular font-bold whitespace-nowrap tracking-[-0.03em] leading-none mb-4',
+          'font-tabular font-bold whitespace-nowrap tracking-tight leading-none mb-4 min-w-0',
           fontSize,
           valueStyles[variant]
         )}
