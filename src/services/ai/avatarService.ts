@@ -1,72 +1,12 @@
 'use client';
 
 import { createClient } from '@/lib/supabase';
-import type { DbProfile, Profile, ProfileFormData, AvatarUploadResult } from '@/types/profile';
-import { mapDbProfile, mapProfileToDb } from '@/types/profile';
+import type { AvatarUploadResult } from '@/types/profile';
+import { upsertProfile } from '../profileService';
 
 const MAX_AVATAR_SIZE = 500 * 1024; // 500 KB target
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
 const AVATAR_BUCKET = 'avatars';
-
-// ─── Profile CRUD ─────────────────────────────────────────────────────────────
-
-/**
- * Fetch a single profile row by user ID.
- * Returns null if no profile exists yet.
- */
-export async function getProfile(userId: string): Promise<Profile | null> {
-  const supabase = createClient();
-
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-
-  if (error) {
-    console.error('[profileService] Supabase Error Details:', {
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
-    // PGRST116 or 406 = no rows returned
-    if (error.code === 'PGRST116' || error.code === '406') return null;
-    throw new Error(error.message);
-  }
-
-  return data ? mapDbProfile(data as DbProfile) : null;
-}
-
-/**
- * Upsert (insert or update) a profile row.
- * Always merges — only updates the provided fields.
- */
-export async function upsertProfile(
-  userId: string,
-  data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
-): Promise<Profile> {
-  const supabase = createClient();
-  const payload = mapProfileToDb(userId, data);
-
-  const { data: row, error } = await supabase
-    .from('profiles')
-    .upsert(payload, { onConflict: 'id' })
-    .select('*')
-    .single();
-
-  if (error) {
-    console.error('[profileService] upsertProfile error:', error.message);
-    throw new Error(error.message);
-  }
-
-  return mapDbProfile(row as DbProfile);
-}
-
-/**
- * Update the user's public profile status.
- */
-export async function updatePublicProfile(userId: string, isPublic: boolean): Promise<Profile> {
-  return upsertProfile(userId, { public_profile: isPublic });
-}
-
-// ─── Avatar Upload ─────────────────────────────────────────────────────────────
 
 /**
  * Compress an image file client-side using a canvas element.
@@ -192,16 +132,25 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
 
   if (uploadError) {
     if (process.env.NODE_ENV === 'development') {
-      console.error('[profileService] uploadAvatar error (dev):', uploadError);
+      console.error('[avatarService] uploadAvatar error (dev):', uploadError);
     }
     
     let friendlyMessage = 'Failed to upload avatar. Please try again.';
     const msg = uploadError.message?.toLowerCase() || '';
     
-    if (msg.includes('bucket not found')) {
+    if (msg.includes('bucket not found') || msg.includes('not found')) {
       friendlyMessage = 'Storage bucket is missing. Please ensure the "avatars" bucket is created.';
-    } else if (msg.includes('policy') || msg.includes('permission denied')) {
-      friendlyMessage = 'Upload permission denied. Check storage policies.';
+    } else if (
+      msg.includes('row-level security') || 
+      msg.includes('violates') || 
+      msg.includes('policy') || 
+      msg.includes('security') || 
+      msg.includes('permission denied') || 
+      msg.includes('unauthorized')
+    ) {
+      friendlyMessage = 'Upload permission denied.';
+    } else if (msg.includes('fetch') || msg.includes('network')) {
+      friendlyMessage = 'Network error.';
     } else {
       friendlyMessage = 'Storage configuration is incorrect. ' + uploadError.message;
     }
@@ -215,27 +164,4 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
   await upsertProfile(userId, { avatar_url: urlData.publicUrl });
 
   return { publicUrl: urlData.publicUrl, path: storagePath };
-}
-
-/**
- * Remove the current avatar from storage and clear the DB field.
- */
-export async function removeAvatar(userId: string, currentAvatarUrl: string): Promise<void> {
-  const supabase = createClient();
-
-  // Extract the storage path from the public URL
-  try {
-    const url = new URL(currentAvatarUrl);
-    // Path is typically /storage/v1/object/public/avatars/{userId}/{filename}
-    const parts = url.pathname.split(`/${AVATAR_BUCKET}/`);
-    if (parts.length > 1) {
-      const storagePath = parts[1];
-      await supabase.storage.from(AVATAR_BUCKET).remove([storagePath]);
-    }
-  } catch {
-    // Non-fatal — the file might not exist in our bucket (e.g. OAuth avatar URL)
-  }
-
-  // Always clear the DB field
-  await upsertProfile(userId, { avatar_url: null });
 }

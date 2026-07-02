@@ -124,11 +124,11 @@ export function getProfileDisplayName(profile: Profile | null, email?: string | 
 /** Get initials for avatar fallback */
 export function getProfileInitials(displayName: string, email?: string | null): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) {
-    return `${parts[0][0] ?? ''}${parts[parts.length - 1][0] ?? ''}`.toUpperCase();
+  if (parts.length > 1) {
+    return (`${parts[0][0]}${parts[parts.length - 1][0]}`).toUpperCase();
   }
-  if (parts.length === 1 && parts[0].length >= 1) {
-    return parts[0].slice(0, 2).toUpperCase();
+  if (parts.length === 1 && parts[0].length > 1) {
+    return parts[0].substring(0, 2).toUpperCase();
   }
   if (email) {
     const local = email.split('@')[0] ?? '';

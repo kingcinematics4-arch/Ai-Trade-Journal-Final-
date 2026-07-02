@@ -1,7 +1,21 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useCallback } from 'react';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
 
-export default function SearchBar() {
+interface SearchBarProps {
+  onSearch?: (query: string) => void;
+}
+
+export default function SearchBar({ onSearch }: SearchBarProps) {
+  const [query, setQuery] = useState('');
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    onSearch?.(value);
+  }, [onSearch]);
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-8">
       <div className="relative flex-1">
@@ -10,9 +24,10 @@ export default function SearchBar() {
         </div>
         <input
           type="text"
+          value={query}
+          onChange={handleChange}
           className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/[0.05] rounded-xl text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all sm:text-sm"
-          placeholder="Search traders by name, username, or style..."
-          disabled
+          placeholder="Search traders by name or username..."
         />
       </div>
       <div className="flex gap-3">

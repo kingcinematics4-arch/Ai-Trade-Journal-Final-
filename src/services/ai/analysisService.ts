@@ -1,5 +1,4 @@
 // src/services/ai/analysisService.ts
-'use client';
 import { computeAdvancedAnalytics } from '@/lib/trades/analyticsEngine';
 import type { DbTrade } from '@/lib/trades/types';
 import type { AdvancedAnalytics } from '@/lib/trades/analyticsEngine';

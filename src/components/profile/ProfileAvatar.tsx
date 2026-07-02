@@ -4,7 +4,8 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Camera, Trash2, Upload, User, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
-import { useAvatarUpload } from '@/hooks/useAvatarUpload';
+import { useAvatarUpload } from '@/hooks/useAvatarUpload'; // This hook will now use avatarService
+import { removeAvatar as removeAvatarFromStorage } from '@/services/profileService';
 import { getProfileInitials } from '@/types/profile';
 import { getAvatarColorSeed } from '@/lib/auth/profile';
 
@@ -22,7 +23,8 @@ const SIZE = {
 export default function ProfileAvatar({ editable = false, size = 'xl' }: ProfileAvatarProps) {
   const { user, displayName } = useAuth();
   const { dbProfile } = useProfileContext();
-  const { uploadAvatar, removeAvatar, isUploading, isRemoving, validateFile } = useAvatarUpload();
+  const { uploadAvatar, isUploading, validateFile } = useAvatarUpload();
+  const [isRemoving, setIsRemoving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -73,8 +75,16 @@ export default function ProfileAvatar({ editable = false, size = 'xl' }: Profile
   const handleRemove = useCallback(async () => {
     setPreview(null);
     setImageError(false);
-    await removeAvatar();
-  }, [removeAvatar]);
+    if (!user?.id || !dbProfile?.avatarUrl) return;
+    setIsRemoving(true);
+    try {
+      await removeAvatarFromStorage(user.id, dbProfile.avatarUrl);
+    } catch (error) {
+      // handle error, maybe show a toast
+    } finally {
+      setIsRemoving(false);
+    }
+  }, [user?.id, dbProfile?.avatarUrl]);
 
   const avatarBody = (
     <div
