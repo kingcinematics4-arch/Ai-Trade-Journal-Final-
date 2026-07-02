@@ -6,8 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { uploadAvatar, removeAvatar } from '@/services/profileService';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB raw input
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
+const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB raw input
+const MIN_RESOLUTION = 200; // 200x200px minimum
 
 interface UseAvatarUploadReturn {
   isUploading: boolean;
@@ -32,12 +33,36 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
   /** Client-side validation before upload */
   const validateFile = useCallback((file: File): string | null => {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'Please upload a JPEG, PNG, WebP, or GIF image.';
+      return 'Please upload a JPEG, PNG, WebP, or AVIF image.';
     }
     if (file.size > MAX_SIZE_BYTES) {
-      return 'Image must be smaller than 10 MB.';
+      return 'Image must be smaller than 5 MB.';
     }
     return null;
+  }, []);
+
+  /** Validate image resolution */
+  const validateResolution = useCallback((file: File): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        if (img.width < MIN_RESOLUTION || img.height < MIN_RESOLUTION) {
+          resolve(`Image must be at least ${MIN_RESOLUTION}x${MIN_RESOLUTION} pixels.`);
+        } else {
+          resolve(null);
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve('Failed to load image. Please try another file.');
+      };
+
+      img.src = url;
+    });
   }, []);
 
   const handleUpload = useCallback(

@@ -82,11 +82,25 @@ ON CONFLICT (id) DO NOTHING;
 -- Storage policies for authenticated users
 -- Note: We use the first part of the path as the user_id for isolation
 
+DROP POLICY IF EXISTS "Give users access to own folder" ON storage.objects;
 CREATE POLICY "Give users access to own folder" ON storage.objects
 FOR ALL TO authenticated
-USING (bucket_id = 'trade-media' AND (storage.foldername(name))[1] = auth.uid()::text)
-WITH CHECK (bucket_id = 'trade-media' AND (storage.foldername(name))[1] = auth.uid()::text);
+USING (
+  bucket_id = 'trade-media' AND (
+    (storage.foldername(name))[1] = auth.uid()::text OR
+    (regexp_split_to_array(name, '/'))[1] = auth.uid()::text OR
+    name LIKE (auth.uid()::text || '/%')
+  )
+)
+WITH CHECK (
+  bucket_id = 'trade-media' AND (
+    (storage.foldername(name))[1] = auth.uid()::text OR
+    (regexp_split_to_array(name, '/'))[1] = auth.uid()::text OR
+    name LIKE (auth.uid()::text || '/%')
+  )
+);
 
+DROP POLICY IF EXISTS "Allow public read access to media" ON storage.objects;
 CREATE POLICY "Allow public read access to media" ON storage.objects
 FOR SELECT TO public
 USING (bucket_id = 'trade-media');

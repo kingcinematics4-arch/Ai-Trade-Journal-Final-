@@ -97,34 +97,28 @@ CREATE POLICY "Avatar images are publicly accessible"
   TO public
   USING (bucket_id = 'avatars');
 
--- Storage: authenticated users can upload their own avatar
+-- Storage: authenticated users can manage their own avatars (All actions)
 DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
-CREATE POLICY "Users can upload own avatar"
-  ON storage.objects FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    bucket_id = 'avatars' AND
-    (storage.foldername(name))[1] = auth.uid()::TEXT
-  );
-
--- Storage: authenticated users can update their own avatar
 DROP POLICY IF EXISTS "Users can update own avatar" ON storage.objects;
-CREATE POLICY "Users can update own avatar"
-  ON storage.objects FOR UPDATE
-  TO authenticated
-  USING (
-    bucket_id = 'avatars' AND
-    (storage.foldername(name))[1] = auth.uid()::TEXT
-  );
-
--- Storage: authenticated users can delete their own avatar
 DROP POLICY IF EXISTS "Users can delete own avatar" ON storage.objects;
-CREATE POLICY "Users can delete own avatar"
-  ON storage.objects FOR DELETE
+DROP POLICY IF EXISTS "Users can manage their own avatars" ON storage.objects;
+
+CREATE POLICY "Users can manage their own avatars"
+  ON storage.objects FOR ALL
   TO authenticated
   USING (
-    bucket_id = 'avatars' AND
-    (storage.foldername(name))[1] = auth.uid()::TEXT
+    bucket_id = 'avatars' AND (
+      (storage.foldername(name))[1] = auth.uid()::TEXT OR
+      (regexp_split_to_array(name, '/'))[1] = auth.uid()::TEXT OR
+      name LIKE (auth.uid()::TEXT || '/%')
+    )
+  )
+  WITH CHECK (
+    bucket_id = 'avatars' AND (
+      (storage.foldername(name))[1] = auth.uid()::TEXT OR
+      (regexp_split_to_array(name, '/'))[1] = auth.uid()::TEXT OR
+      name LIKE (auth.uid()::TEXT || '/%')
+    )
   );
 
 -- ============================================================

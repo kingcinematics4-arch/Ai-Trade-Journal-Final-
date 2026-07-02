@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase';
 import type { DbProfile, Profile, ProfileFormData, AvatarUploadResult } from '@/types/profile';
 import { mapDbProfile, mapProfileToDb } from '@/types/profile';
 
-const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2 MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_AVATAR_SIZE = 500 * 1024; // 500 KB target
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
 const AVATAR_BUCKET = 'avatars';
 
 // ─── Profile CRUD ─────────────────────────────────────────────────────────────
@@ -62,8 +62,9 @@ export async function upsertProfile(
 /**
  * Compress an image file client-side using a canvas element.
  * Reduces file size while keeping quality acceptable.
+ * Targets < 500KB by adjusting quality if needed.
  */
-async function compressImage(file: File, maxSide = 512, quality = 0.82): Promise<Blob> {
+async function compressImage(file: File, maxSide = 512, initialQuality = 0.85): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -73,6 +74,7 @@ async function compressImage(file: File, maxSide = 512, quality = 0.82): Promise
       const canvas = document.createElement('canvas');
       let { width, height } = img;
 
+      // Resize to max dimension
       if (width > height) {
         if (width > maxSide) {
           height = Math.round((height * maxSide) / width);
@@ -90,13 +92,47 @@ async function compressImage(file: File, maxSide = 512, quality = 0.82): Promise
       const ctx = canvas.getContext('2d');
       if (!ctx) return reject(new Error('Canvas context unavailable'));
       ctx.drawImage(img, 0, 0, width, height);
+
+      // Try initial quality
       canvas.toBlob(
         (blob) => {
           if (!blob) return reject(new Error('Image compression failed'));
-          resolve(blob);
+
+          // If under target size, return
+          if (blob.size <= MAX_AVATAR_SIZE) {
+            return resolve(blob);
+          }
+
+          // If over target, try progressively lower quality
+          let quality = initialQuality;
+          const tryLowerQuality = (attempt: number) => {
+            if (attempt >= 5) {
+              // Give up after 5 attempts, return what we have
+              return resolve(blob);
+            }
+
+            quality -= 0.1;
+            if (quality < 0.5) quality = 0.5;
+
+            canvas.toBlob(
+              (newBlob) => {
+                if (newBlob && newBlob.size <= MAX_AVATAR_SIZE) {
+                  resolve(newBlob);
+                } else if (newBlob) {
+                  tryLowerQuality(attempt + 1);
+                } else {
+                  resolve(blob);
+                }
+              },
+              'image/webp',
+              quality
+            );
+          };
+
+          tryLowerQuality(0);
         },
         'image/webp',
-        quality
+        initialQuality
       );
     };
 
@@ -146,8 +182,31 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
     });
 
   if (uploadError) {
-    console.error('[profileService] uploadAvatar error:', uploadError.message);
-    throw new Error(uploadError.message);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[profileService] uploadAvatar error (dev):', uploadError);
+    }
+    
+    let friendlyMessage = 'Failed to upload avatar. Please try again.';
+    const msg = uploadError.message?.toLowerCase() || '';
+    
+    if (msg.includes('bucket not found') || msg.includes('not found')) {
+      friendlyMessage = 'Storage bucket is missing. Please ensure the "avatars" bucket is created.';
+    } else if (
+      msg.includes('row-level security') || 
+      msg.includes('violates') || 
+      msg.includes('policy') || 
+      msg.includes('security') || 
+      msg.includes('permission denied') || 
+      msg.includes('unauthorized')
+    ) {
+      friendlyMessage = 'Upload permission denied.';
+    } else if (msg.includes('fetch') || msg.includes('network')) {
+      friendlyMessage = 'Network error.';
+    } else {
+      friendlyMessage = 'Storage configuration is incorrect. ' + uploadError.message;
+    }
+    
+    throw new Error(friendlyMessage);
   }
 
   const { data: urlData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(storagePath);

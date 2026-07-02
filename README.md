@@ -28,6 +28,19 @@ yarn dev
 
 3. Open [http://localhost:4028](http://localhost:4028) with your browser to see the result.
 
+## 🗄️ Database Setup
+
+To ensure all features work correctly (such as profile avatar uploads), you need to set up the necessary database tables and storage buckets in your Supabase project.
+
+1. Go to the [Supabase Dashboard](https://supabase.com/dashboard/).
+2. Select your project.
+3. Open the **SQL Editor**.
+4. Run the SQL scripts provided in the root directory:
+   - `supabase_schema.sql` (Creates tables and policies for trades)
+   - `profiles_schema.sql` (Creates the `profiles` table and the `avatars` storage bucket)
+
+Without running `profiles_schema.sql`, you may encounter a `Storage bucket is missing` error when uploading profile avatars.
+
 ## 📁 Project Structure
 
 ```
