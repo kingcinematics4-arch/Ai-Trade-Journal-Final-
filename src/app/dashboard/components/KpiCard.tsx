@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface KpiCardProps {
   id: string;
@@ -15,6 +16,39 @@ interface KpiCardProps {
   isAlert?: boolean;
   onClick?: () => void;
   href?: string;
+}
+
+/**
+ * Adaptive font sizing based on value length
+ * Returns appropriate Tailwind text size class
+ */
+function getAdaptiveFontSize(value: string, isHero: boolean = false): string {
+  const length = value.length;
+
+  if (isHero) {
+    // Hero cards (larger base size)
+    if (length <= 8) return 'text-5xl';
+    if (length <= 12) return 'text-4xl';
+    if (length <= 16) return 'text-3xl';
+    return 'text-2xl';
+  }
+
+  // Standard cards
+  if (length <= 6) return 'text-4xl';
+  if (length <= 10) return 'text-3xl';
+  if (length <= 14) return 'text-2xl';
+  return 'text-xl';
+}
+
+/**
+ * Adaptive subtitle font sizing based on text length
+ * Returns appropriate Tailwind text size class
+ */
+function getAdaptiveSubtitleSize(text: string): string {
+  const length = text.length;
+  if (length <= 20) return 'text-xs';
+  if (length <= 35) return 'text-[11px]';
+  return 'text-[10px]';
 }
 
 const variantStyles: Record<string, string> = {
@@ -67,41 +101,58 @@ export default function KpiCard({
   const trendColor =
     trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-muted-foreground';
 
+  const fontSize = getAdaptiveFontSize(value, isHero);
+  const subtitleSize = getAdaptiveSubtitleSize(subtext);
+
   const cardContent = (
     <>
-      <div className="flex items-start justify-between mb-6">
-        <p className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
+      <div className="flex items-start justify-between mb-5">
+        <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">
           {label}
         </p>
         <div
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-inner border border-white/[0.03] ${iconBgStyles[variant]}`}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm border border-white/[0.05] ${iconBgStyles[variant]}`}
         >
           {icon}
         </div>
       </div>
 
       <p
-        className={`font-tabular font-bold ${isHero ? 'text-[44px] md:text-[56px]' : 'text-3xl md:text-4xl'} ${valueStyles[variant]} tracking-[-0.04em] leading-none mb-4`}
+        className={cn(
+          'font-tabular font-bold whitespace-nowrap tracking-[-0.03em] leading-none mb-4',
+          fontSize,
+          valueStyles[variant]
+        )}
       >
         {value}
       </p>
 
-      <div className="flex items-center gap-4">
-        <p className="text-sm font-semibold text-muted-foreground/40 truncate flex-1">{subtext}</p>
-        <div
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[13px] font-bold ${trendColor}`}
-        >
-          {trendIcon}
-          <span>{trendValue}</span>
-        </div>
+      <div className="flex items-start gap-3">
+        <p className={cn('font-medium text-muted-foreground/60 leading-tight', subtitleSize, 'flex-1')}>
+          {subtext}
+        </p>
+        {trendValue && trendValue !== '—' && (
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.02] border border-white/[0.05] text-[11px] font-semibold whitespace-nowrap flex-shrink-0 ${trendColor}`}
+          >
+            {trendIcon}
+            <span>{trendValue}</span>
+          </div>
+        )}
       </div>
 
       {isAlert && (
         <div className="mt-3 pt-3 border-t border-amber-500/20">
-          <p className="text-xs text-amber-400 font-medium">⚠ Action needed — check AI Coach</p>
+          <p className="text-xs text-amber-400 font-medium">Action needed — check AI Coach</p>
         </div>
       )}
     </>
+  );
+
+  const cardClassName = cn(
+    'relative card-premium h-full p-6 overflow-hidden transition-all duration-200',
+    isAlert ? 'border-amber-500/30' : '',
+    (href || onClick) && 'hover:scale-[1.01] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background'
   );
 
   if (href) {
@@ -109,9 +160,7 @@ export default function KpiCard({
       <Link
         id={id}
         href={href}
-        className={`relative card-premium h-full p-7 overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background ${
-          isAlert ? 'border-amber-500/30' : ''
-        }`}
+        className={cardClassName}
         aria-label={`View ${label} details`}
       >
         {cardContent}
@@ -124,9 +173,7 @@ export default function KpiCard({
       <button
         id={id}
         onClick={onClick}
-        className={`relative card-premium h-full p-7 overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background text-left w-full ${
-          isAlert ? 'border-amber-500/30' : ''
-        }`}
+        className={cn(cardClassName, 'text-left w-full')}
         aria-label={`View ${label} details`}
       >
         {cardContent}
@@ -137,9 +184,7 @@ export default function KpiCard({
   return (
     <div
       id={id}
-      className={`relative card-premium h-full p-7 overflow-hidden ${
-        isAlert ? 'border-amber-500/30' : ''
-      }`}
+      className={cardClassName}
     >
       {cardContent}
     </div>

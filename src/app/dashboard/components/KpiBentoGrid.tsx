@@ -45,19 +45,18 @@ export default function KpiBentoGrid() {
 
   const streakLabel =
     currentStreak.type === 'none'
-      ? '—'
+      ? '0'
       : `${currentStreak.type === 'win' ? 'W' : 'L'}${currentStreak.count}`;
 
-  const streakSubtext =
-    currentStreak.type === 'none'
-      ? t('dashboard.streak.noActive')
-      : t('dashboard.streak.consecutive', {
-          count: currentStreak.count,
-          type:
-            currentStreak.type === 'win'
-              ? t('dashboard.streak.wins')
-              : t('dashboard.streak.losses'),
-        });
+  const streakSubtext = t('dashboard.streak.consecutive', {
+    count: currentStreak.type === 'none' ? 0 : currentStreak.count,
+    type:
+      currentStreak.type === 'none'
+        ? t('dashboard.streak.trades')
+        : currentStreak.type === 'win'
+          ? t('dashboard.streak.wins')
+          : t('dashboard.streak.losses'),
+  });
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 lg:gap-6 w-full min-w-0">
@@ -66,9 +65,9 @@ export default function KpiBentoGrid() {
           id="kpi-total-pnl"
           label={t('dashboard.kpi.totalPnl')}
           value={pnlFormatted}
-          subtext={`${analytics.totalTrades} ${t('dashboard.kpi.tradeLogged', { count: analytics.totalTrades })}`}
+          subtext={`${analytics.totalTrades} trades`}
           trend={totalPnl >= 0 ? 'up' : 'down'}
-          trendValue={analytics.totalTrades > 0 ? t('dashboard.kpi.allTime') : '—'}
+          trendValue={analytics.totalTrades > 0 ? t('dashboard.kpi.allTime') : ''}
           icon={<TrendingUp size={20} />}
           variant={pnlVariant}
           isHero
@@ -80,9 +79,9 @@ export default function KpiBentoGrid() {
           id="kpi-win-rate"
           label={t('dashboard.kpi.winRate')}
           value={`${winRate.toFixed(1)}%`}
-          subtext={`${winCount} ${t('dashboard.kpi.wins')} / ${lossCount} ${t('dashboard.kpi.losses')}`}
+          subtext={`${winCount}W / ${lossCount}L`}
           trend={winRate >= 50 ? 'up' : winRate > 0 ? 'down' : 'neutral'}
-          trendValue={winCount + lossCount > 0 ? t('dashboard.kpi.closedTrades') : '—'}
+          trendValue={winCount + lossCount > 0 ? t('dashboard.kpi.closedTrades') : ''}
           icon={<Target size={18} />}
           variant="info"
         />
@@ -92,12 +91,12 @@ export default function KpiBentoGrid() {
         <KpiCard
           id="kpi-rr-ratio"
           label={t('dashboard.kpi.avgRrRatio')}
-          value={avgRr > 0 ? avgRr.toFixed(2) : '—'}
-          subtext={avgRr > 0 ? t('dashboard.kpi.acrossLoggedTrades') : t('dashboard.kpi.noRrData')}
-          trend="neutral"
-          trendValue="—"
+          value={avgRr > 0 ? avgRr.toFixed(2) : '0.00'}
+          subtext="Average risk/reward"
+          trend={avgRr > 1.5 ? 'up' : avgRr > 0 ? 'neutral' : 'neutral'}
+          trendValue={avgRr > 0 ? t('dashboard.kpi.allTime') : ''}
           icon={<BarChart2 size={18} />}
-          variant="neutral"
+          variant={avgRr > 1.5 ? 'profit' : 'neutral'}
         />
       </div>
 
@@ -106,11 +105,11 @@ export default function KpiBentoGrid() {
           id="kpi-streak"
           label={t('dashboard.kpi.currentStreak')}
           value={streakLabel}
-          subtext={streakSubtext}
+          subtext={currentStreak.type === 'none' ? 'No active streak' : streakSubtext}
           trend={
             currentStreak.type === 'win' ? 'up' : currentStreak.type === 'loss' ? 'down' : 'neutral'
           }
-          trendValue={currentStreak.type === 'none' ? '—' : t('dashboard.kpi.latestTrades')}
+          trendValue={currentStreak.type === 'none' ? '' : t('dashboard.kpi.latestTrades')}
           icon={<Flame size={18} />}
           variant={
             currentStreak.type === 'win'
@@ -126,14 +125,10 @@ export default function KpiBentoGrid() {
         <KpiCard
           id="kpi-best-trade"
           label={t('dashboard.kpi.bestTrade')}
-          value={bestTrade ? formatCurrency(bestTrade.pnl, { showSign: true }) : '—'}
-          subtext={
-            bestTrade
-              ? `${bestTrade.asset} — ${bestTrade.strategy}`
-              : t('dashboard.kpi.noTradesYet')
-          }
+          value={bestTrade ? formatCurrency(bestTrade.pnl, { showSign: true }) : '$0.00'}
+          subtext={bestTrade ? bestTrade.asset : t('dashboard.kpi.noTradesYet')}
           trend={bestTrade && bestTrade.pnl > 0 ? 'up' : 'neutral'}
-          trendValue={bestTrade?.date ?? '—'}
+          trendValue={bestTrade?.date ?? ''}
           icon={<Trophy size={18} />}
           variant={bestTrade && bestTrade.pnl > 0 ? 'profit' : 'neutral'}
         />
@@ -144,9 +139,9 @@ export default function KpiBentoGrid() {
           id="kpi-discipline"
           label={t('dashboard.kpi.journalActivity')}
           value={`${analytics.totalTrades}`}
-          subtext={t('dashboard.kpi.journalActivitySubtext')}
+          subtext="Total trades logged"
           trend="neutral"
-          trendValue={t('dashboard.kpi.allTime')}
+          trendValue={analytics.totalTrades > 0 ? t('dashboard.kpi.allTime') : ''}
           icon={<AlertTriangle size={18} />}
           variant="neutral"
         />
