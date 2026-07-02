@@ -47,7 +47,8 @@ function AiCoachContent() {
       new Date(a.trade_date || a.created_at || '').getTime()
   );
   const recentPnl = sortedTrades.slice(0, 5).reduce((acc, t) => {
-    const pnl = parseFloat((t.pnl_amount as string) || (t as any).pnl || '0');
+    const pnlValue = t.pnl_amount ?? (t as any).pnl ?? '0';
+    const pnl = parseFloat(String(pnlValue));
     return acc + (isNaN(pnl) ? 0 : pnl);
   }, 0);
 
@@ -108,7 +109,7 @@ export default function AICoachPage() {
   return (
     <AuthGuard>
       <TradesProvider>
-        <AppLayout activePath="/ai-coach">
+        <AppLayout>
           <AiCoachContent />
         </AppLayout>
       </TradesProvider>

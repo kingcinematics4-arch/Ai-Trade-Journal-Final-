@@ -161,7 +161,7 @@ export default function GoalsPage() {
   return (
     <AuthGuard>
       <TradesProvider>
-        <AppLayout activePath="/goals">
+        <AppLayout>
           <GoalsContent />
         </AppLayout>
       </TradesProvider>

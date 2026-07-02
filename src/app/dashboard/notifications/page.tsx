@@ -90,8 +90,8 @@ export default function NotificationsPage() {
 
   return (
     <AuthGuard>
-      <AppLayout activePath="/dashboard/notifications">
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12 py-6 space-y-6 text-white">
+      <AppLayout>
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6 text-white">
           {/* Header Section */}
           <div className="max-w-7xl mx-auto mb-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

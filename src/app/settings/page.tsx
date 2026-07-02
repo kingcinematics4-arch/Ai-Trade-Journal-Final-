@@ -17,7 +17,7 @@ export default function SettingsPage() {
   return (
     <AuthGuard>
       <AppLayout>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 space-y-8">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-8">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">{t('settings.title')}</h1>
             <p className="text-muted-foreground mt-1 text-sm">

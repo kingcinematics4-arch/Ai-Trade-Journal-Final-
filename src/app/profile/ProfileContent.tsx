@@ -9,7 +9,7 @@ export default function ProfileContent() {
   const { t } = useTranslation();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 space-y-5">
+    <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-5">
       {/* Page heading (visible on mobile only) */}
       <div className="lg:hidden">
         <h1 className="text-xl font-bold text-foreground">{t('profile.mobileTitle')}</h1>

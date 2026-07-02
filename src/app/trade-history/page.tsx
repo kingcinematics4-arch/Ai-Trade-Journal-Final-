@@ -8,8 +8,10 @@ export default function TradeHistoryPage() {
   return (
     <AuthGuard>
       <TradesProvider>
-        <AppLayout activePath="/trade-history">
-          <TradeHistoryView />
+        <AppLayout>
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6">
+            <TradeHistoryView />
+          </div>
         </AppLayout>
       </TradesProvider>
     </AuthGuard>

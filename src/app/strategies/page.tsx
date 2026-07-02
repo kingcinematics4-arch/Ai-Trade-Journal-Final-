@@ -9,7 +9,9 @@ export default function StrategiesPage() {
     <AuthGuard>
       <TradesProvider>
         <AppLayout>
-          <StrategiesView />
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6">
+            <StrategiesView />
+          </div>
         </AppLayout>
       </TradesProvider>
     </AuthGuard>

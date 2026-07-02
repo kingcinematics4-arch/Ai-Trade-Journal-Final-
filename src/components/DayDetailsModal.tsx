@@ -104,8 +104,6 @@ export default function DayDetailsModal({
     return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
 
-  if (!isOpen) return null;
-
   const { netPnL, winRate } = useMemo(() => {
     const pnl = trades.reduce((acc, t) => acc + (getTradePnL(t) || 0), 0);
     const wr =
@@ -158,6 +156,8 @@ export default function DayDetailsModal({
     });
     setIsAddingTask(false);
   }, [newTaskData, date, onAddTask]);
+
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
