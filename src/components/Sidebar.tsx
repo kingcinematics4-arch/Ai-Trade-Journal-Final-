@@ -26,6 +26,7 @@ import {
   Menu,
   X,
   Download,
+  Users,
 } from 'lucide-react';
 
 interface NavItem {
@@ -97,6 +98,12 @@ export default function Sidebar({ activePath }: SidebarProps) {
       label: t('sidebar.nav.exports'),
       href: '/exports',
       icon: <Download size={18} />,
+    },
+    {
+      id: 'nav-community',
+      label: 'Community',
+      href: '/community',
+      icon: <Users size={18} />,
     },
   ];
 

@@ -7,12 +7,13 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 1. Create profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  username    TEXT,
-  full_name   TEXT,
-  avatar_url  TEXT,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username        TEXT,
+  full_name       TEXT,
+  avatar_url      TEXT,
+  public_profile  BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Index for fast lookups

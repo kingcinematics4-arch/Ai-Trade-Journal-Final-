@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Mail,
   Lock,
@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
-import { sendPasswordReset, updateEmail } from '@/services/profileService';
+import { sendPasswordReset, updateEmail, getProfile, updatePublicProfile } from '@/services/profileService';
 import { NotificationSettings } from '@/services/notificationService';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { locales, localeNames, localeFlags } from '@/i18n/config';
@@ -80,6 +80,10 @@ export default function AccountSettings() {
   const { settings, updateSettings } = useNotifications();
   const { locale, setLocale, t } = useTranslation();
 
+  // Public profile state (stored in profiles table, not notification_settings)
+  const [publicProfile, setPublicProfile] = useState(false);
+  const [publicProfileLoading, setPublicProfileLoading] = useState(false);
+
   // Email change
   const [newEmail, setNewEmail] = useState('');
   const [emailSaving, setEmailSaving] = useState(false);
@@ -89,8 +93,36 @@ export default function AccountSettings() {
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
 
+  // Load public profile from profiles table
+  useEffect(() => {
+    if (!user?.id) return;
+    getProfile(user.id).then((profile) => {
+      if (profile) {
+        setPublicProfile(profile.publicProfile);
+      }
+    }).catch(() => {
+      // Silently fail — default to false
+    });
+  }, [user?.id]);
+
   const handleToggle = (key: keyof NotificationSettings, value: boolean) => {
     updateSettings({ [key]: value });
+  };
+
+  const handlePublicProfileToggle = async (value: boolean) => {
+    if (!user?.id) return;
+    setPublicProfileLoading(true);
+    // Optimistic update
+    setPublicProfile(value);
+    try {
+      await updatePublicProfile(user.id, value);
+    } catch (err) {
+      // Revert on failure
+      setPublicProfile(!value);
+      toast.error(err instanceof Error ? err.message : t('settings.error'));
+    } finally {
+      setPublicProfileLoading(false);
+    }
   };
 
   const handleEmailUpdate = async () => {
@@ -245,8 +277,8 @@ export default function AccountSettings() {
           id="privacy-public"
           label={t('settings.publicProfile')}
           description={t('settings.publicProfileDesc')}
-          checked={settings?.profile_public ?? false}
-          onChange={(v) => handleToggle('profile_public', v)}
+          checked={publicProfile}
+          onChange={handlePublicProfileToggle}
           icon={<Shield size={14} />}
         />
         <ToggleRow

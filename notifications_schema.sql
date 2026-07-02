@@ -69,7 +69,6 @@ CREATE TABLE IF NOT EXISTS public.notification_settings (
     system_updates BOOLEAN NOT NULL DEFAULT TRUE,
     message_alerts BOOLEAN NOT NULL DEFAULT TRUE,
     activity_alerts BOOLEAN NOT NULL DEFAULT TRUE,
-    profile_public BOOLEAN NOT NULL DEFAULT FALSE,
     show_stats BOOLEAN NOT NULL DEFAULT TRUE,
     timezone TEXT NOT NULL DEFAULT 'UTC',
     language TEXT NOT NULL DEFAULT 'en',

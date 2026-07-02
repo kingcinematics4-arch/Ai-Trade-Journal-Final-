@@ -12,7 +12,6 @@ export interface NotificationSettings {
   volume: number;
   trade_alerts: boolean;
   pnl_alerts: boolean;
-  profile_public: boolean;
   show_stats: boolean;
   timezone: string;
   security_alerts: boolean;
@@ -31,7 +30,6 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   do_not_disturb: false,
   volume: 1.0,
   trade_alerts: true,
-  profile_public: false,
   show_stats: true,
   timezone: 'UTC',
   pnl_alerts: true,
@@ -136,7 +134,6 @@ export const notificationService = {
       'system_updates',
       'message_alerts',
       'activity_alerts',
-      'profile_public',
       'show_stats',
       'timezone',
     ];

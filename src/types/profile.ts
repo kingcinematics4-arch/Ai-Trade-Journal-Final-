@@ -13,6 +13,7 @@ export interface DbProfile {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  public_profile: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -30,6 +31,7 @@ export interface Profile {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  publicProfile: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -84,6 +86,7 @@ export function mapDbProfile(row: DbProfile): Profile {
     twitter: row.twitter,
     instagram: row.instagram,
     linkedin: row.linkedin,
+    publicProfile: row.public_profile,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -92,7 +95,7 @@ export function mapDbProfile(row: DbProfile): Profile {
 /** Map a Profile → DB upsert payload */
 export function mapProfileToDb(
   userId: string,
-  data: Partial<ProfileFormData> & { avatar_url?: string | null }
+  data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
 ): Partial<DbProfile> & { id: string } {
   const out: Partial<DbProfile> & { id: string } = { id: userId };
   if (data.username !== undefined) out.username = data.username || null;
@@ -105,6 +108,7 @@ export function mapProfileToDb(
   if (data.instagram !== undefined) out.instagram = data.instagram || null;
   if (data.linkedin !== undefined) out.linkedin = data.linkedin || null;
   if (data.avatar_url !== undefined) out.avatar_url = data.avatar_url;
+  if (data.public_profile !== undefined) out.public_profile = data.public_profile;
   return out;
 }
 

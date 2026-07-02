@@ -38,7 +38,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
  */
 export async function upsertProfile(
   userId: string,
-  data: Partial<ProfileFormData> & { avatar_url?: string | null }
+  data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
 ): Promise<Profile> {
   const supabase = createClient();
   const payload = mapProfileToDb(userId, data);
@@ -238,6 +238,26 @@ export async function removeAvatar(userId: string, currentAvatarUrl: string): Pr
 
   // Always clear the DB field
   await upsertProfile(userId, { avatar_url: null });
+}
+
+// ─── Profile Update Operations ─────────────────────────────────────────────────
+
+/**
+ * Update a profile with partial data.
+ * Only updates the provided fields.
+ */
+export async function updateProfile(
+  userId: string,
+  data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
+): Promise<Profile> {
+  return upsertProfile(userId, data);
+}
+
+/**
+ * Update only the public_profile visibility flag.
+ */
+export async function updatePublicProfile(userId: string, isPublic: boolean): Promise<Profile> {
+  return upsertProfile(userId, { public_profile: isPublic });
 }
 
 // ─── Account Operations ────────────────────────────────────────────────────────
