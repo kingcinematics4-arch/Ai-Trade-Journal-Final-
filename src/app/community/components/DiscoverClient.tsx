@@ -53,11 +53,11 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <SearchBar onSearch={handleSearch} />
 
-      {/* Main content area for trader cards - now a responsive grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {/* Main content area for trader cards - 2 cards per row on desktop */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {traders.map((trader) => (
           <TraderCard key={trader.id} trader={trader} />
         ))}
