@@ -100,6 +100,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           ...(data.twitter !== undefined && { twitter: data.twitter || null }),
           ...(data.instagram !== undefined && { instagram: data.instagram || null }),
           ...(data.linkedin !== undefined && { linkedin: data.linkedin || null }),
+          ...(data.tradingStyle !== undefined && { tradingStyle: data.tradingStyle || null }),
+          ...(data.markets !== undefined && { markets: data.markets || null }),
+          ...(data.experience !== undefined && { experience: data.experience || null }),
           ...(data.avatar_url !== undefined && { avatarUrl: data.avatar_url }),
         };
       });

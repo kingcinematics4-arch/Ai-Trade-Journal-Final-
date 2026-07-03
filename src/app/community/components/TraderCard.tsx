@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Eye, UserPlus, ShieldCheck } from 'lucide-react';
+import { Eye, UserPlus, ShieldCheck, BarChart3, Target, Ratio, TrendingUp, Briefcase, BrainCircuit, Globe, Calendar, LineChart, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { PublicTraderProfile } from '@/types/community';
 import { CountryFlag } from './CountryFlag';
+import { formatDistanceToNow } from 'date-fns';
 
 interface TraderCardProps {
   trader: PublicTraderProfile;
+  isPremium?: boolean;
 }
 
 const PREMIUM_GRADIENTS = [
@@ -28,75 +30,66 @@ function getGradientIndex(id: string): number {
   return Math.abs(hash) % PREMIUM_GRADIENTS.length;
 }
 
-function getDisplayName(trader: PublicTraderProfile): string {
-  if (trader.fullName && trader.fullName.trim().length > 0) return trader.fullName;
-  if (trader.username && trader.username.trim().length > 0) return trader.username;
-  return 'New Trader';
-}
-
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length > 1) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
-  if (parts.length === 1 && parts[0].length >= 2) {
-    return parts[0].substring(0, 2).toUpperCase();
-  }
-  if (parts.length === 1 && parts[0].length === 1) {
-    return parts[0].toUpperCase();
+  if (parts.length === 1 && parts[0]?.length >= 2) {
+    return parts[0].slice(0, 2).toUpperCase();
   }
   return 'NT';
 }
 
-function hasMinimumProfile(trader: PublicTraderProfile): boolean {
-  const hasFullName = trader.fullName && trader.fullName.trim().length > 0;
-  const hasUsername = trader.username && trader.username.trim().length > 0;
-  return hasFullName || hasUsername;
-}
-
-const StatItem = ({ label, value, positive, negative }: {
-  label: string;
-  value: string | number | null;
-  positive?: boolean;
-  negative?: boolean;
-}) => {
-  if (value === null) return null;
-  const colorClass = positive ? 'text-emerald-400' : negative ? 'text-red-400' : 'text-white';
+const StatCard = ({ icon, title, value, isPositive, isNegative }: { icon: React.ReactNode; title: string; value: string; isPositive?: boolean; isNegative?: boolean }) => {
+  const valueColor = isPositive ? 'text-emerald-400' : isNegative ? 'text-red-400' : 'text-white';
   return (
-    <div className="text-center">
-      <dt className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-medium">{label}</dt>
-      <dd className={`text-sm font-bold ${colorClass} mt-0.5`}>{value}</dd>
+    <div className="flex flex-col items-center justify-center text-center p-4 bg-white/[0.03] border border-white/10 rounded-xl h-full">
+      <div className="flex items-center gap-2 text-slate-400 text-xs">
+        {icon}
+        <span>{title}</span>
+      </div>
+      <div className={`text-2xl font-bold mt-1.5 ${valueColor}`}>
+        {value}
+      </div>
     </div>
   );
 };
 
-const TraderCard = ({ trader }: TraderCardProps) => {
+const InfoBadge = ({ icon, text }: { icon: React.ReactNode; text: string | null }) => {
+  if (!text) return null;
+  return (
+    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/10 rounded-md text-xs text-slate-300">
+      {icon}
+      <span>{text}</span>
+    </div>
+  );
+};
+
+const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | null }) => {
+  if (!value) return null;
+  return (
+    <div className="flex items-center gap-2 text-xs text-slate-400">
+      {icon}
+      <span className="font-medium text-slate-300">{value}</span>
+    </div>
+  );
+};
+
+const TraderCardComponent = ({ trader, isPremium = false }: TraderCardProps) => {
   const router = useRouter();
-  const displayName = useMemo(() => getDisplayName(trader), [trader]);
+  const displayName = useMemo(() => trader.fullName?.trim() || trader.username || 'New Trader', [trader.fullName, trader.username]);
   const initials = useMemo(() => getInitials(displayName), [displayName]);
   const gradient = useMemo(() => PREMIUM_GRADIENTS[getGradientIndex(trader.id)], [trader.id]);
-  const profileIncomplete = useMemo(() => !hasMinimumProfile(trader), [trader]);
+  const memberSince = useMemo(() => {
+    try {
+      return formatDistanceToNow(new Date(trader.createdAt), { addSuffix: true });
+    } catch {
+      return null;
+    }
+  }, [trader.createdAt]);
 
   const hasTrades = trader.tradesLogged > 0;
-  const winRateDisplay = useMemo(() => {
-    if (!hasTrades) return null;
-    if (trader.winRate === null || trader.winRate === undefined) return null;
-    return `${trader.winRate.toFixed(1)}%`;
-  }, [hasTrades, trader.winRate]);
-
-  const avgRrDisplay = useMemo(() => {
-    if (!hasTrades) return null;
-    if (trader.avgRr === null || trader.avgRr === undefined) return null;
-    return `${trader.avgRr.toFixed(2)}R`;
-  }, [hasTrades, trader.avgRr]);
-
-  const totalPnlDisplay = useMemo(() => {
-    if (!hasTrades) return null;
-    if (trader.totalPnl === null || trader.totalPnl === undefined) return null;
-    const isPositive = trader.totalPnl >= 0;
-    const formatted = `${isPositive ? '+' : ''}$${Math.abs(trader.totalPnl).toFixed(0)}`;
-    return { value: formatted, isPositive };
-  }, [hasTrades, trader.totalPnl]);
 
   const handleViewProfile = () => {
     if (trader.username) {
@@ -106,135 +99,109 @@ const TraderCard = ({ trader }: TraderCardProps) => {
 
   return (
     <div
-      onClick={handleViewProfile}
-      className="relative bg-white/[0.02] border border-white/[0.05] rounded-2xl p-5 transition-all duration-300 group flex flex-col h-full cursor-pointer overflow-hidden"
+      className="relative w-full h-full flex flex-col bg-white/[0.03] border border-white/10 rounded-[28px] backdrop-blur-xl transition-all duration-300 group shadow-lg shadow-black/20 hover:shadow-primary/20 hover:border-primary/20 hover:-translate-y-1.5"
     >
-      {/* Glass hover effect */}
-      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]"></div>
-
-      <div className="relative z-10 flex flex-col h-full">
-        {/* ─── Avatar ─────────────────────────────────────────── */}
-        <div className="flex flex-col items-center text-center mb-4">
-          <div className="relative h-20 w-20 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 mb-3 ring-2 ring-white/[0.06] group-hover:ring-primary/30 transition-all">
-            {trader.avatarUrl ? (
-              <img
-                src={trader.avatarUrl}
-                alt={displayName}
-                className="h-full w-full object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    const fallback = document.createElement('div');
-                    fallback.className = `h-full w-full flex items-center justify-center bg-gradient-to-br ${gradient} text-white text-2xl font-bold`;
-                    fallback.textContent = initials;
-                    parent.appendChild(fallback);
-                  }
-                }}
-              />
-            ) : (
-              <div className={`h-full w-full flex items-center justify-center bg-gradient-to-br ${gradient} text-white text-2xl font-bold`}>
-                {initials}
-              </div>
-            )}
+      <div className="p-6 flex flex-col flex-grow">
+        {/* TOP SECTION */}
+        <div className="flex items-center gap-4">
+          <div className="relative h-20 w-20 rounded-full flex-shrink-0">
+            <div className="absolute -inset-1 bg-gradient-to-br from-primary/60 to-primary/30 rounded-full blur-md group-hover:blur-lg transition-all duration-300"></div>
+            <div className={`relative h-full w-full rounded-full flex items-center justify-center overflow-hidden ring-2 ring-white/10 bg-gradient-to-br ${gradient}`}>
+              {trader.avatarUrl ? (
+                <img src={trader.avatarUrl} alt={displayName} className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <span className="text-white text-3xl font-bold">{initials}</span>
+              )}
+            </div>
           </div>
-
-          {/* ─── Name ─────────────────────────────────────────── */}
-          <h3 className="text-lg font-bold text-white truncate w-full leading-tight">{displayName}</h3>
-
-          {/* ─── @username ────────────────────────────────────── */}
-          {trader.username && trader.username.trim().length > 0 && (
-            <p className="text-sm text-muted-foreground truncate w-full mt-0.5">@{trader.username}</p>
-          )}
-
-          {/* ─── Country flag + verified badge row ────────────── */}
-          <div className="flex items-center justify-center gap-3 mt-3 min-h-[20px]">
-            {trader.country && trader.country.trim().length > 0 && (
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="flex-grow overflow-hidden">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-white truncate" title={displayName}>{displayName}</h2>
+              {isPremium && <ShieldCheck size={18} className="text-primary flex-shrink-0" />}
+            </div>
+            {trader.username && <p className="text-sm text-muted-foreground truncate">@{trader.username}</p>}
+            {trader.country && (
+              <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
                 <CountryFlag countryCode={trader.country} />
-                <span className="text-xs text-muted-foreground/70">{trader.country}</span>
+                <span>{trader.country}</span>
               </div>
             )}
-            {/* Verified badge (future ready) */}
-            <div className="flex items-center gap-1 text-xs text-primary/60">
-              <ShieldCheck size={12} />
-              <span>Verified</span>
-            </div>
           </div>
         </div>
 
-        {/* ─── Profile Incomplete Badge ──────────────────────── */}
-        {profileIncomplete && (
-          <div className="flex justify-center mb-3">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              Profile Incomplete
-            </span>
-          </div>
-        )}
+        {/* BADGES */}
+        <div className="flex flex-wrap gap-2 mt-4">
+          <InfoBadge icon={<Briefcase size={12} />} text={trader.tradingStyle} />
+          <InfoBadge icon={<BrainCircuit size={12} />} text={trader.experience} />
+          {trader.markets?.map(market => <InfoBadge key={market} icon={<Globe size={12} />} text={market} />)}
+        </div>
 
-        {/* ─── Bio ───────────────────────────────────────────── */}
-        {trader.bio && trader.bio.trim().length > 0 && (
-          <p className="text-sm text-slate-400 mb-5 line-clamp-2 text-center leading-relaxed">{trader.bio}</p>
-        )}
+        {/* BIO */}
+        {trader.bio && <p className="text-sm text-slate-400 mt-4 line-clamp-2 leading-relaxed">{trader.bio}</p>}
 
-        {/* ─── Trading Style Badge ────────────────────────────── */}
-        {trader.tradingStyle && trader.tradingStyle.trim().length > 0 && (
-          <div className="flex justify-center mb-4">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium bg-primary/8 text-primary border border-primary/15">
-              {trader.tradingStyle}
-            </span>
-          </div>
-        )}
-
-        {/* ─── Statistics ────────────────────────────────────── */}
-        <div className="my-auto">
+        {/* STATISTICS */}
+        <div className="mt-6">
           {hasTrades ? (
-            <>
-              <div className="grid grid-cols-2 gap-y-4 gap-x-3">
-                <StatItem label="Trades" value={trader.tradesLogged.toString()} />
-                <StatItem label="Win Rate" value={winRateDisplay} positive />
-                <StatItem label="Avg R:R" value={avgRrDisplay} />
-                {totalPnlDisplay ? (
-                  <StatItem
-                    label="Net P&L"
-                    value={totalPnlDisplay.value}
-                    positive={totalPnlDisplay.isPositive}
-                    negative={!totalPnlDisplay.isPositive}
-                  />
-                ) : (
-                  <StatItem label="Net P&L" value="$0" />
-                )}
-              </div>
-            </>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard icon={<BarChart3 size={14} />} title="Trades" value={trader.tradesLogged.toString()} />
+              <StatCard
+                icon={<Target size={14} />}
+                title="Win Rate"
+                value={trader.winRate !== null ? `${trader.winRate.toFixed(0)}%` : 'N/A'}
+                isPositive={trader.winRate !== null && trader.winRate >= 50}
+                isNegative={trader.winRate !== null && trader.winRate < 40}
+              />
+              <StatCard
+                icon={<Ratio size={14} />}
+                title="Avg. R:R"
+                value={trader.avgRr !== null ? `${trader.avgRr.toFixed(2)}R` : 'N/A'}
+              />
+              <StatCard
+                icon={<TrendingUp size={14} />}
+                title="Net P&L"
+                value={trader.totalPnl !== null ? `${trader.totalPnl >= 0 ? '+' : ''}$${Math.abs(trader.totalPnl).toLocaleString(undefined, { maximumFractionDigits: 0 })}` : 'N/A'}
+                isPositive={trader.totalPnl !== null && trader.totalPnl > 0}
+                isNegative={trader.totalPnl !== null && trader.totalPnl < 0}
+              />
+            </div>
           ) : (
-            <div className="py-4 text-center border-y border-white/[0.05]">
-              <p className="text-xs text-muted-foreground/50 font-medium tracking-wide">No trading history yet</p>
+            <div className="h-[100px] flex flex-col items-center justify-center rounded-xl bg-white/5 border border-dashed border-white/10 p-4 text-center">
+              <LineChart size={24} className="text-muted-foreground/50 mb-2" />
+              <p className="font-bold text-white text-sm">No Trading History</p>
+              <p className="text-xs text-muted-foreground mt-1">No completed trades published yet.</p>
             </div>
           )}
         </div>
 
-        {/* ─── Footer Actions ────────────────────────────────── */}
-        <div className="flex items-center justify-between gap-3 mt-5">
+        <div className="flex-grow" />
+
+        {/* FOOTER INFO */}
+        <div className="flex justify-between items-center gap-4 mt-6 pt-4 border-t border-white/10">
+          <InfoItem icon={<Calendar size={14} />} value={memberSince} label="Member Since" />
+          <InfoItem icon={<Users size={14} />} value="0" label="Connections" />
+          <InfoItem icon={<Eye size={14} />} value="Public" label="Profile" />
+        </div>
+      </div>
+
+      {/* BOTTOM BUTTONS */}
+      <div className="flex items-center gap-4 p-6 pt-4 border-t border-white/10">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleViewProfile(); }}
+            className="h-11 flex-1 flex items-center justify-center gap-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30"
+          >
+            <Eye size={16} />
+            View Profile
+          </button>
           <button
             disabled
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm font-semibold text-foreground/50 cursor-not-allowed opacity-70"
+            className="h-11 flex-1 flex items-center justify-center gap-2 px-4 bg-white/10 border border-white/20 rounded-lg text-sm font-semibold text-white/60 cursor-not-allowed"
           >
-            <UserPlus size={14} />
-            Coming Soon
+            <UserPlus size={16} />
+            Connect
           </button>
-          <button
-            onClick={handleViewProfile}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-sm font-semibold transition-all"
-          >
-            <Eye size={14} />
-            Profile
-          </button>
-        </div>
       </div>
     </div>
   );
 };
 
-export default React.memo(TraderCard);
+export default React.memo(TraderCardComponent);

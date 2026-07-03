@@ -13,6 +13,9 @@ import {
   FileText,
   Phone,
   MapPin,
+  TrendingUp,
+  BarChart3,
+  Briefcase,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -152,6 +155,9 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
         twitter: dbProfile.twitter ?? '',
         instagram: dbProfile.instagram ?? '',
         linkedin: dbProfile.linkedin ?? '',
+        tradingStyle: dbProfile.tradingStyle ?? '',
+        markets: dbProfile.markets ?? '',
+        experience: dbProfile.experience ?? '',
       });
     }
   }, [dbProfile, reset]);
@@ -331,6 +337,41 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                       placeholder="https://linkedin.com/in/you"
                       className={inputClass}
                     />
+                  </Field>
+                </div>
+              </div>
+
+              {/* Trading Profile */}
+              <div>
+                <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.2em] mb-4">
+                  Trading Profile
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Trading Style" icon={<TrendingUp size={12} />}>
+                    <select {...register('tradingStyle')} className={`${inputClass} appearance-none`}>
+                      <option value="">Select style</option>
+                      <option value="day_trading">Day Trading</option>
+                      <option value="swing_trading">Swing Trading</option>
+                      <option value="scalping">Scalping</option>
+                      <option value="position_trading">Position Trading</option>
+                      <option value="investing">Investing</option>
+                    </select>
+                  </Field>
+                  <Field label="Markets" icon={<BarChart3 size={12} />}>
+                    <input
+                      {...register('markets')}
+                      placeholder="e.g. Crypto, Forex, Stocks"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Experience" icon={<Briefcase size={12} />}>
+                    <select {...register('experience')} className={`${inputClass} appearance-none`}>
+                      <option value="">Select experience</option>
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                      <option value="professional">Professional</option>
+                    </select>
                   </Field>
                 </div>
               </div>

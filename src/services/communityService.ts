@@ -135,13 +135,18 @@ export async function getPublicTraders(
     throw new Error(error.message);
   }
 
+  console.log('[Audit] Raw DB Profiles', JSON.stringify(profiles, null, 2));
+  console.log('[Audit] Raw DB Profiles count', profiles?.length ?? 0);
+
   const userIds = (profiles ?? []).map((p) => p.id);
   const statsMap = await fetchTradeStatsForUsers(userIds);
 
   // ── Step 5: Merge stats and perform client-side sort if needed ────────
-  let traders: PublicTraderProfile[] = (profiles ?? []).map((p) =>
-    mapToPublicTrader(p, statsMap.get(p.id))
-  );
+  let traders: PublicTraderProfile[] = (profiles ?? []).map((p) => {
+    const trader = mapToPublicTrader(p, statsMap.get(p.id));
+    console.log('[Audit] Mapped Trader', JSON.stringify(trader, null, 2));
+    return trader;
+  });
 
   // ── Step 8: Sort by stat-based fields in TypeScript ───────────────────
   if (sortBy === 'mostActive') {
@@ -186,6 +191,8 @@ export async function getPublicProfileById(userId: string): Promise<PublicTrader
   // If profile is not public, return null (security: never expose private profiles)
   if (!data.public_profile) return null;
 
+  console.log('[Audit] DB Profile by ID', JSON.stringify(data, null, 2));
+
   // Fetch trade stats separately
   const stats = await fetchTradeStatsForUser(userId);
 
@@ -213,6 +220,8 @@ export async function getPublicProfileByUsername(username: string): Promise<Publ
 
   // Security: never expose private profiles
   if (!data.public_profile) return null;
+
+  console.log('[Audit] DB Profile by username', JSON.stringify(data, null, 2));
 
   // Fetch trade stats separately
   const stats = await fetchTradeStatsForUser(data.id);
@@ -268,13 +277,14 @@ export async function getUserConnections(): Promise<Connection[]> {
  * Stats are provided separately from the trades table aggregation.
  */
 function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfile {
+  console.log('[Audit] DB Profile', JSON.stringify(profile, null, 2));
   return {
     id: profile.id,
-    username: profile.username,
-    fullName: profile.full_name,
-    bio: profile.bio,
-    avatarUrl: profile.avatar_url,
-    country: profile.country,
+    username: profile.username ?? null,
+    fullName: profile.full_name ?? null,
+    bio: profile.bio ?? null,
+    avatarUrl: profile.avatar_url ?? null,
+    country: profile.country ?? null,
     tradingStyle: profile.trading_style ?? null,
     markets: profile.markets ?? null,
     experience: profile.experience ?? null,

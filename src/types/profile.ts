@@ -13,6 +13,10 @@ export interface DbProfile {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  trading_style: string | null;
+  markets: string | null;
+  experience: string | null;
+  show_stats: boolean;
   public_profile: boolean;
   created_at: string;
   updated_at: string;
@@ -31,6 +35,10 @@ export interface Profile {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  tradingStyle: string | null;
+  markets: string | null;
+  experience: string | null;
+  showStats: boolean;
   publicProfile: boolean;
   createdAt: string;
   updatedAt: string;
@@ -47,6 +55,9 @@ export interface ProfileFormData {
   twitter: string;
   instagram: string;
   linkedin: string;
+  tradingStyle: string;
+  markets: string;
+  experience: string;
 }
 
 /** Result from an avatar upload operation */
@@ -86,6 +97,10 @@ export function mapDbProfile(row: DbProfile): Profile {
     twitter: row.twitter,
     instagram: row.instagram,
     linkedin: row.linkedin,
+    tradingStyle: row.trading_style,
+    markets: row.markets,
+    experience: row.experience,
+    showStats: row.show_stats,
     publicProfile: row.public_profile,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -107,6 +122,9 @@ export function mapProfileToDb(
   if (data.twitter !== undefined) out.twitter = data.twitter || null;
   if (data.instagram !== undefined) out.instagram = data.instagram || null;
   if (data.linkedin !== undefined) out.linkedin = data.linkedin || null;
+  if (data.tradingStyle !== undefined) out.trading_style = data.tradingStyle || null;
+  if (data.markets !== undefined) out.markets = data.markets || null;
+  if (data.experience !== undefined) out.experience = data.experience || null;
   if (data.avatar_url !== undefined) out.avatar_url = data.avatar_url;
   if (data.public_profile !== undefined) out.public_profile = data.public_profile;
   return out;

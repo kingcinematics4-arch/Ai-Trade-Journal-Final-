@@ -11,6 +11,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   username        TEXT,
   full_name       TEXT,
   avatar_url      TEXT,
+  bio             TEXT,
+  phone           TEXT,
+  country         TEXT,
+  website         TEXT,
+  twitter         TEXT,
+  instagram       TEXT,
+  linkedin        TEXT,
   public_profile  BOOLEAN NOT NULL DEFAULT FALSE,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -45,13 +52,15 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, username)
+  INSERT INTO public.profiles (id, full_name, avatar_url, username, country, trading_style)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data ->> 'full_name',
     NEW.raw_user_meta_data ->> 'avatar_url',
     -- Generate a default username from email local-part
-    LOWER(REGEXP_REPLACE(SPLIT_PART(NEW.email, '@', 1), '[^a-z0-9_]', '', 'g'))
+    LOWER(REGEXP_REPLACE(SPLIT_PART(NEW.email, '@', 1), '[^a-z0-9_]', '', 'g')),
+    NEW.raw_user_meta_data ->> 'country',
+    NEW.raw_user_meta_data ->> 'trading_style'
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
