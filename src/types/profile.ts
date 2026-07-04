@@ -56,8 +56,10 @@ export interface ProfileFormData {
   instagram: string;
   linkedin: string;
   tradingStyle: string;
+  /** The form stores markets as a plain comma-separated string from the text input */
   markets: string;
   experience: string;
+  showStats: boolean;
 }
 
 /** Result from an avatar upload operation */
@@ -97,8 +99,9 @@ export function mapDbProfile(row: DbProfile): Profile {
     twitter: row.twitter,
     instagram: row.instagram,
     linkedin: row.linkedin,
-    tradingStyle: row.trading_style,
-    markets: row.markets,
+    tradingStyle: row.trading_style, // string | null
+    // DB stores as comma-separated string, UI uses array
+    markets: row.markets ? row.markets.split(',').filter(Boolean) : [],
     experience: row.experience,
     showStats: row.show_stats,
     publicProfile: row.public_profile,
@@ -110,7 +113,11 @@ export function mapDbProfile(row: DbProfile): Profile {
 /** Map a Profile → DB upsert payload */
 export function mapProfileToDb(
   userId: string,
-  data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
+  data: Partial<ProfileFormData> & {
+    avatar_url?: string | null;
+    public_profile?: boolean;
+    show_stats?: boolean;
+  }
 ): Partial<DbProfile> & { id: string } {
   const out: Partial<DbProfile> & { id: string } = { id: userId };
   if (data.username !== undefined) out.username = data.username || null;
@@ -123,8 +130,20 @@ export function mapProfileToDb(
   if (data.instagram !== undefined) out.instagram = data.instagram || null;
   if (data.linkedin !== undefined) out.linkedin = data.linkedin || null;
   if (data.tradingStyle !== undefined) out.trading_style = data.tradingStyle || null;
-  if (data.markets !== undefined) out.markets = data.markets || null;
+  // Form sends a plain string (e.g. "Crypto, Forex"); store as-is.
+  // An array (e.g. from other callers) is joined with commas.
+  // An empty value writes null so the column is not stored as an empty string.
+  if (data.markets !== undefined) {
+    if (Array.isArray(data.markets)) {
+      out.markets = data.markets.length > 0 ? data.markets.join(',') : null;
+    } else if (typeof data.markets === 'string') {
+      out.markets = data.markets.trim() || null;
+    } else {
+      out.markets = null;
+    }
+  }
   if (data.experience !== undefined) out.experience = data.experience || null;
+  if (data.showStats !== undefined) out.show_stats = data.showStats;
   if (data.avatar_url !== undefined) out.avatar_url = data.avatar_url;
   if (data.public_profile !== undefined) out.public_profile = data.public_profile;
   return out;

@@ -139,6 +139,10 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
       twitter: dbProfile?.twitter ?? '',
       instagram: dbProfile?.instagram ?? '',
       linkedin: dbProfile?.linkedin ?? '',
+      tradingStyle: dbProfile?.tradingStyle ?? '',
+      // markets is string[] in Profile but the form uses a plain text input → join to string
+      markets: Array.isArray(dbProfile?.markets) ? (dbProfile.markets as string[]).join(', ') : '',
+      experience: dbProfile?.experience ?? '',
     },
   });
 
@@ -156,7 +160,8 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
         instagram: dbProfile.instagram ?? '',
         linkedin: dbProfile.linkedin ?? '',
         tradingStyle: dbProfile.tradingStyle ?? '',
-        markets: dbProfile.markets ?? '',
+        // markets is string[] in Profile but the form uses a plain text input → join to string
+        markets: Array.isArray(dbProfile.markets) ? (dbProfile.markets as string[]).join(', ') : '',
         experience: dbProfile.experience ?? '',
       });
     }

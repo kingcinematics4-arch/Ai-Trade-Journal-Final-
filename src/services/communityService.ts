@@ -135,18 +135,11 @@ export async function getPublicTraders(
     throw new Error(error.message);
   }
 
-  console.log('[Audit] Raw DB Profiles', JSON.stringify(profiles, null, 2));
-  console.log('[Audit] Raw DB Profiles count', profiles?.length ?? 0);
-
   const userIds = (profiles ?? []).map((p) => p.id);
   const statsMap = await fetchTradeStatsForUsers(userIds);
 
   // ── Step 5: Merge stats and perform client-side sort if needed ────────
-  let traders: PublicTraderProfile[] = (profiles ?? []).map((p) => {
-    const trader = mapToPublicTrader(p, statsMap.get(p.id));
-    console.log('[Audit] Mapped Trader', JSON.stringify(trader, null, 2));
-    return trader;
-  });
+  let traders: PublicTraderProfile[] = (profiles ?? []).map((p) => mapToPublicTrader(p, statsMap.get(p.id)));
 
   // ── Step 8: Sort by stat-based fields in TypeScript ───────────────────
   if (sortBy === 'mostActive') {
@@ -277,7 +270,6 @@ export async function getUserConnections(): Promise<Connection[]> {
  * Stats are provided separately from the trades table aggregation.
  */
 function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfile {
-  console.log('[Audit] DB Profile', JSON.stringify(profile, null, 2));
   return {
     id: profile.id,
     username: profile.username ?? null,
@@ -286,7 +278,8 @@ function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfil
     avatarUrl: profile.avatar_url ?? null,
     country: profile.country ?? null,
     tradingStyle: profile.trading_style ?? null,
-    markets: profile.markets ?? null,
+    // DB stores comma-separated string; split into array for the UI
+    markets: profile.markets ? profile.markets.split(',').map((m: string) => m.trim()).filter(Boolean) : null,
     experience: profile.experience ?? null,
     tradesLogged: stats?.trades_logged ?? 0,
     winRate: stats?.win_rate ?? null,

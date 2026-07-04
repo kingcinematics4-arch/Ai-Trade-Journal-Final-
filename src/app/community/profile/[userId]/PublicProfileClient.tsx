@@ -44,9 +44,10 @@ function getGradientIndex(id: string): number {
 }
 
 function getDisplayName(profile: PublicTraderProfile): string {
-  if (profile.fullName && profile.fullName.trim().length > 0) return profile.fullName;
-  if (profile.username && profile.username.trim().length > 0) return profile.username;
-  return 'New Trader';
+  if (profile.fullName && profile.fullName.trim().length > 0) return profile.fullName.trim();
+  if (profile.username && profile.username.trim().length > 0) return profile.username.trim();
+  // Never show UUIDs, placeholders, or fake names
+  return 'Trader';
 }
 
 function getInitials(name: string): string {
@@ -171,13 +172,13 @@ export default function PublicProfileClient({ profile }: Props) {
               </div>
             )}
 
-            {/* Markets - hide if empty */}
-            {profile.markets && profile.markets.trim().length > 0 && (
+            {/* Markets - hide if empty; markets is string[] | null */}
+            {profile.markets && profile.markets.length > 0 && (
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
                 <BarChart3 size={18} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Markets</p>
-                  <p className="text-sm font-medium text-foreground">{profile.markets}</p>
+                  <p className="text-sm font-medium text-foreground">{profile.markets.join(', ')}</p>
                 </div>
               </div>
             )}

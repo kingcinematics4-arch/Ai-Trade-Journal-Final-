@@ -39,7 +39,8 @@ export interface PublicTraderProfile {
   avatarUrl: string | null;
   country: string | null;
   tradingStyle: string | null;
-  markets: string | null;
+  /** Parsed array of markets (split from the comma-separated DB column) */
+  markets: string[] | null;
   experience: string | null;
   tradesLogged: number;
   winRate: number | null;

@@ -42,8 +42,14 @@ export async function upsertProfile(
   userId: string,
   data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
 ): Promise<Profile> {
+  // [DEBUG] Log the raw data received by the service function
+  console.log('[DEBUG] 1. upsertProfile received data:', JSON.stringify(data, null, 2));
+
   const supabase = createClient();
   const payload = mapProfileToDb(userId, data);
+
+  // [DEBUG] Log the snake_cased payload before it's sent to Supabase
+  console.log('[DEBUG] 2. Mapped payload for Supabase:', JSON.stringify(payload, null, 2));
 
   const { data: row, error } = await supabase
     .from('profiles')
@@ -51,12 +57,39 @@ export async function upsertProfile(
     .select('*')
     .single();
 
+  // [DEBUG] Log any potential errors from the upsert operation
   if (error) {
-    console.error('[profileService] upsertProfile error:', error.message);
+    console.error('[DEBUG] 3. Supabase upsert error:', {
+      message: error.message,
+      details: error.details,
+      code: error.code,
+    });
     throw new Error(error.message);
   }
 
-  return mapDbProfile(row as DbProfile);
+  // [DEBUG] Task 7: Post-upsert verification — re-read the row to confirm values were written
+  const { data: verifyRow, error: verifyError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (verifyError) {
+    console.warn('[DEBUG] 5. Post-upsert verify read failed:', verifyError.message);
+  } else {
+    console.log('[DEBUG] 5. Post-upsert verified DB row:', JSON.stringify(verifyRow, null, 2));
+    // Warn if key fields that were sent are still NULL in the DB (possible RLS issue)
+    const sentKeys = Object.keys(payload) as Array<keyof typeof payload>;
+    const nullKeys = sentKeys.filter((k) => payload[k] !== undefined && payload[k] !== null && verifyRow[k] === null);
+    if (nullKeys.length > 0) {
+      console.error('[DEBUG] 6. WARNING: These fields were sent but are NULL in DB (check RLS UPDATE policy):', nullKeys);
+    }
+  }
+
+  const finalProfile = mapDbProfile(row as DbProfile);
+  // [DEBUG] Log the final, mapped profile object that will be returned
+  console.log('[DEBUG] 4. Supabase returned and mapped profile:', JSON.stringify(finalProfile, null, 2));
+  return finalProfile;
 }
 
 /**
@@ -64,6 +97,110 @@ export async function upsertProfile(
  */
 export async function updatePublicProfile(userId: string, isPublic: boolean): Promise<Profile> {
   return upsertProfile(userId, { public_profile: isPublic });
+}
+
+// ─── Auth-seeded Profile Initialization ───────────────────────────────────────
+
+/**
+ * Metadata shape from Supabase auth.users.user_metadata (OAuth + email sign-ups).
+ */
+export interface AuthMeta {
+  full_name?: string | null;
+  name?: string | null;
+  email?: string | null;
+  avatar_url?: string | null;
+  picture?: string | null;
+  preferred_username?: string | null;
+  user_name?: string | null;
+}
+
+/**
+ * Generate a safe username slug from an email prefix or display name.
+ * Strips non-alphanumeric characters, lowercases, truncates to 20 chars.
+ */
+function generateUsernameSlug(source: string): string {
+  return source
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, '_')   // non-alphanumeric → underscore
+    .replace(/_+/g, '_')            // collapse consecutive underscores
+    .replace(/^_|_$/g, '')          // trim leading/trailing underscores
+    .slice(0, 20)
+    || 'trader';
+}
+
+/**
+ * Initialize a profile row from auth metadata.
+ *
+ * Rules:
+ * - Only writes a field if the DB column is currently NULL (never overwrites user edits).
+ * - Derives full_name from `user_metadata.full_name` → `user_metadata.name`.
+ * - Derives username from `user_metadata.preferred_username` → `user_metadata.user_name`
+ *   → email prefix slug.
+ * - Derives avatar_url from `user_metadata.avatar_url` → `user_metadata.picture`.
+ * - Called once after sign-in when a profile row is first created or fields are still empty.
+ */
+export async function initializeProfileFromAuth(
+  userId: string,
+  meta: AuthMeta,
+  existingProfile: Profile | null
+): Promise<Profile> {
+  const patch: Record<string, string | null> = {};
+
+  // ── full_name ──────────────────────────────────────────────────────────────
+  if (!existingProfile?.fullName) {
+    const name =
+      (typeof meta.full_name === 'string' && meta.full_name.trim()) ||
+      (typeof meta.name === 'string' && meta.name.trim()) ||
+      null;
+    if (name) patch.full_name = name;
+  }
+
+  // ── username ───────────────────────────────────────────────────────────────
+  if (!existingProfile?.username) {
+    const rawUsername =
+      (typeof meta.preferred_username === 'string' && meta.preferred_username.trim()) ||
+      (typeof meta.user_name === 'string' && meta.user_name.trim()) ||
+      null;
+
+    const emailPrefix =
+      (typeof meta.email === 'string' && meta.email.split('@')[0]) || null;
+
+    const slugSource = rawUsername || emailPrefix;
+    if (slugSource) patch.username = generateUsernameSlug(slugSource);
+  }
+
+  // ── avatar_url ─────────────────────────────────────────────────────────────
+  if (!existingProfile?.avatarUrl) {
+    const avatarUrl =
+      (typeof meta.avatar_url === 'string' && meta.avatar_url.trim()) ||
+      (typeof meta.picture === 'string' && meta.picture.trim()) ||
+      null;
+    if (avatarUrl) patch.avatar_url = avatarUrl;
+  }
+
+  // Nothing to seed — return existing profile or create a bare row
+  if (Object.keys(patch).length === 0) {
+    if (existingProfile) return existingProfile;
+    return upsertProfile(userId, {});
+  }
+
+  console.log('[profileService] Seeding profile from auth metadata:', patch);
+
+  const supabase = createClient();
+  const { data: row, error } = await supabase
+    .from('profiles')
+    .upsert({ id: userId, ...patch }, { onConflict: 'id' })
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('[profileService] initializeProfileFromAuth upsert error:', error.message);
+    // Non-fatal: return existing profile if seeding fails
+    if (existingProfile) return existingProfile;
+    throw new Error(error.message);
+  }
+
+  return mapDbProfile(row as DbProfile);
 }
 
 // ─── Avatar Upload ─────────────────────────────────────────────────────────────

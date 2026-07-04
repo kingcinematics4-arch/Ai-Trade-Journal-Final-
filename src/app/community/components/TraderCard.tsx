@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Eye, UserPlus, ShieldCheck, BarChart3, Target, Ratio, TrendingUp, Briefcase, BrainCircuit, Globe, Calendar, LineChart, Users } from 'lucide-react';
+import { Eye, UserPlus, BarChart3, Target, Ratio, TrendingUp, Briefcase, BrainCircuit, Globe, Calendar, LineChart, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { PublicTraderProfile } from '@/types/community';
 import { CountryFlag } from './CountryFlag';
@@ -75,16 +75,22 @@ const InfoBadge = ({ text, icon }: { text: string | null; icon?: React.ReactNode
 
 const TraderCardComponent = ({ trader, isPremium = false }: TraderCardProps) => {
   const router = useRouter();
-  const displayName = useMemo(() => trader.fullName?.trim() || trader.username || 'New Trader', [trader.fullName, trader.username]);
+  const displayName = useMemo(() => {
+    if (trader.fullName?.trim()) return trader.fullName.trim();
+    if (trader.username?.trim()) return trader.username.trim();
+    // Both are empty — the profile seeding should have populated at least one.
+    // Show 'Trader' as a neutral fallback; never show UUIDs or IDs.
+    return 'Trader';
+  }, [trader.fullName, trader.username]);
   const initials = useMemo(() => getInitials(displayName), [displayName]);
   const memberSince = useMemo(() => trader.createdAt ? `Joined ${new Date(trader.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}` : null, [trader.createdAt]);
 
   const hasTrades = trader.tradesLogged > 0;
 
   const handleViewProfile = () => {
-    if (trader.username) {
-      router.push(`/community/profile/${trader.username.toLowerCase()}`);
-    }
+    // Route by username if set, fall back to user ID so the button always works
+    const slug = trader.username?.toLowerCase() ?? trader.id;
+    router.push(`/community/profile/${slug}`);
   };
 
   return (
@@ -114,18 +120,17 @@ const TraderCardComponent = ({ trader, isPremium = false }: TraderCardProps) => 
         <div className="flex-grow md:w-[82%] flex flex-col gap-4 min-w-0">
           {/* Name, Username, Verified, Country */}
           <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-grow">
-              <div className="flex items-center gap-2">
-                <h2 className="text-3xl font-bold text-white truncate" title={displayName}>{displayName}</h2>
-                {isPremium && <ShieldCheck size={20} className="text-primary flex-shrink-0" />}
-              </div>
-              {trader.username && <p className="text-base text-muted-foreground truncate">@{trader.username}</p>}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-3xl font-bold text-white truncate" title={displayName}>{displayName}</h2>
+              {trader.username && <p className="text-sm text-slate-400 truncate">@{trader.username}</p>}
             </div>
             {trader.country && <div className="flex-shrink-0"><CountryFlag countryCode={trader.country} className="w-6 h-auto rounded-sm" /></div>}
           </div>
 
-          {/* Bio */}
-          <p className="text-base text-slate-400 line-clamp-2 leading-relaxed">{trader.bio || 'No bio available.'}</p>
+          {/* Bio — only render when content exists, matching PublicProfileClient */}
+          {trader.bio && (
+            <p className="text-base text-slate-400 line-clamp-2 leading-relaxed">{trader.bio}</p>
+          )}
 
           {/* Stats Row */}
           <div className="flex-grow flex items-center">

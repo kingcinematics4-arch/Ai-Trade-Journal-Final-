@@ -3,49 +3,72 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 import PublicProfileClient from './PublicProfileClient';
-import type { DbProfile } from '@/types/profile';
-import type { PublicTraderProfile } from '@/types/community';
-import { getPublicProfileById } from '@/services/communityService';
+import { getPublicProfileById, getPublicProfileByUsername } from '@/services/communityService';
 
 interface Props {
   params: { userId: string };
 }
 
+/** UUID v4 pattern — if the slug matches, treat it as an ID; otherwise treat as username */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Resolve a profile slug that may be either a UUID or a username.
+ * TraderCard routes by username when one is set, and by UUID as fallback.
+ */
+async function resolveProfile(slug: string) {
+  if (UUID_RE.test(slug)) {
+    return getPublicProfileById(slug);
+  }
+  return getPublicProfileByUsername(slug);
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createClient();
-  const { data } = await supabase
-    .from('profiles')
-    .select('full_name, username')
-    .eq('id', params.userId)
-    .single();
+  let full_name: string | null = null;
+  let username: string | null = null;
 
-  const name = data?.full_name || data?.username || 'Community Profile';
-  return {
-    title: `${name} - Community Profile`,
-  };
+  if (UUID_RE.test(params.userId)) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, username')
+      .eq('id', params.userId)
+      .single();
+    full_name = data?.full_name ?? null;
+    username = data?.username ?? null;
+  } else {
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name, username')
+      .eq('username', params.userId)
+      .single();
+    full_name = data?.full_name ?? null;
+    username = data?.username ?? null;
+  }
+
+  const name = full_name || username || 'Community Profile';
+  return { title: `${name} - Community Profile` };
 }
 
 export default async function PublicProfilePage({ params }: Props) {
-  // Fetch the public profile with trade stats from the service
-  const profile = await getPublicProfileById(params.userId);
+  const profile = await resolveProfile(params.userId);
 
   if (!profile) {
-    // Profile doesn't exist, is private, or error occurred
-    // Try to check if profile exists at all to differentiate
     const supabase = createClient();
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('public_profile')
-      .eq('id', params.userId)
-      .single();
+    let exists = false;
 
-    const exists = !error && !!data;
-
-    if (!exists) {
-      notFound();
+    if (UUID_RE.test(params.userId)) {
+      const { data, error } = await supabase
+        .from('profiles').select('public_profile').eq('id', params.userId).single();
+      exists = !error && !!data;
+    } else {
+      const { data, error } = await supabase
+        .from('profiles').select('public_profile').eq('username', params.userId).single();
+      exists = !error && !!data;
     }
 
-    // Profile exists but is private
+    if (!exists) notFound();
+
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md text-center">
@@ -55,13 +78,11 @@ export default async function PublicProfilePage({ params }: Props) {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">This profile is private.</h1>
-          <p className="text-muted-foreground text-sm">
-            This trader has not enabled their public profile.
-          </p>
+          <p className="text-muted-foreground text-sm">This trader has not enabled their public profile.</p>
         </div>
       </div>
     );
   }
 
   return <PublicProfileClient profile={profile} />;
-}
+}
