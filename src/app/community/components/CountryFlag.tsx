@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactCountryFlag from 'react-country-flag';
 
 interface CountryFlagProps {
   country: string;
@@ -71,30 +72,25 @@ const COUNTRY_CODE_MAP: Record<string, string> = {
   Vietnam: 'VN',
 };
 
-function getEmojiFlag(countryCode: string): string {
-  if (!countryCode || countryCode.length !== 2) return '';
-
-  const base = 127462;
-  const codePoint1 = countryCode.toUpperCase().charCodeAt(0);
-  const codePoint2 = countryCode.toUpperCase().charCodeAt(1);
-
-  return String.fromCodePoint(base + codePoint1) + String.fromCodePoint(base + codePoint2);
-}
-
-export function getCountryFlagEmoji(country: string): string {
-  const code = COUNTRY_CODE_MAP[country];
-  if (!code) return '';
-  return getEmojiFlag(code);
+export function getCountryCode(country: string): string {
+  return COUNTRY_CODE_MAP[country] || '';
 }
 
 export const CountryFlag = ({ country, className }: CountryFlagProps) => {
-  const flagEmoji = getCountryFlagEmoji(country);
+  const countryCode = getCountryCode(country);
 
-  if (!flagEmoji) return null;
+  if (!countryCode) return null;
 
   return (
-    <span className={`text-xl leading-none ${className || ''}`} aria-label={`${country} flag`}>
-      {flagEmoji}
-    </span>
+    <ReactCountryFlag
+      countryCode={countryCode}
+      svg
+      style={{
+        width: '24px',
+        height: '18px',
+        borderRadius: '2px',
+      }}
+      className={`flex-shrink-0 ${className || ''}`}
+    />
   );
 };

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import type { PublicTraderProfile } from '@/types/community';
 import SocialLinkCard from '@/components/profile/SocialLinkCard';
-import { getCountryFlagEmoji } from '@/app/community/components/CountryFlag';
+import { CountryFlag } from '@/app/community/components/CountryFlag';
 
 interface Props {
   profile: PublicTraderProfile;
@@ -124,21 +124,19 @@ export default function PublicProfileClient({ profile }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 pt-8 border-t border-white/[0.05]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#262626]">
             {profile.country && profile.country.trim().length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
                 <MapPin size={18} className="text-muted-foreground flex-shrink-0" />
                 <div className="flex items-center gap-2">
-                  <span className="text-lg leading-none">
-                    {getCountryFlagEmoji(profile.country)}
-                  </span>
+                  <CountryFlag country={profile.country} />
                   <p className="text-sm font-medium text-foreground">{profile.country}</p>
                 </div>
               </div>
             )}
 
             {profile.tradingStyle && profile.tradingStyle.trim().length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
                 <TrendingUp size={18} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Trading Style</p>
@@ -150,7 +148,7 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
 
             {profile.markets && profile.markets.length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
                 <BarChart3 size={18} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Markets</p>
@@ -162,7 +160,7 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
 
             {profile.experience && profile.experience.trim().length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
                 <Briefcase size={18} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Experience</p>
@@ -173,7 +171,7 @@ export default function PublicProfileClient({ profile }: Props) {
               </div>
             )}
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
               <Calendar size={18} className="text-muted-foreground flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Member Since</p>
@@ -188,7 +186,7 @@ export default function PublicProfileClient({ profile }: Props) {
             </div>
 
             {hasTrades && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
                 <Target size={18} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Trades Logged</p>
@@ -304,7 +302,7 @@ export default function PublicProfileClient({ profile }: Props) {
           )}
 
           {!hasTrades && (
-            <div className="mt-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center gap-3">
+            <div className="mt-4 p-4 rounded-xl bg-white/[0.02] border border-[#262626] flex items-center gap-3">
               <Activity size={20} className="text-muted-foreground/50 flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground/50 font-medium">
