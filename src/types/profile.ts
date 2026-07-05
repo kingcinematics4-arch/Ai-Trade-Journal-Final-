@@ -36,7 +36,7 @@ export interface Profile {
   instagram: string | null;
   linkedin: string | null;
   tradingStyle: string | null;
-  markets: string | null;
+  markets: string[] | null;
   experience: string | null;
   showStats: boolean;
   publicProfile: boolean;
@@ -101,7 +101,7 @@ export function mapDbProfile(row: DbProfile): Profile {
     linkedin: row.linkedin,
     tradingStyle: row.trading_style, // string | null
     // DB stores as comma-separated string, UI uses array
-    markets: row.markets ? row.markets.split(',').filter(Boolean) : [],
+    markets: row.markets ? row.markets.split(',').map(m => m.trim()).filter(Boolean) : null,
     experience: row.experience,
     showStats: row.show_stats,
     publicProfile: row.public_profile,

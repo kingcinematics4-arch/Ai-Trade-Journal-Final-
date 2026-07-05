@@ -51,6 +51,20 @@ BEGIN
 
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'experience'
+  ) THEN
+    ALTER TABLE public.profiles ADD COLUMN experience TEXT;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'trading_style'
+  ) THEN
+    ALTER TABLE public.profiles ADD COLUMN trading_style TEXT;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
     WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'show_stats'
   ) THEN
     ALTER TABLE public.profiles ADD COLUMN show_stats BOOLEAN NOT NULL DEFAULT TRUE;
@@ -58,8 +72,6 @@ BEGIN
 END $$;
 
 -- 2. Recreate the auth trigger to properly copy metadata into profiles
---    This is required because trading_style may not have existed when the
---    original trigger was created, causing it to fail silently.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -67,14 +79,13 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, username, country, trading_style)
+  INSERT INTO public.profiles (id, full_name, avatar_url, username, country)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data ->> 'full_name',
     NEW.raw_user_meta_data ->> 'avatar_url',
     LOWER(REGEXP_REPLACE(SPLIT_PART(NEW.email, '@', 1), '[^a-z0-9_]', '', 'g')),
-    NEW.raw_user_meta_data ->> 'country',
-    NEW.raw_user_meta_data ->> 'trading_style'
+    NEW.raw_user_meta_data ->> 'country'
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
@@ -88,9 +99,32 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
--- 3. Ensure RLS policy allows community to see public profiles
+-- 3. Ensure RLS policies exist for INSERT and UPDATE
+-- These are critical for profile saving to work!
 DO $$
 BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE schemaname = 'public' AND tablename = 'profiles' AND policyname = 'Users can insert own profile'
+  ) THEN
+    CREATE POLICY "Users can insert own profile"
+      ON public.profiles FOR INSERT
+      TO authenticated
+      WITH CHECK (auth.uid() = id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE schemaname = 'public' AND tablename = 'profiles' AND policyname = 'Users can update own profile'
+  ) THEN
+    CREATE POLICY "Users can update own profile"
+      ON public.profiles FOR UPDATE
+      TO authenticated
+      USING (auth.uid() = id)
+      WITH CHECK (auth.uid() = id);
+  END IF;
+
+  -- Update the SELECT policy for community
   IF EXISTS (
     SELECT 1 FROM pg_policies 
     WHERE schemaname = 'public' AND tablename = 'profiles' AND policyname = 'Profiles are viewable by owner or if public'
@@ -108,7 +142,6 @@ BEGIN
 END $$;
 
 -- 4. Backfill existing profiles from auth metadata where fields are missing.
---    This fixes profiles that were created before the trigger was working.
 UPDATE public.profiles p
 SET 
   full_name = COALESCE(p.full_name, au.raw_user_meta_data ->> 'full_name'),

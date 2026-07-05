@@ -117,7 +117,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           ...(data.tradingStyle !== undefined && { tradingStyle: data.tradingStyle || null }),
           ...(data.markets !== undefined && {
             markets: typeof data.markets === 'string'
-              ? data.markets.split(',').map((m) => m.trim()).filter(Boolean)
+              ? (data.markets.trim() ? data.markets.split(',').map((m) => m.trim()).filter(Boolean) : null)
               : (data.markets as string[]) || null,
           }),
           ...(data.experience !== undefined && { experience: data.experience || null }),
@@ -127,12 +127,13 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const updated = await upsertProfile(user.id, data);
+        console.log("===== UPDATED PROFILE =====");
+        console.log(updated);
         setDbProfile(updated);
       } catch (err) {
         // Rollback on error
         await fetchProfile();
-        const msg = err instanceof Error ? err.message : 'Failed to save profile';
-        setError(msg);
+        console.error(err);
         throw err;
       } finally {
         setIsSaving(false);

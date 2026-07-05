@@ -22,16 +22,15 @@ export function useUpdateProfile() {
     ) => {
       const {
         successMessage = 'Profile updated!',
-        errorMessage = 'Failed to save profile',
         silent = false,
       } = options ?? {};
 
       try {
         await ctxUpdate(data);
         if (!silent) toast.success(successMessage);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : errorMessage;
-        if (!silent) toast.error(msg);
+      } catch (err: any) {
+        console.error(err);
+        if (!silent) toast.error(err?.message ?? JSON.stringify(err));
         throw err;
       }
     },

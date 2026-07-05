@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   X,
   Loader2,
   Globe,
-  Twitter,
-  Instagram,
-  Linkedin,
+  AtSign,
+  Camera,
   User,
   FileText,
   Phone,
@@ -17,11 +15,9 @@ import {
   BarChart3,
   Briefcase,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
-import type { ProfileFormData } from '@/types/profile';
 
 interface EditProfileModalProps {
   open: boolean;
@@ -117,63 +113,92 @@ function Field({ label, error, children, icon }: FieldProps) {
 const inputClass =
   'w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/60 focus:border-primary/60 transition-all';
 
+type FormState = {
+  fullName: string;
+  username: string;
+  bio: string;
+  phone: string;
+  country: string;
+  website: string;
+  twitter: string;
+  instagram: string;
+  linkedin: string;
+  tradingStyle: string;
+  markets: string;
+  experience: string;
+};
+
 export default function EditProfileModal({ open, onClose }: EditProfileModalProps) {
   const { dbProfile } = useProfileContext();
   const { updateProfile, isSaving } = useUpdateProfile();
   const [hasChanges, setHasChanges] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isDirty },
-    watch,
-  } = useForm<ProfileFormData>({
-    defaultValues: {
-      fullName: dbProfile?.fullName ?? '',
-      username: dbProfile?.username ?? '',
-      bio: dbProfile?.bio ?? '',
-      phone: dbProfile?.phone ?? '',
-      country: dbProfile?.country ?? '',
-      website: dbProfile?.website ?? '',
-      twitter: dbProfile?.twitter ?? '',
-      instagram: dbProfile?.instagram ?? '',
-      linkedin: dbProfile?.linkedin ?? '',
-      tradingStyle: dbProfile?.tradingStyle ?? '',
-      // markets is string[] in Profile but the form uses a plain text input → join to string
-      markets: Array.isArray(dbProfile?.markets) ? (dbProfile.markets as string[]).join(', ') : '',
-      experience: dbProfile?.experience ?? '',
-    },
+  const [formData, setFormData] = useState<FormState>({
+    fullName: "",
+    username: "",
+    bio: "",
+    phone: "",
+    country: "",
+    website: "",
+    twitter: "",
+    instagram: "",
+    linkedin: "",
+    tradingStyle: "",
+    markets: "",
+    experience: "",
   });
 
-  // Sync form when profile loads/changes
-  useEffect(() => {
-    if (dbProfile) {
-      reset({
-        fullName: dbProfile.fullName ?? '',
-        username: dbProfile.username ?? '',
-        bio: dbProfile.bio ?? '',
-        phone: dbProfile.phone ?? '',
-        country: dbProfile.country ?? '',
-        website: dbProfile.website ?? '',
-        twitter: dbProfile.twitter ?? '',
-        instagram: dbProfile.instagram ?? '',
-        linkedin: dbProfile.linkedin ?? '',
-        tradingStyle: dbProfile.tradingStyle ?? '',
-        // markets is string[] in Profile but the form uses a plain text input → join to string
-        markets: Array.isArray(dbProfile.markets) ? (dbProfile.markets as string[]).join(', ') : '',
-        experience: dbProfile.experience ?? '',
-      });
-    }
-  }, [dbProfile, reset]);
+  const handleInputChange = useCallback((field: keyof FormState, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+    setHasChanges(true);
+  }, []);
 
+  // Load current profile when modal opens
   useEffect(() => {
-    setHasChanges(isDirty);
-  }, [isDirty]);
+    if (!open || !dbProfile) return;
 
-  const onSubmit = async (data: ProfileFormData) => {
+    setFormData({
+      fullName: dbProfile.fullName ?? "",
+      username: dbProfile.username ?? "",
+      bio: dbProfile.bio ?? "",
+      phone: dbProfile.phone ?? "",
+      country: dbProfile.country ?? "",
+      website: dbProfile.website ?? "",
+      twitter: dbProfile.twitter ?? "",
+      instagram: dbProfile.instagram ?? "",
+      linkedin: dbProfile.linkedin ?? "",
+      tradingStyle: dbProfile.tradingStyle ?? "",
+      // markets is string[] in Profile but the form uses a plain text input → join to string
+      markets: Array.isArray(dbProfile?.markets) ? (dbProfile.markets as string[]).join(", ") : "",
+      experience: dbProfile.experience ?? "",
+    });
+    setHasChanges(false);
+  }, [open, dbProfile]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    console.log("===== FORM DATA =====");
+    console.log(formData);
+
     try {
-      await updateProfile(data, { successMessage: 'Profile saved!' });
+      await updateProfile({
+        fullName: formData.fullName,
+        username: formData.username,
+        bio: formData.bio,
+        phone: formData.phone,
+        country: formData.country,
+        website: formData.website,
+        twitter: formData.twitter,
+        instagram: formData.instagram,
+        linkedin: formData.linkedin,
+        tradingStyle: formData.tradingStyle,
+        markets: formData.markets,
+        experience: formData.experience,
+      }, { successMessage: 'Profile saved!' });
       setHasChanges(false);
       onClose();
     } catch {
@@ -185,7 +210,20 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
     if (hasChanges) {
       if (!confirm('You have unsaved changes. Discard them?')) return;
     }
-    reset();
+    setFormData({
+      fullName: "",
+      username: "",
+      bio: "",
+      phone: "",
+      country: "",
+      website: "",
+      twitter: "",
+      instagram: "",
+      linkedin: "",
+      tradingStyle: "",
+      markets: "",
+      experience: "",
+    });
     onClose();
   };
 
@@ -228,7 +266,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
           </div>
 
           {/* Body */}
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1">
+          <form onSubmit={onSubmit} className="flex flex-col flex-1">
             <div className="px-6 py-6 space-y-6">
               {/* Avatar */}
               <div className="flex justify-center">
@@ -243,48 +281,44 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field
                     label="Full Name"
-                    error={errors.fullName?.message}
                     icon={<User size={12} />}
                   >
                     <input
-                      {...register('fullName', {
-                        maxLength: { value: 80, message: 'Max 80 characters' },
-                      })}
+                      value={formData.fullName}
+                      onChange={(e) => handleInputChange('fullName', e.target.value)}
                       placeholder="Your full name"
+                      maxLength={80}
                       className={inputClass}
                     />
                   </Field>
                   <Field
                     label="Username"
-                    error={errors.username?.message}
                     icon={<span className="text-xs font-bold">@</span>}
                   >
                     <input
-                      {...register('username', {
-                        maxLength: { value: 30, message: 'Max 30 characters' },
-                        pattern: {
-                          value: /^[a-z0-9_]*$/i,
-                          message: 'Letters, numbers and underscores only',
-                        },
-                      })}
+                      value={formData.username}
+                      onChange={(e) => handleInputChange('username', e.target.value)}
                       placeholder="your_handle"
+                      maxLength={30}
+                      pattern="[a-z0-9_]*"
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Bio" error={errors.bio?.message} icon={<FileText size={12} />}>
+                  <Field label="Bio" icon={<FileText size={12} />}>
                     <textarea
-                      {...register('bio', {
-                        maxLength: { value: 200, message: 'Max 200 characters' },
-                      })}
+                      value={formData.bio}
+                      onChange={(e) => handleInputChange('bio', e.target.value)}
                       placeholder="Tell traders a bit about yourself…"
+                      maxLength={200}
                       rows={3}
                       className={`${inputClass} resize-none`}
                     />
                   </Field>
                   <div className="space-y-4">
-                    <Field label="Phone" error={errors.phone?.message} icon={<Phone size={12} />}>
+                    <Field label="Phone" icon={<Phone size={12} />}>
                       <input
-                        {...register('phone')}
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
                         type="tel"
                         placeholder="+1 555 000 0000"
                         className={inputClass}
@@ -292,10 +326,13 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                     </Field>
                     <Field
                       label="Country"
-                      error={errors.country?.message}
                       icon={<MapPin size={12} />}
                     >
-                      <select {...register('country')} className={`${inputClass} appearance-none`}>
+                      <select
+                        value={formData.country}
+                        onChange={(e) => handleInputChange('country', e.target.value)}
+                        className={`${inputClass} appearance-none`}
+                      >
                         <option value="">Select country</option>
                         {COUNTRIES.map((c) => (
                           <option key={c} value={c}>
@@ -316,29 +353,33 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Website" icon={<Globe size={12} />}>
                     <input
-                      {...register('website')}
+                      value={formData.website}
+                      onChange={(e) => handleInputChange('website', e.target.value)}
                       type="url"
                       placeholder="https://yoursite.com"
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Twitter / X" icon={<Twitter size={12} />}>
+                  <Field label="Twitter / X" icon={<AtSign size={12} />}>
                     <input
-                      {...register('twitter')}
+                      value={formData.twitter}
+                      onChange={(e) => handleInputChange('twitter', e.target.value)}
                       placeholder="@username"
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Instagram" icon={<Instagram size={12} />}>
+                  <Field label="Instagram" icon={<Camera size={12} />}>
                     <input
-                      {...register('instagram')}
+                      value={formData.instagram}
+                      onChange={(e) => handleInputChange('instagram', e.target.value)}
                       placeholder="@username"
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="LinkedIn" icon={<Linkedin size={12} />}>
+                  <Field label="LinkedIn" icon={<Briefcase size={12} />}>
                     <input
-                      {...register('linkedin')}
+                      value={formData.linkedin}
+                      onChange={(e) => handleInputChange('linkedin', e.target.value)}
                       placeholder="https://linkedin.com/in/you"
                       className={inputClass}
                     />
@@ -353,7 +394,11 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Trading Style" icon={<TrendingUp size={12} />}>
-                    <select {...register('tradingStyle')} className={`${inputClass} appearance-none`}>
+                    <select
+                      value={formData.tradingStyle}
+                      onChange={(e) => handleInputChange('tradingStyle', e.target.value)}
+                      className={`${inputClass} appearance-none`}
+                    >
                       <option value="">Select style</option>
                       <option value="day_trading">Day Trading</option>
                       <option value="swing_trading">Swing Trading</option>
@@ -364,13 +409,18 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                   </Field>
                   <Field label="Markets" icon={<BarChart3 size={12} />}>
                     <input
-                      {...register('markets')}
+                      value={formData.markets}
+                      onChange={(e) => handleInputChange('markets', e.target.value)}
                       placeholder="e.g. Crypto, Forex, Stocks"
                       className={inputClass}
                     />
                   </Field>
                   <Field label="Experience" icon={<Briefcase size={12} />}>
-                    <select {...register('experience')} className={`${inputClass} appearance-none`}>
+                    <select
+                      value={formData.experience}
+                      onChange={(e) => handleInputChange('experience', e.target.value)}
+                      className={`${inputClass} appearance-none`}
+                    >
                       <option value="">Select experience</option>
                       <option value="beginner">Beginner</option>
                       <option value="intermediate">Intermediate</option>

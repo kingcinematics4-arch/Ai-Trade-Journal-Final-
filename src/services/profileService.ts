@@ -42,53 +42,55 @@ export async function upsertProfile(
   userId: string,
   data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
 ): Promise<Profile> {
-  // [DEBUG] Log the raw data received by the service function
-  console.log('[DEBUG] 1. upsertProfile received data:', JSON.stringify(data, null, 2));
+  console.log("========== PROFILE UPSERT ==========");
+  console.log("User ID:", userId);
+  console.log("Received data:", JSON.stringify(data, null, 2));
 
   const supabase = createClient();
   const payload = mapProfileToDb(userId, data);
 
-  // [DEBUG] Log the snake_cased payload before it's sent to Supabase
-  console.log('[DEBUG] 2. Mapped payload for Supabase:', JSON.stringify(payload, null, 2));
+  console.log("Mapped payload for Supabase:", JSON.stringify(payload, null, 2));
 
-  const { data: row, error } = await supabase
+  // First, perform the upsert WITHOUT .single() - it returns an array
+  const { error: upsertError } = await supabase
     .from('profiles')
-    .upsert(payload, { onConflict: 'id' })
-    .select('*')
-    .single();
+    .upsert(payload, { onConflict: 'id' });
 
-  // [DEBUG] Log any potential errors from the upsert operation
-  if (error) {
-    console.error('[DEBUG] 3. Supabase upsert error:', {
-      message: error.message,
-      details: error.details,
-      code: error.code,
-    });
-    throw new Error(error.message);
+  if (upsertError) {
+    console.error("========== SUPABASE UPSERT ERROR ==========");
+    console.dir(upsertError, { depth: null });
+    console.error("Message:", upsertError.message);
+    console.error("Code:", upsertError.code);
+    console.error("Details:", upsertError.details);
+    console.error("Hint:", upsertError.hint);
+    console.error("Payload:", payload);
+    console.error("==========================================");
+
+    throw upsertError;
   }
 
-  // [DEBUG] Task 7: Post-upsert verification — re-read the row to confirm values were written
-  const { data: verifyRow, error: verifyError } = await supabase
+  // Now fetch the profile to return it
+  const { data: row, error: selectError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
     .single();
 
-  if (verifyError) {
-    console.warn('[DEBUG] 5. Post-upsert verify read failed:', verifyError.message);
-  } else {
-    console.log('[DEBUG] 5. Post-upsert verified DB row:', JSON.stringify(verifyRow, null, 2));
-    // Warn if key fields that were sent are still NULL in the DB (possible RLS issue)
-    const sentKeys = Object.keys(payload) as Array<keyof typeof payload>;
-    const nullKeys = sentKeys.filter((k) => payload[k] !== undefined && payload[k] !== null && verifyRow[k] === null);
-    if (nullKeys.length > 0) {
-      console.error('[DEBUG] 6. WARNING: These fields were sent but are NULL in DB (check RLS UPDATE policy):', nullKeys);
-    }
+  if (selectError) {
+    console.log("Select error:", selectError);
+    console.dir(selectError, { depth: null });
+    throw selectError;
   }
 
+  if (!row) {
+    throw new Error('Profile upsert succeeded but no row returned. This may indicate RLS blocked the SELECT after INSERT/UPDATE.');
+  }
+
+  // [DEBUG] Task 7: Post-upsert verification — re-read the row to confirm values were written
+  console.log('[profileService] Post-upsert verify read.');
+
   const finalProfile = mapDbProfile(row as DbProfile);
-  // [DEBUG] Log the final, mapped profile object that will be returned
-  console.log('[DEBUG] 4. Supabase returned and mapped profile:', JSON.stringify(finalProfile, null, 2));
+  console.log('[profileService] Supabase returned and mapped profile:', JSON.stringify(finalProfile, null, 2));
   return finalProfile;
 }
 
@@ -187,17 +189,28 @@ export async function initializeProfileFromAuth(
   console.log('[profileService] Seeding profile from auth metadata:', patch);
 
   const supabase = createClient();
-  const { data: row, error } = await supabase
+  const { error } = await supabase
     .from('profiles')
-    .upsert({ id: userId, ...patch }, { onConflict: 'id' })
-    .select('*')
-    .single();
+    .upsert({ id: userId, ...patch }, { onConflict: 'id' });
 
   if (error) {
-    console.error('[profileService] initializeProfileFromAuth upsert error:', error.message);
+    console.error('[profileService] initializeProfileFromAuth upsert error:', error);
     // Non-fatal: return existing profile if seeding fails
     if (existingProfile) return existingProfile;
-    throw new Error(error.message);
+    throw error;
+  }
+
+  // Fetch the profile after upserting
+  const { data: row, error: selectError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (selectError || !row) {
+    console.error('[profileService] initializeProfileFromAuth select error:', selectError);
+    if (existingProfile) return existingProfile;
+    throw selectError || new Error('Failed to fetch profile after seed');
   }
 
   return mapDbProfile(row as DbProfile);
@@ -375,4 +388,47 @@ export async function removeAvatar(userId: string, currentAvatarUrl: string): Pr
 
   // Always clear the DB field
   await upsertProfile(userId, { avatar_url: null });
+}
+
+// ─── Auth Functions ─────────────────────────────────────────────────────────────
+
+/**
+ * Update the user's email address.
+ */
+export async function updateEmail(email: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.auth.updateUser({ email });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Send a password reset email to the user.
+ */
+export async function sendPasswordReset(email: string): Promise<void> {
+  const supabase = createClient();
+  const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Sign out from all sessions.
+ */
+export async function signOutEverywhere(): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.auth.signOut({ scope: 'global' });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Delete the user account.
+ */
+export async function deleteAccount(): Promise<void> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) throw new Error('Not authenticated');
+  const { error } = await supabase.auth.admin.deleteUser(user.id);
+  if (error) throw new Error(error.message);
 }

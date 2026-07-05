@@ -82,13 +82,13 @@ BEGIN
 END $$;
 
 -- ============================================================
--- RLS POLICY: Allow community to see public profiles
+-- RLS POLICIES FOR PROFILES TABLE (fix missing INSERT/UPDATE policies)
 -- ============================================================
 
--- Drop the restrictive "viewable by authenticated users" policy
+-- Drop old SELECT policy
 DROP POLICY IF EXISTS "Profiles are viewable by authenticated users" ON public.profiles;
 
--- Create a policy that allows:
+-- Create SELECT policy that allows:
 -- 1. Users to see their own profile
 -- 2. Anyone (authenticated) to see profiles with public_profile = true
 CREATE POLICY "Profiles are viewable by owner or if public"
@@ -98,6 +98,19 @@ CREATE POLICY "Profiles are viewable by owner or if public"
     auth.uid() = id 
     OR public_profile = true
   );
+
+-- Ensure INSERT policy exists (was dropped in profiles_schema.sql)
+CREATE POLICY IF NOT EXISTS "Users can insert own profile"
+  ON public.profiles FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
+
+-- Ensure UPDATE policy exists (was dropped in profiles_schema.sql)
+CREATE POLICY IF NOT EXISTS "Users can update own profile"
+  ON public.profiles FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
 
 -- ============================================================
 -- INDEX FOR PUBLIC PROFILE QUERIES

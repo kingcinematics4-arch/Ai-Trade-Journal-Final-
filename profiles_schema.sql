@@ -45,6 +45,7 @@ CREATE TRIGGER set_profiles_updated_at
   EXECUTE FUNCTION public.handle_updated_at();
 
 -- Auto-create profile on new auth user signup
+-- NOTE: Only insert columns that exist at this point (trading_style added later via community_schema.sql)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -52,15 +53,14 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, avatar_url, username, country, trading_style)
+  INSERT INTO public.profiles (id, full_name, avatar_url, username, country)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data ->> 'full_name',
     NEW.raw_user_meta_data ->> 'avatar_url',
     -- Generate a default username from email local-part
     LOWER(REGEXP_REPLACE(SPLIT_PART(NEW.email, '@', 1), '[^a-z0-9_]', '', 'g')),
-    NEW.raw_user_meta_data ->> 'country',
-    NEW.raw_user_meta_data ->> 'trading_style'
+    NEW.raw_user_meta_data ->> 'country'
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;

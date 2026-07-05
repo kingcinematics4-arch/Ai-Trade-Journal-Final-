@@ -74,6 +74,8 @@ const InfoBadge = ({ text, icon }: { text: string | null; icon?: React.ReactNode
 };
 
 const TraderCardComponent = ({ trader, isPremium = false }: TraderCardProps) => {
+  console.log("===== TRADER CARD DATA =====");
+  console.log(trader);
   const router = useRouter();
   const displayName = useMemo(() => {
     if (trader.fullName?.trim()) return trader.fullName.trim();

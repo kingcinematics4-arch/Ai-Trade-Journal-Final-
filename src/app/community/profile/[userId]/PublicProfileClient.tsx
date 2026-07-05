@@ -65,6 +65,8 @@ function getInitials(name: string): string {
 }
 
 export default function PublicProfileClient({ profile }: Props) {
+  console.log("===== PUBLIC PROFILE CLIENT DATA =====");
+  console.log(profile);
   const router = useRouter();
   const displayName = useMemo(() => getDisplayName(profile), [profile]);
   const initials = useMemo(() => getInitials(displayName), [displayName]);

@@ -130,6 +130,9 @@ export async function getPublicTraders(
   // ── Step 4: Execute query and fetch trade stats ───────────────────────
   const { data: profiles, error, count } = await query;
 
+  console.log("===== RAW PROFILE FROM SUPABASE =====");
+  console.table(profiles);
+
   if (error) {
     console.error('[communityService] getPublicTraders data error:', error.message);
     throw new Error(error.message);
@@ -140,6 +143,9 @@ export async function getPublicTraders(
 
   // ── Step 5: Merge stats and perform client-side sort if needed ────────
   let traders: PublicTraderProfile[] = (profiles ?? []).map((p) => mapToPublicTrader(p, statsMap.get(p.id)));
+
+  console.log("===== MAPPED TRADERS WITH STATS =====");
+  console.table(traders);
 
   // ── Step 8: Sort by stat-based fields in TypeScript ───────────────────
   if (sortBy === 'mostActive') {
