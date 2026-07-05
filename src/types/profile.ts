@@ -13,6 +13,10 @@ export interface DbProfile {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  youtube: string | null;
+  github: string | null;
+  discord: string | null;
+  telegram: string | null;
   trading_style: string | null;
   markets: string | null;
   experience: string | null;
@@ -35,6 +39,10 @@ export interface Profile {
   twitter: string | null;
   instagram: string | null;
   linkedin: string | null;
+  youtube: string | null;
+  github: string | null;
+  discord: string | null;
+  telegram: string | null;
   tradingStyle: string | null;
   markets: string[] | null;
   experience: string | null;
@@ -55,6 +63,10 @@ export interface ProfileFormData {
   twitter: string;
   instagram: string;
   linkedin: string;
+  youtube: string;
+  github: string;
+  discord: string;
+  telegram: string;
   tradingStyle: string;
   /** The form stores markets as a plain comma-separated string from the text input */
   markets: string;
@@ -99,9 +111,18 @@ export function mapDbProfile(row: DbProfile): Profile {
     twitter: row.twitter,
     instagram: row.instagram,
     linkedin: row.linkedin,
-    tradingStyle: row.trading_style, // string | null
+    youtube: row.youtube,
+    github: row.github,
+    discord: row.discord,
+    telegram: row.telegram,
+    tradingStyle: row.trading_style,
     // DB stores as comma-separated string, UI uses array
-    markets: row.markets ? row.markets.split(',').map(m => m.trim()).filter(Boolean) : null,
+    markets: row.markets
+      ? row.markets
+          .split(',')
+          .map((m) => m.trim())
+          .filter(Boolean)
+      : null,
     experience: row.experience,
     showStats: row.show_stats,
     publicProfile: row.public_profile,
@@ -129,6 +150,10 @@ export function mapProfileToDb(
   if (data.twitter !== undefined) out.twitter = data.twitter || null;
   if (data.instagram !== undefined) out.instagram = data.instagram || null;
   if (data.linkedin !== undefined) out.linkedin = data.linkedin || null;
+  if (data.youtube !== undefined) out.youtube = data.youtube || null;
+  if (data.github !== undefined) out.github = data.github || null;
+  if (data.discord !== undefined) out.discord = data.discord || null;
+  if (data.telegram !== undefined) out.telegram = data.telegram || null;
   if (data.tradingStyle !== undefined) out.trading_style = data.tradingStyle || null;
   // Form sends a plain string (e.g. "Crypto, Forex"); store as-is.
   // An array (e.g. from other callers) is joined with commas.
@@ -162,7 +187,7 @@ export function getProfileDisplayName(profile: Profile | null, email?: string | 
 export function getProfileInitials(displayName: string, email?: string | null): string {
   const parts = displayName.trim().split(/\s+/).filter(Boolean);
   if (parts.length > 1) {
-    return (`${parts[0][0]}${parts[parts.length - 1][0]}`).toUpperCase();
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
   }
   if (parts.length === 1 && parts[0].length > 1) {
     return parts[0].substring(0, 2).toUpperCase();

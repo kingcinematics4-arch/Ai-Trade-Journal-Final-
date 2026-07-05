@@ -42,14 +42,14 @@ export async function upsertProfile(
   userId: string,
   data: Partial<ProfileFormData> & { avatar_url?: string | null; public_profile?: boolean }
 ): Promise<Profile> {
-  console.log("========== PROFILE UPSERT ==========");
-  console.log("User ID:", userId);
-  console.log("Received data:", JSON.stringify(data, null, 2));
+  console.log('========== PROFILE UPSERT ==========');
+  console.log('User ID:', userId);
+  console.log('Received data:', JSON.stringify(data, null, 2));
 
   const supabase = createClient();
   const payload = mapProfileToDb(userId, data);
 
-  console.log("Mapped payload for Supabase:", JSON.stringify(payload, null, 2));
+  console.log('Mapped payload for Supabase:', JSON.stringify(payload, null, 2));
 
   // First, perform the upsert WITHOUT .single() - it returns an array
   const { error: upsertError } = await supabase
@@ -57,14 +57,14 @@ export async function upsertProfile(
     .upsert(payload, { onConflict: 'id' });
 
   if (upsertError) {
-    console.error("========== SUPABASE UPSERT ERROR ==========");
+    console.error('========== SUPABASE UPSERT ERROR ==========');
     console.dir(upsertError, { depth: null });
-    console.error("Message:", upsertError.message);
-    console.error("Code:", upsertError.code);
-    console.error("Details:", upsertError.details);
-    console.error("Hint:", upsertError.hint);
-    console.error("Payload:", payload);
-    console.error("==========================================");
+    console.error('Message:', upsertError.message);
+    console.error('Code:', upsertError.code);
+    console.error('Details:', upsertError.details);
+    console.error('Hint:', upsertError.hint);
+    console.error('Payload:', payload);
+    console.error('==========================================');
 
     throw upsertError;
   }
@@ -77,20 +77,25 @@ export async function upsertProfile(
     .single();
 
   if (selectError) {
-    console.log("Select error:", selectError);
+    console.log('Select error:', selectError);
     console.dir(selectError, { depth: null });
     throw selectError;
   }
 
   if (!row) {
-    throw new Error('Profile upsert succeeded but no row returned. This may indicate RLS blocked the SELECT after INSERT/UPDATE.');
+    throw new Error(
+      'Profile upsert succeeded but no row returned. This may indicate RLS blocked the SELECT after INSERT/UPDATE.'
+    );
   }
 
   // [DEBUG] Task 7: Post-upsert verification — re-read the row to confirm values were written
   console.log('[profileService] Post-upsert verify read.');
 
   const finalProfile = mapDbProfile(row as DbProfile);
-  console.log('[profileService] Supabase returned and mapped profile:', JSON.stringify(finalProfile, null, 2));
+  console.log(
+    '[profileService] Supabase returned and mapped profile:',
+    JSON.stringify(finalProfile, null, 2)
+  );
   return finalProfile;
 }
 
@@ -121,13 +126,14 @@ export interface AuthMeta {
  * Strips non-alphanumeric characters, lowercases, truncates to 20 chars.
  */
 function generateUsernameSlug(source: string): string {
-  return source
-    .toLowerCase()
-    .replace(/[^a-z0-9_]/g, '_')   // non-alphanumeric → underscore
-    .replace(/_+/g, '_')            // collapse consecutive underscores
-    .replace(/^_|_$/g, '')          // trim leading/trailing underscores
-    .slice(0, 20)
-    || 'trader';
+  return (
+    source
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, '_') // non-alphanumeric → underscore
+      .replace(/_+/g, '_') // collapse consecutive underscores
+      .replace(/^_|_$/g, '') // trim leading/trailing underscores
+      .slice(0, 20) || 'trader'
+  );
 }
 
 /**
@@ -164,8 +170,7 @@ export async function initializeProfileFromAuth(
       (typeof meta.user_name === 'string' && meta.user_name.trim()) ||
       null;
 
-    const emailPrefix =
-      (typeof meta.email === 'string' && meta.email.split('@')[0]) || null;
+    const emailPrefix = (typeof meta.email === 'string' && meta.email.split('@')[0]) || null;
 
     const slugSource = rawUsername || emailPrefix;
     if (slugSource) patch.username = generateUsernameSlug(slugSource);
@@ -344,10 +349,10 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
     if (process.env.NODE_ENV === 'development') {
       console.error('[profileService] uploadAvatar error (dev):', uploadError);
     }
-    
+
     let friendlyMessage = 'Failed to upload avatar. Please try again.';
     const msg = uploadError.message?.toLowerCase() || '';
-    
+
     if (msg.includes('bucket not found')) {
       friendlyMessage = 'Storage bucket is missing. Please ensure the "avatars" bucket is created.';
     } else if (msg.includes('policy') || msg.includes('permission denied')) {
@@ -355,7 +360,7 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
     } else {
       friendlyMessage = 'Storage configuration is incorrect. ' + uploadError.message;
     }
-    
+
     throw new Error(friendlyMessage);
   }
 
@@ -427,7 +432,9 @@ export async function signOutEverywhere(): Promise<void> {
  */
 export async function deleteAccount(): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user?.id) throw new Error('Not authenticated');
   const { error } = await supabase.auth.admin.deleteUser(user.id);
   if (error) throw new Error(error.message);

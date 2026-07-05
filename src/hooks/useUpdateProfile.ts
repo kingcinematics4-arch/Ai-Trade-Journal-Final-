@@ -20,10 +20,7 @@ export function useUpdateProfile() {
       data: Partial<ProfileFormData> & { avatar_url?: string | null },
       options?: { successMessage?: string; errorMessage?: string; silent?: boolean }
     ) => {
-      const {
-        successMessage = 'Profile updated!',
-        silent = false,
-      } = options ?? {};
+      const { successMessage = 'Profile updated!', silent = false } = options ?? {};
 
       try {
         await ctxUpdate(data);

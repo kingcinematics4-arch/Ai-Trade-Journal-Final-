@@ -13,9 +13,7 @@ export default function ProfileContent() {
       {/* Page heading (visible on mobile only) */}
       <div className="lg:hidden">
         <h1 className="text-xl font-bold text-foreground">{t('profile.mobileTitle')}</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {t('profile.mobileSubtitle')}
-        </p>
+        <p className="text-sm text-muted-foreground mt-0.5">{t('profile.mobileSubtitle')}</p>
       </div>
 
       {/* Profile header with avatar + stats */}
@@ -25,9 +23,7 @@ export default function ProfileContent() {
       <div className="rounded-2xl border border-white/[0.07] bg-card/30 backdrop-blur-md overflow-hidden">
         <div className="px-6 py-4 border-b border-white/[0.05]">
           <h2 className="text-sm font-bold text-foreground">{t('profile.socialLinks')}</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {t('profile.socialLinksSubtitle')}
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('profile.socialLinksSubtitle')}</p>
         </div>
         <div className="p-6">
           <SocialLinks />

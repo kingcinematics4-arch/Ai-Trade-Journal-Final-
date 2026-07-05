@@ -165,7 +165,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     [user?.id, fetchSettings]
   );
 
-
   const playNotificationSound = useCallback((currentSettings: NotificationSettings | null) => {
     if (!currentSettings?.sound_enabled || currentSettings?.do_not_disturb) return;
     soundService.play('notification', currentSettings?.volume);

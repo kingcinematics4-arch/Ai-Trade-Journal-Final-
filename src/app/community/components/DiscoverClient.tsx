@@ -29,7 +29,11 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
   const loadMoreTraders = useCallback(async () => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
-    const { traders: newTraders, hasMore: newHasMore } = await getPublicTraders(page, searchQuery, sortBy);
+    const { traders: newTraders, hasMore: newHasMore } = await getPublicTraders(
+      page,
+      searchQuery,
+      sortBy
+    );
     setTraders((prev) => [...prev, ...newTraders]);
     setPage((prev) => prev + 1);
     setHasMore(newHasMore);
@@ -45,7 +49,7 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     setPage(1);
-    setHasMore(true); // Assume there might be results
+    setHasMore(true);
     const { traders: newTraders, hasMore: newHasMore } = await getPublicTraders(1, query, sortBy);
     setTraders(newTraders);
     setHasMore(newHasMore);
@@ -56,8 +60,8 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <SearchBar onSearch={handleSearch} />
 
-      {/* Main content area for trader cards - 2 cards per row on desktop */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      {/* Main content area for trader cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {traders.map((trader) => (
           <TraderCard key={trader.id} trader={trader} />
         ))}
@@ -71,7 +75,9 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
       )}
 
       {!hasMore && traders.length > 0 && (
-        <p className="text-center text-muted-foreground py-12">You've reached the end of the list.</p>
+        <p className="text-center text-muted-foreground py-12">
+          You've reached the end of the list.
+        </p>
       )}
     </div>
   );

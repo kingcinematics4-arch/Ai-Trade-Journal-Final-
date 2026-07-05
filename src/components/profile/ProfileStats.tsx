@@ -16,7 +16,15 @@ interface StatCardProps {
   onClick?: () => void;
 }
 
-function StatCard({ icon, label, value, sub, color = 'text-primary', href, onClick }: StatCardProps) {
+function StatCard({
+  icon,
+  label,
+  value,
+  sub,
+  color = 'text-primary',
+  href,
+  onClick,
+}: StatCardProps) {
   const cardContent = (
     <>
       <div className={`${color} opacity-70`}>{icon}</div>

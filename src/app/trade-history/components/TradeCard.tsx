@@ -64,14 +64,20 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
           </div>
           <StatusBadge
             variant={(trade.trade_direction as 'buy' | 'sell') || 'buy'}
-            label={trade.trade_direction === 'sell' ? t('trading.tradeHistory.tradeCard.short') : t('trading.tradeHistory.tradeCard.long')}
+            label={
+              trade.trade_direction === 'sell'
+                ? t('trading.tradeHistory.tradeCard.short')
+                : t('trading.tradeHistory.tradeCard.long')
+            }
           />
         </div>
 
         {/* Metrics */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div>
-            <p className="text-[11px] text-muted-foreground font-medium">{t('trading.tradeHistory.tradeCard.entry')}</p>
+            <p className="text-[11px] text-muted-foreground font-medium">
+              {t('trading.tradeHistory.tradeCard.entry')}
+            </p>
             <p className="text-sm font-semibold text-foreground font-tabular">
               $
               {parseSafeNumber(trade.entry_price).toLocaleString('en-US', {
@@ -80,7 +86,9 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
             </p>
           </div>
           <div>
-            <p className="text-[11px] text-muted-foreground font-medium">{t('trading.tradeHistory.tradeCard.exit')}</p>
+            <p className="text-[11px] text-muted-foreground font-medium">
+              {t('trading.tradeHistory.tradeCard.exit')}
+            </p>
             <p className="text-sm font-semibold text-foreground font-tabular">
               $
               {parseSafeNumber(trade.exit_price).toLocaleString('en-US', {
@@ -89,7 +97,9 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
             </p>
           </div>
           <div>
-            <p className="text-[11px] text-muted-foreground font-medium">{t('trading.tradeHistory.tradeCard.pnl')}</p>
+            <p className="text-[11px] text-muted-foreground font-medium">
+              {t('trading.tradeHistory.tradeCard.pnl')}
+            </p>
             <p
               className={`text-sm font-bold font-tabular ${
                 pnl >= 0 ? 'text-green-400' : 'text-red-400'
@@ -99,7 +109,9 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
             </p>
           </div>
           <div>
-            <p className="text-[11px] text-muted-foreground font-medium">{t('trading.tradeHistory.tradeCard.rrRatio')}</p>
+            <p className="text-[11px] text-muted-foreground font-medium">
+              {t('trading.tradeHistory.tradeCard.rrRatio')}
+            </p>
             <p
               className={`text-sm font-semibold font-tabular ${
                 rr >= 2 ? 'text-green-400' : rr >= 1 ? 'text-amber-400' : 'text-red-400'
@@ -132,7 +144,8 @@ export default function TradeCard({ trade, index, onClick }: TradeCardProps) {
             </div>
             {allImages.length > 1 && (
               <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <ImageIcon size={10} />{t('trading.tradeHistory.tradeCard.moreImages', { count: allImages.length - 1 })}
+                <ImageIcon size={10} />
+                {t('trading.tradeHistory.tradeCard.moreImages', { count: allImages.length - 1 })}
               </span>
             )}
           </div>

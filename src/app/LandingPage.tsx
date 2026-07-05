@@ -79,17 +79,23 @@ export default function LandingPage() {
       preview: (
         <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-300">{t('landing.features.tradeJournal.preview.recentTrades')}</span>
+            <span className="text-xs font-bold text-slate-300">
+              {t('landing.features.tradeJournal.preview.recentTrades')}
+            </span>
             <div className="w-2 h-2 rounded-full bg-blue-500" />
           </div>
           <div className="space-y-1 mb-2">
             <div className="flex items-center gap-2 p-1.5 bg-slate-800 rounded-md">
               <div className="w-3 h-3 bg-emerald-500/20 rounded-sm" />
-              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.tradeJournal.preview.btcUsdLong')}</span>
+              <span className="text-[9px] font-medium text-slate-400">
+                {t('landing.features.tradeJournal.preview.btcUsdLong')}
+              </span>
             </div>
             <div className="flex items-center gap-2 p-1.5 bg-slate-800 rounded-md">
               <div className="w-3 h-3 bg-red-500/20 rounded-sm" />
-              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.tradeJournal.preview.ethUsdtShort')}</span>
+              <span className="text-[9px] font-medium text-slate-400">
+                {t('landing.features.tradeJournal.preview.ethUsdtShort')}
+              </span>
             </div>
           </div>
           <div className="flex-1 bg-slate-800 rounded-md p-2 text-[9px] text-slate-500 leading-tight">
@@ -99,7 +105,7 @@ export default function LandingPage() {
             {[
               t('landing.features.tradeJournal.preview.tags.breakout'),
               t('landing.features.tradeJournal.preview.tags.fomo'),
-              t('landing.features.tradeJournal.preview.tags.long')
+              t('landing.features.tradeJournal.preview.tags.long'),
             ].map((tag, i) => (
               <span
                 key={i}
@@ -120,21 +126,29 @@ export default function LandingPage() {
       preview: (
         <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-300">{t('landing.features.aiCoach.preview.aiInsights')}</span>
+            <span className="text-xs font-bold text-slate-300">
+              {t('landing.features.aiCoach.preview.aiInsights')}
+            </span>
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
           <div className="space-y-1.5 mb-2">
             <div className="flex items-center gap-2 p-1.5 bg-emerald-500/10 rounded-md text-[9px] text-emerald-300">
               <CheckCircle2 size={11} />
-              <span className="font-medium">{t('landing.features.aiCoach.preview.strongDiscipline')}</span>
+              <span className="font-medium">
+                {t('landing.features.aiCoach.preview.strongDiscipline')}
+              </span>
             </div>
             <div className="flex items-center gap-2 p-1.5 bg-red-500/10 rounded-md text-[9px] text-red-300">
               <TrendingDown size={11} />
-              <span className="font-medium">{t('landing.features.aiCoach.preview.overtrading')}</span>
+              <span className="font-medium">
+                {t('landing.features.aiCoach.preview.overtrading')}
+              </span>
             </div>
           </div>
           <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
-            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.aiCoach.preview.psychologyScore')}</span>
+            <span className="text-[9px] text-slate-500 uppercase font-bold">
+              {t('landing.features.aiCoach.preview.psychologyScore')}
+            </span>
             <span className="text-sm font-bold text-emerald-400">85/100</span>
           </div>
         </div>
@@ -148,22 +162,32 @@ export default function LandingPage() {
       preview: (
         <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-300">{t('landing.features.strategyManagement.preview.topStrategies')}</span>
+            <span className="text-xs font-bold text-slate-300">
+              {t('landing.features.strategyManagement.preview.topStrategies')}
+            </span>
             <div className="w-2 h-2 rounded-full bg-indigo-500" />
           </div>
           <div className="space-y-1.5 mb-2">
             <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.strategyManagement.preview.breakout')}</span>
+              <span className="text-[9px] font-medium text-slate-400">
+                {t('landing.features.strategyManagement.preview.breakout')}
+              </span>
               <span className="text-[9px] font-bold text-emerald-400">68% WR</span>
             </div>
             <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.strategyManagement.preview.trendFollow')}</span>
+              <span className="text-[9px] font-medium text-slate-400">
+                {t('landing.features.strategyManagement.preview.trendFollow')}
+              </span>
               <span className="text-[9px] font-bold text-blue-400">55% WR</span>
             </div>
           </div>
           <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
-            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.strategyManagement.preview.backtest')}</span>
-            <span className="text-xs font-bold text-white">3 {t('landing.features.strategyManagement.preview.active')}</span>
+            <span className="text-[9px] text-slate-500 uppercase font-bold">
+              {t('landing.features.strategyManagement.preview.backtest')}
+            </span>
+            <span className="text-xs font-bold text-white">
+              3 {t('landing.features.strategyManagement.preview.active')}
+            </span>
           </div>
         </div>
       ),
@@ -176,7 +200,9 @@ export default function LandingPage() {
       preview: (
         <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-300">{t('landing.features.advancedAnalytics.preview.equityCurve')}</span>
+            <span className="text-xs font-bold text-slate-300">
+              {t('landing.features.advancedAnalytics.preview.equityCurve')}
+            </span>
             <div className="w-2 h-2 rounded-full bg-purple-500" />
           </div>
           <div className="relative h-24 w-full mb-2">
@@ -197,11 +223,15 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-2 gap-2 mt-auto pt-2 border-t border-slate-800">
             <div className="flex flex-col">
-              <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.advancedAnalytics.preview.winRate')}</span>
+              <span className="text-[9px] text-slate-500 uppercase font-bold">
+                {t('landing.features.advancedAnalytics.preview.winRate')}
+              </span>
               <span className="text-sm font-bold text-emerald-400">62%</span>
             </div>
             <div className="flex flex-col text-right">
-              <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.advancedAnalytics.preview.maxDd')}</span>
+              <span className="text-[9px] text-slate-500 uppercase font-bold">
+                {t('landing.features.advancedAnalytics.preview.maxDd')}
+              </span>
               <span className="text-sm font-bold text-red-400">-$500</span>
             </div>
           </div>
@@ -216,21 +246,29 @@ export default function LandingPage() {
       preview: (
         <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-300">{t('landing.features.riskManagement.preview.riskMetrics')}</span>
+            <span className="text-xs font-bold text-slate-300">
+              {t('landing.features.riskManagement.preview.riskMetrics')}
+            </span>
             <div className="w-2 h-2 rounded-full bg-rose-500" />
           </div>
           <div className="space-y-1.5 mb-2">
             <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.riskManagement.preview.avgRMultiple')}</span>
+              <span className="text-[9px] font-medium text-slate-400">
+                {t('landing.features.riskManagement.preview.avgRMultiple')}
+              </span>
               <span className="text-[9px] font-bold text-emerald-400">1.8R</span>
             </div>
             <div className="flex items-center justify-between p-1.5 bg-slate-800 rounded-md">
-              <span className="text-[9px] font-medium text-slate-400">{t('landing.features.riskManagement.preview.maxLoss')}</span>
+              <span className="text-[9px] font-medium text-slate-400">
+                {t('landing.features.riskManagement.preview.maxLoss')}
+              </span>
               <span className="text-[9px] font-bold text-red-400">-$150</span>
             </div>
           </div>
           <div className="flex justify-between items-center mt-auto pt-2 border-t border-slate-800">
-            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.riskManagement.preview.portfolioHeat')}</span>
+            <span className="text-[9px] text-slate-500 uppercase font-bold">
+              {t('landing.features.riskManagement.preview.portfolioHeat')}
+            </span>
             <span className="text-sm font-bold text-white">2.5%</span>
           </div>
         </div>
@@ -244,7 +282,9 @@ export default function LandingPage() {
       preview: (
         <div className="relative w-full h-full bg-slate-900 rounded-lg p-3 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-slate-300">{t('landing.features.exportEngine.preview.exportOptions')}</span>
+            <span className="text-xs font-bold text-slate-300">
+              {t('landing.features.exportEngine.preview.exportOptions')}
+            </span>
             <div className="flex gap-1">
               <div className="w-2 h-2 rounded-full bg-amber-500" />
               <div className="w-2 h-2 rounded-full bg-slate-500" />
@@ -255,22 +295,32 @@ export default function LandingPage() {
               t('landing.features.exportEngine.preview.excel'),
               t('landing.features.exportEngine.preview.pdf'),
               t('landing.features.exportEngine.preview.csv'),
-              t('landing.features.exportEngine.preview.json')
+              t('landing.features.exportEngine.preview.json'),
             ].map((format, i) => (
               <div
                 key={i}
                 className="flex items-center gap-1 p-1.5 bg-slate-800 rounded-md text-[9px] font-medium text-slate-400"
               >
                 <span className="w-3 h-3 bg-blue-500/20 rounded-sm flex items-center justify-center text-blue-400">
-                  {format === t('landing.features.exportEngine.preview.excel') ? 'X' : format === t('landing.features.exportEngine.preview.pdf') ? 'P' : format === t('landing.features.exportEngine.preview.csv') ? 'C' : 'J'}
+                  {format === t('landing.features.exportEngine.preview.excel')
+                    ? 'X'
+                    : format === t('landing.features.exportEngine.preview.pdf')
+                      ? 'P'
+                      : format === t('landing.features.exportEngine.preview.csv')
+                        ? 'C'
+                        : 'J'}
                 </span>
                 {format}
               </div>
             ))}
           </div>
           <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-800">
-            <span className="text-[9px] text-slate-500 uppercase font-bold">{t('landing.features.exportEngine.preview.fileName')}</span>
-            <span className="text-xs font-bold text-white">{t('landing.features.exportEngine.preview.tradesReport')}</span>
+            <span className="text-[9px] text-slate-500 uppercase font-bold">
+              {t('landing.features.exportEngine.preview.fileName')}
+            </span>
+            <span className="text-xs font-bold text-white">
+              {t('landing.features.exportEngine.preview.tradesReport')}
+            </span>
           </div>
         </div>
       ),
@@ -398,10 +448,22 @@ export default function LandingPage() {
 
                       <div className="grid grid-cols-2 gap-4">
                         {[
-                          { label: t('landing.preview.tradeTracking'), icon: <TrendingUp size={14} /> },
-                          { label: t('landing.preview.performanceAnalytics'), icon: <BarChart3 size={14} /> },
-                          { label: t('landing.preview.strategyInsights'), icon: <BrainCircuit size={14} /> },
-                          { label: t('landing.preview.exportReports'), icon: <Download size={14} /> },
+                          {
+                            label: t('landing.preview.tradeTracking'),
+                            icon: <TrendingUp size={14} />,
+                          },
+                          {
+                            label: t('landing.preview.performanceAnalytics'),
+                            icon: <BarChart3 size={14} />,
+                          },
+                          {
+                            label: t('landing.preview.strategyInsights'),
+                            icon: <BrainCircuit size={14} />,
+                          },
+                          {
+                            label: t('landing.preview.exportReports'),
+                            icon: <Download size={14} />,
+                          },
                         ].map((item) => (
                           <div
                             key={item.label}

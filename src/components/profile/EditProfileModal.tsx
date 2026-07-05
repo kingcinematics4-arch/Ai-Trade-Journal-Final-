@@ -123,6 +123,10 @@ type FormState = {
   twitter: string;
   instagram: string;
   linkedin: string;
+  youtube: string;
+  github: string;
+  discord: string;
+  telegram: string;
   tradingStyle: string;
   markets: string;
   experience: string;
@@ -134,22 +138,26 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
   const [hasChanges, setHasChanges] = useState(false);
 
   const [formData, setFormData] = useState<FormState>({
-    fullName: "",
-    username: "",
-    bio: "",
-    phone: "",
-    country: "",
-    website: "",
-    twitter: "",
-    instagram: "",
-    linkedin: "",
-    tradingStyle: "",
-    markets: "",
-    experience: "",
+    fullName: '',
+    username: '',
+    bio: '',
+    phone: '',
+    country: '',
+    website: '',
+    twitter: '',
+    instagram: '',
+    linkedin: '',
+    youtube: '',
+    github: '',
+    discord: '',
+    telegram: '',
+    tradingStyle: '',
+    markets: '',
+    experience: '',
   });
 
   const handleInputChange = useCallback((field: keyof FormState, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -161,19 +169,23 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
     if (!open || !dbProfile) return;
 
     setFormData({
-      fullName: dbProfile.fullName ?? "",
-      username: dbProfile.username ?? "",
-      bio: dbProfile.bio ?? "",
-      phone: dbProfile.phone ?? "",
-      country: dbProfile.country ?? "",
-      website: dbProfile.website ?? "",
-      twitter: dbProfile.twitter ?? "",
-      instagram: dbProfile.instagram ?? "",
-      linkedin: dbProfile.linkedin ?? "",
-      tradingStyle: dbProfile.tradingStyle ?? "",
+      fullName: dbProfile.fullName ?? '',
+      username: dbProfile.username ?? '',
+      bio: dbProfile.bio ?? '',
+      phone: dbProfile.phone ?? '',
+      country: dbProfile.country ?? '',
+      website: dbProfile.website ?? '',
+      twitter: dbProfile.twitter ?? '',
+      instagram: dbProfile.instagram ?? '',
+      linkedin: dbProfile.linkedin ?? '',
+      youtube: dbProfile.youtube ?? '',
+      github: dbProfile.github ?? '',
+      discord: dbProfile.discord ?? '',
+      telegram: dbProfile.telegram ?? '',
+      tradingStyle: dbProfile.tradingStyle ?? '',
       // markets is string[] in Profile but the form uses a plain text input → join to string
-      markets: Array.isArray(dbProfile?.markets) ? (dbProfile.markets as string[]).join(", ") : "",
-      experience: dbProfile.experience ?? "",
+      markets: Array.isArray(dbProfile?.markets) ? (dbProfile.markets as string[]).join(', ') : '',
+      experience: dbProfile.experience ?? '',
     });
     setHasChanges(false);
   }, [open, dbProfile]);
@@ -181,24 +193,31 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("===== FORM DATA =====");
+    console.log('===== FORM DATA =====');
     console.log(formData);
 
     try {
-      await updateProfile({
-        fullName: formData.fullName,
-        username: formData.username,
-        bio: formData.bio,
-        phone: formData.phone,
-        country: formData.country,
-        website: formData.website,
-        twitter: formData.twitter,
-        instagram: formData.instagram,
-        linkedin: formData.linkedin,
-        tradingStyle: formData.tradingStyle,
-        markets: formData.markets,
-        experience: formData.experience,
-      }, { successMessage: 'Profile saved!' });
+      await updateProfile(
+        {
+          fullName: formData.fullName,
+          username: formData.username,
+          bio: formData.bio,
+          phone: formData.phone,
+          country: formData.country,
+          website: formData.website,
+          twitter: formData.twitter,
+          instagram: formData.instagram,
+          linkedin: formData.linkedin,
+          youtube: formData.youtube,
+          github: formData.github,
+          discord: formData.discord,
+          telegram: formData.telegram,
+          tradingStyle: formData.tradingStyle,
+          markets: formData.markets,
+          experience: formData.experience,
+        },
+        { successMessage: 'Profile saved!' }
+      );
       setHasChanges(false);
       onClose();
     } catch {
@@ -211,18 +230,22 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
       if (!confirm('You have unsaved changes. Discard them?')) return;
     }
     setFormData({
-      fullName: "",
-      username: "",
-      bio: "",
-      phone: "",
-      country: "",
-      website: "",
-      twitter: "",
-      instagram: "",
-      linkedin: "",
-      tradingStyle: "",
-      markets: "",
-      experience: "",
+      fullName: '',
+      username: '',
+      bio: '',
+      phone: '',
+      country: '',
+      website: '',
+      twitter: '',
+      instagram: '',
+      linkedin: '',
+      youtube: '',
+      github: '',
+      discord: '',
+      telegram: '',
+      tradingStyle: '',
+      markets: '',
+      experience: '',
     });
     onClose();
   };
@@ -279,10 +302,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                   Basic Info
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field
-                    label="Full Name"
-                    icon={<User size={12} />}
-                  >
+                  <Field label="Full Name" icon={<User size={12} />}>
                     <input
                       value={formData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
@@ -291,10 +311,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                       className={inputClass}
                     />
                   </Field>
-                  <Field
-                    label="Username"
-                    icon={<span className="text-xs font-bold">@</span>}
-                  >
+                  <Field label="Username" icon={<span className="text-xs font-bold">@</span>}>
                     <input
                       value={formData.username}
                       onChange={(e) => handleInputChange('username', e.target.value)}
@@ -324,10 +341,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                         className={inputClass}
                       />
                     </Field>
-                    <Field
-                      label="Country"
-                      icon={<MapPin size={12} />}
-                    >
+                    <Field label="Country" icon={<MapPin size={12} />}>
                       <select
                         value={formData.country}
                         onChange={(e) => handleInputChange('country', e.target.value)}
@@ -381,6 +395,38 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                       value={formData.linkedin}
                       onChange={(e) => handleInputChange('linkedin', e.target.value)}
                       placeholder="https://linkedin.com/in/you"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="YouTube">
+                    <input
+                      value={formData.youtube}
+                      onChange={(e) => handleInputChange('youtube', e.target.value)}
+                      placeholder="@channel or URL"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="GitHub">
+                    <input
+                      value={formData.github}
+                      onChange={(e) => handleInputChange('github', e.target.value)}
+                      placeholder="@username"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Discord">
+                    <input
+                      value={formData.discord}
+                      onChange={(e) => handleInputChange('discord', e.target.value)}
+                      placeholder="@username or user ID"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Telegram">
+                    <input
+                      value={formData.telegram}
+                      onChange={(e) => handleInputChange('telegram', e.target.value)}
+                      placeholder="@username"
                       className={inputClass}
                     />
                   </Field>

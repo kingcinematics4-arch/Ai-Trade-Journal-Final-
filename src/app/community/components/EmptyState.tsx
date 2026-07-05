@@ -14,7 +14,7 @@ export default function EmptyState({ type }: EmptyStateProps) {
       description: 'Your network is empty. Connect with other traders to see them here.',
       actionText: 'Discover Traders',
       actionHref: '/community/discover',
-      actionIcon: <UserPlus size={16} />
+      actionIcon: <UserPlus size={16} />,
     },
     invitations: {
       icon: <Inbox size={48} className="text-primary/50" />,
@@ -22,8 +22,8 @@ export default function EmptyState({ type }: EmptyStateProps) {
       description: 'You do not have any pending connection requests right now.',
       actionText: 'Find Connections',
       actionHref: '/community/discover',
-      actionIcon: <UserPlus size={16} />
-    }
+      actionIcon: <UserPlus size={16} />,
+    },
   };
 
   const current = config[type];
@@ -37,7 +37,7 @@ export default function EmptyState({ type }: EmptyStateProps) {
       <p className="text-muted-foreground max-w-md mx-auto mb-8 text-sm leading-relaxed">
         {current.description}
       </p>
-      <Link 
+      <Link
         href={current.actionHref}
         className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-sm font-semibold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
       >

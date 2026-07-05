@@ -44,7 +44,9 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const fetchedForRef = useRef<string | null>(null);
   // Stable ref so fetchProfile always reads the latest user without depending on the object
   const userRef = useRef(user);
-  useEffect(() => { userRef.current = user; }, [user]);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   // ── Fetch ────────────────────────────────────────────────────────────────────
   const fetchProfile = useCallback(async () => {
@@ -58,13 +60,14 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       // Build auth metadata from Supabase user object to seed missing fields
       const rawMeta = (currentUser.user_metadata ?? {}) as Record<string, unknown>;
       const meta: AuthMeta = {
-        full_name:          typeof rawMeta.full_name  === 'string' ? rawMeta.full_name  : null,
-        name:               typeof rawMeta.name       === 'string' ? rawMeta.name       : null,
-        email:              currentUser.email ?? (typeof rawMeta.email === 'string' ? rawMeta.email : null),
-        avatar_url:         typeof rawMeta.avatar_url === 'string' ? rawMeta.avatar_url : null,
-        picture:            typeof rawMeta.picture    === 'string' ? rawMeta.picture    : null,
-        preferred_username: typeof rawMeta.preferred_username === 'string' ? rawMeta.preferred_username : null,
-        user_name:          typeof rawMeta.user_name  === 'string' ? rawMeta.user_name  : null,
+        full_name: typeof rawMeta.full_name === 'string' ? rawMeta.full_name : null,
+        name: typeof rawMeta.name === 'string' ? rawMeta.name : null,
+        email: currentUser.email ?? (typeof rawMeta.email === 'string' ? rawMeta.email : null),
+        avatar_url: typeof rawMeta.avatar_url === 'string' ? rawMeta.avatar_url : null,
+        picture: typeof rawMeta.picture === 'string' ? rawMeta.picture : null,
+        preferred_username:
+          typeof rawMeta.preferred_username === 'string' ? rawMeta.preferred_username : null,
+        user_name: typeof rawMeta.user_name === 'string' ? rawMeta.user_name : null,
       };
 
       // initializeProfileFromAuth creates the row if missing and seeds NULL fields
@@ -116,9 +119,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           ...(data.linkedin !== undefined && { linkedin: data.linkedin || null }),
           ...(data.tradingStyle !== undefined && { tradingStyle: data.tradingStyle || null }),
           ...(data.markets !== undefined && {
-            markets: typeof data.markets === 'string'
-              ? (data.markets.trim() ? data.markets.split(',').map((m) => m.trim()).filter(Boolean) : null)
-              : (data.markets as string[]) || null,
+            markets:
+              typeof data.markets === 'string'
+                ? data.markets.trim()
+                  ? data.markets
+                      .split(',')
+                      .map((m) => m.trim())
+                      .filter(Boolean)
+                  : null
+                : (data.markets as string[]) || null,
           }),
           ...(data.experience !== undefined && { experience: data.experience || null }),
           ...(data.avatar_url !== undefined && { avatarUrl: data.avatar_url }),
@@ -127,7 +136,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const updated = await upsertProfile(user.id, data);
-        console.log("===== UPDATED PROFILE =====");
+        console.log('===== UPDATED PROFILE =====');
         console.log(updated);
         setDbProfile(updated);
       } catch (err) {

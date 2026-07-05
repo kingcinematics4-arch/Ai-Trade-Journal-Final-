@@ -1,5 +1,10 @@
 import { createClient } from '@/lib/supabase';
-import type { DbConnection, Connection, PublicTraderProfile, PaginatedTraders } from '@/types/community';
+import type {
+  DbConnection,
+  Connection,
+  PublicTraderProfile,
+  PaginatedTraders,
+} from '@/types/community';
 import { mapDbConnection } from '@/types/community';
 
 const PROFILES_PER_PAGE = 12;
@@ -51,9 +56,8 @@ async function fetchTradeStatsForUsers(userIds: string[]): Promise<Map<string, T
     const wins = group.statuses.filter((s) => s.toLowerCase() === 'win').length;
     const winRate = tradesLogged > 0 ? (wins / tradesLogged) * 100 : null;
     const totalPnl = group.pnl.reduce((sum, v) => sum + v, 0);
-    const avgRr = group.rr.length > 0
-      ? group.rr.reduce((sum, v) => sum + v, 0) / group.rr.length
-      : null;
+    const avgRr =
+      group.rr.length > 0 ? group.rr.reduce((sum, v) => sum + v, 0) / group.rr.length : null;
 
     statsMap.set(userId, {
       trades_logged: tradesLogged,
@@ -88,14 +92,13 @@ export async function getPublicTraders(
   sortBy: string = 'createdAt'
 ): Promise<PaginatedTraders> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const currentUserId = user?.id;
 
   // ── Step 1: Build the base query ──────────────────────────────────────
-  let query = supabase
-    .from('profiles')
-    .select('*', { count: 'exact' })
-    .eq('public_profile', true);
+  let query = supabase.from('profiles').select('*', { count: 'exact' }).eq('public_profile', true);
 
   // Exclude current user
   if (currentUserId) {
@@ -130,7 +133,7 @@ export async function getPublicTraders(
   // ── Step 4: Execute query and fetch trade stats ───────────────────────
   const { data: profiles, error, count } = await query;
 
-  console.log("===== RAW PROFILE FROM SUPABASE =====");
+  console.log('===== RAW PROFILE FROM SUPABASE =====');
   console.table(profiles);
 
   if (error) {
@@ -142,9 +145,11 @@ export async function getPublicTraders(
   const statsMap = await fetchTradeStatsForUsers(userIds);
 
   // ── Step 5: Merge stats and perform client-side sort if needed ────────
-  let traders: PublicTraderProfile[] = (profiles ?? []).map((p) => mapToPublicTrader(p, statsMap.get(p.id)));
+  const traders: PublicTraderProfile[] = (profiles ?? []).map((p) =>
+    mapToPublicTrader(p, statsMap.get(p.id))
+  );
 
-  console.log("===== MAPPED TRADERS WITH STATS =====");
+  console.log('===== MAPPED TRADERS WITH STATS =====');
   console.table(traders);
 
   // ── Step 8: Sort by stat-based fields in TypeScript ───────────────────
@@ -175,11 +180,7 @@ export async function getPublicTraders(
 export async function getPublicProfileById(userId: string): Promise<PublicTraderProfile | null> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
   if (error) {
     if (error.code === 'PGRST116' || error.code === '406') return null;
@@ -202,7 +203,9 @@ export async function getPublicProfileById(userId: string): Promise<PublicTrader
  * Fetch a single public profile by username.
  * Returns null if the profile is private or doesn't exist.
  */
-export async function getPublicProfileByUsername(username: string): Promise<PublicTraderProfile | null> {
+export async function getPublicProfileByUsername(
+  username: string
+): Promise<PublicTraderProfile | null> {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -250,7 +253,9 @@ export async function getConnectionStatus(targetUserId: string): Promise<Connect
  * Accept a pending connection request.
  */
 export async function acceptConnectionRequest(connectionId: string): Promise<Connection> {
-  console.warn('[communityService] acceptConnectionRequest: connections table not yet implemented.');
+  console.warn(
+    '[communityService] acceptConnectionRequest: connections table not yet implemented.'
+  );
   throw new Error('Connections feature is not yet available');
 }
 
@@ -258,7 +263,9 @@ export async function acceptConnectionRequest(connectionId: string): Promise<Con
  * Decline a pending connection request.
  */
 export async function declineConnectionRequest(connectionId: string): Promise<Connection> {
-  console.warn('[communityService] declineConnectionRequest: connections table not yet implemented.');
+  console.warn(
+    '[communityService] declineConnectionRequest: connections table not yet implemented.'
+  );
   throw new Error('Connections feature is not yet available');
 }
 
@@ -285,7 +292,12 @@ function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfil
     country: profile.country ?? null,
     tradingStyle: profile.trading_style ?? null,
     // DB stores comma-separated string; split into array for the UI
-    markets: profile.markets ? profile.markets.split(',').map((m: string) => m.trim()).filter(Boolean) : null,
+    markets: profile.markets
+      ? profile.markets
+          .split(',')
+          .map((m: string) => m.trim())
+          .filter(Boolean)
+      : null,
     experience: profile.experience ?? null,
     tradesLogged: stats?.trades_logged ?? 0,
     winRate: stats?.win_rate ?? null,
@@ -294,5 +306,14 @@ function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfil
     showStats: profile.show_stats ?? true,
     publicProfile: profile.public_profile,
     createdAt: profile.created_at,
+    website: profile.website ?? null,
+    twitter: profile.twitter ?? null,
+    instagram: profile.instagram ?? null,
+    instagramAvatar: profile.instagram_avatar ?? null,
+    linkedin: profile.linkedin ?? null,
+    youtube: profile.youtube ?? null,
+    github: profile.github ?? null,
+    discord: profile.discord ?? null,
+    telegram: profile.telegram ?? null,
   };
 }

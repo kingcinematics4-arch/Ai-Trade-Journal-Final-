@@ -64,7 +64,9 @@ export default function DangerZone() {
           <div className="flex items-start gap-3 min-w-0">
             <LogOut size={16} className="mt-0.5 text-muted-foreground/60 flex-shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-foreground">{t('settings.logOutEverywhere')}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {t('settings.logOutEverywhere')}
+              </p>
               <p className="text-xs text-muted-foreground/60 mt-0.5">
                 {t('settings.logOutEverywhereDesc')}
               </p>
@@ -129,7 +131,9 @@ export default function DangerZone() {
                   <Trash2 size={18} className="text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-foreground">{t('settings.deleteAccount')}</h3>
+                  <h3 className="text-base font-bold text-foreground">
+                    {t('settings.deleteAccount')}
+                  </h3>
                   <p className="text-xs text-muted-foreground">
                     {t('settings.thisActionIsPermanent')}
                   </p>
@@ -139,12 +143,15 @@ export default function DangerZone() {
               <p className="text-sm text-muted-foreground mb-4">
                 {t('settings.allDataWillBeDeleted')}
                 Your account for{' '}
-                <span className="text-foreground font-semibold">{user?.email}</span> {t('settings.accountCannotBeRecovered')}
+                <span className="text-foreground font-semibold">{user?.email}</span>{' '}
+                {t('settings.accountCannotBeRecovered')}
               </p>
 
               <div className="space-y-2 mb-5">
                 <label className="text-xs font-semibold text-muted-foreground">
-                  {t('settings.typeToConfirm')} <span className="text-red-400 font-bold font-mono">{CONFIRM_PHRASE}</span> {t('settings.toConfirm')}
+                  {t('settings.typeToConfirm')}{' '}
+                  <span className="text-red-400 font-bold font-mono">{CONFIRM_PHRASE}</span>{' '}
+                  {t('settings.toConfirm')}
                 </label>
                 <input
                   type="text"

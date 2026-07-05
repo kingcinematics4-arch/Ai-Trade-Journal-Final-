@@ -274,7 +274,9 @@ export default function AnalyticsView() {
         <div className="card-elevated border-red-500/20 bg-red-500/5 p-6 rounded-xl flex items-center gap-4">
           <AlertTriangle className="text-red-400 flex-shrink-0" size={24} />
           <div>
-            <h3 className="font-semibold text-foreground text-sm">{t('analytics.view.engineInterrupted')}</h3>
+            <h3 className="font-semibold text-foreground text-sm">
+              {t('analytics.view.engineInterrupted')}
+            </h3>
             <p className="text-xs text-muted-foreground mt-1">{error}</p>
           </div>
         </div>
@@ -312,7 +314,9 @@ export default function AnalyticsView() {
           >
             <Compass size={36} className="text-primary" />
           </motion.div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">{t('analytics.view.noTradingRecords')}</h3>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            {t('analytics.view.noTradingRecords')}
+          </h3>
           <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">
             {t('analytics.view.noTradingRecordsDesc')}
           </p>

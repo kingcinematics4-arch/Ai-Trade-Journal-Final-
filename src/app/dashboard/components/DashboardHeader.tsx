@@ -17,7 +17,7 @@ const timeframes = [
   'dashboard.timeframes.thisWeek',
   'dashboard.timeframes.thisMonth',
   'dashboard.timeframes.last3Months',
-  'dashboard.timeframes.allTime'
+  'dashboard.timeframes.allTime',
 ];
 
 export default function DashboardHeader() {

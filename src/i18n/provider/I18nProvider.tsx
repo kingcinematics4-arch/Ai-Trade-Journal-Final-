@@ -163,7 +163,7 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
       if (!value && locale !== defaultLocale && englishTranslations) {
         // Try direct fallback first
         value = getValue(englishTranslations, key);
-        
+
         // Try searching across all English namespaces
         if (!value) {
           const namespaceKeys = Object.keys(englishTranslations);
@@ -175,9 +175,11 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
             if (value) break;
           }
         }
-        
+
         if (value && process.env.NODE_ENV === 'development') {
-          console.warn(`Translation key "${key}" not found for locale "${locale}", using English fallback`);
+          console.warn(
+            `Translation key "${key}" not found for locale "${locale}", using English fallback`
+          );
         }
       }
 

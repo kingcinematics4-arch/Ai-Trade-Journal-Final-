@@ -134,18 +134,18 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
     if (process.env.NODE_ENV === 'development') {
       console.error('[avatarService] uploadAvatar error (dev):', uploadError);
     }
-    
+
     let friendlyMessage = 'Failed to upload avatar. Please try again.';
     const msg = uploadError.message?.toLowerCase() || '';
-    
+
     if (msg.includes('bucket not found') || msg.includes('not found')) {
       friendlyMessage = 'Storage bucket is missing. Please ensure the "avatars" bucket is created.';
     } else if (
-      msg.includes('row-level security') || 
-      msg.includes('violates') || 
-      msg.includes('policy') || 
-      msg.includes('security') || 
-      msg.includes('permission denied') || 
+      msg.includes('row-level security') ||
+      msg.includes('violates') ||
+      msg.includes('policy') ||
+      msg.includes('security') ||
+      msg.includes('permission denied') ||
       msg.includes('unauthorized')
     ) {
       friendlyMessage = 'Upload permission denied.';
@@ -154,7 +154,7 @@ export async function uploadAvatar(userId: string, file: File): Promise<AvatarUp
     } else {
       friendlyMessage = 'Storage configuration is incorrect. ' + uploadError.message;
     }
-    
+
     throw new Error(friendlyMessage);
   }
 

@@ -93,7 +93,9 @@ export default function AdvancedMetricsPanel({ stats }: AdvancedMetricsPanelProp
     <div className="card-elevated p-6 space-y-6">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <div>
-          <h3 className="text-base font-semibold text-foreground">{t('analytics.advanced.title')}</h3>
+          <h3 className="text-base font-semibold text-foreground">
+            {t('analytics.advanced.title')}
+          </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {t('analytics.advanced.description')}
           </p>

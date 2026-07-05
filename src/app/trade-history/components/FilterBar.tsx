@@ -61,7 +61,10 @@ export default function FilterBar({
   const sortOptions = [
     { value: 'newest', label: t('trading.tradeHistory.filterBar.sortOptions.newest') },
     { value: 'oldest', label: t('trading.tradeHistory.filterBar.sortOptions.oldest') },
-    { value: 'highest-profit', label: t('trading.tradeHistory.filterBar.sortOptions.highestProfit') },
+    {
+      value: 'highest-profit',
+      label: t('trading.tradeHistory.filterBar.sortOptions.highestProfit'),
+    },
     { value: 'biggest-loss', label: t('trading.tradeHistory.filterBar.sortOptions.biggestLoss') },
   ];
 
@@ -94,7 +97,9 @@ export default function FilterBar({
         <div className="h-8 w-px bg-border hidden lg:block" />
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">{t('trading.tradeHistory.filterBar.statusLabel')}</span>
+          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">
+            {t('trading.tradeHistory.filterBar.statusLabel')}
+          </span>
           {statusOptions.map((opt) => (
             <button
               key={opt.value}
@@ -113,7 +118,9 @@ export default function FilterBar({
         <div className="h-8 w-px bg-border hidden lg:block" />
 
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">{t('trading.tradeHistory.filterBar.typeLabel')}</span>
+          <span className="text-xs text-muted-foreground font-medium mr-1 lg:hidden">
+            {t('trading.tradeHistory.filterBar.typeLabel')}
+          </span>
           {directionOptions.map((opt) => (
             <button
               key={opt.value}
@@ -134,7 +141,9 @@ export default function FilterBar({
       <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-border/40">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <SlidersHorizontal size={13} />
-          <span className="text-xs font-medium">{t('trading.tradeHistory.filterBar.filtersLabel')}</span>
+          <span className="text-xs font-medium">
+            {t('trading.tradeHistory.filterBar.filtersLabel')}
+          </span>
         </div>
 
         <select

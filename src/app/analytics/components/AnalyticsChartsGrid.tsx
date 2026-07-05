@@ -78,7 +78,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
     const isStart = data.tradeNumber === 0;
     const tradeNum =
       label !== undefined && label !== null && label !== '' ? label : data.tradeNumber;
-    const title = isStart ? t('analytics.charts.tooltip.startingPoint') : t('analytics.charts.tooltip.tradeNumber', { number: tradeNum, date: data.date || '—' });
+    const title = isStart
+      ? t('analytics.charts.tooltip.startingPoint')
+      : t('analytics.charts.tooltip.tradeNumber', { number: tradeNum, date: data.date || '—' });
     const color =
       item.stroke && typeof item.stroke === 'string' && !item.stroke.includes('url')
         ? item.stroke
@@ -102,7 +104,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
 
         {!isStart && (
           <div className="flex justify-between gap-4 mb-1">
-            <span className="text-muted-foreground">{t('analytics.charts.tooltip.tradeReturn')}</span>
+            <span className="text-muted-foreground">
+              {t('analytics.charts.tooltip.tradeReturn')}
+            </span>
             <span
               className={`font-bold font-tabular ${(data.pnl || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}
             >
@@ -167,7 +171,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
           data.totalTrades !== undefined ||
           data.tradesCount !== undefined) && (
           <div className="flex justify-between gap-4 mt-1">
-            <span className="text-muted-foreground">{t('analytics.charts.tooltip.tradesLogged')}</span>
+            <span className="text-muted-foreground">
+              {t('analytics.charts.tooltip.tradesLogged')}
+            </span>
             <span className="font-semibold text-foreground font-tabular">
               {data.trades ?? data.totalTrades ?? data.tradesCount}
             </span>
@@ -205,10 +211,15 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-muted-foreground">{t('analytics.charts.tooltip.occurrences')}</span>
-          <span className="font-bold text-foreground font-tabular">{value}{t('analytics.charts.tooltip.tradesSuffix')}</span>
+          <span className="font-bold text-foreground font-tabular">
+            {value}
+            {t('analytics.charts.tooltip.tradesSuffix')}
+          </span>
         </div>
         <div className="flex justify-between gap-4 mt-1">
-          <span className="text-muted-foreground">{t('analytics.charts.tooltip.distribution')}</span>
+          <span className="text-muted-foreground">
+            {t('analytics.charts.tooltip.distribution')}
+          </span>
           <span className="font-bold text-foreground font-tabular">{percentage.toFixed(1)}%</span>
         </div>
       </div>
@@ -259,7 +270,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Equity curve */}
               <div className="lg:col-span-2 space-y-2 order-2 lg:order-1">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.equityGrowth')}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {t('analytics.charts.equityGrowth')}
+                  </h4>
                   <p className="text-[11px] text-muted-foreground">
                     {t('analytics.charts.equityGrowthDesc')}
                   </p>
@@ -332,7 +345,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Pie distribution chart */}
               <div className="space-y-2 flex flex-col justify-between order-1 lg:order-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.winLossRatio')}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {t('analytics.charts.winLossRatio')}
+                  </h4>
                   <p className="text-[11px] text-muted-foreground">
                     {t('analytics.charts.winLossRatioDesc')}
                   </p>
@@ -404,7 +419,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Daily day of week performance */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.dayOfWeek')}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {t('analytics.charts.dayOfWeek')}
+                  </h4>
                   <p className="text-[11px] text-muted-foreground">
                     {t('analytics.charts.dayOfWeekDesc')}
                   </p>
@@ -455,7 +472,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Monthly P&L performance */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.monthlyPnl')}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {t('analytics.charts.monthlyPnl')}
+                  </h4>
                   <p className="text-[11px] text-muted-foreground">
                     {t('analytics.charts.monthlyPnlDesc')}
                   </p>
@@ -522,7 +541,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Pair performance breakdown */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.assetPairPnl')}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {t('analytics.charts.assetPairPnl')}
+                  </h4>
                   <p className="text-[11px] text-muted-foreground">
                     {t('analytics.charts.assetPairPnlDesc')}
                   </p>
@@ -578,7 +599,9 @@ export default function AnalyticsChartsGrid({ stats }: AnalyticsChartsGridProps)
               {/* Strategy performance breakdown */}
               <div className="space-y-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">{t('analytics.charts.strategyReturn')}</h4>
+                  <h4 className="text-sm font-semibold text-foreground">
+                    {t('analytics.charts.strategyReturn')}
+                  </h4>
                   <p className="text-[11px] text-muted-foreground">
                     {t('analytics.charts.strategyReturnDesc')}
                   </p>

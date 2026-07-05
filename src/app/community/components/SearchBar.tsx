@@ -10,11 +10,14 @@ interface SearchBarProps {
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState('');
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setQuery(value);
-    onSearch?.(value);
-  }, [onSearch]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setQuery(value);
+      onSearch?.(value);
+    },
+    [onSearch]
+  );
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-8">

@@ -10,11 +10,8 @@ export const metadata: Metadata = {
 export default function NetworkPage() {
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto min-h-[80vh] flex flex-col">
-      <CommunityHeader 
-        title="My Network" 
-        subtitle="Manage your connections and trading network." 
-      />
-      
+      <CommunityHeader title="My Network" subtitle="Manage your connections and trading network." />
+
       <div className="flex-1 flex items-center justify-center">
         <EmptyState type="network" />
       </div>

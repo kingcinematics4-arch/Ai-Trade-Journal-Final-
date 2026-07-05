@@ -67,13 +67,11 @@ export default function GoalsMiniPanel() {
                   : 0;
 
             return (
-              <Link
-                key={goal.id}
-                href="/goals"
-                className="space-y-1.5 block group"
-              >
+              <Link key={goal.id} href="/goals" className="space-y-1.5 block group">
                 <div className="flex justify-between text-xs">
-                  <span className="font-medium text-foreground truncate group-hover:text-primary transition-colors">{goal.title}</span>
+                  <span className="font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                    {goal.title}
+                  </span>
                   <span className="text-muted-foreground shrink-0">{Math.round(progress)}%</span>
                 </div>
                 <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">

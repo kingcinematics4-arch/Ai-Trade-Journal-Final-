@@ -49,6 +49,15 @@ export interface PublicTraderProfile {
   showStats: boolean;
   publicProfile: boolean;
   createdAt: string;
+  website: string | null;
+  twitter: string | null;
+  instagram: string | null;
+  instagramAvatar: string | null;
+  linkedin: string | null;
+  youtube: string | null;
+  github: string | null;
+  discord: string | null;
+  telegram: string | null;
 }
 
 /** Pagination response for community queries */

@@ -35,7 +35,9 @@ export default function TradeHistoryHeader() {
           <ArrowLeft size={16} />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold text-foreground">{t('trading.tradeHistory.title')}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">
+            {t('trading.tradeHistory.title')}
+          </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {t('trading.tradeHistory.description')}
           </p>

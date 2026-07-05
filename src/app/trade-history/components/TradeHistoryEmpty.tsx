@@ -24,7 +24,9 @@ export default function TradeHistoryEmpty() {
       >
         <BookOpen size={36} className="text-primary" />
       </motion.div>
-      <h3 className="text-xl font-semibold text-foreground mb-2">{t('trading.tradeHistory.empty.title')}</h3>
+      <h3 className="text-xl font-semibold text-foreground mb-2">
+        {t('trading.tradeHistory.empty.title')}
+      </h3>
       <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">
         {t('trading.tradeHistory.empty.description')}
       </p>

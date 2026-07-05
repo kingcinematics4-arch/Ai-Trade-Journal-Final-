@@ -84,7 +84,7 @@ const scrollbarHideStyle = `
 
 export default function AuthFormPanel() {
   const { t } = useTranslation();
-  
+
   const experienceLevels = [
     { value: 'beginner', label: t('auth.signup.experienceLevels.beginner') },
     { value: 'intermediate', label: t('auth.signup.experienceLevels.intermediate') },
@@ -205,7 +205,9 @@ export default function AuthFormPanel() {
 
   const handleSignupSubmit = async (data: SignupFormData) => {
     if (data.password !== data.confirmPassword) {
-      signupForm.setError('confirmPassword', { message: t('auth.signup.error.passwordsDoNotMatch') });
+      signupForm.setError('confirmPassword', {
+        message: t('auth.signup.error.passwordsDoNotMatch'),
+      });
       toast.error(t('auth.signup.error.passwordsDoNotMatch'));
       return;
     }
@@ -384,7 +386,10 @@ export default function AuthFormPanel() {
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...loginForm.register('email', {
                       required: t('auth.login.error.emailRequired'),
-                      pattern: { value: /^\S+@\S+\.\S+$/, message: t('auth.common.invalidEmailFormat') },
+                      pattern: {
+                        value: /^\S+@\S+\.\S+$/,
+                        message: t('auth.common.invalidEmailFormat'),
+                      },
                     })}
                   />
                 </div>
@@ -423,7 +428,9 @@ export default function AuthFormPanel() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                    aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
+                    aria-label={
+                      showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')
+                    }
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -581,7 +588,10 @@ export default function AuthFormPanel() {
                     className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                     {...signupForm.register('email', {
                       required: t('auth.login.error.emailRequired'),
-                      pattern: { value: /^\S+@\S+\.\S+$/, message: t('auth.common.invalidEmailFormat') },
+                      pattern: {
+                        value: /^\S+@\S+\.\S+$/,
+                        message: t('auth.common.invalidEmailFormat'),
+                      },
                     })}
                   />
                 </div>
@@ -620,7 +630,9 @@ export default function AuthFormPanel() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                    aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
+                    aria-label={
+                      showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')
+                    }
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -660,7 +672,9 @@ export default function AuthFormPanel() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
                     aria-label={
-                      showConfirmPassword ? t('auth.common.hideConfirmPassword') : t('auth.common.showConfirmPassword')
+                      showConfirmPassword
+                        ? t('auth.common.hideConfirmPassword')
+                        : t('auth.common.showConfirmPassword')
                     }
                   >
                     {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -690,7 +704,9 @@ export default function AuthFormPanel() {
                     <select
                       id="signup-experience"
                       className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                      {...signupForm.register('experienceLevel', { required: t('auth.signup.error.experienceRequired') })}
+                      {...signupForm.register('experienceLevel', {
+                        required: t('auth.signup.error.experienceRequired'),
+                      })}
                     >
                       <option value="" className="bg-slate-900">
                         {t('auth.signup.selectLevel')}
@@ -724,7 +740,9 @@ export default function AuthFormPanel() {
                     <select
                       id="signup-style"
                       className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                      {...signupForm.register('tradingStyle', { required: t('auth.signup.error.styleRequired') })}
+                      {...signupForm.register('tradingStyle', {
+                        required: t('auth.signup.error.styleRequired'),
+                      })}
                     >
                       <option value="" className="bg-slate-900">
                         {t('auth.signup.selectStyle')}
@@ -1055,14 +1073,21 @@ export default function AuthFormPanel() {
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...loginForm.register('password', {
                                 required: t('auth.login.error.passwordRequired'),
-                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
+                                minLength: {
+                                  value: 8,
+                                  message: t('auth.signup.error.passwordMinLength'),
+                                },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
+                              aria-label={
+                                showPassword
+                                  ? t('auth.common.hidePassword')
+                                  : t('auth.common.showPassword')
+                              }
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1264,14 +1289,21 @@ export default function AuthFormPanel() {
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('password', {
                                 required: t('auth.login.error.passwordRequired'),
-                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
+                                minLength: {
+                                  value: 8,
+                                  message: t('auth.signup.error.passwordMinLength'),
+                                },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
+                              aria-label={
+                                showPassword
+                                  ? t('auth.common.hidePassword')
+                                  : t('auth.common.showPassword')
+                              }
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1383,7 +1415,9 @@ export default function AuthFormPanel() {
                               <select
                                 id="signup-style"
                                 className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('tradingStyle', { required: t('auth.signup.error.styleRequired') })}
+                                {...signupForm.register('tradingStyle', {
+                                  required: t('auth.signup.error.styleRequired'),
+                                })}
                               >
                                 <option value="" className="bg-slate-900">
                                   {t('auth.signup.selectStyle')}
@@ -1690,14 +1724,21 @@ export default function AuthFormPanel() {
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...loginForm.register('password', {
                                 required: t('auth.login.error.passwordRequired'),
-                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
+                                minLength: {
+                                  value: 8,
+                                  message: t('auth.signup.error.passwordMinLength'),
+                                },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
+                              aria-label={
+                                showPassword
+                                  ? t('auth.common.hidePassword')
+                                  : t('auth.common.showPassword')
+                              }
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -1888,14 +1929,21 @@ export default function AuthFormPanel() {
                               className="w-full bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 focus:shadow-[0_0_15px_rgba(59,130,246,0.1)] rounded-xl pl-10 pr-10 py-3 sm:py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
                               {...signupForm.register('password', {
                                 required: t('auth.login.error.passwordRequired'),
-                                minLength: { value: 8, message: t('auth.signup.error.passwordMinLength') },
+                                minLength: {
+                                  value: 8,
+                                  message: t('auth.signup.error.passwordMinLength'),
+                                },
                               })}
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
                               className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-500/40 rounded-md"
-                              aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}
+                              aria-label={
+                                showPassword
+                                  ? t('auth.common.hidePassword')
+                                  : t('auth.common.showPassword')
+                              }
                             >
                               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
@@ -2002,7 +2050,9 @@ export default function AuthFormPanel() {
                               <select
                                 id="signup-style-focused"
                                 className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('tradingStyle', { required: t('auth.signup.error.styleRequired') })}
+                                {...signupForm.register('tradingStyle', {
+                                  required: t('auth.signup.error.styleRequired'),
+                                })}
                               >
                                 <option value="" className="bg-slate-900">
                                   {t('auth.signup.selectStyle')}

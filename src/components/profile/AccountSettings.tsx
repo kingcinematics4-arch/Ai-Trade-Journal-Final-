@@ -1,19 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  Mail,
-  Lock,
-  Bell,
-  Shield,
-  ChevronRight,
-  Loader2,
-  Check,
-} from 'lucide-react';
+import { Mail, Lock, Bell, Shield, ChevronRight, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationsContext';
-import { sendPasswordReset, updateEmail, getProfile, updatePublicProfile } from '@/services/profileService';
+import {
+  sendPasswordReset,
+  updateEmail,
+  getProfile,
+  updatePublicProfile,
+} from '@/services/profileService';
 import { NotificationSettings } from '@/services/notificationService';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { locales, localeNames, localeFlags } from '@/i18n/config';
@@ -96,13 +93,15 @@ export default function AccountSettings() {
   // Load public profile from profiles table
   useEffect(() => {
     if (!user?.id) return;
-    getProfile(user.id).then((profile) => {
-      if (profile) {
-        setPublicProfile(profile.publicProfile);
-      }
-    }).catch(() => {
-      // Silently fail — default to false
-    });
+    getProfile(user.id)
+      .then((profile) => {
+        if (profile) {
+          setPublicProfile(profile.publicProfile);
+        }
+      })
+      .catch(() => {
+        // Silently fail — default to false
+      });
   }, [user?.id]);
 
   const handleToggle = (key: keyof NotificationSettings, value: boolean) => {
@@ -303,7 +302,7 @@ export default function AccountSettings() {
             }))}
             value={locale}
             onSelect={async (value) => {
-              const newLocale = value as typeof locales[number];
+              const newLocale = value as (typeof locales)[number];
               await setLocale(newLocale);
             }}
             placeholder={t('settings.language')}

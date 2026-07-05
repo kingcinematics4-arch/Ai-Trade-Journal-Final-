@@ -44,7 +44,7 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
             pair: best.pair,
             pnl: formatCurrency(best.pnl),
             trades: best.totalTrades,
-            winRate: best.winRate.toFixed(1)
+            winRate: best.winRate.toFixed(1),
           }),
         });
       }
@@ -81,7 +81,7 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
           text: t('analytics.insights.strongWinLossText', {
             avgWin: formatCurrency(stats.averageWin),
             avgLoss: formatCurrency(stats.averageLoss),
-            ratio: ratio.toFixed(1)
+            ratio: ratio.toFixed(1),
           }),
         });
       } else if (ratio < 0.9) {
@@ -92,7 +92,7 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
           text: t('analytics.insights.negativeDistributionText', {
             avgLoss: formatCurrency(stats.averageLoss),
             avgWin: formatCurrency(stats.averageWin),
-            percent: ((1 / ratio) * 100).toFixed(0)
+            percent: ((1 / ratio) * 100).toFixed(0),
           }),
         });
       }
@@ -109,7 +109,7 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
           text: t('analytics.insights.marketFrictionText', {
             pair: worst.pair,
             pnl: formatCurrency(worst.pnl),
-            trades: worst.totalTrades
+            trades: worst.totalTrades,
           }),
         });
       }
@@ -126,7 +126,7 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
           text: t('analytics.insights.strategyAdaptationText', {
             strategy: worstStrat.strategy,
             pnl: formatCurrency(worstStrat.pnl),
-            winRate: worstStrat.winRate.toFixed(1)
+            winRate: worstStrat.winRate.toFixed(1),
           }),
         });
       }
@@ -148,7 +148,9 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
         id: 'insight-expectancy-positive',
         type: 'positive',
         title: t('analytics.insights.viableSystem'),
-        text: t('analytics.insights.viableSystemText', { expectancy: formatCurrency(stats.expectancy) }),
+        text: t('analytics.insights.viableSystemText', {
+          expectancy: formatCurrency(stats.expectancy),
+        }),
       });
     }
 
@@ -189,7 +191,9 @@ export default function DynamicInsightsCard({ stats }: DynamicInsightsCardProps)
             <BrainCircuit size={16} className="text-violet-400 animate-pulse" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-foreground">{t('analytics.insights.title')}</h4>
+            <h4 className="text-sm font-semibold text-foreground">
+              {t('analytics.insights.title')}
+            </h4>
             <p className="text-[10px] text-muted-foreground">
               {t('analytics.insights.description')}
             </p>

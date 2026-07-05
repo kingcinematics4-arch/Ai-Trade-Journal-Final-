@@ -128,7 +128,13 @@ export default function KpiCard({
       </p>
 
       <div className="flex items-start gap-3">
-        <p className={cn('font-medium text-muted-foreground/60 leading-tight', subtitleSize, 'flex-1')}>
+        <p
+          className={cn(
+            'font-medium text-muted-foreground/60 leading-tight',
+            subtitleSize,
+            'flex-1'
+          )}
+        >
           {subtext}
         </p>
         {trendValue && trendValue !== '—' && (
@@ -152,17 +158,13 @@ export default function KpiCard({
   const cardClassName = cn(
     'relative card-premium h-full p-6 overflow-hidden transition-all duration-200',
     isAlert ? 'border-amber-500/30' : '',
-    (href || onClick) && 'hover:scale-[1.01] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background'
+    (href || onClick) &&
+      'hover:scale-[1.01] hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background'
   );
 
   if (href) {
     return (
-      <Link
-        id={id}
-        href={href}
-        className={cardClassName}
-        aria-label={`View ${label} details`}
-      >
+      <Link id={id} href={href} className={cardClassName} aria-label={`View ${label} details`}>
         {cardContent}
       </Link>
     );
@@ -182,10 +184,7 @@ export default function KpiCard({
   }
 
   return (
-    <div
-      id={id}
-      className={cardClassName}
-    >
+    <div id={id} className={cardClassName}>
       {cardContent}
     </div>
   );
