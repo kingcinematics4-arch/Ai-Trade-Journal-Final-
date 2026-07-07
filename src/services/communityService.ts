@@ -196,7 +196,9 @@ export async function getPublicProfileById(userId: string): Promise<PublicTrader
   // Fetch trade stats separately
   const stats = await fetchTradeStatsForUser(userId);
 
-  return mapToPublicTrader(data, stats);
+  const profile = mapToPublicTrader(data, stats);
+  profile.email = (data as any).email ?? null;
+  return profile;
 }
 
 /**
@@ -228,7 +230,9 @@ export async function getPublicProfileByUsername(
   // Fetch trade stats separately
   const stats = await fetchTradeStatsForUser(data.id);
 
-  return mapToPublicTrader(data, stats);
+  const profile = mapToPublicTrader(data, stats);
+  profile.email = (data as any).email ?? null;
+  return profile;
 }
 
 // ─── Connection Requests ────────────────────────────────────────────────────

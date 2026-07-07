@@ -118,6 +118,9 @@ export default function PublicProfileClient({ profile }: Props) {
               {profile.username && (
                 <p className="text-sm text-muted-foreground mt-1">@{profile.username}</p>
               )}
+              {profile.email && (
+                <p className="text-sm text-muted-foreground mt-1">{profile.email}</p>
+              )}
               {profile.bio && (
                 <p className="text-sm text-slate-400 mt-3 max-w-2xl">{profile.bio}</p>
               )}

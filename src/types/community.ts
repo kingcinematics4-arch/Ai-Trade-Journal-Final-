@@ -34,6 +34,7 @@ export function mapDbConnection(row: DbConnection): Connection {
 export interface PublicTraderProfile {
   id: string;
   username: string | null;
+  email: string | null;
   fullName: string | null;
   bio: string | null;
   avatarUrl: string | null;

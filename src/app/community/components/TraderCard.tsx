@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PublicTraderProfile } from '@/types/community';
+import { getCountryCode } from './CountryFlag';
 
 interface TraderCardProps {
   trader: PublicTraderProfile;
@@ -15,6 +16,13 @@ function getInitials(name: string): string {
   return 'NT';
 }
 
+function getFlagEmoji(countryCode: string): string {
+  if (!countryCode) return '';
+  return countryCode
+    .toUpperCase()
+    .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+
 const TraderCardComponent = ({ trader }: TraderCardProps) => {
   const router = useRouter();
 
@@ -25,6 +33,20 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
   }, [trader.fullName, trader.username]);
 
   const initials = useMemo(() => getInitials(displayName), [displayName]);
+
+  const flagEmoji = useMemo(
+    () => getFlagEmoji(getCountryCode(trader.country || '')),
+    [trader.country],
+  );
+
+  const metadata = useMemo(() => {
+    const parts = [trader.country, ...(trader.markets || []), trader.tradingStyle].filter(
+      Boolean,
+    ) as string[];
+    if (!parts.length) return '';
+    if (trader.country && flagEmoji) parts[0] = `${flagEmoji} ${trader.country}`;
+    return parts.join(' • ');
+  }, [trader.country, trader.markets, trader.tradingStyle, flagEmoji]);
 
   const handleViewProfile = () => {
     const slug = trader.username?.toLowerCase() ?? trader.id;
@@ -47,19 +69,14 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
         </div>
       </div>
 
-      <div className="w-[55%] flex flex-col justify-center">
+      <div className="w-[55%] ml-5 flex flex-col justify-center">
         <h2 className="text-[16px] font-semibold text-white leading-tight">{displayName}</h2>
-        {trader.username && (
-          <p className="text-[13px] text-white/40 leading-tight mt-0.5">@{trader.username}</p>
-        )}
         {trader.bio && (
-          <p className="text-[13px] text-white/50 leading-tight mt-1 line-clamp-2">{trader.bio}</p>
+          <p className="text-[13px] text-white/50 leading-tight mt-2 line-clamp-2">{trader.bio}</p>
         )}
-        <p className="text-[11px] text-white/40 leading-tight mt-1">
-          {trader.country && trader.tradingStyle
-            ? `${trader.country} • ${trader.tradingStyle}`
-            : trader.country || trader.tradingStyle || ''}
-        </p>
+        {metadata && (
+          <p className="text-[11px] text-white/40 leading-tight mt-1 truncate">{metadata}</p>
+        )}
       </div>
 
       <div className="w-[25%] flex flex-col items-end justify-center gap-2">
