@@ -70,12 +70,12 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
       </div>
 
       <div className="w-[55%] ml-5 flex flex-col justify-center">
-        <h2 className="text-[16px] font-semibold text-white leading-tight">{displayName}</h2>
+        <h2 className="text-[14px] font-semibold text-white leading-tight">{displayName}</h2>
         {trader.bio && (
-          <p className="text-[13px] text-white/50 leading-tight mt-2 line-clamp-2">{trader.bio}</p>
+          <p className="text-[11px] text-white/50 leading-tight mt-2 line-clamp-2">{trader.bio}</p>
         )}
         {metadata && (
-          <p className="text-[11px] text-white/40 leading-tight mt-1 truncate">{metadata}</p>
+          <p className="text-[10px] text-white/40 leading-tight mt-1 truncate">{metadata}</p>
         )}
       </div>
 
@@ -84,7 +84,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           <span className="block text-[18px] font-semibold text-white leading-tight">
             {trader.winRate !== null ? `${Math.round(trader.winRate)}%` : '--'}
           </span>
-          <span className="block text-[11px] text-white/40 uppercase tracking-wider leading-tight">
+          <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
             Win Rate
           </span>
         </div>
@@ -92,7 +92,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           <span className="block text-[18px] font-semibold text-white leading-tight">
             {trader.tradesLogged > 0 ? String(trader.tradesLogged) : '--'}
           </span>
-          <span className="block text-[11px] text-white/40 uppercase tracking-wider leading-tight">
+          <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
             Trades
           </span>
         </div>
@@ -100,7 +100,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           <span className="block text-[18px] font-semibold text-white leading-tight">
             {trader.experience || 'Professional'}
           </span>
-          <span className="block text-[11px] text-white/40 uppercase tracking-wider leading-tight">
+          <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
             Level
           </span>
         </div>
