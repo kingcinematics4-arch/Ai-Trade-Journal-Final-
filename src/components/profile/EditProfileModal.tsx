@@ -322,14 +322,19 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                     />
                   </Field>
                   <Field label="Bio" icon={<FileText size={12} />}>
-                    <textarea
-                      value={formData.bio}
-                      onChange={(e) => handleInputChange('bio', e.target.value)}
-                      placeholder="Tell traders a bit about yourself…"
-                      maxLength={200}
-                      rows={3}
-                      className={`${inputClass} resize-none`}
-                    />
+                    <div className="relative">
+                      <textarea
+                        value={formData.bio}
+                        onChange={(e) => handleInputChange('bio', e.target.value)}
+                        placeholder="Tell traders a bit about yourself…"
+                        maxLength={100}
+                        rows={3}
+                        className={`${inputClass} resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
+                      />
+                      <span className="absolute bottom-2 right-2.5 text-[11px] text-slate-400 pointer-events-none">
+                        {formData.bio.length}/100
+                      </span>
+                    </div>
                   </Field>
                   <div className="space-y-4">
                     <Field label="Phone" icon={<Phone size={12} />}>
