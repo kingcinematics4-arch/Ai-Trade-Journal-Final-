@@ -69,13 +69,13 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
         </div>
       </div>
 
-      <div className="w-[55%] ml-5 flex flex-col justify-center">
+      <div className="w-[55%] ml-5 self-stretch flex flex-col justify-start">
         <h2 className="text-[14px] font-semibold text-white leading-tight">{displayName}</h2>
         {trader.bio && (
           <p className="text-[11px] text-white/50 leading-tight mt-2 line-clamp-2">{trader.bio}</p>
         )}
         {metadata && (
-          <p className="text-[10px] text-white/40 leading-tight mt-1 truncate">{metadata}</p>
+          <p className="text-[10px] text-white/40 leading-tight mt-auto truncate">{metadata}</p>
         )}
       </div>
 
