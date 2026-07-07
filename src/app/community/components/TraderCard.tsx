@@ -24,6 +24,16 @@ function getFlagEmoji(countryCode: string): string {
     .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
 }
 
+const truncateBio = (bio?: string) => {
+  if (!bio) return '';
+
+  const MAX_BIO_LENGTH = 120;
+
+  return bio.length > MAX_BIO_LENGTH
+    ? bio.slice(0, MAX_BIO_LENGTH).trimEnd() + '...'
+    : bio;
+};
+
 const TraderCardComponent = ({ trader }: TraderCardProps) => {
   const router = useRouter();
 
@@ -48,10 +58,11 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
     () => (trader.markets && trader.markets.length ? trader.markets.join(' • ') : ''),
     [trader.markets],
   );
+  const bioText = useMemo(() => truncateBio(trader.bio), [trader.bio]);
+
   const styleText = useMemo(() => trader.tradingStyle || '', [trader.tradingStyle]);
 
   const levelText = useMemo(() => formatLevel(trader.experience), [trader.experience]);
-
   const handleViewProfile = () => {
     const slug = trader.username?.toLowerCase() ?? trader.id;
     router.push(`/community/profile/${slug}`);
@@ -63,7 +74,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
     <div className="h-[184px] w-full bg-[#0a0a0a] border border-white/[0.04] rounded-[18px] p-5 pb-7 flex flex-col justify-between cursor-pointer transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_6px_20px_rgba(59,130,246,0.12)]">
       {/* Top row: avatar + name/bio | stats | button */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="h-[56px] w-[56px] rounded-full overflow-hidden flex-shrink-0">
             {trader.avatarUrl ? (
               <img src={trader.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
@@ -78,15 +89,15 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
             <h2 className="text-[14px] font-semibold text-white leading-tight truncate">
               {displayName}
             </h2>
-            {trader.bio && (
-              <p className="text-[11px] text-white/50 leading-tight mt-2 line-clamp-2 truncate">
-                {trader.bio}
+            {bioText && (
+              <p className="text-[11px] text-white/50 leading-tight mt-2 line-clamp-3 break-words [overflow-wrap:anywhere] whitespace-normal">
+                {bioText}
               </p>
             )}
           </div>
         </div>
 
-        <div className="w-[25%] flex flex-col items-end justify-center gap-2">
+        <div className="w-[25%] flex flex-col items-end justify-center gap-2 flex-shrink-0">
           <div className="text-right">
             <span className="block text-[18px] font-semibold text-white leading-tight">
               {trader.winRate !== null ? `${Math.round(trader.winRate)}%` : '--'}

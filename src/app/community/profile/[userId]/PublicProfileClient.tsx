@@ -16,10 +16,14 @@ import {
 import type { PublicTraderProfile } from '@/types/community';
 import SocialLinkCard from '@/components/profile/SocialLinkCard';
 import { CountryFlag } from '@/app/community/components/CountryFlag';
-import { formatLevel } from '@/lib/format';
+import { formatLevel, truncateBio } from '@/lib/format';
 
 interface Props {
   profile: PublicTraderProfile;
+}
+
+function hasLink(value?: string | null): boolean {
+  return !!value && value.trim().length > 0;
 }
 
 const PREMIUM_GRADIENTS = [
@@ -123,7 +127,9 @@ export default function PublicProfileClient({ profile }: Props) {
                 <p className="text-sm text-muted-foreground mt-1">{profile.email}</p>
               )}
               {profile.bio && (
-                <p className="text-sm text-slate-400 mt-3 max-w-2xl">{profile.bio}</p>
+                <p className="text-sm text-slate-400 mt-3 max-w-2xl line-clamp-3 break-words [overflow-wrap:anywhere] whitespace-normal">
+                  {truncateBio(profile.bio)}
+                </p>
               )}
             </div>
           </div>
@@ -202,20 +208,20 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
           </div>
 
-          {(profile.website ||
-            profile.twitter ||
-            profile.instagram ||
-            profile.linkedin ||
-            profile.youtube ||
-            profile.github ||
-            profile.discord ||
-            profile.telegram) && (
+          {(hasLink(profile.website) ||
+            hasLink(profile.twitter) ||
+            hasLink(profile.instagram) ||
+            hasLink(profile.linkedin) ||
+            hasLink(profile.youtube) ||
+            hasLink(profile.github) ||
+            hasLink(profile.discord) ||
+            hasLink(profile.telegram)) && (
             <div className="mt-6">
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 Links
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {profile.website && (
+                {hasLink(profile.website) && (
                   <SocialLinkCard
                     platform="Website"
                     username={profile.website.replace(/^https?:\/\//, '')}
@@ -226,7 +232,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     }
                   />
                 )}
-                {profile.twitter && (
+                {hasLink(profile.twitter) && (
                   <SocialLinkCard
                     platform="Twitter/X"
                     username={
@@ -235,7 +241,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     url={`https://twitter.com/${profile.twitter.replace('@', '')}`}
                   />
                 )}
-                {profile.instagram && (
+                {hasLink(profile.instagram) && (
                   <SocialLinkCard
                     platform="Instagram"
                     username={
@@ -247,7 +253,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     avatar={profile.instagramAvatar}
                   />
                 )}
-                {profile.linkedin && (
+                {hasLink(profile.linkedin) && (
                   <SocialLinkCard
                     platform="LinkedIn"
                     username={profile.linkedin.replace(
@@ -261,7 +267,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     }
                   />
                 )}
-                {profile.youtube && (
+                {hasLink(profile.youtube) && (
                   <SocialLinkCard
                     platform="YouTube"
                     username={profile.youtube}
@@ -272,7 +278,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     }
                   />
                 )}
-                {profile.github && (
+                {hasLink(profile.github) && (
                   <SocialLinkCard
                     platform="GitHub"
                     username={
@@ -281,7 +287,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     url={`https://github.com/${profile.github.replace('@', '')}`}
                   />
                 )}
-                {profile.discord && (
+                {hasLink(profile.discord) && (
                   <SocialLinkCard
                     platform="Discord"
                     username={profile.discord}
@@ -292,7 +298,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     }
                   />
                 )}
-                {profile.telegram && (
+                {hasLink(profile.telegram) && (
                   <SocialLinkCard
                     platform="Telegram"
                     username={
