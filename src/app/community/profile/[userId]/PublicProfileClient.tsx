@@ -16,6 +16,7 @@ import {
 import type { PublicTraderProfile } from '@/types/community';
 import SocialLinkCard from '@/components/profile/SocialLinkCard';
 import { CountryFlag } from '@/app/community/components/CountryFlag';
+import { formatLevel } from '@/lib/format';
 
 interface Props {
   profile: PublicTraderProfile;
@@ -167,8 +168,8 @@ export default function PublicProfileClient({ profile }: Props) {
                 <Briefcase size={18} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Experience</p>
-                  <p className="text-sm font-medium text-foreground capitalize">
-                    {profile.experience}
+                  <p className="text-sm font-medium text-foreground">
+                    {formatLevel(profile.experience)}
                   </p>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PublicTraderProfile } from '@/types/community';
 import { getCountryCode } from './CountryFlag';
+import { formatLevel } from '@/lib/format';
 
 interface TraderCardProps {
   trader: PublicTraderProfile;
@@ -48,6 +49,8 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
     [trader.markets],
   );
   const styleText = useMemo(() => trader.tradingStyle || '', [trader.tradingStyle]);
+
+  const levelText = useMemo(() => formatLevel(trader.experience), [trader.experience]);
 
   const handleViewProfile = () => {
     const slug = trader.username?.toLowerCase() ?? trader.id;
@@ -102,7 +105,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           </div>
           <div className="text-right">
             <span className="block text-[18px] font-semibold text-white leading-tight">
-              {trader.experience || 'Professional'}
+              {levelText}
             </span>
             <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
               Level
