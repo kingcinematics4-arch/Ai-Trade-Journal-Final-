@@ -269,7 +269,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-slate-950 border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col">
+        <div className="relative w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-slate-950 border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] sticky top-0 bg-slate-950 z-10">
             <div>
