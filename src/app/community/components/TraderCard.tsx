@@ -55,9 +55,6 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
         {trader.bio && (
           <p className="text-[13px] text-white/50 leading-tight mt-1 line-clamp-2">{trader.bio}</p>
         )}
-        {!hasTrades && (
-          <p className="text-[12px] text-white/40 leading-tight mt-1">No verified trades yet.</p>
-        )}
         <p className="text-[11px] text-white/40 leading-tight mt-1">
           {trader.country && trader.tradingStyle
             ? `${trader.country} • ${trader.tradingStyle}`
