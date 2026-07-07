@@ -115,7 +115,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
             </span>
           </div>
           <div className="text-right">
-            <span className="block text-[18px] font-semibold text-white leading-tight">
+            <span className="block text-[15px] font-semibold text-white leading-tight">
               {levelText}
             </span>
             <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
