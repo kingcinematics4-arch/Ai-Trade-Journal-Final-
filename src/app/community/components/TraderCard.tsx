@@ -94,9 +94,9 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
 
       <button
         onClick={handleViewProfile}
-        className="h-[34px] w-[120px] text-[13px] text-white/70 font-medium border border-white/[0.12] rounded-full hover:text-white hover:border-blue-500/50 transition-all duration-200 flex-shrink-0"
+        className="h-[34px] w-[120px] text-[13px] text-white font-semibold bg-blue-500 hover:bg-blue-400 rounded-full shadow-lg shadow-blue-500/20 hover:shadow-blue-400/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer flex-shrink-0"
       >
-        View Profile →
+        View Profile <span className="ml-2">→</span>
       </button>
     </div>
   );
