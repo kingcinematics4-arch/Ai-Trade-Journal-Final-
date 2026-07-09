@@ -18,6 +18,7 @@ import {
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 interface EditProfileModalProps {
   open: boolean;
@@ -248,7 +249,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
       experience: '',
     });
     onClose();
-  };
+  }; // This closing brace was missing
 
   if (!open) return null;
 
@@ -347,18 +348,14 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                       />
                     </Field>
                     <Field label="Country" icon={<MapPin size={12} />}>
-                      <select
+                      <SearchableSelect
+                        items={COUNTRIES}
                         value={formData.country}
-                        onChange={(e) => handleInputChange('country', e.target.value)}
-                        className={`${inputClass} appearance-none`}
-                      >
-                        <option value="">Select country</option>
-                        {COUNTRIES.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
+                        onSelect={(val) => handleInputChange('country', val)}
+                        placeholder="Select country"
+                        searchable={true}
+                        buttonClassName={inputClass}
+                      />
                     </Field>
                   </div>
                 </div>
@@ -445,18 +442,20 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Trading Style" icon={<TrendingUp size={12} />}>
-                    <select
+                    <SearchableSelect
+                      items={[
+                        { value: 'day_trading', label: 'Day Trading' },
+                        { value: 'swing_trading', label: 'Swing Trading' },
+                        { value: 'scalping', label: 'Scalping' },
+                        { value: 'position_trading', label: 'Position Trading' },
+                        { value: 'investing', label: 'Investing' },
+                      ]}
                       value={formData.tradingStyle}
-                      onChange={(e) => handleInputChange('tradingStyle', e.target.value)}
-                      className={`${inputClass} appearance-none`}
-                    >
-                      <option value="">Select style</option>
-                      <option value="day_trading">Day Trading</option>
-                      <option value="swing_trading">Swing Trading</option>
-                      <option value="scalping">Scalping</option>
-                      <option value="position_trading">Position Trading</option>
-                      <option value="investing">Investing</option>
-                    </select>
+                      onSelect={(val) => handleInputChange('tradingStyle', val)}
+                      placeholder="Select style"
+                      searchable={false}
+                      buttonClassName={inputClass}
+                    />
                   </Field>
                   <Field label="Markets" icon={<BarChart3 size={12} />}>
                     <input
@@ -467,17 +466,19 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                     />
                   </Field>
                   <Field label="Experience" icon={<Briefcase size={12} />}>
-                    <select
+                    <SearchableSelect
+                      items={[
+                        { value: 'beginner', label: 'Beginner' },
+                        { value: 'intermediate', label: 'Intermediate' },
+                        { value: 'advanced', label: 'Advanced' },
+                        { value: 'professional', label: 'Professional' },
+                      ]}
                       value={formData.experience}
-                      onChange={(e) => handleInputChange('experience', e.target.value)}
-                      className={`${inputClass} appearance-none`}
-                    >
-                      <option value="">Select experience</option>
-                      <option value="beginner">Beginner</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
-                      <option value="professional">Professional</option>
-                    </select>
+                      onSelect={(val) => handleInputChange('experience', val)}
+                      placeholder="Select experience"
+                      searchable={false}
+                      buttonClassName={inputClass}
+                    />
                   </Field>
                 </div>
               </div>
@@ -488,17 +489,17 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/[0.05] transition-all"
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/[0.05] border border-white/[0.07] transition-all"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={isSaving}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 transition-all disabled:opacity-60 shadow-lg shadow-primary/20"
+                disabled={isSaving || !hasChanges}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary/90 transition-all disabled:opacity-50"
               >
                 {isSaving && <Loader2 size={14} className="animate-spin" />}
-                {isSaving ? 'Saving…' : 'Save Changes'}
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>

@@ -3,6 +3,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import type { GoalType } from '@/lib/goals/types';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 interface GoalFormModalProps {
   isOpen: boolean;
@@ -15,7 +16,8 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
   const [description, setDescription] = React.useState('');
   const [type, setType] = React.useState<GoalType>('profit');
   const [targetValue, setTargetValue] = React.useState('');
-  const [deadline, setDeadline] = React.useState('');
+  const [startDate, setStartDate] = React.useState('');
+  const [endDate, setEndDate] = React.useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,20 +79,22 @@ export default function GoalFormModal({ isOpen, onClose, onSubmit }: GoalFormMod
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Goal Type</label>
-                <select
+                <SearchableSelect
+                  items={[
+                    { value: 'profit', label: 'Profit Target ($)' },
+                    { value: 'win_rate', label: 'Win Rate Target (%)' },
+                    { value: 'consistency', label: 'Consistency Target' },
+                    { value: 'max_loss', label: 'Max Drawdown / Loss Limit ($)' },
+                    { value: 'rr_ratio', label: 'Average RR Target' },
+                    { value: 'trade_count', label: 'Number of Trades' },
+                    { value: 'discipline', label: 'Discipline Score (%)' },
+                    { value: 'custom', label: 'Custom Value' },
+                  ]}
                   value={type}
-                  onChange={(e) => setType(e.target.value as GoalType)}
-                  className="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none"
-                >
-                  <option value="profit">Profit Target ($)</option>
-                  <option value="win_rate">Win Rate Target (%)</option>
-                  <option value="consistency">Consistency Target</option>
-                  <option value="max_loss">Max Drawdown / Loss Limit ($)</option>
-                  <option value="rr_ratio">Average RR Target</option>
-                  <option value="trade_count">Number of Trades</option>
-                  <option value="discipline">Discipline Score (%)</option>
-                  <option value="custom">Custom Value</option>
-                </select>
+                  onSelect={(val) => setType(val as GoalType)}
+                  searchable={false}
+                  buttonClassName="w-full bg-background border border-input rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none"
+                />
               </div>
 
               <div>

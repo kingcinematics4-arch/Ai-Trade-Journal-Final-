@@ -6,6 +6,7 @@ import { useTrades } from '@/contexts/TradesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { exportData } from '@/app/exports/exportEngine';
 import styles from './ExportPanel.module.css';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
   Loader2,
   ListChecks,
@@ -220,18 +221,20 @@ export default function ExportPanel() {
 
                   <div className={styles.inputGroup}>
                     <label className={styles.label}>Target Format</label>
-                    <select
-                      className={styles.select}
+                    <SearchableSelect
+                      items={[
+                        { value: 'csv', label: 'CSV (Raw Data)' },
+                        { value: 'json', label: 'JSON (API Object)' },
+                        { value: 'xlsx', label: 'Excel (Worksheet)' },
+                        { value: 'pdf', label: 'PDF (Document)' },
+                        { value: 'txt', label: 'TXT (Flat File)' },
+                        { value: 'compliance_report', label: 'Annual Compliance Report' },
+                      ]}
                       value={format}
-                      onChange={(e) => setFormat(e.target.value)}
-                    >
-                      <option value="csv">CSV (Raw Data)</option>
-                      <option value="json">JSON (API Object)</option>
-                      <option value="xlsx">Excel (Worksheet)</option>
-                      <option value="pdf">PDF (Document)</option>
-                      <option value="txt">TXT (Flat File)</option>
-                      <option value="compliance_report">Annual Compliance Report</option>
-                    </select>
+                      onSelect={(val) => setFormat(val)}
+                      searchable={false}
+                      buttonClassName="bg-[#02040a] border border-[#1f2937] rounded-xl px-4 py-3 text-sm text-[#f8fafc] font-inherit transition-all focus:border-blue-500 focus:bg-[#050814] focus:ring-1 focus:ring-blue-500/20"
+                    />
                   </div>
 
                   {format === 'compliance_report' && (

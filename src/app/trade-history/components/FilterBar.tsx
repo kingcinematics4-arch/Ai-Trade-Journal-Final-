@@ -3,6 +3,7 @@
 import React from 'react';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 interface FilterBarProps {
   searchQuery: string;
@@ -44,6 +45,13 @@ export default function FilterBar({
   onClearFilters,
 }: FilterBarProps) {
   const { t } = useTranslation();
+
+  const pairItems = React.useMemo(() => {
+    return [
+      { value: '', label: t('trading.tradeHistory.filterBar.allPairs') },
+      ...availablePairs.map((pair) => ({ value: pair, label: pair })),
+    ];
+  }, [availablePairs, t]);
 
   const statusOptions: { value: FilterBarProps['statusFilter']; label: string }[] = [
     { value: 'all', label: t('trading.tradeHistory.filterBar.allStatuses') },
@@ -146,18 +154,14 @@ export default function FilterBar({
           </span>
         </div>
 
-        <select
+        <SearchableSelect
+          items={pairItems}
           value={pairFilter}
-          onChange={(e) => onPairFilterChange(e.target.value)}
-          className="form-input py-1.5 text-sm w-auto min-w-[130px] bg-card"
-        >
-          <option value="">{t('trading.tradeHistory.filterBar.allPairs')}</option>
-          {availablePairs.map((pair) => (
-            <option key={pair} value={pair}>
-              {pair}
-            </option>
-          ))}
-        </select>
+          onSelect={onPairFilterChange}
+          placeholder={t('trading.tradeHistory.filterBar.allPairs')}
+          searchable={true}
+          buttonClassName="form-input py-1.5 text-sm w-auto min-w-[130px] bg-card"
+        />
 
         <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           <input
@@ -178,17 +182,13 @@ export default function FilterBar({
         </div>
 
         <div className="flex-grow lg:flex-grow-0 lg:ml-auto">
-          <select
+          <SearchableSelect
+            items={sortOptions}
             value={sortOption}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="form-input py-1.5 text-sm w-full lg:w-auto min-w-[140px] bg-card"
-          >
-            {sortOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onSelect={onSortChange}
+            searchable={false}
+            buttonClassName="form-input py-1.5 text-sm w-full lg:w-auto min-w-[140px] bg-card"
+          />
         </div>
 
         {hasActiveFilters && (

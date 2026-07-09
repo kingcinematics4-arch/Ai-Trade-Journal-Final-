@@ -7,6 +7,7 @@ import { Loader2, Users, Search, ListFilter, X } from 'lucide-react';
 import { getPublicTraders } from '@/services/communityService';
 import type { PublicTraderProfile, PaginatedTraders } from '@/types/community';
 import { useDebounce } from '@/hooks/useDebounce';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 const SkeletonCard = () => (
   <div className="h-[180px] w-full max-w-[520px] bg-[#111111] border border-white/[0.06] rounded-[20px] p-5 animate-pulse">
@@ -134,19 +135,15 @@ export default function DiscoverPage() {
             )}
           </div>
         </div>
-        <div className="relative flex-shrink-0">
-          <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <select
+        <div className="relative flex-shrink-0 w-full md:w-auto">
+          <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+          <SearchableSelect
+            items={sortOptions}
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="appearance-none w-full md:w-auto bg-white/[0.02] border border-white/[0.05] rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-primary focus:border-primary"
-          >
-            {sortOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            onSelect={setSortBy}
+            searchable={false}
+            buttonClassName="appearance-none w-full md:w-auto bg-white/[0.02] border border-white/[0.05] rounded-lg pl-9 pr-8 py-2 text-sm focus:ring-primary focus:border-primary"
+          />
         </div>
       </div>
 

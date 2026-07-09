@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase';
 import AppLogo from '@/components/ui/AppLogo';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 type AuthTab = 'login' | 'signup';
 
@@ -175,6 +176,10 @@ export default function AuthFormPanel() {
       country: '',
     },
   });
+
+  const signupExperience = signupForm.watch('experienceLevel');
+  const signupTradingStyle = signupForm.watch('tradingStyle');
+  const signupCountry = signupForm.watch('country');
 
   const handleLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -696,27 +701,15 @@ export default function AuthFormPanel() {
                   >
                     {t('auth.experienceLabel')}
                   </label>
-                  <div className="relative flex items-center group/input">
-                    <ChevronDown
-                      size={14}
-                      className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
-                    />
-                    <select
-                      id="signup-experience"
-                      className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                      {...signupForm.register('experienceLevel', {
-                        required: t('auth.signup.error.experienceRequired'),
-                      })}
-                    >
-                      <option value="" className="bg-slate-900">
-                        {t('auth.signup.selectLevel')}
-                      </option>
-                      {experienceLevels.map((lvl) => (
-                        <option key={lvl.value} value={lvl.value} className="bg-slate-900">
-                          {lvl.label}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="relative flex items-center group/input w-full">
+                              <SearchableSelect
+                                items={experienceLevels}
+                                value={signupExperience}
+                                onSelect={(val) => signupForm.setValue('experienceLevel', val, { shouldValidate: true, shouldDirty: true })}
+                                placeholder={t('auth.signup.selectLevel')}
+                                searchable={false}
+                                buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
+                              />
                   </div>
                   {signupForm.formState.errors.experienceLevel && (
                     <p className="text-[10px] text-red-400 font-semibold">
@@ -732,27 +725,15 @@ export default function AuthFormPanel() {
                   >
                     {t('auth.styleLabel')}
                   </label>
-                  <div className="relative flex items-center group/input">
-                    <ChevronDown
-                      size={14}
-                      className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
-                    />
-                    <select
-                      id="signup-style"
-                      className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                      {...signupForm.register('tradingStyle', {
-                        required: t('auth.signup.error.styleRequired'),
-                      })}
-                    >
-                      <option value="" className="bg-slate-900">
-                        {t('auth.signup.selectStyle')}
-                      </option>
-                      {tradingStyles.map((style) => (
-                        <option key={style.value} value={style.value} className="bg-slate-900">
-                          {style.label}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="relative flex items-center group/input w-full">
+                              <SearchableSelect
+                                items={tradingStyles}
+                                value={signupTradingStyle}
+                                onSelect={(val) => signupForm.setValue('tradingStyle', val, { shouldValidate: true, shouldDirty: true })}
+                                placeholder={t('auth.signup.selectStyle')}
+                                searchable={false}
+                                buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
+                              />
                   </div>
                   {signupForm.formState.errors.tradingStyle && (
                     <p className="text-[10px] text-red-400 font-semibold">
@@ -770,29 +751,19 @@ export default function AuthFormPanel() {
                 >
                   {t('auth.countryLabel')}
                 </label>
-                <div className="relative flex items-center group/input">
+                <div className="relative flex items-center group/input w-full">
                   <Globe
                     size={15}
-                    className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400"
+                    className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400 z-10 pointer-events-none"
                   />
-                  <ChevronDown
-                    size={14}
-                    className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
-                  />
-                  <select
-                    id="signup-country"
-                    className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-10 pr-8 py-3 text-xs text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                    {...signupForm.register('country', { required: 'Country is required' })}
-                  >
-                    <option value="" className="bg-slate-900">
-                      Select your country
-                    </option>
-                    {countries.map((c) => (
-                      <option key={c} value={c} className="bg-slate-900">
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                            <SearchableSelect
+                              items={countries}
+                              value={signupCountry}
+                              onSelect={(val) => signupForm.setValue('country', val, { shouldValidate: true, shouldDirty: true })}
+                              placeholder="Select your country"
+                              searchable={true}
+                              buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-10 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
+                            />
                 </div>
                 {signupForm.formState.errors.country && (
                   <p className="text-[10px] text-red-400 font-semibold">
@@ -1367,31 +1338,15 @@ export default function AuthFormPanel() {
                             >
                               Experience
                             </label>
-                            <div className="relative flex items-center group/input">
-                              <ChevronDown
-                                size={14}
-                                className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
+                            <div className="relative flex items-center group/input w-full">
+                              <SearchableSelect
+                                items={experienceLevels}
+                                value={signupExperience}
+                                onSelect={(val) => signupForm.setValue('experienceLevel', val, { shouldValidate: true, shouldDirty: true })}
+                                placeholder={t('auth.signup.selectLevel')}
+                                searchable={false}
+                                buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
                               />
-                              <select
-                                id="signup-experience"
-                                className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('experienceLevel', {
-                                  required: t('auth.signup.error.experienceRequired'),
-                                })}
-                              >
-                                <option value="" className="bg-slate-900">
-                                  {t('auth.signup.selectLevel')}
-                                </option>
-                                {experienceLevels.map((lvl) => (
-                                  <option
-                                    key={lvl.value}
-                                    value={lvl.value}
-                                    className="bg-slate-900"
-                                  >
-                                    {lvl.label}
-                                  </option>
-                                ))}
-                              </select>
                             </div>
                             {signupForm.formState.errors.experienceLevel && (
                               <p className="text-[10px] text-red-400 font-semibold">
@@ -1407,31 +1362,15 @@ export default function AuthFormPanel() {
                             >
                               {t('auth.styleLabel')}
                             </label>
-                            <div className="relative flex items-center group/input">
-                              <ChevronDown
-                                size={14}
-                                className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
+                            <div className="relative flex items-center group/input w-full">
+                              <SearchableSelect
+                                items={tradingStyles}
+                                value={signupTradingStyle}
+                                onSelect={(val) => signupForm.setValue('tradingStyle', val, { shouldValidate: true, shouldDirty: true })}
+                                placeholder={t('auth.signup.selectStyle')}
+                                searchable={false}
+                                buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
                               />
-                              <select
-                                id="signup-style"
-                                className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('tradingStyle', {
-                                  required: t('auth.signup.error.styleRequired'),
-                                })}
-                              >
-                                <option value="" className="bg-slate-900">
-                                  {t('auth.signup.selectStyle')}
-                                </option>
-                                {tradingStyles.map((style) => (
-                                  <option
-                                    key={style.value}
-                                    value={style.value}
-                                    className="bg-slate-900"
-                                  >
-                                    {style.label}
-                                  </option>
-                                ))}
-                              </select>
                             </div>
                             {signupForm.formState.errors.tradingStyle && (
                               <p className="text-[10px] text-red-400 font-semibold">
@@ -1449,31 +1388,19 @@ export default function AuthFormPanel() {
                           >
                             Country
                           </label>
-                          <div className="relative flex items-center group/input">
+                          <div className="relative flex items-center group/input w-full">
                             <Globe
                               size={15}
-                              className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400"
+                              className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400 z-10 pointer-events-none"
                             />
-                            <ChevronDown
-                              size={14}
-                              className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
+                            <SearchableSelect
+                              items={countries}
+                              value={signupCountry}
+                              onSelect={(val) => signupForm.setValue('country', val, { shouldValidate: true, shouldDirty: true })}
+                              placeholder="Select your country"
+                              searchable={true}
+                              buttonClassName="!py-3 sm:!py-3.5 !pl-10 !pr-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
                             />
-                            <select
-                              id="signup-country"
-                              className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-10 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                              {...signupForm.register('country', {
-                                required: 'Country is required',
-                              })}
-                            >
-                              <option value="" className="bg-slate-900">
-                                Select your country
-                              </option>
-                              {countries.map((c) => (
-                                <option key={c} value={c} className="bg-slate-900">
-                                  {c}
-                                </option>
-                              ))}
-                            </select>
                           </div>
                           {signupForm.formState.errors.country && (
                             <p className="text-[10px] text-red-400 font-semibold">
@@ -2003,31 +1930,15 @@ export default function AuthFormPanel() {
                             >
                               Experience
                             </label>
-                            <div className="relative flex items-center group/input">
-                              <ChevronDown
-                                size={14}
-                                className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
+                            <div className="relative flex items-center group/input w-full">
+                              <SearchableSelect
+                                items={experienceLevels}
+                                value={signupExperience}
+                                onSelect={(val) => signupForm.setValue('experienceLevel', val, { shouldValidate: true, shouldDirty: true })}
+                                placeholder={t('auth.signup.selectLevel')}
+                                searchable={false}
+                                buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
                               />
-                              <select
-                                id="signup-experience-focused"
-                                className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('experienceLevel', {
-                                  required: t('auth.signup.error.experienceRequired'),
-                                })}
-                              >
-                                <option value="" className="bg-slate-900">
-                                  {t('auth.signup.selectLevel')}
-                                </option>
-                                {experienceLevels.map((lvl) => (
-                                  <option
-                                    key={lvl.value}
-                                    value={lvl.value}
-                                    className="bg-slate-900"
-                                  >
-                                    {lvl.label}
-                                  </option>
-                                ))}
-                              </select>
                             </div>
                             {signupForm.formState.errors.experienceLevel && (
                               <p className="text-[10px] text-red-400 font-semibold">
@@ -2042,31 +1953,15 @@ export default function AuthFormPanel() {
                             >
                               {t('auth.styleLabel')}
                             </label>
-                            <div className="relative flex items-center group/input">
-                              <ChevronDown
-                                size={14}
-                                className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
+                            <div className="relative flex items-center group/input w-full">
+                              <SearchableSelect
+                                items={tradingStyles}
+                                value={signupTradingStyle}
+                                onSelect={(val) => signupForm.setValue('tradingStyle', val, { shouldValidate: true, shouldDirty: true })}
+                                placeholder={t('auth.signup.selectStyle')}
+                                searchable={false}
+                                buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
                               />
-                              <select
-                                id="signup-style-focused"
-                                className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                                {...signupForm.register('tradingStyle', {
-                                  required: t('auth.signup.error.styleRequired'),
-                                })}
-                              >
-                                <option value="" className="bg-slate-900">
-                                  {t('auth.signup.selectStyle')}
-                                </option>
-                                {tradingStyles.map((style) => (
-                                  <option
-                                    key={style.value}
-                                    value={style.value}
-                                    className="bg-slate-900"
-                                  >
-                                    {style.label}
-                                  </option>
-                                ))}
-                              </select>
                             </div>
                             {signupForm.formState.errors.tradingStyle && (
                               <p className="text-[10px] text-red-400 font-semibold">
@@ -2082,31 +1977,19 @@ export default function AuthFormPanel() {
                           >
                             Country
                           </label>
-                          <div className="relative flex items-center group/input">
+                          <div className="relative flex items-center group/input w-full">
                             <Globe
                               size={15}
-                              className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400"
+                              className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400 z-10 pointer-events-none"
                             />
-                            <ChevronDown
-                              size={14}
-                              className="absolute right-3 text-slate-500 pointer-events-none transition-colors group-focus-within/input:text-blue-400"
+                            <SearchableSelect
+                              items={countries}
+                              value={signupCountry}
+                              onSelect={(val) => signupForm.setValue('country', val, { shouldValidate: true, shouldDirty: true })}
+                              placeholder="Select your country"
+                              searchable={true}
+                              buttonClassName="!py-3 sm:!py-3.5 !pl-10 !pr-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
                             />
-                            <select
-                              id="signup-country-focused"
-                              className="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-10 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                              {...signupForm.register('country', {
-                                required: 'Country is required',
-                              })}
-                            >
-                              <option value="" className="bg-slate-900">
-                                Select your country
-                              </option>
-                              {countries.map((c) => (
-                                <option key={c} value={c} className="bg-slate-900">
-                                  {c}
-                                </option>
-                              ))}
-                            </select>
                           </div>
                           {signupForm.formState.errors.country && (
                             <p className="text-[10px] text-red-400 font-semibold">

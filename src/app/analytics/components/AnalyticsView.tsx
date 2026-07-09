@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { useTrades } from '@/contexts/TradesContext';
 import { computeAdvancedAnalytics } from '@/lib/trades/analyticsEngine';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 // Import child analytics components
 import AnalyticsKpiGrid from './AnalyticsKpiGrid';
@@ -73,6 +74,28 @@ export default function AnalyticsView() {
     });
     return Array.from(strategies).sort();
   }, [trades]);
+
+  const assetItems = useMemo(() => {
+    return [
+      { value: '', label: t('analytics.view.allAssets') },
+      ...availablePairs.map((pair) => ({ value: pair, label: pair })),
+    ];
+  }, [availablePairs, t]);
+
+  const strategyItems = useMemo(() => {
+    return [
+      { value: '', label: t('analytics.view.allStrategies') },
+      ...availableStrategies.map((strat) => ({ value: strat, label: strat })),
+    ];
+  }, [availableStrategies, t]);
+
+  const directionItems = useMemo(() => {
+    return [
+      { value: 'all', label: t('analytics.view.allDirections') },
+      { value: 'buy', label: t('analytics.view.longBuys') },
+      { value: 'sell', label: t('analytics.view.shortSells') },
+    ];
+  }, [t]);
 
   // Reset page parameters if timeframe changes
   useEffect(() => {
@@ -450,43 +473,33 @@ export default function AnalyticsView() {
           </div>
 
           {/* Asset Dropdown */}
-          <select
+          <SearchableSelect
+            items={assetItems}
             value={pairFilter}
-            onChange={(e) => setPairFilter(e.target.value)}
-            className="form-input py-1.5 text-xs w-auto min-w-[130px] bg-card font-medium"
-          >
-            <option value="">{t('analytics.view.allAssets')}</option>
-            {availablePairs.map((pair) => (
-              <option key={pair} value={pair}>
-                {pair}
-              </option>
-            ))}
-          </select>
+            onSelect={setPairFilter}
+            placeholder={t('analytics.view.allAssets')}
+            searchable={true}
+            buttonClassName="form-input py-1.5 text-xs w-auto min-w-[130px] bg-card font-medium"
+          />
 
           {/* Strategy Dropdown */}
-          <select
+          <SearchableSelect
+            items={strategyItems}
             value={strategyFilter}
-            onChange={(e) => setStrategyFilter(e.target.value)}
-            className="form-input py-1.5 text-xs w-auto min-w-[140px] bg-card font-medium"
-          >
-            <option value="">{t('analytics.view.allStrategies')}</option>
-            {availableStrategies.map((strategy) => (
-              <option key={strategy} value={strategy}>
-                {strategy}
-              </option>
-            ))}
-          </select>
+            onSelect={setStrategyFilter}
+            placeholder={t('analytics.view.allStrategies')}
+            searchable={true}
+            buttonClassName="form-input py-1.5 text-xs w-auto min-w-[140px] bg-card font-medium"
+          />
 
           {/* Direction Selector */}
-          <select
+          <SearchableSelect
+            items={directionItems}
             value={directionFilter}
-            onChange={(e) => setDirectionFilter(e.target.value as any)}
-            className="form-input py-1.5 text-xs w-auto min-w-[110px] bg-card font-medium"
-          >
-            <option value="all">{t('analytics.view.allDirections')}</option>
-            <option value="buy">{t('analytics.view.longBuys')}</option>
-            <option value="sell">{t('analytics.view.shortSells')}</option>
-          </select>
+            onSelect={(val) => setDirectionFilter(val as any)}
+            searchable={false}
+            buttonClassName="form-input py-1.5 text-xs w-auto min-w-[110px] bg-card font-medium"
+          />
 
           {/* Active filters clear option */}
           {hasActiveFilters && (
