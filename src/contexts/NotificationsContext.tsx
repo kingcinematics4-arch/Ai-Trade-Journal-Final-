@@ -23,7 +23,7 @@ import {
   type NotificationSettings,
   DEFAULT_NOTIFICATION_SETTINGS,
 } from '@/services/notificationService';
-import { soundService, unlockNotificationAudio } from '@/services/soundService';
+import { soundService, unlockNotificationAudio, preloadNotificationSound } from '@/services/soundService';
 import { showRealtimeNotificationToast } from '@/lib/notificationToast';
 
 const PAGE_SIZE = 20;
@@ -84,6 +84,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   // Unlock audio after first user gesture (autoplay policy)
   useEffect(() => {
     unlockNotificationAudio();
+    preloadNotificationSound();
   }, []);
 
   const supabase = useMemo(() => createClient(), []);
@@ -235,6 +236,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const handleRealtimeInsert = useCallback(
     (newNotif: DbNotification, options?: { forceFeedback?: boolean }) => {
       if (!newNotif?.id) return;
+      console.log(`[NotificationsContext] Notification triggered (${newNotif.type})`);
 
       // Hard user targeting
       if (userIdRef.current && newNotif.user_id && newNotif.user_id !== userIdRef.current) {
@@ -266,6 +268,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
       // Popup toast (respect floating setting unless forced by Trigger Test)
       if (options?.forceFeedback || currentSettings.floating_enabled !== false) {
+        console.log('[NotificationsContext] Notification popup shown');
         showRealtimeNotificationToast(newNotif, {
           showPreview: currentSettings.popup_preview_enabled !== false,
           onNavigate: (link) => {
@@ -335,7 +338,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       return { success: false, error: 'Not authenticated — sign in again.' };
     }
 
+    console.log('[NotificationsContext] Notification triggered (test)');
     unlockNotificationAudio();
+    preloadNotificationSound();
     await askBrowserPermissionOnce();
 
     const result = await notificationService.triggerTestNotification(user.id);
@@ -478,6 +483,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         },
         (payload: RealtimePostgresInsertPayload<DbNotification>) => {
           if (!isMounted) return;
+          console.log('[NotificationsContext] Notification saved (realtime insert)');
           handleRealtimeInsert(payload.new);
         }
       )
