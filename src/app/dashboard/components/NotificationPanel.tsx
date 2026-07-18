@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Check,
   Trash2,
   Inbox,
   Settings,
@@ -20,8 +19,6 @@ export default function NotificationPanel() {
   const {
     notifications,
     isLoading,
-    markAsRead,
-    markAllAsRead,
     deleteNotification,
     clearAllNotifications,
     settings,
@@ -92,14 +89,6 @@ export default function NotificationPanel() {
         </div>
 
         <div className="flex items-center gap-3">
-          {!showSettings && notifications.some((n) => !n.is_read) && (
-            <button
-              onClick={markAllAsRead}
-              className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase"
-            >
-              Mark all read
-            </button>
-          )}
           <button
             onClick={() => setShowSettings(!showSettings)}
             className={`transition-colors ${showSettings ? 'text-primary' : 'text-muted-foreground hover:text-white'}`}
@@ -270,19 +259,6 @@ export default function NotificationPanel() {
                       </p>
                     </div>
                     <div className="flex items-start gap-1">
-                      {!n.is_read && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void markAsRead(n.id);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg text-primary"
-                          aria-label="Mark as read"
-                        >
-                          <Check size={14} />
-                        </button>
-                      )}
                       <button
                         type="button"
                         onClick={(e) => {

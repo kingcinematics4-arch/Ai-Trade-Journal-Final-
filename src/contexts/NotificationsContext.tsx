@@ -37,9 +37,6 @@ export interface NotificationsContextType {
   isLoading: boolean;
   hasMore: boolean;
   isLoadingMore: boolean;
-  markAsRead: (id: string) => Promise<void>;
-  markUnread: (id: string) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   selectNotification: (id: string) => void;
   closeSelected: () => void;
@@ -175,10 +172,36 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     }
   }, [user?.id, isLoadingMore, hasMore]);
 
+  const markAsRead = useCallback(
+    async (id: string) => {
+      const target = notificationsRef.current.find((n) => n.id === id);
+      if (!target || target.is_read) return;
+
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+      setUnreadCount((c) => Math.max(0, c - 1));
+
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('id', id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.warn('[NotificationsContext] markAsRead failed:', error);
+        await fetchNotifications();
+      }
+    },
+    [supabase, fetchNotifications]
+  );
+
   const selectNotification = useCallback((id: string) => {
     const target = notificationsRef.current.find((n) => n.id === id) ?? null;
+    if (target && !target.is_read) {
+      void markAsRead(id);
+    }
     setSelectedNotification(target);
-  }, []);
+  }, [markAsRead]);
 
   const closeSelected = useCallback(() => {
     setSelectedNotification(null);
@@ -385,72 +408,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     return { success: true, error: null };
   }, [user?.id, askBrowserPermissionOnce, handleRealtimeInsert]);
 
-  const markAsRead = useCallback(
-    async (id: string) => {
-      const target = notificationsRef.current.find((n) => n.id === id);
-      if (!target || target.is_read) return;
-
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
-      setUnreadCount((c) => Math.max(0, c - 1));
-
-      try {
-        const { error } = await supabase
-          .from('notifications')
-          .update({ is_read: true })
-          .eq('id', id);
-
-        if (error) throw error;
-      } catch (error) {
-        console.warn('[NotificationsContext] markAsRead failed:', error);
-        await fetchNotifications();
-      }
-    },
-    [supabase, fetchNotifications]
-  );
-
-  const markUnread = useCallback(
-    async (id: string) => {
-      const target = notificationsRef.current.find((n) => n.id === id);
-      if (!target || !target.is_read) return;
-
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: false } : n)));
-      setUnreadCount((c) => c + 1);
-
-      try {
-        const { error } = await supabase
-          .from('notifications')
-          .update({ is_read: false })
-          .eq('id', id);
-
-        if (error) throw error;
-      } catch (error) {
-        console.warn('[NotificationsContext] markUnread failed:', error);
-        await fetchNotifications();
-      }
-    },
-    [supabase, fetchNotifications]
-  );
-
-  const markAllAsRead = useCallback(async () => {
-    if (!user?.id) return;
-
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnreadCount(0);
-
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false);
-
-      if (error) throw error;
-    } catch (error) {
-      console.warn('[NotificationsContext] markAllAsRead failed:', error);
-      await fetchNotifications();
-    }
-  }, [user?.id, supabase, fetchNotifications]);
-
   const deleteNotification = useCallback(
     async (id: string) => {
       let wasUnread = false;
@@ -632,9 +589,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       isLoading,
       hasMore,
       isLoadingMore,
-      markAsRead,
-      markUnread,
-      markAllAsRead,
       deleteNotification,
       selectNotification,
       closeSelected,
@@ -653,9 +607,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       isLoading,
       hasMore,
       isLoadingMore,
-      markAsRead,
-      markUnread,
-      markAllAsRead,
       deleteNotification,
       selectNotification,
       closeSelected,

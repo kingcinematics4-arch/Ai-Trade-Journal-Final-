@@ -14,8 +14,6 @@ function NotificationDetailsHost() {
   const {
     selectedNotification,
     closeSelected,
-    markAsRead,
-    markUnread,
     deleteNotification,
   } = useNotifications();
 
@@ -23,8 +21,6 @@ function NotificationDetailsHost() {
     <NotificationDetailsPanel
       notification={selectedNotification}
       onClose={closeSelected}
-      onMarkRead={(id) => void markAsRead(id)}
-      onMarkUnread={(id) => void markUnread(id)}
       onDelete={(id) => void deleteNotification(id)}
       onNavigate={(link) => router.push(link)}
     />

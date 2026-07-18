@@ -4,8 +4,6 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
-  Check,
-  CheckCheck,
   Trash2,
   ExternalLink,
   TrendingUp,
@@ -75,8 +73,6 @@ function formatTimestamp(iso: string): string {
 interface NotificationDetailsPanelProps {
   notification: DbNotification | null;
   onClose: () => void;
-  onMarkRead: (id: string) => void;
-  onMarkUnread: (id: string) => void;
   onDelete: (id: string) => void;
   onNavigate: (link: string) => void;
 }
@@ -84,8 +80,6 @@ interface NotificationDetailsPanelProps {
 export default function NotificationDetailsPanel({
   notification,
   onClose,
-  onMarkRead,
-  onMarkUnread,
   onDelete,
   onNavigate,
 }: NotificationDetailsPanelProps) {
@@ -238,26 +232,6 @@ export default function NotificationDetailsPanel({
                   Open
                 </button>
               )}
-
-              <button
-                type="button"
-                onClick={() =>
-                  notification.is_read ? onMarkUnread(notification.id) : onMarkRead(notification.id)
-                }
-                className="btn-secondary flex items-center justify-center gap-2 flex-1"
-              >
-                {notification.is_read ? (
-                  <>
-                    <CheckCheck size={15} />
-                    Mark unread
-                  </>
-                ) : (
-                  <>
-                    <Check size={15} />
-                    Mark read
-                  </>
-                )}
-              </button>
 
               <button
                 type="button"

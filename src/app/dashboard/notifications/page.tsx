@@ -7,7 +7,6 @@ import { useNotifications } from '@/contexts/NotificationsContext';
 import { type NotificationSettings } from '@/services/notificationService';
 import {
   Bell,
-  CheckCheck,
   Trash2,
   Settings2,
   Volume2,
@@ -67,8 +66,6 @@ export default function NotificationsPage() {
     notifications,
     unreadCount,
     isLoading,
-    markAsRead,
-    markAllAsRead,
     deleteNotification,
     clearAllNotifications,
     selectNotification,
@@ -127,15 +124,6 @@ export default function NotificationsPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                {unreadCount > 0 && (
-                  <button
-                    onClick={() => void markAllAsRead()}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition-all text-sm font-bold text-zinc-300"
-                  >
-                    <CheckCheck size={16} />
-                    Mark all read
-                  </button>
-                )}
                 <div className="px-4 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-black">
                   {unreadCount} UNREAD
                 </div>
