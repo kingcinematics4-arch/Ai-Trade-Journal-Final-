@@ -246,6 +246,41 @@ export async function sendConnectionRequest(recipientId: string): Promise<Connec
 }
 
 /**
+ * Notify a user that someone followed them (call when follow/connection succeeds).
+ */
+export async function notifyFollowReceived(
+  recipientId: string,
+  followerName: string
+): Promise<void> {
+  const { notify } = await import('@/lib/notify');
+  await notify.follow(recipientId, followerName);
+}
+
+/**
+ * Notify a user that someone liked their trade.
+ */
+export async function notifyTradeLiked(
+  recipientId: string,
+  actorName: string,
+  asset?: string
+): Promise<void> {
+  const { notify } = await import('@/lib/notify');
+  await notify.like(recipientId, actorName, asset);
+}
+
+/**
+ * Notify a user that someone commented on their trade.
+ */
+export async function notifyTradeCommented(
+  recipientId: string,
+  actorName: string,
+  asset?: string
+): Promise<void> {
+  const { notify } = await import('@/lib/notify');
+  await notify.comment(recipientId, actorName, asset);
+}
+
+/**
  * Get the connection status between the current user and another user.
  * Returns null if no connection exists.
  */

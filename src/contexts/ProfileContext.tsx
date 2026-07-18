@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getProfile, initializeProfileFromAuth, upsertProfile } from '@/services/profileService';
 import type { AuthMeta } from '@/services/profileService';
 import type { Profile, ProfileFormData } from '@/types/profile';
+import { notify } from '@/lib/notify';
 
 // ─── Context Shape ────────────────────────────────────────────────────────────
 
@@ -135,10 +136,17 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       });
 
       try {
+        const avatarChanged = data.avatar_url !== undefined;
         const updated = await upsertProfile(user.id, data);
         console.log('===== UPDATED PROFILE =====');
         console.log(updated);
         setDbProfile(updated);
+
+        if (avatarChanged) {
+          void notify.avatarChanged(user.id);
+        } else {
+          void notify.profileUpdated(user.id);
+        }
       } catch (err) {
         // Rollback on error
         await fetchProfile();

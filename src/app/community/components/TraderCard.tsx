@@ -29,9 +29,7 @@ const truncateBio = (bio?: string) => {
 
   const MAX_BIO_LENGTH = 120;
 
-  return bio.length > MAX_BIO_LENGTH
-    ? bio.slice(0, MAX_BIO_LENGTH).trimEnd() + '...'
-    : bio;
+  return bio.length > MAX_BIO_LENGTH ? bio.slice(0, MAX_BIO_LENGTH).trimEnd() + '...' : bio;
 };
 
 const TraderCardComponent = ({ trader }: TraderCardProps) => {
@@ -47,16 +45,16 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
 
   const flagEmoji = useMemo(
     () => getFlagEmoji(getCountryCode(trader.country || '')),
-    [trader.country],
+    [trader.country]
   );
 
   const countryText = useMemo(
     () => (trader.country ? (flagEmoji ? `${flagEmoji} ${trader.country}` : trader.country) : ''),
-    [trader.country, flagEmoji],
+    [trader.country, flagEmoji]
   );
   const marketText = useMemo(
     () => (trader.markets && trader.markets.length ? trader.markets.join(' • ') : ''),
-    [trader.markets],
+    [trader.markets]
   );
   const bioText = useMemo(() => truncateBio(trader.bio), [trader.bio]);
 
@@ -77,7 +75,11 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="h-[56px] w-[56px] rounded-full overflow-hidden flex-shrink-0">
             {trader.avatarUrl ? (
-              <img src={trader.avatarUrl} alt={displayName} className="h-full w-full object-cover" />
+              <img
+                src={trader.avatarUrl}
+                alt={displayName}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <div className="h-full w-full bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center">
                 <span className="text-white text-lg font-semibold">{initials}</span>

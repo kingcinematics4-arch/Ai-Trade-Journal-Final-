@@ -51,7 +51,12 @@ export default function SearchableSelect({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -68,6 +73,24 @@ export default function SearchableSelect({
         width: rect.width,
       });
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handler = (e: WheelEvent) => {
+      if (!dropdownRef.current) return;
+      const scrollableList = dropdownRef.current.querySelector(
+        '[data-scroll-list]'
+      ) as HTMLDivElement | null;
+      if (scrollableList?.contains(e.target as Node)) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    document.addEventListener('wheel', handler, { passive: false });
+    return () => document.removeEventListener('wheel', handler, { passive: false });
   }, [isOpen]);
 
   const normalizedItems = useMemo(() => {
@@ -142,7 +165,10 @@ export default function SearchableSelect({
             </div>
           )}
 
-          <div className="max-h-60 overflow-y-auto p-1 bg-zinc-900 scrollbar-none">
+          <div
+            data-scroll-list
+            className="max-h-60 overflow-y-auto p-1 bg-zinc-900 scrollbar-none overscroll-y-contain"
+          >
             {filteredItems.length > 0 ? (
               filteredItems.map((item) => (
                 <div
@@ -187,7 +213,8 @@ export default function SearchableSelect({
                     }}
                     className="mt-2 text-xs text-blue-400 hover:underline font-semibold"
                   >
-                    {t('trading.addTrade.searchable.addCustom', { term: searchTerm }) || `Add "${searchTerm}"`}
+                    {t('trading.addTrade.searchable.addCustom', { term: searchTerm }) ||
+                      `Add "${searchTerm}"`}
                   </button>
                 )}
               </div>

@@ -76,7 +76,7 @@ CREATE INDEX IF NOT EXISTS trades_created_at_idx ON public.trades(created_at DES
 
 -- Create storage bucket for trade media
 INSERT INTO storage.buckets (id, name, public) 
-VALUES ('trade-media', 'trade-media', true)
+VALUES ('trade-images', 'trade-images', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage policies for authenticated users
@@ -86,14 +86,14 @@ DROP POLICY IF EXISTS "Give users access to own folder" ON storage.objects;
 CREATE POLICY "Give users access to own folder" ON storage.objects
 FOR ALL TO authenticated
 USING (
-  bucket_id = 'trade-media' AND (
+  bucket_id = 'trade-images' AND (
     (storage.foldername(name))[1] = auth.uid()::text OR
     (regexp_split_to_array(name, '/'))[1] = auth.uid()::text OR
     name LIKE (auth.uid()::text || '/%')
   )
 )
 WITH CHECK (
-  bucket_id = 'trade-media' AND (
+  bucket_id = 'trade-images' AND (
     (storage.foldername(name))[1] = auth.uid()::text OR
     (regexp_split_to_array(name, '/'))[1] = auth.uid()::text OR
     name LIKE (auth.uid()::text || '/%')
@@ -103,4 +103,9 @@ WITH CHECK (
 DROP POLICY IF EXISTS "Allow public read access to media" ON storage.objects;
 CREATE POLICY "Allow public read access to media" ON storage.objects
 FOR SELECT TO public
-USING (bucket_id = 'trade-media');
+USING (bucket_id = 'trade-images');
+
+-- ========================================================
+-- Notifications schema lives in notifications_schema.sql
+-- Run that file in Supabase to enable the notification system.
+-- ========================================================

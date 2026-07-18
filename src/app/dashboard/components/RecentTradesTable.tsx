@@ -10,7 +10,6 @@ import { TableRowSkeleton } from '@/components/ui/LoadingSkeleton';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
-import { createClient } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/trades/analytics';
 import type { TradeRow } from '@/lib/trades/types';
 import TradeDetailsModal from './TradeDetailsModal';
@@ -24,7 +23,7 @@ type SortDir = 'asc' | 'desc';
 export default function RecentTradesTable() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { tradeRows, trades: rawTrades, isLoading: isLoadingTrades, refetch } = useTrades();
+  const { tradeRows, trades: rawTrades, isLoading: isLoadingTrades, refetch, deleteTrade } = useTrades();
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -60,14 +59,9 @@ export default function RecentTradesTable() {
     if (!deleteTarget || !user) return;
     setIsDeleting(true);
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from('trades')
-      .delete()
-      .eq('id', deleteTarget)
-      .eq('user_id', user.id);
+    const ok = await deleteTrade(deleteTarget);
 
-    if (error) {
+    if (!ok) {
       toast.error(t('dashboard.trades.deleteFailed'));
       setIsDeleting(false);
       return;
@@ -75,7 +69,6 @@ export default function RecentTradesTable() {
 
     setDeleteTarget(null);
     setIsDeleting(false);
-    await refetch();
     toast.success(t('dashboard.trades.deleteSuccess'));
   };
 

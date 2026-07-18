@@ -105,7 +105,16 @@ export default function AccountSettings() {
   }, [user?.id]);
 
   const handleToggle = (key: keyof NotificationSettings, value: boolean) => {
-    updateSettings({ [key]: value });
+    // Keep related category flags in sync with the existing settings toggles
+    if (key === 'activity_alerts') {
+      void updateSettings({ activity_alerts: value, community_alerts: value });
+      return;
+    }
+    if (key === 'system_updates') {
+      void updateSettings({ system_updates: value, ai_alerts: value });
+      return;
+    }
+    void updateSettings({ [key]: value });
   };
 
   const handlePublicProfileToggle = async (value: boolean) => {
@@ -267,6 +276,13 @@ export default function AccountSettings() {
           description={t('settings.activityAlertsDesc')}
           checked={settings?.activity_alerts ?? true}
           onChange={(v) => handleToggle('activity_alerts', v)}
+        />
+        <ToggleRow
+          id="notif-email"
+          label="Email notifications"
+          description="Future-ready email digests (stored preference only)"
+          checked={settings?.email_notifications ?? false}
+          onChange={(v) => handleToggle('email_notifications', v)}
         />
       </Section>
 

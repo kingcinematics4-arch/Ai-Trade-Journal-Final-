@@ -6,6 +6,7 @@ import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { ProfileProvider } from '@/contexts/ProfileContext';
 import ToastProvider from '@/components/ui/ToastProvider';
 import { I18nProvider } from '@/i18n/provider/I18nProvider';
+import AudioInit from '@/components/AudioInit';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <ProfileProvider>
           <NotificationsProvider>
             <TradesProvider>
+              <AudioInit />
               <ToastProvider />
               {children}
             </TradesProvider>

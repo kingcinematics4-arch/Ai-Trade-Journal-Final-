@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import AppLayout from '@/components/AppLayout';
 import { useNotifications } from '@/contexts/NotificationsContext';
@@ -11,8 +12,6 @@ import {
   Trash2,
   Settings2,
   Volume2,
-  VolumeX,
-  Smartphone,
   Vibrate,
   Monitor,
   Eye,
@@ -28,8 +27,12 @@ import {
   Clock,
   Inbox,
   Zap,
+  Users,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import type { DbNotification } from '@/lib/notifications';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -39,6 +42,12 @@ const getNotificationIcon = (type: string) => {
       return <BarChart3 size={18} className="text-purple-400" />;
     case 'warning':
       return <AlertTriangle size={18} className="text-amber-400" />;
+    case 'error':
+      return <XCircle size={18} className="text-red-400" />;
+    case 'success':
+      return <CheckCircle2 size={18} className="text-emerald-400" />;
+    case 'info':
+      return <Info size={18} className="text-sky-400" />;
     case 'system':
       return <Cpu size={18} className="text-zinc-400" />;
     case 'achievement':
@@ -47,27 +56,33 @@ const getNotificationIcon = (type: string) => {
       return <Shield size={18} className="text-red-400" />;
     case 'ai':
       return <Brain size={18} className="text-indigo-400" />;
+    case 'community':
+      return <Users size={18} className="text-pink-400" />;
     default:
       return <Bell size={18} className="text-zinc-400" />;
   }
 };
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const {
     notifications,
     unreadCount,
     isLoading,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     clearAllNotifications,
     settings,
     updateSettings,
     triggerTest,
+    hasMore,
+    isLoadingMore,
+    loadMore,
   } = useNotifications();
 
-  // Centralized change handler for UI reactivity and controlled states
   const handleSettingChange = (key: keyof NotificationSettings, value: boolean | number) => {
-    updateSettings({ [key]: value });
+    void updateSettings({ [key]: value });
   };
 
   const [mounted, setMounted] = useState(false);
@@ -88,11 +103,19 @@ export default function NotificationsPage() {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
+  const handleNotificationClick = async (notification: DbNotification) => {
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    if (notification.link) {
+      router.push(notification.link);
+    }
+  };
+
   return (
     <AuthGuard>
       <AppLayout>
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 2xl:px-12 py-6 space-y-6 text-white">
-          {/* Header Section */}
           <div className="max-w-7xl mx-auto mb-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
@@ -112,7 +135,7 @@ export default function NotificationsPage() {
               <div className="flex items-center gap-3">
                 {unreadCount > 0 && (
                   <button
-                    onClick={markAllAsRead}
+                    onClick={() => void markAllAsRead()}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition-all text-sm font-bold text-zinc-300"
                   >
                     <CheckCheck size={16} />
@@ -127,8 +150,16 @@ export default function NotificationsPage() {
           </div>
 
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Main Section: Notifications List */}
-            <div className="lg:col-span-8 space-y-4">
+            <div
+              className="lg:col-span-8 space-y-4 max-h-[70vh] overflow-y-auto pr-1"
+              onScroll={(e) => {
+                if (!hasMore || isLoadingMore) return;
+                const el = e.currentTarget;
+                if (el.scrollTop + el.clientHeight >= el.scrollHeight - 48) {
+                  void loadMore();
+                }
+              }}
+            >
               {isLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
@@ -154,7 +185,7 @@ export default function NotificationsPage() {
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      onClick={() => !notification.is_read && markAsRead(notification.id)}
+                      onClick={() => void handleNotificationClick(notification)}
                       className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer ${
                         notification.is_read
                           ? 'bg-white/[0.01] border-white/[0.05] opacity-60'
@@ -179,10 +210,23 @@ export default function NotificationsPage() {
                             >
                               {notification.title}
                             </h3>
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-1.5 whitespace-nowrap ml-4">
-                              <Clock size={12} />
-                              {formatTime(notification.created_at)}
-                            </span>
+                            <div className="flex items-center gap-2 ml-4">
+                              <span className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-1.5 whitespace-nowrap">
+                                <Clock size={12} />
+                                {formatTime(notification.created_at)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void deleteNotification(notification.id);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-white/10 text-red-400"
+                                aria-label="Delete notification"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
                           </div>
                           <p
                             className={`text-sm leading-relaxed line-clamp-2 ${notification.is_read ? 'text-zinc-500' : 'text-zinc-400'}`}
@@ -193,11 +237,13 @@ export default function NotificationsPage() {
                       </div>
                     </div>
                   ))}
+                  {isLoadingMore && (
+                    <div className="py-4 text-center text-xs text-zinc-500">Loading more...</div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Sidebar: Settings Panel */}
             <div className="lg:col-span-4 space-y-6">
               <div className="rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-3xl overflow-hidden sticky top-8">
                 <div className="p-6 border-b border-white/[0.05] flex items-center gap-3">
@@ -281,8 +327,12 @@ export default function NotificationsPage() {
                   <div className="pt-6 flex flex-col gap-3">
                     <button
                       onClick={async () => {
-                        await triggerTest();
-                        toast.success('Test notification dispatched');
+                        const result = await triggerTest();
+                        if (result.success) {
+                          toast.success('Test notification dispatched');
+                        } else {
+                          toast.error(result.error ?? 'Insert failed');
+                        }
                       }}
                       className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
@@ -291,7 +341,7 @@ export default function NotificationsPage() {
                     <button
                       onClick={() => {
                         if (confirm('Permanently delete all notification history?')) {
-                          clearAllNotifications();
+                          void clearAllNotifications();
                         }
                       }}
                       className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-black text-xs uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2"
@@ -304,7 +354,7 @@ export default function NotificationsPage() {
                 <div className="p-4 bg-white/[0.02] border-t border-white/[0.05] flex items-center gap-3">
                   <Info size={14} className="text-zinc-500" />
                   <p className="text-[10px] font-medium text-zinc-500 leading-tight italic">
-                    Realtime synchronization is active via Supabase Broadcast.
+                    Realtime synchronization is active via Supabase.
                   </p>
                 </div>
               </div>

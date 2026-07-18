@@ -268,7 +268,6 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
         aria-modal="true"
         aria-label="Edit Profile"
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="relative w-full max-w-2xl max-h-[90dvh] overflow-y-auto bg-slate-950 border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Header */}

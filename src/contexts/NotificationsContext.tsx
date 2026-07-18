@@ -23,21 +23,30 @@ import {
   type NotificationSettings,
   DEFAULT_NOTIFICATION_SETTINGS,
 } from '@/services/notificationService';
-import { soundService } from '@/services/soundService';
-import { toast } from 'sonner';
+import { soundService, unlockNotificationAudio } from '@/services/soundService';
+import { showRealtimeNotificationToast } from '@/lib/notificationToast';
+
+const PAGE_SIZE = 20;
+const PERMISSION_ASKED_KEY = 'aitj_notif_permission_asked';
+const seenNotificationIds = new Set<string>();
+const soundedNotificationIds = new Set<string>();
 
 export interface NotificationsContextType {
   notifications: DbNotification[];
   unreadCount: number;
   isLoading: boolean;
+  hasMore: boolean;
+  isLoadingMore: boolean;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
+  loadMore: () => Promise<void>;
   refresh: () => Promise<void>;
   settings: NotificationSettings | null;
   updateSettings: (newSettings: Partial<NotificationSettings>) => Promise<void>;
   clearAllNotifications: () => Promise<void>;
   requestBrowserPermission: () => Promise<boolean>;
-  triggerTest: () => Promise<void>;
+  triggerTest: () => Promise<{ success: boolean; error: string | null }>;
 }
 
 export const NotificationsContext = createContext<NotificationsContextType | null>(null);
@@ -55,166 +64,303 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const [notifications, setNotifications] = useState<DbNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
-
-  // Use refs to avoid stale closures in the Realtime callback
   const settingsRef = useRef<NotificationSettings | null>(null);
+  const offsetRef = useRef(0);
+  const welcomeSentRef = useRef(false);
+  const userIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
 
-  // Memoize the supabase client to prevent unnecessary re-creations
+  useEffect(() => {
+    userIdRef.current = user?.id ?? null;
+  }, [user?.id]);
+
+  // Unlock audio after first user gesture (autoplay policy)
+  useEffect(() => {
+    unlockNotificationAudio();
+  }, []);
+
   const supabase = useMemo(() => createClient(), []);
+
+  const refreshUnreadCount = useCallback(async () => {
+    if (!user?.id) {
+      setUnreadCount(0);
+      return;
+    }
+    const count = await notificationService.fetchUnreadCount(user.id);
+    setUnreadCount(count);
+  }, [user?.id]);
 
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) {
       setNotifications([]);
       setUnreadCount(0);
+      setHasMore(false);
+      offsetRef.current = 0;
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+      const { data, error, hasMore: more } = await notificationService.fetchNotifications(user.id, {
+        limit: PAGE_SIZE,
+        offset: 0,
+      });
 
-      console.log('Fetched Data:', data);
-      console.log('Fetch Error:', error);
-
-      if (!error && data) {
-        console.log('[NotificationsContext] Fetched notifications:', data);
+      if (!error) {
         setNotifications(data);
-        setUnreadCount(data.filter((n) => !n.is_read).length);
+        offsetRef.current = data.length;
+        setHasMore(more);
+        data.forEach((n) => seenNotificationIds.add(n.id));
       }
+
+      await refreshUnreadCount();
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+      console.warn('[NotificationsContext] fetch failed:', err instanceof Error ? err.message : err);
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, supabase]);
+  }, [user?.id, refreshUnreadCount]);
+
+  const loadMore = useCallback(async () => {
+    if (!user?.id || isLoadingMore || !hasMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const { data, error, hasMore: more } = await notificationService.fetchNotifications(user.id, {
+        limit: PAGE_SIZE,
+        offset: offsetRef.current,
+      });
+
+      if (!error && data.length > 0) {
+        setNotifications((prev) => {
+          const existing = new Set(prev.map((n) => n.id));
+          const merged = [...prev, ...data.filter((n) => !existing.has(n.id))];
+          offsetRef.current = merged.length;
+          return merged;
+        });
+        setHasMore(more);
+      } else {
+        setHasMore(false);
+      }
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [user?.id, isLoadingMore, hasMore]);
 
   const fetchSettings = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const data = await notificationService.fetchSettings(user.id);
-      if (data) {
-        setSettings(data);
-      } else {
-        console.debug('[NotificationsContext] No settings found in DB, using defaults.');
-        // Fallback to defaults if row is missing
-        setSettings(DEFAULT_NOTIFICATION_SETTINGS);
+      const data = await notificationService.ensureSettings(user.id);
+      setSettings(data);
+
+      if (!welcomeSentRef.current) {
+        welcomeSentRef.current = true;
+        await notificationService.ensureWelcomeNotification(user.id);
       }
     } catch (err) {
       console.warn(
-        '[NotificationsContext] Settings not found, using defaults:',
+        '[NotificationsContext] Settings fallback:',
         err instanceof Error ? err.message : 'Unknown error'
       );
       setSettings(DEFAULT_NOTIFICATION_SETTINGS);
     }
   }, [user?.id]);
 
+  const requestBrowserPermission = useCallback(async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return false;
+    try {
+      if (Notification.permission === 'granted') return true;
+      if (Notification.permission === 'denied') return false;
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
+    } catch {
+      return false;
+    }
+  }, []);
+
+  /** Ask browser permission once (never spam). */
+  const askBrowserPermissionOnce = useCallback(async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'default') return;
+    if (localStorage.getItem(PERMISSION_ASKED_KEY)) return;
+    localStorage.setItem(PERMISSION_ASKED_KEY, '1');
+    await requestBrowserPermission();
+  }, [requestBrowserPermission]);
+
   const updateSettings = useCallback(
     async (newSettings: Partial<NotificationSettings>) => {
       if (!user?.id) return;
 
-      // 1. Optimistic UI update (Functional to avoid stale closure issues)
       setSettings((prev) => {
         const current = prev ?? DEFAULT_NOTIFICATION_SETTINGS;
         const updated = { ...current, ...newSettings };
 
-        // 2. Sound preview when volume is being adjusted
         if (
           newSettings.volume !== undefined &&
           newSettings.volume !== current.volume &&
           updated.sound_enabled &&
           !updated.do_not_disturb
         ) {
-          soundService.play('notification', newSettings.volume);
+          soundService.play('notification', newSettings.volume, `volume-${Date.now()}`);
         }
 
         return updated;
       });
 
-      // If desktop notifications are being enabled, request browser permission
       if (newSettings.desktop_enabled === true) {
         await requestBrowserPermission();
       }
 
       try {
-        // 3. Persist to DB
         await notificationService.updateSettings(user.id, newSettings);
-      } catch (err: any) {
-        console.error('[NotificationsContext] Settings sync failed:', JSON.stringify(err, null, 2));
-        console.error('Supabase Error Details:', {
-          message: err?.message,
-          details: err?.details,
-          hint: err?.hint,
-          code: err?.code,
-          payload: newSettings,
-        });
-        await fetchSettings(); // 4. Rollback to server state on failure
+      } catch (err) {
+        console.warn(
+          '[NotificationsContext] Settings sync failed:',
+          err instanceof Error ? err.message : err
+        );
+        await fetchSettings();
       }
     },
-    [user?.id, fetchSettings]
+    [user?.id, fetchSettings, requestBrowserPermission]
   );
 
-  const playNotificationSound = useCallback((currentSettings: NotificationSettings | null) => {
-    if (!currentSettings?.sound_enabled || currentSettings?.do_not_disturb) return;
-    soundService.play('notification', currentSettings?.volume);
-  }, []);
+  const handleRealtimeInsert = useCallback(
+    (newNotif: DbNotification, options?: { forceFeedback?: boolean }) => {
+      if (!newNotif?.id) return;
 
-  const triggerVibration = useCallback((currentSettings: NotificationSettings | null) => {
-    if (currentSettings?.vibration_enabled && !currentSettings?.do_not_disturb) {
-      soundService.triggerVibration();
-    }
-  }, []);
+      // Hard user targeting
+      if (userIdRef.current && newNotif.user_id && newNotif.user_id !== userIdRef.current) {
+        return;
+      }
 
-  const showNativeNotification = useCallback(
-    (notif: DbNotification, currentSettings: NotificationSettings | null) => {
-      if (
-        currentSettings?.desktop_enabled &&
-        Notification.permission === 'granted' &&
-        !currentSettings.do_not_disturb
-      ) {
-        new Notification(notif.title, {
-          body: currentSettings.popup_preview_enabled ? notif.message : 'New notification received',
-          icon: '/logo.png',
+      // Duplicate protection (list + toast + sound)
+      if (seenNotificationIds.has(newNotif.id)) return;
+      seenNotificationIds.add(newNotif.id);
+      window.setTimeout(() => seenNotificationIds.delete(newNotif.id), 60_000);
+
+      const currentSettings = settingsRef.current ?? DEFAULT_NOTIFICATION_SETTINGS;
+      const masterOn = currentSettings.notifications_enabled && !currentSettings.do_not_disturb;
+      const typeOn = notificationService.isTypeEnabled(newNotif.type, currentSettings);
+      const allowFeedback = options?.forceFeedback || (masterOn && typeOn);
+
+      // Always update list + badge instantly (even if muted)
+      setNotifications((prev) => {
+        if (prev.some((n) => n.id === newNotif.id)) return prev;
+        offsetRef.current += 1;
+        return [newNotif, ...prev];
+      });
+
+      if (!newNotif.is_read) {
+        setUnreadCount((c) => c + 1);
+      }
+
+      if (!allowFeedback) return;
+
+      // Popup toast (respect floating setting unless forced by Trigger Test)
+      if (options?.forceFeedback || currentSettings.floating_enabled !== false) {
+        showRealtimeNotificationToast(newNotif, {
+          showPreview: currentSettings.popup_preview_enabled !== false,
+          onNavigate: (link) => {
+            window.location.href = link;
+          },
         });
+      }
+
+      // Sound once per notification id (still respects sound_enabled)
+      if (currentSettings.sound_enabled && !currentSettings.do_not_disturb) {
+        if (!soundedNotificationIds.has(newNotif.id)) {
+          soundedNotificationIds.add(newNotif.id);
+          window.setTimeout(() => soundedNotificationIds.delete(newNotif.id), 10_000);
+          soundService.play('notification', currentSettings.volume ?? 1, newNotif.id);
+        }
+      }
+
+      // Haptics
+      if (currentSettings.vibration_enabled && !currentSettings.do_not_disturb) {
+        soundService.triggerVibration();
+      }
+
+      // Native browser notification only when tab is hidden / minimized
+      const tabHidden =
+        typeof document !== 'undefined' &&
+        (document.hidden || document.visibilityState === 'hidden');
+
+      if (
+        tabHidden &&
+        currentSettings.desktop_enabled &&
+        typeof window !== 'undefined' &&
+        'Notification' in window &&
+        Notification.permission === 'granted'
+      ) {
+        try {
+          const native = new Notification(newNotif.title, {
+            body:
+              currentSettings.popup_preview_enabled !== false
+                ? newNotif.message
+                : 'New notification received',
+            icon: '/logo.png',
+            tag: newNotif.id,
+            renotify: false,
+          });
+
+          native.onclick = () => {
+            try {
+              window.focus();
+              if (newNotif.link) {
+                window.location.href = newNotif.link;
+              }
+              native.close();
+            } catch {
+              // ignore
+            }
+          };
+        } catch {
+          // Permission race / unsupported — in-app toast already shown
+        }
       }
     },
     []
   );
 
-  const requestBrowserPermission = async () => {
-    if (!('Notification' in window)) return false;
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-  };
+  const triggerTest = useCallback(async (): Promise<{ success: boolean; error: string | null }> => {
+    if (!user?.id) {
+      return { success: false, error: 'Not authenticated — sign in again.' };
+    }
 
-  const triggerTest = async () => {
-    if (!user?.id) return;
-    console.debug('[NotificationsContext] Manual test trigger initiated');
-    const { error } = await notificationService.triggerTestNotification(user.id);
-    if (error) toast.error('Failed to trigger test notification');
-  };
+    unlockNotificationAudio();
+    await askBrowserPermissionOnce();
+
+    const result = await notificationService.triggerTestNotification(user.id);
+
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        error: result.error ?? 'Insert failed — unknown error',
+      };
+    }
+
+    // Present immediately so test works even if realtime is delayed/misconfigured.
+    // Realtime INSERT for the same id is ignored by duplicate protection.
+    handleRealtimeInsert(result.data, { forceFeedback: true });
+
+    return { success: true, error: null };
+  }, [user?.id, askBrowserPermissionOnce, handleRealtimeInsert]);
 
   const markAsRead = useCallback(
     async (id: string) => {
-      setNotifications((prev: DbNotification[]) => {
-        const notif = prev.find((n) => n.id === id);
-        if (!notif || notif.is_read) return prev;
+      const target = notifications.find((n) => n.id === id);
+      if (!target || target.is_read) return;
 
-        // Decrement unread count only if we are actually changing a status
-        setUnreadCount((c: number): number => Math.max(0, c - 1));
-        return prev.map((n) => (n.id === id ? { ...n, is_read: true } : n));
-      });
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+      setUnreadCount((c) => Math.max(0, c - 1));
 
       try {
         const { error } = await supabase
@@ -222,24 +368,20 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           .update({ is_read: true })
           .eq('id', id);
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
       } catch (error) {
-        console.error('Error marking notification as read:', error);
-        // Revert on error
-        fetchNotifications();
+        console.warn('[NotificationsContext] markAsRead failed:', error);
+        await fetchNotifications();
       }
     },
-    [supabase, fetchNotifications]
+    [supabase, fetchNotifications, notifications]
   );
 
   const markAllAsRead = useCallback(async () => {
     if (!user?.id) return;
 
-    // Optimistic Update
-    setNotifications((prev: DbNotification[]) => prev.map((n) => ({ ...n, is_read: true })));
-    setUnreadCount((_: number) => 0);
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadCount(0);
 
     try {
       const { error } = await supabase
@@ -248,54 +390,84 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         .eq('user_id', user.id)
         .eq('is_read', false);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-      // Revert on error
-      fetchNotifications();
+      console.warn('[NotificationsContext] markAllAsRead failed:', error);
+      await fetchNotifications();
     }
   }, [user?.id, supabase, fetchNotifications]);
+
+  const deleteNotification = useCallback(
+    async (id: string) => {
+      let wasUnread = false;
+
+      setNotifications((prev) => {
+        const target = prev.find((n) => n.id === id);
+        if (target && !target.is_read) wasUnread = true;
+        return prev.filter((n) => n.id !== id);
+      });
+
+      if (wasUnread) setUnreadCount((c) => Math.max(0, c - 1));
+      offsetRef.current = Math.max(0, offsetRef.current - 1);
+
+      const { error } = await notificationService.deleteNotification(id);
+      if (error) {
+        console.warn('[NotificationsContext] delete failed:', error.message);
+        await fetchNotifications();
+      }
+    },
+    [fetchNotifications]
+  );
 
   const clearAllNotifications = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const { error } = await supabase.from('notifications').delete().eq('user_id', user.id);
+      const { error } = await notificationService.clearAll(user.id);
       if (error) throw error;
-      setNotifications((_: DbNotification[]) => []);
-      setUnreadCount((_: number) => 0);
+      setNotifications([]);
+      setUnreadCount(0);
+      setHasMore(false);
+      offsetRef.current = 0;
     } catch (error) {
-      console.error('Error clearing notifications:', error);
+      console.warn('[NotificationsContext] clearAll failed:', error);
     }
-  }, [user?.id, supabase]);
+  }, [user?.id]);
 
   useEffect(() => {
     let isMounted = true;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
     if (!user?.id) {
       setNotifications([]);
       setUnreadCount(0);
       setIsLoading(false);
       setSettings(null);
+      setHasMore(false);
+      offsetRef.current = 0;
+      welcomeSentRef.current = false;
 
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+        void supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
       return;
     }
 
-    // Initial Load
-    fetchNotifications();
-    fetchSettings();
+    void fetchNotifications();
+    void fetchSettings();
+    void askBrowserPermissionOnce();
+    unlockNotificationAudio();
 
-    // Generate a completely unique channel name to prevent collisions / cache issues
-    const uniqueChannelName = `notifs:${user.id.slice(0, 8)}:${Math.random().toString(36).substring(2, 7)}`;
+    // One stable channel per user — avoids duplicate subscriptions
+    const channelName = `notifications:user:${user.id}`;
 
-    // Create the channel and register all event listeners BEFORE calling subscribe()
+    if (channelRef.current) {
+      void supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
     const channel = supabase
-      .channel(uniqueChannelName)
+      .channel(channelName)
       .on<DbNotification>(
         'postgres_changes',
         {
@@ -305,42 +477,8 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           filter: `user_id=eq.${user.id}`,
         },
         (payload: RealtimePostgresInsertPayload<DbNotification>) => {
-          const newNotif = payload.new;
-          console.debug('[Notifications] Realtime INSERT received:', newNotif.id);
-
-          const currentSettings = settingsRef.current ?? DEFAULT_NOTIFICATION_SETTINGS;
-          const isEnabled = notificationService.isTypeEnabled(newNotif.type, currentSettings);
-
-          // Handle side effects outside state updaters
-          if (isEnabled && currentSettings.notifications_enabled) {
-            console.debug(
-              '[Notifications] Side effects enabled for this type. Triggering feedback...'
-            );
-            playNotificationSound(currentSettings);
-            triggerVibration(currentSettings);
-            showNativeNotification(newNotif, currentSettings);
-
-            if (currentSettings.floating_enabled) {
-              toast.info(newNotif.title, {
-                description: currentSettings.popup_preview_enabled ? newNotif.message : undefined,
-                action: newNotif.link
-                  ? {
-                      label: 'View',
-                      onClick: () => (window.location.href = newNotif.link!),
-                    }
-                  : undefined,
-              });
-            }
-          }
-
-          setNotifications((prev: DbNotification[]): DbNotification[] => {
-            if (!isMounted) return prev;
-            if (prev.some((n) => n.id === newNotif.id)) return prev;
-            if (!newNotif.is_read) {
-              setUnreadCount((c) => c + 1);
-            }
-            return [newNotif, ...prev].slice(0, 20);
-          });
+          if (!isMounted) return;
+          handleRealtimeInsert(payload.new);
         }
       )
       .on<DbNotification>(
@@ -352,15 +490,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           filter: `user_id=eq.${user.id}`,
         },
         (payload: RealtimePostgresUpdatePayload<DbNotification>) => {
+          if (!isMounted) return;
           const updatedNotif = payload.new;
-          console.debug('[Notifications] Realtime UPDATE received:', updatedNotif.id);
 
-          setNotifications((prev: DbNotification[]) => {
-            if (!isMounted) return prev;
+          setNotifications((prev) => {
             const oldNotif = prev.find((n) => n.id === updatedNotif.id);
 
             if (oldNotif && oldNotif.is_read !== updatedNotif.is_read) {
-              setUnreadCount((c: number) => (updatedNotif.is_read ? Math.max(0, c - 1) : c + 1));
+              setUnreadCount((c) => (updatedNotif.is_read ? Math.max(0, c - 1) : c + 1));
             }
 
             return prev.map((n) => (n.id === updatedNotif.id ? updatedNotif : n));
@@ -376,32 +513,41 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           filter: `user_id=eq.${user.id}`,
         },
         (payload: RealtimePostgresDeletePayload<DbNotification>) => {
+          if (!isMounted) return;
           const deletedId = payload.old.id;
           let wasUnread = false;
 
-          setNotifications((prev: DbNotification[]) => {
-            if (!isMounted) return prev;
+          setNotifications((prev) => {
             const target = prev.find((n) => n.id === deletedId);
             if (target && !target.is_read) wasUnread = true;
+            offsetRef.current = Math.max(0, offsetRef.current - 1);
             return prev.filter((n) => n.id !== deletedId);
           });
 
           if (wasUnread) {
-            setUnreadCount((count: number) => Math.max(0, count - 1));
+            setUnreadCount((count) => Math.max(0, count - 1));
+          }
+
+          if (deletedId) {
+            seenNotificationIds.delete(deletedId);
+            soundedNotificationIds.delete(deletedId);
           }
         }
       );
 
-    // Call subscribe after all listeners are registered
     channel.subscribe((status) => {
       if (!isMounted) return;
 
-      if (status === 'SUBSCRIBED') {
-        console.debug('Realtime notification channel subscribed:', uniqueChannelName);
-      } else if (status === 'CHANNEL_ERROR') {
-        console.warn('Realtime channel error - retrying:', uniqueChannelName);
-      } else if (status === 'TIMED_OUT') {
-        console.warn('Realtime channel timeout - retrying:', uniqueChannelName);
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(() => {
+          if (!isMounted) return;
+          try {
+            void channel.subscribe();
+          } catch {
+            // reconnect quietly
+          }
+        }, 2500);
       }
     });
 
@@ -409,22 +555,32 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
     return () => {
       isMounted = false;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
       if (channel) {
-        supabase.removeChannel(channel).catch((err) => {
-          console.warn('[Notifications] Cleanup failed:', err);
-        });
+        void supabase.removeChannel(channel).catch(() => undefined);
         if (channelRef.current === channel) channelRef.current = null;
       }
     };
-  }, [user?.id, fetchNotifications, fetchSettings, supabase]);
+  }, [
+    user?.id,
+    fetchNotifications,
+    fetchSettings,
+    supabase,
+    handleRealtimeInsert,
+    askBrowserPermissionOnce,
+  ]);
 
   const value = useMemo(
     () => ({
       notifications,
       unreadCount,
       isLoading,
+      hasMore,
+      isLoadingMore,
       markAsRead,
       markAllAsRead,
+      deleteNotification,
+      loadMore,
       refresh: fetchNotifications,
       settings,
       updateSettings,
@@ -436,12 +592,17 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       notifications,
       unreadCount,
       isLoading,
+      hasMore,
+      isLoadingMore,
       markAsRead,
       markAllAsRead,
+      deleteNotification,
+      loadMore,
       fetchNotifications,
       settings,
       updateSettings,
       clearAllNotifications,
+      requestBrowserPermission,
       triggerTest,
     ]
   );

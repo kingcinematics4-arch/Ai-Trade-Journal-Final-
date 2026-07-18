@@ -702,14 +702,19 @@ export default function AuthFormPanel() {
                     {t('auth.experienceLabel')}
                   </label>
                   <div className="relative flex items-center group/input w-full">
-                              <SearchableSelect
-                                items={experienceLevels}
-                                value={signupExperience}
-                                onSelect={(val) => signupForm.setValue('experienceLevel', val, { shouldValidate: true, shouldDirty: true })}
-                                placeholder={t('auth.signup.selectLevel')}
-                                searchable={false}
-                                buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                              />
+                    <SearchableSelect
+                      items={experienceLevels}
+                      value={signupExperience}
+                      onSelect={(val) =>
+                        signupForm.setValue('experienceLevel', val, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                      placeholder={t('auth.signup.selectLevel')}
+                      searchable={false}
+                      buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
+                    />
                   </div>
                   {signupForm.formState.errors.experienceLevel && (
                     <p className="text-[10px] text-red-400 font-semibold">
@@ -726,14 +731,19 @@ export default function AuthFormPanel() {
                     {t('auth.styleLabel')}
                   </label>
                   <div className="relative flex items-center group/input w-full">
-                              <SearchableSelect
-                                items={tradingStyles}
-                                value={signupTradingStyle}
-                                onSelect={(val) => signupForm.setValue('tradingStyle', val, { shouldValidate: true, shouldDirty: true })}
-                                placeholder={t('auth.signup.selectStyle')}
-                                searchable={false}
-                                buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                              />
+                    <SearchableSelect
+                      items={tradingStyles}
+                      value={signupTradingStyle}
+                      onSelect={(val) =>
+                        signupForm.setValue('tradingStyle', val, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        })
+                      }
+                      placeholder={t('auth.signup.selectStyle')}
+                      searchable={false}
+                      buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-3.5 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
+                    />
                   </div>
                   {signupForm.formState.errors.tradingStyle && (
                     <p className="text-[10px] text-red-400 font-semibold">
@@ -756,14 +766,19 @@ export default function AuthFormPanel() {
                     size={15}
                     className="absolute left-3.5 text-slate-500 transition-colors group-focus-within/input:text-blue-400 z-10 pointer-events-none"
                   />
-                            <SearchableSelect
-                              items={countries}
-                              value={signupCountry}
-                              onSelect={(val) => signupForm.setValue('country', val, { shouldValidate: true, shouldDirty: true })}
-                              placeholder="Select your country"
-                              searchable={true}
-                              buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-10 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
-                            />
+                  <SearchableSelect
+                    items={countries}
+                    value={signupCountry}
+                    onSelect={(val) =>
+                      signupForm.setValue('country', val, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      })
+                    }
+                    placeholder="Select your country"
+                    searchable={true}
+                    buttonClassName="w-full appearance-none bg-slate-950/60 border border-white/[0.07] hover:border-white/[0.12] focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 rounded-xl pl-10 pr-8 py-3 sm:py-3.5 text-xs sm:text-sm text-white focus:outline-none transition-all font-sans font-medium cursor-pointer"
+                  />
                 </div>
                 {signupForm.formState.errors.country && (
                   <p className="text-[10px] text-red-400 font-semibold">
@@ -1342,7 +1357,12 @@ export default function AuthFormPanel() {
                               <SearchableSelect
                                 items={experienceLevels}
                                 value={signupExperience}
-                                onSelect={(val) => signupForm.setValue('experienceLevel', val, { shouldValidate: true, shouldDirty: true })}
+                                onSelect={(val) =>
+                                  signupForm.setValue('experienceLevel', val, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
                                 placeholder={t('auth.signup.selectLevel')}
                                 searchable={false}
                                 buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
@@ -1366,7 +1386,12 @@ export default function AuthFormPanel() {
                               <SearchableSelect
                                 items={tradingStyles}
                                 value={signupTradingStyle}
-                                onSelect={(val) => signupForm.setValue('tradingStyle', val, { shouldValidate: true, shouldDirty: true })}
+                                onSelect={(val) =>
+                                  signupForm.setValue('tradingStyle', val, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
                                 placeholder={t('auth.signup.selectStyle')}
                                 searchable={false}
                                 buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
@@ -1396,7 +1421,12 @@ export default function AuthFormPanel() {
                             <SearchableSelect
                               items={countries}
                               value={signupCountry}
-                              onSelect={(val) => signupForm.setValue('country', val, { shouldValidate: true, shouldDirty: true })}
+                              onSelect={(val) =>
+                                signupForm.setValue('country', val, {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                })
+                              }
                               placeholder="Select your country"
                               searchable={true}
                               buttonClassName="!py-3 sm:!py-3.5 !pl-10 !pr-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
@@ -1934,7 +1964,12 @@ export default function AuthFormPanel() {
                               <SearchableSelect
                                 items={experienceLevels}
                                 value={signupExperience}
-                                onSelect={(val) => signupForm.setValue('experienceLevel', val, { shouldValidate: true, shouldDirty: true })}
+                                onSelect={(val) =>
+                                  signupForm.setValue('experienceLevel', val, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
                                 placeholder={t('auth.signup.selectLevel')}
                                 searchable={false}
                                 buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
@@ -1957,7 +1992,12 @@ export default function AuthFormPanel() {
                               <SearchableSelect
                                 items={tradingStyles}
                                 value={signupTradingStyle}
-                                onSelect={(val) => signupForm.setValue('tradingStyle', val, { shouldValidate: true, shouldDirty: true })}
+                                onSelect={(val) =>
+                                  signupForm.setValue('tradingStyle', val, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  })
+                                }
                                 placeholder={t('auth.signup.selectStyle')}
                                 searchable={false}
                                 buttonClassName="!py-3 sm:!py-3.5 !px-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"
@@ -1985,7 +2025,12 @@ export default function AuthFormPanel() {
                             <SearchableSelect
                               items={countries}
                               value={signupCountry}
-                              onSelect={(val) => signupForm.setValue('country', val, { shouldValidate: true, shouldDirty: true })}
+                              onSelect={(val) =>
+                                signupForm.setValue('country', val, {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                })
+                              }
                               placeholder="Select your country"
                               searchable={true}
                               buttonClassName="!py-3 sm:!py-3.5 !pl-10 !pr-3.5 !h-11 bg-slate-950/60 border-white/[0.07] text-xs sm:text-sm"

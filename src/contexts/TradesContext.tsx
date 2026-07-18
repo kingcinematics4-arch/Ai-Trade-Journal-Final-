@@ -11,6 +11,7 @@ import {
 } from '@/lib/trades/analytics';
 import { dbTradeFromRow, mapDbTrades } from '@/lib/trades/mapTrade';
 import type { DbTrade, TradeAnalytics, TradeInsight, TradeRow } from '@/lib/trades/types';
+import { notify } from '@/lib/notify';
 
 type TradesContextValue = {
   trades: DbTrade[];
@@ -21,7 +22,8 @@ type TradesContextValue = {
   isEmpty: boolean;
   error: string | null;
   refetch: () => Promise<void>;
-  updateTrade: (id: string, updates: any) => Promise<void>;
+  updateTrade: (id: string, updates: Record<string, unknown>) => Promise<void>;
+  deleteTrade: (id: string) => Promise<boolean>;
 };
 
 const TradesContext = createContext<TradesContextValue | null>(null);
@@ -75,19 +77,47 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const updateTrade = useCallback(
-    async (id: string, updates: any) => {
+    async (id: string, updates: Record<string, unknown>) => {
+      if (!user?.id) return;
       try {
+        const existing = trades.find((t) => t.id === id);
         const supabase = createClient();
         const { error: updateError } = await supabase.from('trades').update(updates).eq('id', id);
 
         if (updateError) throw updateError;
         await fetchTrades();
-      } catch (err: any) {
+        void notify.tradeUpdated(user.id, existing?.asset_name ?? undefined);
+      } catch (err: unknown) {
         console.error('Error updating trade:', err);
         toast.error('Failed to update trade record');
       }
     },
-    [fetchTrades]
+    [fetchTrades, trades, user?.id]
+  );
+
+  const deleteTrade = useCallback(
+    async (id: string) => {
+      if (!user?.id) return false;
+      try {
+        const existing = trades.find((t) => t.id === id);
+        const supabase = createClient();
+        const { error: deleteError } = await supabase
+          .from('trades')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+
+        if (deleteError) throw deleteError;
+        await fetchTrades();
+        void notify.tradeDeleted(user.id, existing?.asset_name ?? undefined);
+        return true;
+      } catch (err: unknown) {
+        console.error('Error deleting trade:', err);
+        toast.error('Failed to delete trade record');
+        return false;
+      }
+    },
+    [fetchTrades, trades, user?.id]
   );
 
   useEffect(() => {
@@ -113,6 +143,7 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
       error,
       refetch: fetchTrades,
       updateTrade,
+      deleteTrade,
     }),
     [
       trades,
@@ -124,6 +155,7 @@ export function TradesProvider({ children }: { children: React.ReactNode }) {
       error,
       fetchTrades,
       updateTrade,
+      deleteTrade,
     ]
   );
 

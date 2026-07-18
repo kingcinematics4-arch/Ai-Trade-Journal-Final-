@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import type { DbNotification } from '@/lib/notifications';
+import { toast } from 'sonner';
 
 export default function NotificationPanel() {
   const {
@@ -22,11 +23,14 @@ export default function NotificationPanel() {
     isLoading,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     clearAllNotifications,
     settings,
     updateSettings,
-    requestBrowserPermission,
     triggerTest,
+    hasMore,
+    isLoadingMore,
+    loadMore,
   } = useNotifications();
 
   const router = useRouter();
@@ -113,7 +117,16 @@ export default function NotificationPanel() {
       </div>
 
       {/* Main Content Area */}
-      <div className="overflow-y-auto flex-1 scrollbar-none">
+      <div
+        className="overflow-y-auto flex-1 scrollbar-none"
+        onScroll={(e) => {
+          if (showSettings || !hasMore || isLoadingMore) return;
+          const el = e.currentTarget;
+          if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+            void loadMore();
+          }
+        }}
+      >
         {showSettings ? (
           /* Settings View */
           <div className="flex flex-col text-xs">
@@ -200,7 +213,14 @@ export default function NotificationPanel() {
             <div className="p-4 flex flex-col gap-2">
               <button
                 type="button"
-                onClick={triggerTest}
+                onClick={async () => {
+                  const result = await triggerTest();
+                  if (result.success) {
+                    toast.success('Test notification dispatched');
+                  } else {
+                    toast.error(result.error ?? 'Insert failed');
+                  }
+                }}
                 className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/30 text-primary rounded-xl font-bold transition-all mb-1"
               >
                 <BellRing size={14} />
@@ -255,22 +275,38 @@ export default function NotificationPanel() {
                         {formatTimestamp(n.created_at)}
                       </p>
                     </div>
-                    {!n.is_read && (
+                    <div className="flex items-start gap-1">
+                      {!n.is_read && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void markAsRead(n.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg text-primary"
+                          aria-label="Mark as read"
+                        >
+                          <Check size={14} />
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          markAsRead(n.id);
+                          void deleteNotification(n.id);
                         }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg text-primary"
-                        aria-label="Mark as read"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-lg text-red-400"
+                        aria-label="Delete notification"
                       >
-                        <Check size={14} />
+                        <Trash2 size={14} />
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))
+            )}
+            {isLoadingMore && (
+              <div className="p-3 text-center text-muted-foreground text-[10px]">Loading more...</div>
             )}
           </>
         )}
@@ -281,7 +317,7 @@ export default function NotificationPanel() {
           type="button"
           onClick={() => {
             setShowSettings(false);
-            router.push('/dashboard');
+            router.push('/dashboard/notifications');
           }}
           className="text-[10px] font-bold text-muted-foreground hover:text-white transition-colors uppercase tracking-widest"
         >

@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrades } from '@/contexts/TradesContext';
 import { createClient } from '@/lib/supabase';
-import { notificationService } from '@/services/notificationService';
+import { notify } from '@/lib/notify';
 import { parseSafeNumber } from '@/lib/trades/analytics';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 import TradeInfoSection from './TradeInfoSection';
@@ -174,25 +174,41 @@ export default function AddTradeForm() {
     }
   }, [entryPrice, exitPrice, stopLoss, takeProfit, lotSize, tradeDirection, form]);
 
-  const uploadImages = async (supabase: any, files: File[], bucket: string, path: string) => {
+  const TRADE_IMAGES_BUCKET = 'trade-images';
+
+  const uploadImages = async (supabase: any, files: File[], path: string) => {
     const urls: string[] = [];
     for (const file of files) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user!.id}/${path}/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
-        .from(bucket)
+      const { error: uploadError } = await supabase.storage
+        .from(TRADE_IMAGES_BUCKET)
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error('Error uploading image:', uploadError);
-        continue;
+        const msg = uploadError.message?.toLowerCase() || '';
+        let friendlyMessage = 'Image upload failed. Please try again.';
+        if (msg.includes('bucket not found') || msg.includes('not found')) {
+          friendlyMessage = 'Storage bucket is missing. Please ensure the "trade-images" bucket is created.';
+        } else if (
+          msg.includes('policy') ||
+          msg.includes('permission denied') ||
+          msg.includes('unauthorized') ||
+          msg.includes('security') ||
+          msg.includes('violates')
+        ) {
+          friendlyMessage = 'Upload permission denied. Check storage policies.';
+        } else if (msg.includes('fetch') || msg.includes('network')) {
+          friendlyMessage = 'Network error. Please check your connection and try again.';
+        }
+        throw new Error(friendlyMessage);
       }
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      } = supabase.storage.from(TRADE_IMAGES_BUCKET).getPublicUrl(filePath);
       urls.push(publicUrl);
     }
     return urls;
@@ -212,9 +228,9 @@ export default function AddTradeForm() {
     try {
       // 1. Upload Images
       const [entryUrls, exitUrls, chartUrls] = await Promise.all([
-        uploadImages(supabase, entryImages, 'trade-media', 'entry'),
-        uploadImages(supabase, exitImages, 'trade-media', 'exit'),
-        uploadImages(supabase, chartImages, 'trade-media', 'charts'),
+        uploadImages(supabase, entryImages, 'entry'),
+        uploadImages(supabase, exitImages, 'exit'),
+        uploadImages(supabase, chartImages, 'charts'),
       ]);
 
       // 2. Insert Trade Record
@@ -259,16 +275,7 @@ export default function AddTradeForm() {
       await refetch();
 
       // 3. Create Notification
-      await notificationService.createNotification({
-        userId: user.id,
-        title: t('trading.addTrade.tradeLogged'),
-        message: t('trading.addTrade.successfullyRecorded', {
-          direction: data.tradeDirection,
-          asset: data.assetName,
-        }),
-        type: 'trade',
-        link: '/dashboard',
-      });
+      await notify.tradeCreated(user.id, data.assetName, data.tradeDirection);
 
       // Update the existing loading toast to success
       toast.success(t('trading.addTrade.tradeLoggedSuccessfully'), { id: toastId });

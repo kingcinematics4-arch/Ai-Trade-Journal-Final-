@@ -1,10 +1,12 @@
 // src/app/ai-coach/page.tsx
 'use client';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import AuthGuard from '@/components/AuthGuard';
 import AppLayout from '@/components/AppLayout';
 import { TradesProvider, useTrades } from '@/contexts/TradesContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useAiInsights } from '@/hooks/ai/useAiInsights';
+import { notify } from '@/lib/notify';
 import AiCoachHero from '@/components/ai-coach/AiCoachHero';
 import AiMetricsGrid from '@/components/ai-coach/AiMetricsGrid';
 import AiChartsSection from '@/components/ai-coach/AiChartsSection';
@@ -14,10 +16,27 @@ import AiChatWidget from '@/components/ai-coach/AiChatWidget';
 import { Loader2 } from 'lucide-react';
 
 function AiCoachContent() {
+  const { user } = useAuth();
   const { trades, isLoading: tradesLoading } = useTrades();
   const { insights, loading: aiLoading, error } = useAiInsights(trades);
+  const notifiedRef = useRef(false);
 
   const isLoading = tradesLoading || aiLoading;
+
+  useEffect(() => {
+    if (isLoading || error || !insights || !user?.id || notifiedRef.current) return;
+    if (trades.length === 0) return;
+
+    notifiedRef.current = true;
+    const key = `ai_notify_${user.id}`;
+    const last = typeof window !== 'undefined' ? sessionStorage.getItem(key) : null;
+    const today = new Date().toISOString().slice(0, 10);
+    if (last === today) return;
+
+    sessionStorage.setItem(key, today);
+    void notify.aiAnalysisCompleted(user.id);
+    void notify.aiCoachReady(user.id);
+  }, [isLoading, error, insights, user?.id, trades.length]);
 
   if (isLoading) {
     return (
