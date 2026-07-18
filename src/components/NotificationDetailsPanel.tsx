@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   Trash2,
-  ExternalLink,
   TrendingUp,
   Brain,
   BarChart3,
@@ -31,33 +30,79 @@ function getTypeIcon(type: NotificationType | string): IconDef {
   const iconClass = 'w-5 h-5';
   switch (type) {
     case 'trade':
-      return { icon: <TrendingUp className={iconClass} />, bg: 'bg-blue-500/10', text: 'text-blue-400' };
+      return {
+        icon: <TrendingUp className={iconClass} />,
+        bg: 'bg-blue-500/10',
+        text: 'text-blue-400',
+      };
     case 'ai':
-      return { icon: <Brain className={iconClass} />, bg: 'bg-indigo-500/10', text: 'text-indigo-400' };
+      return {
+        icon: <Brain className={iconClass} />,
+        bg: 'bg-indigo-500/10',
+        text: 'text-indigo-400',
+      };
     case 'analytics':
-      return { icon: <BarChart3 className={iconClass} />, bg: 'bg-purple-500/10', text: 'text-purple-400' };
+      return {
+        icon: <BarChart3 className={iconClass} />,
+        bg: 'bg-purple-500/10',
+        text: 'text-purple-400',
+      };
     case 'community':
-      return { icon: <Users className={iconClass} />, bg: 'bg-pink-500/10', text: 'text-pink-400' };
+      return {
+        icon: <Users className={iconClass} />,
+        bg: 'bg-pink-500/10',
+        text: 'text-pink-400',
+      };
     case 'warning':
-      return { icon: <AlertTriangle className={iconClass} />, bg: 'bg-amber-500/10', text: 'text-amber-400' };
+      return {
+        icon: <AlertTriangle className={iconClass} />,
+        bg: 'bg-amber-500/10',
+        text: 'text-amber-400',
+      };
     case 'error':
-      return { icon: <XCircle className={iconClass} />, bg: 'bg-red-500/10', text: 'text-red-400' };
+      return {
+        icon: <XCircle className={iconClass} />,
+        bg: 'bg-red-500/10',
+        text: 'text-red-400',
+      };
     case 'success':
-      return { icon: <CheckCircle2 className={iconClass} />, bg: 'bg-emerald-500/10', text: 'text-emerald-400' };
+      return {
+        icon: <CheckCircle2 className={iconClass} />,
+        bg: 'bg-emerald-500/10',
+        text: 'text-emerald-400',
+      };
     case 'info':
-      return { icon: <Info className={iconClass} />, bg: 'bg-sky-500/10', text: 'text-sky-400' };
+      return {
+        icon: <Info className={iconClass} />,
+        bg: 'bg-sky-500/10',
+        text: 'text-sky-400',
+      };
     case 'achievement':
-      return { icon: <Trophy className={iconClass} />, bg: 'bg-yellow-500/10', text: 'text-yellow-400' };
+      return {
+        icon: <Trophy className={iconClass} />,
+        bg: 'bg-yellow-500/10',
+        text: 'text-yellow-400',
+      };
     case 'admin':
-      return { icon: <Shield className={iconClass} />, bg: 'bg-red-500/10', text: 'text-red-400' };
+      return {
+        icon: <Shield className={iconClass} />,
+        bg: 'bg-red-500/10',
+        text: 'text-red-400',
+      };
     case 'system':
-      return { icon: <Cpu className={iconClass} />, bg: 'bg-zinc-500/10', text: 'text-zinc-300' };
+      return {
+        icon: <Cpu className={iconClass} />,
+        bg: 'bg-zinc-500/10',
+        text: 'text-zinc-300',
+      };
     default:
-      return { icon: <Bell className={iconClass} />, bg: 'bg-primary/10', text: 'text-primary' };
+      return {
+        icon: <Bell className={iconClass} />,
+        bg: 'bg-primary/10',
+        text: 'text-primary',
+      };
   }
 }
-
-const BADGE_TYPES: NotificationType[] = ['success', 'warning', 'error', 'info'];
 
 function formatTimestamp(iso: string): string {
   try {
@@ -70,18 +115,18 @@ function formatTimestamp(iso: string): string {
   }
 }
 
+const BADGE_TYPES: NotificationType[] = ['success', 'warning', 'error', 'info'];
+
 interface NotificationDetailsPanelProps {
   notification: DbNotification | null;
   onClose: () => void;
   onDelete: (id: string) => void;
-  onNavigate: (link: string) => void;
 }
 
 export default function NotificationDetailsPanel({
   notification,
   onClose,
   onDelete,
-  onNavigate,
 }: NotificationDetailsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -137,7 +182,6 @@ export default function NotificationDetailsPanel({
 
   const icon = notification ? getTypeIcon(notification.type) : null;
   const showBadge = notification ? BADGE_TYPES.includes(notification.type) : false;
-  const hasLink = Boolean(notification?.link);
 
   return (
     <AnimatePresence>
@@ -222,33 +266,22 @@ export default function NotificationDetailsPanel({
             </div>
 
             <div className="flex items-center gap-3 px-8 py-6">
-              {hasLink && (
-                <button
-                  type="button"
-                  onClick={() => onNavigate(notification.link!)}
-                  className="btn-primary flex items-center justify-center gap-2 flex-1"
-                >
-                  <ExternalLink size={15} />
-                  Open
-                </button>
-              )}
-
               <button
                 type="button"
                 onClick={() => {
                   onDelete(notification.id);
                   handleClose();
                 }}
-                aria-label="Delete notification"
-                className="h-11 w-11 shrink-0 flex items-center justify-center rounded-2xl border border-border bg-white/[0.02] text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+                className="flex-1 flex items-center justify-center gap-2 text-red-400 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/30 rounded-2xl transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
               >
                 <Trash2 size={16} />
+                Delete
               </button>
 
               <button
                 type="button"
                 onClick={handleClose}
-                className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-2.5 rounded-xl hover:bg-white/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="flex-1 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/[0.05] rounded-2xl transition-all duration-200 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 Close
               </button>

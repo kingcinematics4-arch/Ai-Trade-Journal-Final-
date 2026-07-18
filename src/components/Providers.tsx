@@ -7,22 +7,15 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import ToastProvider from '@/components/ui/ToastProvider';
 import { I18nProvider } from '@/i18n/provider/I18nProvider';
 import NotificationDetailsPanel from '@/components/NotificationDetailsPanel';
-import { useRouter } from 'next/navigation';
 
 function NotificationDetailsHost() {
-  const router = useRouter();
-  const {
-    selectedNotification,
-    closeSelected,
-    deleteNotification,
-  } = useNotifications();
+  const { selectedNotification, closeSelected, deleteNotification } = useNotifications();
 
   return (
     <NotificationDetailsPanel
       notification={selectedNotification}
       onClose={closeSelected}
       onDelete={(id) => void deleteNotification(id)}
-      onNavigate={(link) => router.push(link)}
     />
   );
 }
