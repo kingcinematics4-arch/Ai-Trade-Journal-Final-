@@ -48,6 +48,7 @@ export interface NotificationsContextType {
   clearAllNotifications: () => Promise<void>;
   requestBrowserPermission: () => Promise<boolean>;
   triggerTest: () => Promise<{ success: boolean; error: string | null }>;
+  triggerLongNotification: () => Promise<{ success: boolean; error: string | null }>;
 }
 
 export const NotificationsContext = createContext<NotificationsContextType | null>(null);
@@ -408,6 +409,30 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     return { success: true, error: null };
   }, [user?.id, askBrowserPermissionOnce, handleRealtimeInsert]);
 
+  const triggerLongNotification = useCallback(async (): Promise<{ success: boolean; error: string | null }> => {
+    if (!user?.id) {
+      return { success: false, error: 'Not authenticated — sign in again.' };
+    }
+
+    console.log('[NotificationsContext] Notification triggered (long)');
+    unlockNotificationAudio();
+    preloadNotificationSound();
+    await askBrowserPermissionOnce();
+
+    const result = await notificationService.triggerLongNotification(user.id);
+
+    if (!result.success || !result.data) {
+      return {
+        success: false,
+        error: result.error ?? 'Insert failed — unknown error',
+      };
+    }
+
+    handleRealtimeInsert(result.data, { forceFeedback: true });
+
+    return { success: true, error: null };
+  }, [user?.id, askBrowserPermissionOnce, handleRealtimeInsert]);
+
   const deleteNotification = useCallback(
     async (id: string) => {
       let wasUnread = false;
@@ -600,6 +625,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       clearAllNotifications,
       requestBrowserPermission,
       triggerTest,
+      triggerLongNotification,
     }),
     [
       notifications,
@@ -618,6 +644,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       clearAllNotifications,
       requestBrowserPermission,
       triggerTest,
+      triggerLongNotification,
     ]
   );
 

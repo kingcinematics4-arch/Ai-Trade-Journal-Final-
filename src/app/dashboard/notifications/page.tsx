@@ -72,6 +72,7 @@ export default function NotificationsPage() {
     settings,
     updateSettings,
     triggerTest,
+    triggerLongNotification,
     hasMore,
     isLoadingMore,
     loadMore,
@@ -319,6 +320,19 @@ export default function NotificationsPage() {
                       className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
                       <Zap size={14} /> Trigger Realtime Test
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const result = await triggerLongNotification();
+                        if (result.success) {
+                          toast.success('Long notification dispatched');
+                        } else {
+                          toast.error(result.error ?? 'Insert failed');
+                        }
+                      }}
+                      className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Zap size={14} /> Trigger Long Notification
                     </button>
                     <button
                       onClick={() => {

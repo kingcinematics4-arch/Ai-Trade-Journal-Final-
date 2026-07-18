@@ -408,6 +408,28 @@ export const notificationService = {
     });
   },
 
+  async triggerLongNotification(userId: string): Promise<NotificationMutationResult> {
+    return this.createNotification({
+      userId,
+      title: 'System Maintenance Scheduled',
+      message:
+        'A scheduled maintenance window has been planned for the application.\n\n' +
+        'During this period some services may respond more slowly than usual.\n\n' +
+        'Real-time notifications will continue to operate whenever possible.\n\n' +
+        'Trading data synchronization may experience short delays.\n\n' +
+        'Previously saved information will remain safe.\n\n' +
+        'Please avoid refreshing the application repeatedly during maintenance.\n\n' +
+        'All background services will automatically reconnect after completion.\n\n' +
+        'If you notice any unexpected behavior, simply wait a few moments.\n\n' +
+        'Normal operation will resume automatically once maintenance has finished.\n\n' +
+        'Thank you for your patience and understanding.',
+      type: 'system',
+      link: '/dashboard/notifications',
+      metadata: { is_test: true, kind: 'long' },
+      force: true,
+    });
+  },
+
   async ensureWelcomeNotification(userId: string): Promise<void> {
     const supabase = createClient();
     const { count, error } = await supabase
