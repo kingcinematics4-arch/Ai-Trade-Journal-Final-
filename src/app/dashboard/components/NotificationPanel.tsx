@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Check,
   Trash2,
@@ -28,12 +27,12 @@ export default function NotificationPanel() {
     settings,
     updateSettings,
     triggerTest,
+    selectNotification,
     hasMore,
     isLoadingMore,
     loadMore,
   } = useNotifications();
 
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -69,13 +68,8 @@ export default function NotificationPanel() {
     }
   };
 
-  const handleNotificationClick = async (notification: DbNotification) => {
-    if (!notification.is_read) {
-      await markAsRead(notification.id);
-    }
-    if (notification.link) {
-      router.push(notification.link);
-    }
+  const handleNotificationClick = (notification: DbNotification) => {
+    selectNotification(notification.id);
   };
 
   return (

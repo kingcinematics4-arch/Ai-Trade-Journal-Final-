@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import AppLayout from '@/components/AppLayout';
 import { useNotifications } from '@/contexts/NotificationsContext';
@@ -64,7 +63,6 @@ const getNotificationIcon = (type: string) => {
 };
 
 export default function NotificationsPage() {
-  const router = useRouter();
   const {
     notifications,
     unreadCount,
@@ -73,6 +71,7 @@ export default function NotificationsPage() {
     markAllAsRead,
     deleteNotification,
     clearAllNotifications,
+    selectNotification,
     settings,
     updateSettings,
     triggerTest,
@@ -103,13 +102,8 @@ export default function NotificationsPage() {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
-  const handleNotificationClick = async (notification: DbNotification) => {
-    if (!notification.is_read) {
-      await markAsRead(notification.id);
-    }
-    if (notification.link) {
-      router.push(notification.link);
-    }
+  const handleNotificationClick = (notification: DbNotification) => {
+    selectNotification(notification.id);
   };
 
   return (

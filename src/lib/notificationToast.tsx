@@ -240,12 +240,17 @@ function ToastContent({
  */
 export function showRealtimeNotificationToast(
   notif: DbNotification,
-  options?: { showPreview?: boolean; onNavigate?: (link: string) => void }
+  options?: {
+    showPreview?: boolean;
+    onNavigate?: (link: string) => void;
+    onSelect?: (id: string) => void;
+  }
 ): void {
   if (!notif?.id || !notif.title) return;
 
   const showPreview = options?.showPreview !== false;
   const toastId = `realtime-notif-${notif.id}`;
+  const handleSelect = options?.onSelect;
 
   toast.custom(
     (t) => (
@@ -254,10 +259,8 @@ export function showRealtimeNotificationToast(
         showPreview={showPreview}
         onClose={() => toast.dismiss(t)}
         onClick={() => {
-          if (notif.link && options?.onNavigate) {
-            options.onNavigate(notif.link);
-            toast.dismiss(t);
-          }
+          if (handleSelect) handleSelect(notif.id);
+          toast.dismiss(t);
         }}
         toastId={t}
       />

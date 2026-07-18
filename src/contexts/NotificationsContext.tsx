@@ -38,8 +38,12 @@ export interface NotificationsContextType {
   hasMore: boolean;
   isLoadingMore: boolean;
   markAsRead: (id: string) => Promise<void>;
+  markUnread: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
+  selectNotification: (id: string) => void;
+  closeSelected: () => void;
+  selectedNotification: DbNotification | null;
   loadMore: () => Promise<void>;
   refresh: () => Promise<void>;
   settings: NotificationSettings | null;
@@ -67,11 +71,17 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [settings, setSettings] = useState<NotificationSettings | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<DbNotification | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const settingsRef = useRef<NotificationSettings | null>(null);
   const offsetRef = useRef(0);
   const welcomeSentRef = useRef(false);
   const userIdRef = useRef<string | null>(null);
+  const notificationsRef = useRef<DbNotification[]>([]);
+
+  useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -80,6 +90,15 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     userIdRef.current = user?.id ?? null;
   }, [user?.id]);
+
+  // Keep the open details panel in sync with the live notification list.
+  useEffect(() => {
+    setSelectedNotification((prev) => {
+      if (!prev) return prev;
+      const live = notifications.find((n) => n.id === prev.id);
+      return live ? { ...prev, ...live } : prev;
+    });
+  }, [notifications]);
 
   // Unlock audio after first user gesture (autoplay policy)
   useEffect(() => {
@@ -155,6 +174,15 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       setIsLoadingMore(false);
     }
   }, [user?.id, isLoadingMore, hasMore]);
+
+  const selectNotification = useCallback((id: string) => {
+    const target = notificationsRef.current.find((n) => n.id === id) ?? null;
+    setSelectedNotification(target);
+  }, []);
+
+  const closeSelected = useCallback(() => {
+    setSelectedNotification(null);
+  }, []);
 
   const fetchSettings = useCallback(async () => {
     if (!user?.id) return;
@@ -271,9 +299,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         console.log('[NotificationsContext] Notification popup shown');
         showRealtimeNotificationToast(newNotif, {
           showPreview: currentSettings.popup_preview_enabled !== false,
-          onNavigate: (link) => {
-            window.location.href = link;
-          },
+          onSelect: (id) => selectNotification(id),
         });
       }
 
@@ -330,7 +356,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         }
       }
     },
-    []
+    [selectNotification]
   );
 
   const triggerTest = useCallback(async (): Promise<{ success: boolean; error: string | null }> => {
@@ -361,7 +387,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   const markAsRead = useCallback(
     async (id: string) => {
-      const target = notifications.find((n) => n.id === id);
+      const target = notificationsRef.current.find((n) => n.id === id);
       if (!target || target.is_read) return;
 
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
@@ -379,7 +405,30 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         await fetchNotifications();
       }
     },
-    [supabase, fetchNotifications, notifications]
+    [supabase, fetchNotifications]
+  );
+
+  const markUnread = useCallback(
+    async (id: string) => {
+      const target = notificationsRef.current.find((n) => n.id === id);
+      if (!target || !target.is_read) return;
+
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: false } : n)));
+      setUnreadCount((c) => c + 1);
+
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ is_read: false })
+          .eq('id', id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.warn('[NotificationsContext] markUnread failed:', error);
+        await fetchNotifications();
+      }
+    },
+    [supabase, fetchNotifications]
   );
 
   const markAllAsRead = useCallback(async () => {
@@ -584,8 +633,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       hasMore,
       isLoadingMore,
       markAsRead,
+      markUnread,
       markAllAsRead,
       deleteNotification,
+      selectNotification,
+      closeSelected,
+      selectedNotification,
       loadMore,
       refresh: fetchNotifications,
       settings,
@@ -601,8 +654,12 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       hasMore,
       isLoadingMore,
       markAsRead,
+      markUnread,
       markAllAsRead,
       deleteNotification,
+      selectNotification,
+      closeSelected,
+      selectedNotification,
       loadMore,
       fetchNotifications,
       settings,
