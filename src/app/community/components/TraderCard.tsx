@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { PublicTraderProfile } from '@/types/community';
 import { getCountryCode } from './CountryFlag';
 import { formatLevel } from '@/lib/format';
+import LikeProfileButton from './LikeProfileButton';
 
 interface TraderCardProps {
   trader: PublicTraderProfile;
@@ -69,7 +70,16 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
   const hasTrades = trader.tradesLogged > 0 && trader.winRate !== null;
 
   return (
-    <div className="h-[184px] w-full bg-[#0a0a0a] border border-white/[0.04] rounded-[18px] p-5 pb-7 flex flex-col justify-between cursor-pointer transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_6px_20px_rgba(59,130,246,0.12)]">
+    <div className="h-[184px] w-full bg-[#0a0a0a] border border-white/[0.04] rounded-[18px] p-5 pb-7 flex flex-col justify-between cursor-pointer transition-all duration-200 ease-out hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-[0_6px_20px_rgba(59,130,246,0.12)] relative">
+      {/* Like button - top-right corner */}
+      <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
+        <LikeProfileButton
+          profileId={trader.id}
+          profileOwnerId={trader.id}
+          size="sm"
+          compact
+        />
+      </div>
       {/* Top row: avatar + name/bio | stats | button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">

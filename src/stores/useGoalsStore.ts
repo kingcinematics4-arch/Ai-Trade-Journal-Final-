@@ -13,6 +13,8 @@ interface GoalsState {
   syncProgress: (trades: (DbTrade & { goalId?: string })[]) => void;
   lastCompletedGoal: Goal | null;
   clearLastCompletedGoal: () => void;
+  lastFailedGoal: Goal | null;
+  clearLastFailedGoal: () => void;
 
   // Analytics
   getActiveGoals: () => Goal[];
@@ -26,6 +28,8 @@ export const useGoalsStore = create<GoalsState>()(
       goals: [],
       lastCompletedGoal: null,
       clearLastCompletedGoal: () => set({ lastCompletedGoal: null }),
+      lastFailedGoal: null,
+      clearLastFailedGoal: () => set({ lastFailedGoal: null }),
 
       addGoal: (goalData) => {
         const newGoal: Goal = {
@@ -55,8 +59,8 @@ export const useGoalsStore = create<GoalsState>()(
         set((state) => {
           let hasChanges = false;
           let newlyCompleted: Goal | null = null;
+          let newlyFailed: Goal | null = null;
           const updatedGoals = state.goals.map((goal) => {
-            // Migration safety: Provide defaults for fields removed from persistence
             const currentGoal = {
               ...goal,
               status: goal.status || 'active',
@@ -84,6 +88,15 @@ export const useGoalsStore = create<GoalsState>()(
                   progress: 100,
                 };
               }
+
+              if (updated.status === 'failed' && goal.status === 'active') {
+                newlyFailed = {
+                  ...updated,
+                  completedAt: new Date().toISOString(),
+                  progress: safeProgress,
+                };
+              }
+
               return { ...updated, progress: safeProgress, currentValue: safeCurrentValue };
             }
             return goal;
@@ -93,6 +106,7 @@ export const useGoalsStore = create<GoalsState>()(
             ? {
                 goals: updatedGoals,
                 lastCompletedGoal: newlyCompleted || state.lastCompletedGoal,
+                lastFailedGoal: newlyFailed || state.lastFailedGoal,
               }
             : state;
         });
@@ -104,7 +118,6 @@ export const useGoalsStore = create<GoalsState>()(
     }),
     {
       name: 'ai-trade-journal-goals',
-      // Persist ONLY configuration. Computed fields are recalculated on load.
       partialize: (state) => ({
         goals: state.goals.map(
           ({

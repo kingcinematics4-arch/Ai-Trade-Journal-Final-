@@ -29,8 +29,10 @@ import {
 import { cn } from '@/lib/utils';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { useTrades } from '@/contexts/TradesContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { getTradePnL, normalizeStatus } from '@/lib/trades/analytics';
 import { useCalendarGoalsStore } from '@/stores/useCalendarGoalsStore';
+import { notify } from '@/lib/notify';
 import EventModal from './EventModal';
 import GoalModal from './GoalModal';
 import DayDetailsModal from '@/components/DayDetailsModal';
@@ -94,6 +96,7 @@ const filterOptions = [
 ];
 
 export default function CalendarView() {
+  const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -174,6 +177,9 @@ export default function CalendarView() {
       updateEvent(editingEvent.id, data);
     } else {
       addEvent(data);
+      if (user?.id) {
+        notify.eventCreated(user.id, data.title, data.date);
+      }
     }
 
     setIsModalOpen(false);
@@ -554,7 +560,11 @@ export default function CalendarView() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          updateEvent(event.id, { ...event, completed: !event.completed });
+                          const nextCompleted = !event.completed;
+                          updateEvent(event.id, { ...event, completed: nextCompleted });
+                          if (nextCompleted && user?.id) {
+                            notify.eventCompleted(user.id, event.title);
+                          }
                         }}
                         className={cn(
                           'w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 hover:scale-110 active:scale-95',

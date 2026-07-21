@@ -43,6 +43,8 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   show_stats: true,
 };
 
+const WELCOME_SENT_KEY = 'aitj_welcome_notification_sent';
+
 export interface CreateNotificationInput {
   userId: string;
   title: string;
@@ -384,9 +386,13 @@ export const notificationService = {
     return count ?? 0;
   },
 
-  async deleteNotification(id: string): Promise<{ error: Error | null }> {
+  async deleteNotification(userId: string, id: string): Promise<{ error: Error | null }> {
     const supabase = createClient();
-    const { error } = await supabase.from('notifications').delete().eq('id', id);
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId)
+      .eq('id', id);
     return { error: error ? new Error(error.message) : null };
   },
 
@@ -431,6 +437,10 @@ export const notificationService = {
   },
 
   async ensureWelcomeNotification(userId: string): Promise<void> {
+    if (typeof window !== 'undefined' && window.localStorage.getItem(WELCOME_SENT_KEY)) {
+      return;
+    }
+
     const supabase = createClient();
     const { count, error } = await supabase
       .from('notifications')
@@ -438,7 +448,12 @@ export const notificationService = {
       .eq('user_id', userId)
       .contains('metadata', { kind: 'welcome' });
 
-    if (error || (count ?? 0) > 0) return;
+    if (error || (count ?? 0) > 0) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(WELCOME_SENT_KEY, '1');
+      }
+      return;
+    }
 
     await this.createNotification({
       userId,
@@ -450,5 +465,9 @@ export const notificationService = {
       metadata: { kind: 'welcome' },
       force: true,
     });
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(WELCOME_SENT_KEY, '1');
+    }
   },
 };

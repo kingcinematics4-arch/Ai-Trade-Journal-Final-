@@ -96,6 +96,7 @@ function exportTXT(data: any[], options: ExportOptions) {
   const text = data.map((row) => JSON.stringify(row)).join('\n');
 
   download(new Blob([text], { type: 'text/plain' }), `${options.fileName}.txt`);
+  return true;
 }
 
 /* ---------------- ANNUAL COMPLIANCE REPORT ---------------- */

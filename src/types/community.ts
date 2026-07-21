@@ -61,6 +61,30 @@ export interface PublicTraderProfile {
   telegram: string | null;
 }
 
+/** A like on a public profile */
+export interface ProfileLike {
+  id: string;
+  profileId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface DbProfileLike {
+  id: string;
+  profile_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export function mapDbProfileLike(row: DbProfileLike): ProfileLike {
+  return {
+    id: row.id,
+    profileId: row.profile_id,
+    userId: row.user_id,
+    createdAt: row.created_at,
+  };
+}
+
 /** Pagination response for community queries */
 export interface PaginatedTraders {
   traders: PublicTraderProfile[];

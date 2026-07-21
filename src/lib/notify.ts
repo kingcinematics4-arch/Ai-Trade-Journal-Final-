@@ -48,6 +48,17 @@ export const notify = {
     });
   },
 
+  profileLike(recipientId: string, actorName: string) {
+    return safeNotify({
+      userId: recipientId,
+      title: 'New Profile Like',
+      message: `${actorName} liked your profile.`,
+      type: 'community',
+      link: '/profile',
+      metadata: { kind: 'profile_like' },
+    });
+  },
+
   follow(recipientId: string, followerName: string) {
     return safeNotify({
       userId: recipientId,
@@ -63,9 +74,7 @@ export const notify = {
     return safeNotify({
       userId: recipientId,
       title: 'Trade Liked',
-      message: asset
-        ? `${actorName} liked your ${asset} trade.`
-        : `${actorName} liked your trade.`,
+      message: asset ? `${actorName} liked your ${asset} trade.` : `${actorName} liked your trade.`,
       type: 'community',
       link: '/profile',
       metadata: { kind: 'like', asset },
@@ -148,6 +157,83 @@ export const notify = {
       type: 'warning',
       link: '/dashboard',
       metadata: { kind: 'maintenance' },
+    });
+  },
+
+  exportCompleted(userId: string, format: string) {
+    return safeNotify({
+      userId,
+      title: 'Export Complete',
+      message: `Your ${format} trade report was generated successfully.`,
+      type: 'success',
+      link: '/exports',
+      metadata: { kind: 'export_completed', format },
+    });
+  },
+
+  exportFailed(userId: string, format: string) {
+    return safeNotify({
+      userId,
+      title: 'Export Failed',
+      message: `Your ${format} export could not be generated. Please try again.`,
+      type: 'error',
+      link: '/exports',
+      metadata: { kind: 'export_failed', format },
+    });
+  },
+
+  goalCreated(userId: string, title: string) {
+    return safeNotify({
+      userId,
+      title: 'Goal Created',
+      message: `"${title}" target has been set.`,
+      type: 'info',
+      link: '/goals',
+      metadata: { kind: 'goal_created', title },
+    });
+  },
+
+  goalCompleted(userId: string, title: string) {
+    return safeNotify({
+      userId,
+      title: 'Goal Achieved',
+      message: `"${title}" — you hit your target!`,
+      type: 'success',
+      link: '/goals',
+      metadata: { kind: 'goal_completed', title },
+    });
+  },
+
+  goalFailed(userId: string, title: string) {
+    return safeNotify({
+      userId,
+      title: 'Goal Missed',
+      message: `"${title}" target was not met by the deadline.`,
+      type: 'warning',
+      link: '/goals',
+      metadata: { kind: 'goal_failed', title },
+    });
+  },
+
+  eventCreated(userId: string, title: string, date: string) {
+    return safeNotify({
+      userId,
+      title: 'Event Scheduled',
+      message: `"${title}" added to ${date}.`,
+      type: 'info',
+      link: '/dashboard/calendar',
+      metadata: { kind: 'event_created', title, date },
+    });
+  },
+
+  eventCompleted(userId: string, title: string) {
+    return safeNotify({
+      userId,
+      title: 'Task Completed',
+      message: `"${title}" marked as done.`,
+      type: 'success',
+      link: '/dashboard/calendar',
+      metadata: { kind: 'event_completed', title },
     });
   },
 };

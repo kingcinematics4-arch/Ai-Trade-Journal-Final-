@@ -10,8 +10,11 @@ import GoalCard from '@/components/goals/GoalCard';
 import GoalFormModal from '@/components/goals/GoalFormModal';
 import { generateAiGoalSuggestions } from '@/lib/goals/engine';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { notify } from '@/lib/notify';
 
 function GoalsContent() {
+  const { user } = useAuth();
   const { trades, isLoading } = useTrades();
   const {
     goals,
@@ -21,15 +24,32 @@ function GoalsContent() {
     getActiveGoals,
     getCompletedGoals,
     getFailedGoals,
+    lastCompletedGoal,
+    clearLastCompletedGoal,
+    lastFailedGoal,
+    clearLastFailedGoal,
   } = useGoalsStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Sync progress automatically when trades are loaded or change
   useEffect(() => {
     if (!isLoading && trades.length >= 0) {
       syncProgress(trades);
     }
   }, [trades, isLoading, syncProgress]);
+
+  useEffect(() => {
+    if (lastCompletedGoal && user?.id) {
+      notify.goalCompleted(user.id, lastCompletedGoal.title);
+      clearLastCompletedGoal();
+    }
+  }, [lastCompletedGoal, user?.id, clearLastCompletedGoal]);
+
+  useEffect(() => {
+    if (lastFailedGoal && user?.id) {
+      notify.goalFailed(user.id, lastFailedGoal.title);
+      clearLastFailedGoal();
+    }
+  }, [lastFailedGoal, user?.id, clearLastFailedGoal]);
 
   const activeGoals = getActiveGoals();
   const completedGoals = getCompletedGoals();
@@ -39,6 +59,9 @@ function GoalsContent() {
   const handleAddGoal = (data: any) => {
     addGoal(data);
     toast.success('Goal created successfully!');
+    if (user?.id && data.title) {
+      notify.goalCreated(user.id, data.title);
+    }
   };
 
   return (

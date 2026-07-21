@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTrades } from '@/contexts/TradesContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { exportData } from '@/app/exports/exportEngine';
+import { notify } from '@/lib/notify';
 import styles from './ExportPanel.module.css';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import {
@@ -539,8 +540,8 @@ export default function ExportPanel() {
             <div className="mt-6 pt-6 border-t border-white/5">
               <button
                 className={styles.button}
-                onClick={() =>
-                  exportData(
+                onClick={async () => {
+                  const result = await exportData(
                     filteredTrades,
                     {
                       fileName,
@@ -558,8 +559,13 @@ export default function ExportPanel() {
                       userId: user?.id || '',
                       accountId: user?.id || '',
                     }
-                  )
-                }
+                  );
+                  if (result && user?.id) {
+                    notify.exportCompleted(user.id, format);
+                  } else if (!result && user?.id) {
+                    notify.exportFailed(user.id, format);
+                  }
+                }}
               >
                 <Download size={18} className="mr-2" />
                 Execute Institutional Export

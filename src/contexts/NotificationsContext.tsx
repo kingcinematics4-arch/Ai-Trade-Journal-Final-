@@ -25,6 +25,7 @@ import {
 } from '@/services/notificationService';
 import { soundService, unlockNotificationAudio, preloadNotificationSound } from '@/services/soundService';
 import { showRealtimeNotificationToast } from '@/lib/notificationToast';
+import { toast } from 'sonner';
 
 const PAGE_SIZE = 20;
 const PERMISSION_ASKED_KEY = 'aitj_notif_permission_asked';
@@ -435,24 +436,33 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   const deleteNotification = useCallback(
     async (id: string) => {
+      if (!user?.id) return;
+
       let wasUnread = false;
 
       setNotifications((prev) => {
-        const target = prev.find((n) => n.id === id);
-        if (target && !target.is_read) wasUnread = true;
+        const found = prev.find((n) => n.id === id);
+        if (found && !found.is_read) wasUnread = true;
         return prev.filter((n) => n.id !== id);
       });
 
       if (wasUnread) setUnreadCount((c) => Math.max(0, c - 1));
       offsetRef.current = Math.max(0, offsetRef.current - 1);
 
-      const { error } = await notificationService.deleteNotification(id);
-      if (error) {
-        console.warn('[NotificationsContext] delete failed:', error.message);
+      try {
+        const { error } = await notificationService.deleteNotification(user.id, id);
+        if (error) {
+          console.warn('[NotificationsContext] delete failed:', error.message);
+          toast.error('Failed to delete notification');
+          await fetchNotifications();
+        }
+      } catch (err) {
+        console.error('[NotificationsContext] delete threw:', err);
+        toast.error('Failed to delete notification');
         await fetchNotifications();
       }
     },
-    [fetchNotifications]
+    [fetchNotifications, user?.id]
   );
 
   const clearAllNotifications = useCallback(async () => {
