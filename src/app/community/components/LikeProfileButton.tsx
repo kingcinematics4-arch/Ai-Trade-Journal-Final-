@@ -58,9 +58,9 @@ export default function LikeProfileButton({
 
   // Size mappings
   const sizeMap = {
-    sm: { icon: 14, text: 'text-xs', gap: 'gap-1', padding: 'p-1' },
-    md: { icon: 18, text: 'text-sm', gap: 'gap-1.5', padding: 'p-1.5' },
-    lg: { icon: 22, text: 'text-base', gap: 'gap-2', padding: 'p-2' },
+    sm: { icon: 14, text: 'text-xs', gap: 'gap-2', height: 'h-7', padding: 'px-2.5' },
+    md: { icon: 18, text: 'text-sm', gap: 'gap-2', height: 'h-8', padding: 'px-3' },
+    lg: { icon: 22, text: 'text-base', gap: 'gap-2', height: 'h-9', padding: 'px-3.5' },
   };
 
   const s = sizeMap[size];
@@ -87,10 +87,14 @@ export default function LikeProfileButton({
       console.log(
         '[LIKE STATE UPDATE]',
         'Function: init',
-        'Old liked:', liked,
-        'New liked:', likedStatus,
-        'Old count:', count,
-        'New count:', likeCount,
+        'Old liked:',
+        liked,
+        'New liked:',
+        likedStatus,
+        'Old count:',
+        count,
+        'New count:',
+        likeCount,
         new Error().stack
       );
       setCount(likeCount);
@@ -111,8 +115,10 @@ export default function LikeProfileButton({
       console.log(
         '[LIKE STATE UPDATE]',
         'Function: subscribeToProfileLikes callback',
-        'Old count:', count,
-        'New count:', newCount,
+        'Old count:',
+        count,
+        'New count:',
+        newCount,
         'Trigger: Realtime event',
         new Error().stack
       );
@@ -151,10 +157,14 @@ export default function LikeProfileButton({
     console.log(
       '[LIKE STATE UPDATE]',
       'Function: handleLike optimistic',
-      'Old liked:', currentLiked,
-      'New liked:', !currentLiked,
-      'Old count:', currentCount,
-      'New count:', currentLiked ? currentCount - 1 : currentCount + 1,
+      'Old liked:',
+      currentLiked,
+      'New liked:',
+      !currentLiked,
+      'Old count:',
+      currentCount,
+      'New count:',
+      currentLiked ? currentCount - 1 : currentCount + 1,
       new Error().stack
     );
     setLiked(!currentLiked);
@@ -169,10 +179,14 @@ export default function LikeProfileButton({
         console.log(
           '[LIKE STATE UPDATE]',
           'Function: handleLike revert-null',
-          'Old liked:', !currentLiked,
-          'New liked:', previousLiked,
-          'Old count:', currentLiked ? currentCount - 1 : currentCount + 1,
-          'New count:', previousCount,
+          'Old liked:',
+          !currentLiked,
+          'New liked:',
+          previousLiked,
+          'Old count:',
+          currentLiked ? currentCount - 1 : currentCount + 1,
+          'New count:',
+          previousCount,
           new Error().stack
         );
         setLiked(previousLiked);
@@ -182,10 +196,14 @@ export default function LikeProfileButton({
         console.log(
           '[LIKE STATE UPDATE]',
           'Function: handleLike success',
-          'Old liked:', !currentLiked,
-          'New liked:', result.liked,
-          'Old count:', currentLiked ? currentCount - 1 : currentCount + 1,
-          'New count:', result.count,
+          'Old liked:',
+          !currentLiked,
+          'New liked:',
+          result.liked,
+          'Old count:',
+          currentLiked ? currentCount - 1 : currentCount + 1,
+          'New count:',
+          result.count,
           new Error().stack
         );
         setLiked(result.liked);
@@ -197,7 +215,7 @@ export default function LikeProfileButton({
             const client = createClient();
             const { data: profile, error: profileErr } = await client
               .from('profiles')
-              .select('full_name, username')
+              .select('full_name, username, avatar_url')
               .eq('id', currentUserId)
               .single();
 
@@ -208,7 +226,13 @@ export default function LikeProfileButton({
               );
             } else {
               const actorName = profile?.full_name || profile?.username || 'Someone';
-              notify.profileLike(profileOwnerId, actorName);
+              notify.profileLike(
+                profileOwnerId,
+                currentUserId,
+                profileId,
+                actorName,
+                profile?.avatar_url ?? null
+              );
             }
           } catch (notifyErr) {
             console.warn('[LikeProfileButton] Notification error:', notifyErr);
@@ -221,10 +245,14 @@ export default function LikeProfileButton({
       console.log(
         '[LIKE STATE UPDATE]',
         'Function: handleLike catch',
-        'Old liked:', !currentLiked,
-        'New liked:', previousLiked,
-        'Old count:', currentLiked ? currentCount - 1 : currentCount + 1,
-        'New count:', previousCount,
+        'Old liked:',
+        !currentLiked,
+        'New liked:',
+        previousLiked,
+        'Old count:',
+        currentLiked ? currentCount - 1 : currentCount + 1,
+        'New count:',
+        previousCount,
         new Error().stack
       );
       setLiked(previousLiked);
@@ -243,11 +271,14 @@ export default function LikeProfileButton({
       onClick={handleLike}
       disabled={isLoading}
       className={`
-        relative inline-flex items-center ${s.gap} ${s.padding}
-        rounded-full transition-all duration-200 cursor-pointer
-        ${liked ? 'text-blue-400 hover:text-blue-300' : 'text-gray-500 hover:text-gray-300'}
+        relative inline-flex items-center justify-center ${s.height} ${s.padding} ${s.gap}
+        rounded-full border transition-all duration-200 cursor-pointer
+        ${
+          liked
+            ? 'bg-blue-500/15 border-blue-500/40 text-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.12)] hover:shadow-[0_0_14px_rgba(59,130,246,0.2)]'
+            : 'bg-transparent border-border text-gray-500 hover:text-blue-400 hover:border-blue-500/40 hover:shadow-[0_0_12px_rgba(59,130,246,0.15)]'
+        }
         ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
-        hover:scale-105 hover:shadow-[0_0_12px_rgba(59,130,246,0.15)]
         focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40
         group
       `}
@@ -259,7 +290,7 @@ export default function LikeProfileButton({
           key={liked ? 'liked' : 'unliked'}
           initial={{ scale: 1 }}
           animate={{
-            scale: isAnimating ? [1, 1.2, 1] : 1,
+            scale: isAnimating ? [1, 1.08, 1] : 1,
           }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
           className="relative"
@@ -268,7 +299,7 @@ export default function LikeProfileButton({
             size={s.icon}
             className={`
               transition-all duration-200
-              ${liked ? 'fill-blue-400 text-blue-400' : 'fill-none text-gray-500'}
+              ${liked ? 'fill-blue-400 text-blue-400' : 'fill-none text-gray-500 group-hover:text-blue-400'}
               group-hover:drop-shadow-[0_0_4px_rgba(59,130,246,0.3)]
             `}
           />

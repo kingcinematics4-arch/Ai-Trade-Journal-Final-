@@ -190,6 +190,7 @@ export const notificationService = {
       case 'admin':
         return settings.message_alerts;
       case 'community':
+      case 'profile_like':
         return settings.community_alerts ?? settings.activity_alerts;
       case 'ai':
         return settings.ai_alerts ?? settings.system_updates;
@@ -218,6 +219,8 @@ export const notificationService = {
         return '📊';
       case 'community':
         return '👥';
+      case 'profile_like':
+        return '❤️';
       case 'system':
         return '⚙️';
       case 'admin':
@@ -227,9 +230,7 @@ export const notificationService = {
     }
   },
 
-  async createNotification(
-    params: CreateNotificationInput
-  ): Promise<NotificationMutationResult> {
+  async createNotification(params: CreateNotificationInput): Promise<NotificationMutationResult> {
     try {
       const supabase = createClient();
       const {

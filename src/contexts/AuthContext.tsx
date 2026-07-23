@@ -10,6 +10,7 @@ import {
   getDisplaySubtitle,
   type UserProfile,
 } from '@/lib/auth/profile';
+import { setOneSignalExternalId, requestOneSignalPermission } from '@/lib/oneSignal';
 
 export type { UserProfile };
 export { getDisplayName, getDisplaySubtitle, buildProfile } from '@/lib/auth/profile';
@@ -95,6 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         router.refresh();
+        if (event === 'SIGNED_IN' && nextSession?.user?.id) {
+          void setOneSignalExternalId(nextSession.user.id);
+          void requestOneSignalPermission();
+        }
       }
     });
 

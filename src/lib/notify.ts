@@ -1,3 +1,4 @@
+import { createClient } from '@/lib/supabase';
 import { notificationService } from '@/services/notificationService';
 
 /** Fire-and-forget helpers so feature code never blocks on notification failures */
@@ -48,15 +49,68 @@ export const notify = {
     });
   },
 
-  profileLike(recipientId: string, actorName: string) {
-    return safeNotify({
-      userId: recipientId,
-      title: 'New Profile Like',
-      message: `${actorName} liked your profile.`,
-      type: 'community',
-      link: '/profile',
-      metadata: { kind: 'profile_like' },
-    });
+  profileLike(
+    recipientId: string,
+    likerId: string,
+    profileId: string,
+    likerName: string,
+    avatarUrl?: string | null
+  ) {
+    (async () => {
+      try {
+        const supabase = createClient();
+
+        const { data: existing, error: dupError } = await supabase
+          .from('notifications')
+          .select('id')
+          .eq('user_id', recipientId)
+          .eq('type', 'profile_like')
+          .eq('is_read', false)
+          .contains('metadata', { kind: 'profile_like', liker_id: likerId })
+          .maybeSingle();
+
+        if (dupError) {
+          console.warn('[notify] duplicate check failed:', dupError);
+        }
+
+        if (existing) {
+          return;
+        }
+
+        const link = `/community/profile/${likerId}`;
+
+        const result = await notificationService.createNotification({
+          userId: recipientId,
+          title: 'New Profile Like',
+          message: `${likerName} liked your profile.`,
+          type: 'profile_like',
+          link,
+          metadata: {
+            kind: 'profile_like',
+            liker_id: likerId,
+            profile_id: profileId,
+            avatar_url: avatarUrl,
+          },
+        });
+
+        if (result.success && result.data) {
+          const settings = await notificationService.fetchSettings(recipientId);
+          if (settings?.desktop_enabled && settings?.notifications_enabled) {
+            try {
+              await fetch('/api/onesignal/push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ recipientId, likerName }),
+              });
+            } catch {
+              // ignore
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[notify]', err instanceof Error ? err.message : 'notification failed');
+      }
+    })();
   },
 
   follow(recipientId: string, followerName: string) {

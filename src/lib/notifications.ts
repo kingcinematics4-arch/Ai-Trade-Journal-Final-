@@ -9,7 +9,8 @@ export type NotificationType =
   | 'success'
   | 'error'
   | 'info'
-  | 'community';
+  | 'community'
+  | 'profile_like';
 
 export interface DbNotification {
   id: string;

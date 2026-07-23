@@ -7,6 +7,7 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import ToastProvider from '@/components/ui/ToastProvider';
 import { I18nProvider } from '@/i18n/provider/I18nProvider';
 import NotificationDetailsPanel from '@/components/NotificationDetailsPanel';
+import OneSignalInit from '@/components/OneSignalInit';
 
 function NotificationDetailsHost() {
   const { selectedNotification, closeSelected, deleteNotification } = useNotifications();
@@ -23,6 +24,7 @@ function NotificationDetailsHost() {
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
+      <OneSignalInit />
       <AuthProvider>
         <ProfileProvider>
           <NotificationsProvider>

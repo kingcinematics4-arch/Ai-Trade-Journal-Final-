@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { DbNotification } from '@/lib/notifications';
+import { requestOneSignalPermission, optOutOneSignal } from '@/lib/oneSignal';
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -78,8 +79,18 @@ export default function NotificationsPage() {
     loadMore,
   } = useNotifications();
 
-  const handleSettingChange = (key: keyof NotificationSettings, value: boolean | number) => {
+  const handleSettingChange = async (key: keyof NotificationSettings, value: boolean | number) => {
     void updateSettings({ [key]: value });
+    if (key === 'desktop_enabled') {
+      if (value) {
+        const granted = await requestOneSignalPermission();
+        if (!granted) {
+          toast.error('Browser push permission was not granted.');
+        }
+      } else {
+        await optOutOneSignal();
+      }
+    }
   };
 
   const [mounted, setMounted] = useState(false);
