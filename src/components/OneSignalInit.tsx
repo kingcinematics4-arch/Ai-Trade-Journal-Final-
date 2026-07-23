@@ -5,7 +5,7 @@ import { initOneSignal, getOneSignalDiagnostics } from '@/lib/oneSignal';
 
 export default function OneSignalInit() {
   useEffect(() => {
-    const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+    const appId = "bb029fae-5823-43ca-8870-2260b03223d8";
     console.log('[OneSignalInit] Component mounted. App ID from env:', appId);
 
     if (!appId) {
