@@ -134,6 +134,41 @@ export default function AuthFormPanel() {
   // Initialize Supabase client once per component mount
   const supabase = useMemo(() => createClient(), []);
 
+  function mapAuthError(error: any): string {
+    const code = error?.code;
+    const msg = error?.message ?? '';
+    const lower = msg.toLowerCase();
+
+    if (code === 'invalid_credentials' || lower.includes('invalid login')) {
+      return t('auth.login.error.invalidCredentials');
+    }
+    if (code === 'user_not_found' || lower.includes('user not found')) {
+      return t('auth.login.error.emailNotFound');
+    }
+    if (code === 'invalid_email' || lower.includes('invalid email')) {
+      return t('auth.login.error.invalidEmail');
+    }
+    if (code === 'user_banned' || lower.includes('banned')) {
+      return t('auth.login.error.accountDisabled');
+    }
+    if (code === 'too_many_requests' || lower.includes('rate limit')) {
+      return t('auth.login.error.tooManyAttempts');
+    }
+    if (code === 'user_already_confirmed' || lower.includes('already confirmed')) {
+      return t('auth.login.error.emailNotVerified');
+    }
+    if (
+      code === 'network_error' ||
+      lower.includes('network') ||
+      lower.includes('fetch') ||
+      lower.includes('failed to fetch')
+    ) {
+      return t('auth.login.error.network');
+    }
+
+    return t('auth.login.error.signInFailed');
+  }
+
   // ESC key exits focus mode
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -189,8 +224,10 @@ export default function AuthFormPanel() {
         password: data.password,
       });
       if (error) {
-        loginForm.setError('email', { message: error.message });
-        toast.error(error.message || t('auth.login.error.signInFailed'));
+        console.error('[auth] login error:', error);
+        const userMessage = mapAuthError(error);
+        loginForm.setError('email', { message: userMessage });
+        toast.error(userMessage);
         return;
       }
       if (process.env.NODE_ENV === 'development') {
@@ -201,14 +238,15 @@ export default function AuthFormPanel() {
       }
       toast.success(t('auth.login.welcomeBack'));
       router.push('/dashboard');
-    } catch (err: any) {
-      toast.error(err.message || t('auth.login.error.signInFailed'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+} catch (err: any) {
+       const userMessage = mapAuthError(err);
+       toast.error(userMessage);
+     } finally {
+       setIsLoading(false);
+     }
+   };
 
-  const handleSignupSubmit = async (data: SignupFormData) => {
+   const handleSignupSubmit = async (data: SignupFormData) => {
     if (data.password !== data.confirmPassword) {
       signupForm.setError('confirmPassword', {
         message: t('auth.signup.error.passwordsDoNotMatch'),
@@ -233,8 +271,10 @@ export default function AuthFormPanel() {
         },
       });
       if (error) {
-        signupForm.setError('email', { message: error.message });
-        toast.error(error.message || t('auth.signup.error.createAccountFailed'));
+        console.error('[auth] signup error:', error);
+        const userMessage = mapAuthError(error);
+        signupForm.setError('email', { message: userMessage });
+        toast.error(userMessage);
         return;
       }
       if (process.env.NODE_ENV === 'development') {
@@ -249,14 +289,15 @@ export default function AuthFormPanel() {
       } else {
         toast.success(t('auth.signup.accountCreatedCheckEmail'));
       }
-    } catch (err: any) {
-      toast.error(err.message || t('auth.signup.error.createAccountFailed'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+} catch (err: any) {
+       const userMessage = mapAuthError(err);
+       toast.error(userMessage);
+     } finally {
+       setIsLoading(false);
+     }
+   };
 
-  const handleSocialLogin = async (provider: string) => {
+   const handleSocialLogin = async (provider: string) => {
     if (provider.toLowerCase() !== 'google') {
       toast.error(`${t('auth.signup.unsupportedProvider')} ${provider}`);
       return;
@@ -281,7 +322,8 @@ export default function AuthFormPanel() {
       }
     } catch (err: any) {
       console.error('[auth] Google login error:', err);
-      toast.error(err.message || t('auth.signup.googleAuthFailed'));
+      const userMessage = mapAuthError(err);
+      toast.error(userMessage);
       setIsGoogleLoading(false);
     }
   };

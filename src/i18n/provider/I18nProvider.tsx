@@ -183,12 +183,12 @@ export function I18nProvider({ children, initialLocale }: I18nProviderProps) {
         }
       }
 
-      // If still not found, return the key
+      // If still not found, return a readable fallback instead of the raw key
       if (!value) {
         if (process.env.NODE_ENV === 'development') {
           console.warn(`Translation key "${key}" not found in any locale`);
         }
-        return key;
+        return '';
       }
 
       // Replace parameters in the translation string
