@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Globe, AtSign, Camera, Briefcase, ExternalLink } from 'lucide-react';
+import { FaInstagram } from "react-icons/fa";
+import { Globe, AtSign, Briefcase, ExternalLink } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 
@@ -71,7 +72,7 @@ export default function SocialLinks() {
         color="text-sky-500"
       />
       <SocialLinkRow
-        icon={<Camera size={16} />}
+        icon={<FaInstagram size={16} />}
         label={t('profile.instagram')}
         href={instagram ? `https://instagram.com/${instagram.replace('@', '')}` : null}
         display={instagram ? (instagram.startsWith('@') ? instagram : `@${instagram}`) : ''}
