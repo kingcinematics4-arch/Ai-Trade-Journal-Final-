@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { FaInstagram } from "react-icons/fa";
-import { Globe, AtSign, Briefcase, ExternalLink } from 'lucide-react';
+import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { Globe, AtSign, ExternalLink } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 
@@ -99,7 +99,7 @@ export default function SocialLinks() {
         color="text-pink-400"
       />
       <SocialLinkRow
-        icon={<Briefcase size={16} />}
+        icon={<FaLinkedin size={16} />}
         label={t('profile.linkedin')}
         href={linkedin}
         display={formatLinkedInDisplayName(linkedin || '')}
