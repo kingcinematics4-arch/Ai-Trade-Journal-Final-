@@ -38,6 +38,26 @@ function SocialLinkRow({ icon, label, href, display, color }: SocialLinkRowProps
   );
 }
 
+function formatLinkedInDisplayName(linkedinValue: string): string {
+  if (!linkedinValue) return '';
+
+  let cleaned = linkedinValue.trim();
+
+  cleaned = cleaned.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '');
+
+  cleaned = cleaned.replace(/\/$/, '');
+
+  const parts = cleaned.split('-');
+
+  if (parts.length > 1 && /\d/.test(parts[parts.length - 1])) {
+    parts.pop();
+  }
+
+  return parts
+    .join(' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export default function SocialLinks() {
   const { dbProfile } = useProfileContext();
   const { t } = useTranslation();
@@ -82,7 +102,7 @@ export default function SocialLinks() {
         icon={<Briefcase size={16} />}
         label={t('profile.linkedin')}
         href={linkedin}
-        display={linkedin?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') ?? ''}
+        display={formatLinkedInDisplayName(linkedin || '')}
         color="text-blue-400"
       />
     </div>
