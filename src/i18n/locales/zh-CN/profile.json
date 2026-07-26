@@ -43,6 +43,8 @@
   "linkedin": "领英",
   "youtube": "YouTube",
   "github": "GitHub",
+  "discord": "Discord",
+  "telegram": "Telegram",
   "success": {
     "profileUpdated": "个人资料更新成功",
     "passwordChanged": "密码更改成功",

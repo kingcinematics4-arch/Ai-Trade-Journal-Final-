@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 
@@ -136,6 +137,7 @@ type FormState = {
 export default function EditProfileModal({ open, onClose }: EditProfileModalProps) {
   const { dbProfile } = useProfileContext();
   const { updateProfile, isSaving } = useUpdateProfile();
+  const { t } = useTranslation();
   const [hasChanges, setHasChanges] = useState(false);
 
   const [formData, setFormData] = useState<FormState>({
@@ -415,7 +417,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Discord">
+                  <Field label={t('profile.discord')}>
                     <input
                       value={formData.discord}
                       onChange={(e) => handleInputChange('discord', e.target.value)}
@@ -423,7 +425,7 @@ export default function EditProfileModal({ open, onClose }: EditProfileModalProp
                       className={inputClass}
                     />
                   </Field>
-                  <Field label="Telegram">
+                  <Field label={t('profile.telegram')}>
                     <input
                       value={formData.telegram}
                       onChange={(e) => handleInputChange('telegram', e.target.value)}

@@ -118,6 +118,10 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           ...(data.twitter !== undefined && { twitter: data.twitter || null }),
           ...(data.instagram !== undefined && { instagram: data.instagram || null }),
           ...(data.linkedin !== undefined && { linkedin: data.linkedin || null }),
+          ...(data.youtube !== undefined && { youtube: data.youtube || null }),
+          ...(data.github !== undefined && { github: data.github || null }),
+          ...(data.discord !== undefined && { discord: data.discord || null }),
+          ...(data.telegram !== undefined && { telegram: data.telegram || null }),
           ...(data.tradingStyle !== undefined && { tradingStyle: data.tradingStyle || null }),
           ...(data.markets !== undefined && {
             markets:

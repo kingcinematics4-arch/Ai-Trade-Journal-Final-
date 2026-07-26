@@ -43,6 +43,8 @@
   "linkedin": "LinkedIn",
   "youtube": "YouTube",
   "github": "GitHub",
+  "discord": "Discord",
+  "telegram": "Telegram",
   "success": {
     "profileUpdated": "Profile updated successfully",
     "passwordChanged": "Password changed successfully",

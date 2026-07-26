@@ -1,8 +1,15 @@
 'use client';
 
 import React from 'react';
-import { FaInstagram, FaLinkedin, FaYoutube, FaGithub } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import {
+  FaDiscord,
+  FaInstagram,
+  FaLinkedin,
+  FaTelegram,
+  FaYoutube,
+  FaGithub,
+} from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 import { Globe, ExternalLink } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
@@ -60,9 +67,7 @@ function formatLinkedInDisplayName(linkedinValue: string): string {
     parts.pop();
   }
 
-  return parts
-    .join(' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  return parts.join(' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function formatWebsiteDisplay(websiteValue: string): string {
@@ -134,6 +139,40 @@ function formatGitHubDisplay(githubValue: string): string {
   return `@${cleaned}`;
 }
 
+function formatDiscordDisplay(discordValue: string): string {
+  if (!discordValue) return '';
+
+  const cleaned = discordValue.trim();
+
+  const userMatch = cleaned.match(/discord\.com\/users\/(\d+)/);
+  if (userMatch) return `@${userMatch[1]}`;
+
+  const inviteMatch = cleaned.match(/discord\.gg\/([a-zA-Z0-9_-]+)/);
+  if (inviteMatch) return `Invite: ${inviteMatch[1]}`;
+
+  if (/^\d+$/.test(cleaned)) return `@${cleaned}`;
+
+  if (cleaned.startsWith('@')) return cleaned;
+
+  return `@${cleaned}`;
+}
+
+function formatTelegramDisplay(telegramValue: string): string {
+  if (!telegramValue) return '';
+
+  let cleaned = telegramValue.trim();
+
+  cleaned = cleaned.replace(/^https?:\/\/(www\.)?t\.me\//, '');
+
+  cleaned = cleaned.replace(/^https?:\/\/(www\.)?telegram\.me\//, '');
+
+  cleaned = cleaned.replace(/\/$/, '');
+
+  if (cleaned.startsWith('@')) return cleaned;
+
+  return `@${cleaned}`;
+}
+
 export default function SocialLinks({ profile: propProfile }: SocialLinksProps) {
   const { dbProfile } = useProfileContext();
   const { t } = useTranslation();
@@ -142,8 +181,9 @@ export default function SocialLinks({ profile: propProfile }: SocialLinksProps) 
 
   if (!profile) return null;
 
-  const { website, twitter, instagram, linkedin, youtube, github } = profile;
-  const hasAnySocial = website || twitter || instagram || linkedin || youtube || github;
+  const { website, twitter, instagram, linkedin, youtube, github, discord, telegram } = profile;
+  const hasAnySocial =
+    website || twitter || instagram || linkedin || youtube || github || discord || telegram;
 
   if (!hasAnySocial) {
     return (
@@ -165,7 +205,13 @@ export default function SocialLinks({ profile: propProfile }: SocialLinksProps) 
       <SocialLinkRow
         icon={<FaXTwitter size={20} />}
         label={t('profile.twitter')}
-        href={twitter ? (twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter.replace('@', '')}`) : null}
+        href={
+          twitter
+            ? twitter.startsWith('http')
+              ? twitter
+              : `https://twitter.com/${twitter.replace('@', '')}`
+            : null
+        }
         display={formatTwitterDisplay(twitter || '')}
         color="text-white"
       />
@@ -186,16 +232,56 @@ export default function SocialLinks({ profile: propProfile }: SocialLinksProps) 
       <SocialLinkRow
         icon={<FaYoutube size={20} />}
         label={t('profile.youtube')}
-        href={youtube ? (youtube.startsWith('http') ? youtube : `https://youtube.com/@${youtube.replace('@', '')}`) : null}
+        href={
+          youtube
+            ? youtube.startsWith('http')
+              ? youtube
+              : `https://youtube.com/@${youtube.replace('@', '')}`
+            : null
+        }
         display={formatYouTubeDisplay(youtube || '')}
         color="text-[#FF0000]"
       />
       <SocialLinkRow
         icon={<FaGithub size={20} />}
         label={t('profile.github')}
-        href={github ? (github.startsWith('http') ? github : `https://github.com/${github.replace('@', '')}`) : null}
+        href={
+          github
+            ? github.startsWith('http')
+              ? github
+              : `https://github.com/${github.replace('@', '')}`
+            : null
+        }
         display={formatGitHubDisplay(github || '')}
         color="text-white"
+      />
+      <SocialLinkRow
+        icon={<FaDiscord size={20} />}
+        label={t('profile.discord')}
+        href={
+          discord
+            ? discord.startsWith('http')
+              ? discord
+              : /^\d+$/.test(discord.trim())
+                ? `https://discord.com/users/${discord.trim()}`
+                : `https://discord.gg/${discord.trim()}`
+            : null
+        }
+        display={formatDiscordDisplay(discord || '')}
+        color="text-[#5865F2]"
+      />
+      <SocialLinkRow
+        icon={<FaTelegram size={20} />}
+        label={t('profile.telegram')}
+        href={
+          telegram
+            ? telegram.startsWith('http')
+              ? telegram
+              : `https://t.me/${telegram.replace('@', '')}`
+            : null
+        }
+        display={formatTelegramDisplay(telegram || '')}
+        color="text-[#26A5E4]"
       />
     </div>
   );

@@ -43,6 +43,8 @@
   "linkedin": "লিংকডইন",
   "youtube": "YouTube",
   "github": "GitHub",
+  "discord": "Discord",
+  "telegram": "Telegram",
   "success": {
     "profileUpdated": "প্রোফাইল সফলভাবে আপডেট করা হয়েছে",
     "passwordChanged": "পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে",
