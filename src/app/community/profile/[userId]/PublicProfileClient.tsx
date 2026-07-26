@@ -74,20 +74,20 @@ export default function PublicProfileClient({ profile }: Props) {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-6 pt-6">
+      <div className="max-w-[1750px] mx-auto px-6 lg:px-14 pt-6">
         <button
           onClick={() => router.push('/community/discover')}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm mb-8"
         >
           <ArrowLeft size={16} />
           Back to Discover
         </button>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-8 md:p-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="relative h-24 w-24 md:h-28 md:w-28 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/[0.08]">
+      <div className="max-w-[1750px] mx-auto px-6 lg:px-14">
+        <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-8 lg:p-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 lg:gap-8">
+            <div className="relative h-32 w-32 md:h-36 md:w-36 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/[0.08]">
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
@@ -99,7 +99,7 @@ export default function PublicProfileClient({ profile }: Props) {
                     const parent = target.parentElement;
                     if (parent) {
                       const fallback = document.createElement('div');
-                      fallback.className = `h-full w-full flex items-center justify-center bg-gradient-to-br ${gradient} text-white text-3xl font-bold`;
+                      fallback.className = `h-full w-full flex items-center justify-center bg-gradient-to-br ${gradient} text-white text-4xl font-bold`;
                       fallback.textContent = initials;
                       parent.appendChild(fallback);
                     }
@@ -107,7 +107,7 @@ export default function PublicProfileClient({ profile }: Props) {
                 />
               ) : (
                 <div
-                  className={`h-full w-full flex items-center justify-center bg-gradient-to-br ${gradient} text-white text-3xl font-bold`}
+                  className={`h-full w-full flex items-center justify-center bg-gradient-to-br ${gradient} text-white text-4xl font-bold`}
                 >
                   {initials}
                 </div>
@@ -116,7 +116,7 @@ export default function PublicProfileClient({ profile }: Props) {
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-4 flex-wrap">
-                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
                   {displayName}
                 </h1>
                 <LikeProfileButton
@@ -132,17 +132,17 @@ export default function PublicProfileClient({ profile }: Props) {
                 <p className="text-sm text-muted-foreground mt-1">{profile.email}</p>
               )}
               {profile.bio && (
-                <p className="text-sm text-slate-400 mt-3 max-w-2xl line-clamp-3 break-words [overflow-wrap:anywhere] whitespace-normal">
+                <p className="text-sm text-slate-400 mt-4 max-w-2xl line-clamp-3 break-words [overflow-wrap:anywhere] whitespace-normal">
                   {truncateBio(profile.bio)}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 pt-8 border-t border-[#262626]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10 pt-10 border-t border-[#262626]">
             {profile.country && profile.country.trim().length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
-                <MapPin size={18} className="text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+                <MapPin size={20} className="text-muted-foreground flex-shrink-0" />
                 <div className="flex items-center gap-2">
                   <CountryFlag country={profile.country} />
                   <p className="text-sm font-medium text-foreground">{profile.country}</p>
@@ -151,8 +151,8 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
 
             {profile.tradingStyle && profile.tradingStyle.trim().length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
-                <TrendingUp size={18} className="text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+                <TrendingUp size={20} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Trading Style</p>
                   <p className="text-sm font-medium text-foreground capitalize">
@@ -163,8 +163,8 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
 
             {profile.markets && profile.markets.length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
-                <BarChart3 size={18} className="text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+                <BarChart3 size={20} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Markets</p>
                   <p className="text-sm font-medium text-foreground">
@@ -175,8 +175,8 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
 
             {profile.experience && profile.experience.trim().length > 0 && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
-                <Briefcase size={18} className="text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+                <Briefcase size={20} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Experience</p>
                   <p className="text-sm font-medium text-foreground">
@@ -186,8 +186,8 @@ export default function PublicProfileClient({ profile }: Props) {
               </div>
             )}
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
-              <Calendar size={18} className="text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+              <Calendar size={20} className="text-muted-foreground flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Member Since</p>
                 <p className="text-sm font-medium text-foreground">
@@ -201,8 +201,8 @@ export default function PublicProfileClient({ profile }: Props) {
             </div>
 
             {hasTrades && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#262626]">
-                <Target size={18} className="text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+                <Target size={20} className="text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground">Trades Logged</p>
                   <p className="text-sm font-medium text-foreground">
@@ -213,10 +213,12 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
           </div>
 
-          <SocialLinks profile={profile} />
+          <div className="mt-8">
+            <SocialLinks profile={profile} />
+          </div>
 
           {!hasTrades && (
-            <div className="mt-4 p-4 rounded-xl bg-white/[0.02] border border-[#262626] flex items-center gap-3">
+            <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-[#262626] flex items-center gap-3">
               <Activity size={20} className="text-muted-foreground/50 flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground/50 font-medium">
@@ -227,7 +229,7 @@ export default function PublicProfileClient({ profile }: Props) {
           )}
 
           {hasTrades && profile.showStats && profile.winRate !== null && (
-            <div className="mt-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
+            <div className="mt-6 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
               <Percent size={20} className="text-emerald-400 flex-shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">Win Rate</p>
