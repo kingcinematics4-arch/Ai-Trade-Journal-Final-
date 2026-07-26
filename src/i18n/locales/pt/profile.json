@@ -41,6 +41,8 @@
   "twitter": "Twitter / X",
   "instagram": "Instagram",
   "linkedin": "LinkedIn",
+  "youtube": "YouTube",
+  "github": "GitHub",
   "success": {
     "profileUpdated": "Perfil atualizado com sucesso",
     "passwordChanged": "Senha alterada com sucesso",

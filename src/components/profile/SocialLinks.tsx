@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
-import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaInstagram, FaLinkedin, FaYoutube, FaGithub } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { Globe, ExternalLink } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
+import type { Profile } from '@/types/profile';
+import type { PublicTraderProfile } from '@/types/community';
 
 interface SocialLinkRowProps {
   icon: React.ReactNode;
@@ -13,6 +15,10 @@ interface SocialLinkRowProps {
   href: string | null;
   display: string;
   color: string;
+}
+
+interface SocialLinksProps {
+  profile?: Profile | PublicTraderProfile | null;
 }
 
 function SocialLinkRow({ icon, label, href, display, color }: SocialLinkRowProps) {
@@ -98,14 +104,46 @@ function formatTwitterDisplay(twitterValue: string): string {
   return `@${cleaned}`;
 }
 
-export default function SocialLinks() {
+function formatYouTubeDisplay(youtubeValue: string): string {
+  if (!youtubeValue) return '';
+
+  let cleaned = youtubeValue.trim();
+
+  cleaned = cleaned.replace(/^https?:\/\/(www\.)?youtube\.com\//, '');
+
+  cleaned = cleaned.replace(/\/$/, '');
+
+  if (cleaned.startsWith('@')) {
+    cleaned = cleaned.slice(1);
+  }
+
+  return cleaned;
+}
+
+function formatGitHubDisplay(githubValue: string): string {
+  if (!githubValue) return '';
+
+  let cleaned = githubValue.trim();
+
+  cleaned = cleaned.replace(/^https?:\/\/(www\.)?github\.com\//, '');
+
+  cleaned = cleaned.replace(/\/$/, '');
+
+  cleaned = cleaned.replace(/^@/, '');
+
+  return `@${cleaned}`;
+}
+
+export default function SocialLinks({ profile: propProfile }: SocialLinksProps) {
   const { dbProfile } = useProfileContext();
   const { t } = useTranslation();
 
-  if (!dbProfile) return null;
+  const profile = propProfile ?? dbProfile;
 
-  const { website, twitter, instagram, linkedin } = dbProfile;
-  const hasAnySocial = website || twitter || instagram || linkedin;
+  if (!profile) return null;
+
+  const { website, twitter, instagram, linkedin, youtube, github } = profile;
+  const hasAnySocial = website || twitter || instagram || linkedin || youtube || github;
 
   if (!hasAnySocial) {
     return (
@@ -144,6 +182,20 @@ export default function SocialLinks() {
         href={linkedin}
         display={formatLinkedInDisplayName(linkedin || '')}
         color="text-[#0A66C2]"
+      />
+      <SocialLinkRow
+        icon={<FaYoutube size={20} />}
+        label={t('profile.youtube')}
+        href={youtube ? (youtube.startsWith('http') ? youtube : `https://youtube.com/@${youtube.replace('@', '')}`) : null}
+        display={formatYouTubeDisplay(youtube || '')}
+        color="text-[#FF0000]"
+      />
+      <SocialLinkRow
+        icon={<FaGithub size={20} />}
+        label={t('profile.github')}
+        href={github ? (github.startsWith('http') ? github : `https://github.com/${github.replace('@', '')}`) : null}
+        display={formatGitHubDisplay(github || '')}
+        color="text-white"
       />
     </div>
   );

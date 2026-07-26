@@ -41,6 +41,8 @@
   "twitter": "Twitter / X",
   "instagram": "Instagram",
   "linkedin": "LinkedIn",
+  "youtube": "YouTube",
+  "github": "GitHub",
   "success": {
     "profileUpdated": "Profil berhasil diperbarui",
     "passwordChanged": "Kata sandi berhasil diubah",

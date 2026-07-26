@@ -15,17 +15,13 @@ import {
   Heart,
 } from 'lucide-react';
 import type { PublicTraderProfile } from '@/types/community';
-import SocialLinkCard from '@/components/profile/SocialLinkCard';
+import SocialLinks from '@/components/profile/SocialLinks';
 import { CountryFlag } from '@/app/community/components/CountryFlag';
 import { formatLevel, truncateBio } from '@/lib/format';
 import LikeProfileButton from '@/app/community/components/LikeProfileButton';
 
 interface Props {
   profile: PublicTraderProfile;
-}
-
-function hasLink(value?: string | null): boolean {
-  return !!value && value.trim().length > 0;
 }
 
 const PREMIUM_GRADIENTS = [
@@ -217,108 +213,7 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
           </div>
 
-          {(hasLink(profile.website) ||
-            hasLink(profile.twitter) ||
-            hasLink(profile.instagram) ||
-            hasLink(profile.linkedin) ||
-            hasLink(profile.youtube) ||
-            hasLink(profile.github) ||
-            hasLink(profile.discord) ||
-            hasLink(profile.telegram)) && (
-            <div className="mt-6">
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                Links
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {hasLink(profile.website) && (
-                  <SocialLinkCard
-                    platform="Website"
-                    username={profile.website.replace(/^https?:\/\//, '')}
-                    url={
-                      profile.website.startsWith('http')
-                        ? profile.website
-                        : `https://${profile.website}`
-                    }
-                  />
-                )}
-                {hasLink(profile.twitter) && (
-                  <SocialLinkCard
-                    platform="Twitter/X"
-                    username={
-                      profile.twitter.startsWith('@') ? profile.twitter : `@${profile.twitter}`
-                    }
-                    url={`https://twitter.com/${profile.twitter.replace('@', '')}`}
-                  />
-                )}
-                {hasLink(profile.instagram) && (
-                  <SocialLinkCard
-                    platform="Instagram"
-                    username={
-                      profile.instagram.startsWith('@')
-                        ? profile.instagram
-                        : `@${profile.instagram}`
-                    }
-                    url={`https://instagram.com/${profile.instagram.replace('@', '')}`}
-                    avatar={profile.instagramAvatar}
-                  />
-                )}
-                {hasLink(profile.linkedin) && (
-                  <SocialLinkCard
-                    platform="LinkedIn"
-                    username={profile.linkedin.replace(
-                      /^https?:\/\/(www\.)?linkedin\.com\/in\//,
-                      ''
-                    )}
-                    url={
-                      profile.linkedin.startsWith('http')
-                        ? profile.linkedin
-                        : `https://linkedin.com/in/${profile.linkedin}`
-                    }
-                  />
-                )}
-                {hasLink(profile.youtube) && (
-                  <SocialLinkCard
-                    platform="YouTube"
-                    username={profile.youtube}
-                    url={
-                      profile.youtube.startsWith('http')
-                        ? profile.youtube
-                        : `https://youtube.com/@${profile.youtube.replace('@', '')}`
-                    }
-                  />
-                )}
-                {hasLink(profile.github) && (
-                  <SocialLinkCard
-                    platform="GitHub"
-                    username={
-                      profile.github.startsWith('@') ? profile.github : `@${profile.github}`
-                    }
-                    url={`https://github.com/${profile.github.replace('@', '')}`}
-                  />
-                )}
-                {hasLink(profile.discord) && (
-                  <SocialLinkCard
-                    platform="Discord"
-                    username={profile.discord}
-                    url={
-                      profile.discord.startsWith('http')
-                        ? profile.discord
-                        : `https://discord.com/users/${profile.discord}`
-                    }
-                  />
-                )}
-                {hasLink(profile.telegram) && (
-                  <SocialLinkCard
-                    platform="Telegram"
-                    username={
-                      profile.telegram.startsWith('@') ? profile.telegram : `@${profile.telegram}`
-                    }
-                    url={`https://t.me/${profile.telegram.replace('@', '')}`}
-                  />
-                )}
-              </div>
-            </div>
-          )}
+          <SocialLinks profile={profile} />
 
           {!hasTrades && (
             <div className="mt-4 p-4 rounded-xl bg-white/[0.02] border border-[#262626] flex items-center gap-3">

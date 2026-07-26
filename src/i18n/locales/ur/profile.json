@@ -41,6 +41,8 @@
   "twitter": "ٹوئٹر / X",
   "instagram": "انسٹاگرام",
   "linkedin": "لنکڈ ان",
+  "youtube": "YouTube",
+  "github": "GitHub",
   "success": {
     "profileUpdated": "پروفائل کامیابی سے اپ ڈیٹ ہوا",
     "passwordChanged": "پاس ورڈ کامیابی سے تبدیل ہوا",

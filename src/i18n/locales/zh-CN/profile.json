@@ -41,6 +41,8 @@
   "twitter": "推特 / X",
   "instagram": "Instagram",
   "linkedin": "领英",
+  "youtube": "YouTube",
+  "github": "GitHub",
   "success": {
     "profileUpdated": "个人资料更新成功",
     "passwordChanged": "密码更改成功",
