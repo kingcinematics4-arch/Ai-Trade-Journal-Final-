@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation';
 import TraderCard from '../components/TraderCard';
 import { Loader2, Users, Search, ListFilter, X } from 'lucide-react';
-import { getPublicTraders } from '@/services/communityService';
 import type { PublicTraderProfile, PaginatedTraders } from '@/types/community';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchableSelect from '@/components/ui/SearchableSelect';
@@ -65,7 +64,17 @@ export default function DiscoverPage() {
       setError(null);
 
       try {
-        const result: PaginatedTraders = await getPublicTraders(pageNum, query, sort);
+        const params = new URLSearchParams({
+          page: String(pageNum),
+          searchQuery: query,
+          sortBy: sort,
+        });
+
+        const response = await fetch(`/api/community/traders?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch traders');
+        }
+        const result: PaginatedTraders = await response.json();
         setTraders((prev) => (append ? [...prev, ...result.traders] : result.traders));
         setTotal(result.total);
         setHasMore(result.hasMore);

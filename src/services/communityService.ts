@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase';
+import { createServiceClient } from '@/lib/supabase/supabase-admin';
 import type {
   DbConnection,
   Connection,
@@ -6,76 +7,110 @@ import type {
   PaginatedTraders,
 } from '@/types/community';
 import { mapDbConnection } from '@/types/community';
+import { computeTradeAnalytics } from '@/lib/trades/analytics';
+import type { DbTrade, TradeAnalytics } from '@/lib/trades/types';
 
 const PROFILES_PER_PAGE = 12;
 
 // ─── Trade Stats Helpers ─────────────────────────────────────────────────────
 
-interface TradeStats {
-  trades_logged: number;
-  win_rate: number | null;
-  total_pnl: number | null;
-  avg_rr: number | null;
-}
-
 /**
- * Fetch aggregated trade statistics for a set of user IDs.
- * Returns a map of userId -> TradeStats.
+ * Fetch full analytics for multiple users using the service role client.
+ * Uses the shared computeTradeAnalytics engine so all pages show identical stats.
  */
-async function fetchTradeStatsForUsers(userIds: string[]): Promise<Map<string, TradeStats>> {
+async function fetchTradeStatsForUsers(
+  userIds: string[]
+): Promise<Map<string, TradeAnalytics>> {
   if (userIds.length === 0) return new Map();
 
-  const supabase = createClient();
+  try {
+    const supabase = createServiceClient();
 
-  const { data, error } = await supabase
-    .from('trades')
-    .select('user_id, pnl_amount, trade_status, rr_ratio') // This was already correct, but verifying.
-    .in('user_id', userIds);
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .in('user_id', userIds);
 
-  if (error) {
-    console.error('[communityService] fetchTradeStatsForUsers error:', error.message);
+    if (error) {
+      console.error('[communityService] fetchTradeStatsForUsers error:', error.message);
+      return new Map();
+    }
+
+    const tradesByUser = new Map<string, Record<string, unknown>[]>();
+    for (const trade of data ?? []) {
+      const uid = trade.user_id as string;
+      if (!tradesByUser.has(uid)) {
+        tradesByUser.set(uid, []);
+      }
+      tradesByUser.get(uid)!.push(trade);
+    }
+
+    const statsMap = new Map<string, TradeAnalytics>();
+    for (const [userId, rows] of tradesByUser) {
+      statsMap.set(userId, computeTradeAnalytics(rows as DbTrade[]));
+    }
+
+    return statsMap;
+  } catch (err) {
+    console.error('[communityService] fetchTradeStatsForUsers unexpected error:', err);
     return new Map();
   }
-
-  const statsMap = new Map<string, TradeStats>();
-
-  // Group trades by user_id
-  const grouped = new Map<string, { pnl: number[]; statuses: string[]; rr: number[] }>();
-  for (const trade of data ?? []) {
-    if (!grouped.has(trade.user_id)) {
-      grouped.set(trade.user_id, { pnl: [], statuses: [], rr: [] });
-    }
-    const group = grouped.get(trade.user_id)!;
-    if (trade.pnl_amount != null) group.pnl.push(Number(trade.pnl_amount)); // Corrected from pnl
-    if (trade.trade_status) group.statuses.push(trade.trade_status); // Corrected from status
-    if (trade.rr_ratio != null) group.rr.push(Number(trade.rr_ratio));
-  }
-
-  for (const [userId, group] of grouped) {
-    const tradesLogged = group.pnl.length; // Use PNL length as a more reliable trade count
-    const wins = group.statuses.filter((s) => s.toLowerCase() === 'win').length;
-    const winRate = tradesLogged > 0 ? (wins / tradesLogged) * 100 : null;
-    const totalPnl = group.pnl.reduce((sum, v) => sum + v, 0);
-    const avgRr =
-      group.rr.length > 0 ? group.rr.reduce((sum, v) => sum + v, 0) / group.rr.length : null;
-
-    statsMap.set(userId, {
-      trades_logged: tradesLogged,
-      win_rate: winRate,
-      total_pnl: totalPnl,
-      avg_rr: avgRr,
-    });
-  }
-
-  return statsMap;
 }
 
 /**
- * Fetch aggregated trade statistics for a single user ID.
+ * Fetch all trades for a single user ID using the service role client.
+ * Bypasses RLS to read another user's trades for public profile display.
  */
-async function fetchTradeStatsForUser(userId: string): Promise<TradeStats> {
-  const map = await fetchTradeStatsForUsers([userId]);
-  return map.get(userId) ?? { trades_logged: 0, win_rate: null, total_pnl: null, avg_rr: null };
+async function fetchTradesForUser(userId: string): Promise<DbTrade[]> {
+  try {
+    const supabase = createServiceClient();
+
+    const { data, error } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', userId)
+      .order('trade_date', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('[communityService] fetchTradesForUser error:', error.message);
+      return [];
+    }
+
+    return (data ?? []) as DbTrade[];
+  } catch (err) {
+    console.error('[communityService] fetchTradesForUser unexpected error:', err);
+    return [];
+  }
+}
+
+/**
+ * Compute full analytics for a user by fetching their trades and running
+ * the shared analytics engine. Returns the same TradeAnalytics shape used
+ * by the dashboard and trade history.
+ */
+async function computeFullAnalyticsForUser(userId: string): Promise<TradeAnalytics> {
+  try {
+    const trades = await fetchTradesForUser(userId);
+    return computeTradeAnalytics(trades);
+  } catch (err) {
+    console.error('[communityService] computeFullAnalyticsForUser error:', err);
+    return {
+      isEmpty: true,
+      totalTrades: 0,
+      totalPnl: 0,
+      winCount: 0,
+      lossCount: 0,
+      breakevenCount: 0,
+      winRate: 0,
+      avgRr: 0,
+      currentStreak: { type: 'none', count: 0 },
+      bestTrade: null,
+      worstTrade: null,
+      pnlTrend: [],
+      marketDistribution: [],
+    };
+  }
 }
 
 // ─── Public Profile Queries ─────────────────────────────────────────────────
@@ -193,10 +228,10 @@ export async function getPublicProfileById(userId: string): Promise<PublicTrader
 
   console.log('[Audit] DB Profile by ID', JSON.stringify(data, null, 2));
 
-  // Fetch trade stats separately
-  const stats = await fetchTradeStatsForUser(userId);
+  // Fetch full analytics for the profile owner
+  const analytics = await computeFullAnalyticsForUser(userId);
 
-  const profile = mapToPublicTrader(data, stats);
+  const profile = mapToPublicTrader(data, analytics);
   profile.email = (data as any).email ?? null;
   return profile;
 }
@@ -227,10 +262,10 @@ export async function getPublicProfileByUsername(
 
   console.log('[Audit] DB Profile by username', JSON.stringify(data, null, 2));
 
-  // Fetch trade stats separately
-  const stats = await fetchTradeStatsForUser(data.id);
+  // Fetch full analytics for the profile owner
+  const analytics = await computeFullAnalyticsForUser(data.id);
 
-  const profile = mapToPublicTrader(data, stats);
+  const profile = mapToPublicTrader(data, analytics);
   profile.email = (data as any).email ?? null;
   return profile;
 }
@@ -319,9 +354,9 @@ export async function getUserConnections(): Promise<Connection[]> {
 
 /**
  * Map a DbProfile to a PublicTraderProfile.
- * Stats are provided separately from the trades table aggregation.
+ * Analytics are computed from the full trades dataset using the shared analytics engine.
  */
-function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfile {
+function mapToPublicTrader(profile: any, analytics?: TradeAnalytics): PublicTraderProfile {
   return {
     id: profile.id,
     username: profile.username ?? null,
@@ -330,7 +365,6 @@ function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfil
     avatarUrl: profile.avatar_url ?? null,
     country: profile.country ?? null,
     tradingStyle: profile.trading_style ?? null,
-    // DB stores comma-separated string; split into array for the UI
     markets: profile.markets
       ? profile.markets
           .split(',')
@@ -338,10 +372,10 @@ function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfil
           .filter(Boolean)
       : null,
     experience: profile.experience ?? null,
-    tradesLogged: stats?.trades_logged ?? 0,
-    winRate: stats?.win_rate ?? null,
-    totalPnl: stats?.total_pnl ?? null,
-    avgRr: stats?.avg_rr ?? null,
+    tradesLogged: analytics?.totalTrades ?? 0,
+    winRate: analytics?.winRate ?? null,
+    totalPnl: analytics?.totalPnl ?? null,
+    avgRr: analytics?.avgRr ?? null,
     showStats: profile.show_stats ?? true,
     publicProfile: profile.public_profile,
     createdAt: profile.created_at,
@@ -354,5 +388,13 @@ function mapToPublicTrader(profile: any, stats?: TradeStats): PublicTraderProfil
     github: profile.github ?? null,
     discord: profile.discord ?? null,
     telegram: profile.telegram ?? null,
+    winCount: analytics?.winCount ?? 0,
+    lossCount: analytics?.lossCount ?? 0,
+    breakevenCount: analytics?.breakevenCount ?? 0,
+    bestTrade: analytics?.bestTrade ?? null,
+    worstTrade: analytics?.worstTrade ?? null,
+    currentStreak: analytics?.currentStreak ?? { type: 'none', count: 0 },
+    pnlTrend: analytics?.pnlTrend ?? [],
+    marketDistribution: analytics?.marketDistribution ?? [],
   };
 }

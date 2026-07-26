@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
-import { getPublicTraders } from '@/services/communityService';
 import type { PublicTraderProfile } from '@/types/community';
 import TraderCard from '../components/TraderCard';
 import SearchBar from '../components/SearchBar';
@@ -29,14 +28,20 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
   const loadMoreTraders = useCallback(async () => {
     if (isLoading || !hasMore) return;
     setIsLoading(true);
-    const { traders: newTraders, hasMore: newHasMore } = await getPublicTraders(
-      page,
+    const params = new URLSearchParams({
+      page: String(page),
       searchQuery,
-      sortBy
-    );
-    setTraders((prev) => [...prev, ...newTraders]);
+      sortBy,
+    });
+    const response = await fetch(`/api/community/traders?${params.toString()}`);
+    if (!response.ok) {
+      setIsLoading(false);
+      return;
+    }
+    const result = await response.json();
+    setTraders((prev) => [...prev, ...result.traders]);
     setPage((prev) => prev + 1);
-    setHasMore(newHasMore);
+    setHasMore(result.hasMore);
     setIsLoading(false);
   }, [page, hasMore, isLoading, searchQuery, sortBy]);
 
@@ -50,9 +55,17 @@ export default function DiscoverClient({ initialTraders, initialHasMore }: Disco
     setSearchQuery(query);
     setPage(1);
     setHasMore(true);
-    const { traders: newTraders, hasMore: newHasMore } = await getPublicTraders(1, query, sortBy);
-    setTraders(newTraders);
-    setHasMore(newHasMore);
+    const params = new URLSearchParams({
+      page: '1',
+      searchQuery: query,
+      sortBy,
+    });
+    const response = await fetch(`/api/community/traders?${params.toString()}`);
+    if (response.ok) {
+      const result = await response.json();
+      setTraders(result.traders);
+      setHasMore(result.hasMore);
+    }
     setPage(2);
   };
 

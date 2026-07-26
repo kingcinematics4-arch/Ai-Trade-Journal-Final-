@@ -109,10 +109,10 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           </div>
         </div>
 
-        <div className="w-[25%] flex flex-col items-end justify-center gap-2 flex-shrink-0">
+          <div className="w-[25%] flex flex-col items-end justify-center gap-2 flex-shrink-0">
           <div className="text-right">
             <span className="block text-[18px] font-semibold text-white leading-tight">
-              {trader.winRate !== null ? `${Math.round(trader.winRate)}%` : '--'}
+              {`${Math.round(trader.winRate ?? 0)}%`}
             </span>
             <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
               Win Rate
@@ -120,7 +120,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           </div>
           <div className="text-right">
             <span className="block text-[18px] font-semibold text-white leading-tight">
-              {trader.tradesLogged > 0 ? String(trader.tradesLogged) : '--'}
+              {String(trader.tradesLogged)}
             </span>
             <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
               Trades

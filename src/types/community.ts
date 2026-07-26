@@ -59,6 +59,14 @@ export interface PublicTraderProfile {
   github: string | null;
   discord: string | null;
   telegram: string | null;
+  winCount: number;
+  lossCount: number;
+  breakevenCount: number;
+  bestTrade: { pnl: number; asset: string; strategy: string; date: string } | null;
+  worstTrade: { pnl: number; asset: string; strategy: string; date: string } | null;
+  currentStreak: { type: 'win' | 'loss' | 'none'; count: number };
+  pnlTrend: { date: string; pnl: number; cumulative: number; tradeNumber: number; asset: string }[];
+  marketDistribution: { id: string; name: string; value: number; trades: number; pnl: number }[];
 }
 
 /** A like on a public profile */

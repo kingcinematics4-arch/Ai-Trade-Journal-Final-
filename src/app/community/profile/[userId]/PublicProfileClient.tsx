@@ -12,12 +12,16 @@ import {
   MapPin,
   Briefcase,
   Percent,
-  Heart,
+  Trophy,
+  Flame,
+  BarChart2,
+  TrendingDown,
 } from 'lucide-react';
 import type { PublicTraderProfile } from '@/types/community';
 import SocialLinks from '@/components/profile/SocialLinks';
 import { CountryFlag } from '@/app/community/components/CountryFlag';
 import { formatLevel, truncateBio } from '@/lib/format';
+import { formatCurrency } from '@/lib/trades/analytics';
 import LikeProfileButton from '@/app/community/components/LikeProfileButton';
 
 interface Props {
@@ -62,9 +66,48 @@ function getInitials(name: string): string {
   return 'NT';
 }
 
+function formatPnL(value: number | null): string {
+  if (value == null) return '$0.00';
+  return formatCurrency(value, { showSign: true });
+}
+
+function getStreakLabel(streak: { type: 'win' | 'loss' | 'none'; count: number }): string {
+  if (streak.type === 'none') return '0';
+  return `${streak.type === 'win' ? 'W' : 'L'}${streak.count}`;
+}
+
+function getStreakSubtext(streak: { type: 'win' | 'loss' | 'none'; count: number }): string {
+  if (streak.type === 'none') return 'No active streak';
+  const tradeType = streak.type === 'win' ? 'wins' : 'losses';
+  return `${streak.count} consecutive ${tradeType}`;
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  sub,
+  color = 'text-foreground',
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  sub?: string;
+  color?: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-[#262626]">
+      <span className={`${color} opacity-70 flex-shrink-0`}>{icon}</span>
+      <div className="min-w-0">
+        <p className="text-xs text-muted-foreground font-medium">{label}</p>
+        <p className="text-sm font-bold text-foreground tracking-tight truncate">{value}</p>
+        {sub && <p className="text-[11px] text-muted-foreground/60 truncate">{sub}</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function PublicProfileClient({ profile }: Props) {
-  console.log('===== PUBLIC PROFILE CLIENT DATA =====');
-  console.log(profile);
   const router = useRouter();
   const displayName = useMemo(() => getDisplayName(profile), [profile]);
   const initials = useMemo(() => getInitials(displayName), [displayName]);
@@ -119,11 +162,7 @@ export default function PublicProfileClient({ profile }: Props) {
                 <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
                   {displayName}
                 </h1>
-                <LikeProfileButton
-                  profileId={profile.id}
-                  profileOwnerId={profile.id}
-                  size="md"
-                />
+                <LikeProfileButton profileId={profile.id} profileOwnerId={profile.id} size="md" />
               </div>
               {profile.username && (
                 <p className="text-sm text-muted-foreground mt-1">@{profile.username}</p>
@@ -213,10 +252,6 @@ export default function PublicProfileClient({ profile }: Props) {
             )}
           </div>
 
-          <div className="mt-8">
-            <SocialLinks profile={profile} />
-          </div>
-
           {!hasTrades && (
             <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-[#262626] flex items-center gap-3">
               <Activity size={20} className="text-muted-foreground/50 flex-shrink-0" />
@@ -228,15 +263,71 @@ export default function PublicProfileClient({ profile }: Props) {
             </div>
           )}
 
-          {hasTrades && profile.showStats && profile.winRate !== null && (
-            <div className="mt-6 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
-              <Percent size={20} className="text-emerald-400 flex-shrink-0" />
-              <div>
-                <p className="text-xs text-muted-foreground">Win Rate</p>
-                <p className="text-lg font-bold text-emerald-400">{profile.winRate.toFixed(1)}%</p>
+          {hasTrades && profile.showStats && (
+            <div className="mt-8 pt-8 border-t border-[#262626]">
+              <h3 className="text-sm font-bold text-foreground mb-4">Trading Statistics</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <StatCard
+                  icon={<Target size={18} />}
+                  label="Total Trades"
+                  value={profile.tradesLogged.toString()}
+                />
+                <StatCard
+                  icon={<Percent size={18} />}
+                  label="Win Rate"
+                  value={`${(profile.winRate ?? 0).toFixed(1)}%`}
+                  color={(profile.winRate ?? 0) >= 50 ? 'text-emerald-400' : 'text-rose-400'}
+                />
+                <StatCard
+                  icon={<TrendingUp size={18} />}
+                  label="Total P&L"
+                  value={formatPnL(profile.totalPnl)}
+                  color={(profile.totalPnl ?? 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}
+                />
+                <StatCard
+                  icon={<BarChart2 size={18} />}
+                  label="Risk/Reward"
+                  value={`1 : ${(profile.avgRr ?? 0).toFixed(1)}`}
+                />
+                <StatCard
+                  icon={<Trophy size={18} />}
+                  label="Best Trade"
+                  value={profile.bestTrade ? formatPnL(profile.bestTrade.pnl) : '$0.00'}
+                  sub={profile.bestTrade?.asset}
+                  color="text-amber-400"
+                />
+                <StatCard
+                  icon={<TrendingDown size={18} />}
+                  label="Worst Trade"
+                  value={profile.worstTrade ? formatPnL(profile.worstTrade.pnl) : '$0.00'}
+                  sub={profile.worstTrade?.asset}
+                  color="text-rose-400"
+                />
+                <StatCard
+                  icon={<Flame size={18} />}
+                  label="Streak"
+                  value={getStreakLabel(profile.currentStreak)}
+                  sub={getStreakSubtext(profile.currentStreak)}
+                  color={
+                    profile.currentStreak.type === 'win'
+                      ? 'text-emerald-400'
+                      : profile.currentStreak.type === 'loss'
+                        ? 'text-rose-400'
+                        : 'text-muted-foreground'
+                  }
+                />
+                <StatCard
+                  icon={<Target size={18} />}
+                  label="Wins / Losses"
+                  value={`${profile.winCount}W / ${profile.lossCount}L`}
+                />
               </div>
             </div>
           )}
+
+          <div className="mt-8">
+            <SocialLinks profile={profile} />
+          </div>
         </div>
       </div>
     </div>
