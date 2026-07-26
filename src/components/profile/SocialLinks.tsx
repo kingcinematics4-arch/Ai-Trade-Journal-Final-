@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { FaInstagram, FaLinkedin } from "react-icons/fa";
-import { Globe, AtSign, ExternalLink } from 'lucide-react';
+import { FaXTwitter } from "react-icons/fa6";
+import { Globe, ExternalLink } from 'lucide-react';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 
@@ -58,6 +59,45 @@ function formatLinkedInDisplayName(linkedinValue: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function formatWebsiteDisplay(websiteValue: string): string {
+  if (!websiteValue) return '';
+
+  let cleaned = websiteValue.trim();
+
+  cleaned = cleaned.replace(/^https?:\/\//, '');
+
+  cleaned = cleaned.replace(/^www\./, '');
+
+  cleaned = cleaned.replace(/\/$/, '');
+
+  const domain = cleaned.toLowerCase();
+
+  if (
+    domain === 'aitradejournal.com' ||
+    domain === 'www.aitradejournal.com' ||
+    domain.includes('ai-trade-journal') ||
+    domain.includes('aitradejournal')
+  ) {
+    return 'AI Trade Journal';
+  }
+
+  return cleaned;
+}
+
+function formatTwitterDisplay(twitterValue: string): string {
+  if (!twitterValue) return '';
+
+  let cleaned = twitterValue.trim();
+
+  cleaned = cleaned.replace(/^https?:\/\/(www\.)?(twitter\.com|x\.com)\//, '');
+
+  cleaned = cleaned.replace(/\/$/, '');
+
+  cleaned = cleaned.replace(/^@/, '');
+
+  return `@${cleaned}`;
+}
+
 export default function SocialLinks() {
   const { dbProfile } = useProfileContext();
   const { t } = useTranslation();
@@ -78,32 +118,32 @@ export default function SocialLinks() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
       <SocialLinkRow
-        icon={<Globe size={16} />}
+        icon={<Globe size={20} />}
         label={t('profile.website')}
         href={website}
-        display={website?.replace(/^https?:\/\//, '') ?? ''}
-        color="text-sky-400"
+        display={formatWebsiteDisplay(website || '')}
+        color="text-[#38BDF8]"
       />
       <SocialLinkRow
-        icon={<AtSign size={16} />}
+        icon={<FaXTwitter size={20} />}
         label={t('profile.twitter')}
-        href={twitter ? `https://twitter.com/${twitter.replace('@', '')}` : null}
-        display={twitter ? (twitter.startsWith('@') ? twitter : `@${twitter}`) : ''}
-        color="text-sky-500"
+        href={twitter ? (twitter.startsWith('http') ? twitter : `https://twitter.com/${twitter.replace('@', '')}`) : null}
+        display={formatTwitterDisplay(twitter || '')}
+        color="text-white"
       />
       <SocialLinkRow
-        icon={<FaInstagram size={16} />}
+        icon={<FaInstagram size={20} />}
         label={t('profile.instagram')}
         href={instagram ? `https://instagram.com/${instagram.replace('@', '')}` : null}
         display={instagram ? (instagram.startsWith('@') ? instagram : `@${instagram}`) : ''}
-        color="text-pink-400"
+        color="text-[#E1306C]"
       />
       <SocialLinkRow
-        icon={<FaLinkedin size={16} />}
+        icon={<FaLinkedin size={20} />}
         label={t('profile.linkedin')}
         href={linkedin}
         display={formatLinkedInDisplayName(linkedin || '')}
-        color="text-blue-400"
+        color="text-[#0A66C2]"
       />
     </div>
   );
