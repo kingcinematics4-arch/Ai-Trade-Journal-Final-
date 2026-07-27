@@ -109,11 +109,27 @@ function StatCard({
 
 export default function PublicProfileClient({ profile }: Props) {
   const router = useRouter();
+
+  const totalTrades = profile.totalTrades ?? profile.tradesLogged ?? 0;
+  const winRate = profile.winRate ?? 0;
+
+  console.log("PROFILE ID", profile.id);
+  console.log("USER ID", (profile as any).user_id ?? profile.id);
+  console.log("PROFILE STATS", { totalTrades, winRate, wins: profile.wins ?? profile.winCount });
+
+  console.table({
+    profileId: profile.id,
+    profileUserId: (profile as any).user_id ?? profile.id,
+    stats: { totalTrades, winRate, wins: profile.wins ?? profile.winCount },
+    totalTrades: totalTrades,
+    winRate: winRate
+  });
+
   const displayName = useMemo(() => getDisplayName(profile), [profile]);
   const initials = useMemo(() => getInitials(displayName), [displayName]);
   const gradient = useMemo(() => PREMIUM_GRADIENTS[getGradientIndex(profile.id)], [profile.id]);
 
-  const hasTrades = profile.tradesLogged > 0;
+  const hasTrades = totalTrades > 0;
 
   return (
     <div className="min-h-screen">

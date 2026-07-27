@@ -1,12 +1,6 @@
 import { createClient } from '@/lib/supabase';
 import { createServiceClient } from '@/lib/supabase/supabase-admin';
-import type {
-  DbConnection,
-  Connection,
-  PublicTraderProfile,
-  PaginatedTraders,
-} from '@/types/community';
-import { mapDbConnection } from '@/types/community';
+import type { PublicTraderProfile, PaginatedTraders } from '@/types/community';
 import { computeTradeAnalytics } from '@/lib/trades/analytics';
 import type { DbTrade, TradeAnalytics } from '@/lib/trades/types';
 
@@ -18,41 +12,109 @@ const PROFILES_PER_PAGE = 12;
  * Fetch full analytics for multiple users using the service role client.
  * Uses the shared computeTradeAnalytics engine so all pages show identical stats.
  */
-async function fetchTradeStatsForUsers(
-  userIds: string[]
-): Promise<Map<string, TradeAnalytics>> {
+async function fetchTradeStatsForUsers(userIds: string[]): Promise<Map<string, TradeAnalytics>> {
+  if (userIds.length === 0) return new Map();
+
+  let tradesData: any[] = [];
+  let fetched = false;
+
+  // 1. Try service role client first (bypasses RLS if valid SUPABASE_SERVICE_ROLE_KEY is set)
+  try {
+    const supabaseAdmin = createServiceClient();
+    if (supabaseAdmin) {
+      const { data, error } = await supabaseAdmin.from('trades').select('*').in('user_id', userIds);
+      if (!error && data && data.length > 0) {
+        tradesData = data;
+        fetched = true;
+        console.log('RAW QUERY', tradesData);
+      }
+    }
+  } catch (err) {
+    console.warn('[communityService] serviceClient attempt failed:', err);
+  }
+
+  // 2. If running on server side, try server client with session cookies (allows RLS access for logged-in user)
+  if (!fetched && typeof window === 'undefined') {
+    try {
+      const { createServerSupabaseClient } = await import('@/lib/supabase/supabase-server');
+      const serverSupabase = await createServerSupabaseClient();
+      const { data, error } = await serverSupabase.from('trades').select('*').in('user_id', userIds);
+      if (!error && data && data.length > 0) {
+        tradesData = data;
+        fetched = true;
+        console.log('RAW QUERY', tradesData);
+      }
+    } catch (serverErr) {
+      console.warn('[communityService] serverSupabaseClient attempt failed:', serverErr);
+    }
+  }
+
+  // 3. Fallback to standard client
+  if (!fetched) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.from('trades').select('*').in('user_id', userIds);
+      if (!error && data) {
+        tradesData = data;
+        console.log('RAW QUERY', tradesData);
+      }
+    } catch (stdErr) {
+      console.error('[communityService] standard client query error:', stdErr);
+    }
+  }
+
+  const tradesByUser = new Map<string, Record<string, unknown>[]>();
+  for (const trade of tradesData) {
+    const uid = trade.user_id as string;
+    if (!tradesByUser.has(uid)) {
+      tradesByUser.set(uid, []);
+    }
+    tradesByUser.get(uid)!.push(trade);
+  }
+
+  const statsMap = new Map<string, TradeAnalytics>();
+  for (const [userId, rows] of tradesByUser) {
+    const analytics = computeTradeAnalytics(rows as DbTrade[]);
+    console.log('[communityService] fetchTradeStatsForUsers computed analytics:', {
+      userId,
+      totalTrades: analytics.totalTrades,
+      winRate: analytics.winRate,
+      winCount: analytics.winCount,
+      lossCount: analytics.lossCount,
+    });
+    statsMap.set(userId, analytics);
+  }
+
+  return statsMap;
+}
+
+/**
+ * Fetch like counts for multiple profile IDs using the service role client.
+ */
+async function fetchLikeCountsForUsers(userIds: string[]): Promise<Map<string, number>> {
   if (userIds.length === 0) return new Map();
 
   try {
     const supabase = createServiceClient();
-
     const { data, error } = await supabase
-      .from('trades')
-      .select('*')
-      .in('user_id', userIds);
+      .from('profile_likes')
+      .select('profile_id')
+      .in('profile_id', userIds);
 
     if (error) {
-      console.error('[communityService] fetchTradeStatsForUsers error:', error.message);
+      console.error('[communityService] fetchLikeCountsForUsers error:', error.message);
       return new Map();
     }
 
-    const tradesByUser = new Map<string, Record<string, unknown>[]>();
-    for (const trade of data ?? []) {
-      const uid = trade.user_id as string;
-      if (!tradesByUser.has(uid)) {
-        tradesByUser.set(uid, []);
-      }
-      tradesByUser.get(uid)!.push(trade);
+    const counts = new Map<string, number>();
+    for (const row of data ?? []) {
+      const pid = row.profile_id as string;
+      counts.set(pid, (counts.get(pid) ?? 0) + 1);
     }
 
-    const statsMap = new Map<string, TradeAnalytics>();
-    for (const [userId, rows] of tradesByUser) {
-      statsMap.set(userId, computeTradeAnalytics(rows as DbTrade[]));
-    }
-
-    return statsMap;
+    return counts;
   } catch (err) {
-    console.error('[communityService] fetchTradeStatsForUsers unexpected error:', err);
+    console.error('[communityService] fetchLikeCountsForUsers unexpected error:', err);
     return new Map();
   }
 }
@@ -62,26 +124,74 @@ async function fetchTradeStatsForUsers(
  * Bypasses RLS to read another user's trades for public profile display.
  */
 async function fetchTradesForUser(userId: string): Promise<DbTrade[]> {
+  let tradesData: any[] = [];
+  let fetched = false;
+
+  // 1. Try service role client first
   try {
-    const supabase = createServiceClient();
+    const supabaseAdmin = createServiceClient();
+    if (supabaseAdmin) {
+      const { data, error } = await supabaseAdmin
+        .from('trades')
+        .select('*')
+        .eq('user_id', userId)
+        .order('trade_date', { ascending: true })
+        .order('created_at', { ascending: true });
 
-    const { data, error } = await supabase
-      .from('trades')
-      .select('*')
-      .eq('user_id', userId)
-      .order('trade_date', { ascending: true })
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('[communityService] fetchTradesForUser error:', error.message);
-      return [];
+      if (!error && data && data.length > 0) {
+        tradesData = data;
+        fetched = true;
+        console.log("RAW RESPONSE", data);
+      }
     }
-
-    return (data ?? []) as DbTrade[];
   } catch (err) {
-    console.error('[communityService] fetchTradesForUser unexpected error:', err);
-    return [];
+    console.warn('[communityService] fetchTradesForUser serviceClient error:', err);
   }
+
+  // 2. If running on server side, try server client with session cookies
+  if (!fetched && typeof window === 'undefined') {
+    try {
+      const { createServerSupabaseClient } = await import('@/lib/supabase/supabase-server');
+      const serverSupabase = await createServerSupabaseClient();
+      const { data, error } = await serverSupabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', userId)
+        .order('trade_date', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        tradesData = data;
+        fetched = true;
+        console.log("RAW RESPONSE", data);
+      }
+    } catch (serverErr) {
+      console.warn('[communityService] fetchTradesForUser serverSupabase error:', serverErr);
+    }
+  }
+
+  // 3. Fallback to standard client
+  if (!fetched) {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', userId)
+        .order('trade_date', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (!error && data) {
+        tradesData = data;
+        console.log("RAW RESPONSE", data);
+      }
+    } catch (stdErr) {
+      console.error('[communityService] fetchTradesForUser standard client error:', stdErr);
+    }
+  }
+
+  console.log("TRADES", tradesData);
+  return tradesData as DbTrade[];
 }
 
 /**
@@ -92,7 +202,11 @@ async function fetchTradesForUser(userId: string): Promise<DbTrade[]> {
 async function computeFullAnalyticsForUser(userId: string): Promise<TradeAnalytics> {
   try {
     const trades = await fetchTradesForUser(userId);
-    return computeTradeAnalytics(trades);
+    const stats = computeTradeAnalytics(trades);
+    console.log("PROFILE ID", userId);
+    console.log("USER ID", userId);
+    console.log("PROFILE STATS", stats);
+    return stats;
   } catch (err) {
     console.error('[communityService] computeFullAnalyticsForUser error:', err);
     return {
@@ -170,6 +284,12 @@ export async function getPublicTraders(
 
   console.log('===== RAW PROFILE FROM SUPABASE =====');
   console.table(profiles);
+  console.log('[communityService] getPublicTraders profiles count:', profiles?.length ?? 0);
+  console.log('[communityService] getPublicTraders query error:', error);
+  console.log('[communityService] getPublicTraders currentUserId:', currentUserId);
+  if (profiles && profiles.length > 0) {
+    console.log('[communityService] getPublicTraders first profile id:', profiles[0].id);
+  }
 
   if (error) {
     console.error('[communityService] getPublicTraders data error:', error.message);
@@ -177,12 +297,34 @@ export async function getPublicTraders(
   }
 
   const userIds = (profiles ?? []).map((p) => p.id);
+  console.log('[communityService] getPublicTraders userIds:', userIds);
   const statsMap = await fetchTradeStatsForUsers(userIds);
+  console.log('[communityService] getPublicTraders statsMap keys:', Array.from(statsMap.keys()));
+  console.log(
+    '[communityService] getPublicTraders statsMap sample:',
+    statsMap.get(userIds[0] ?? '')
+  );
+  const likeCountsMap = await fetchLikeCountsForUsers(userIds);
+  console.log(
+    '[communityService] getPublicTraders likeCountsMap:',
+    Object.fromEntries(likeCountsMap)
+  );
 
   // ── Step 5: Merge stats and perform client-side sort if needed ────────
-  const traders: PublicTraderProfile[] = (profiles ?? []).map((p) =>
-    mapToPublicTrader(p, statsMap.get(p.id))
-  );
+  console.log('[communityService] getPublicTraders mapping traders...');
+  const traders: PublicTraderProfile[] = (profiles ?? []).map((p) => {
+    const analytics = statsMap.get(p.id);
+    const likeCount = likeCountsMap.get(p.id) ?? 0;
+    console.log('[communityService] getPublicTraders mapped profile:', {
+      profileId: p.id,
+      username: p.username,
+      hasAnalytics: !!analytics,
+      totalTrades: analytics?.totalTrades ?? 0,
+      winRate: analytics?.winRate ?? null,
+      likeCount,
+    });
+    return mapToPublicTrader(p, analytics, likeCount);
+  });
 
   console.log('===== MAPPED TRADERS WITH STATS =====');
   console.table(traders);
@@ -230,8 +372,9 @@ export async function getPublicProfileById(userId: string): Promise<PublicTrader
 
   // Fetch full analytics for the profile owner
   const analytics = await computeFullAnalyticsForUser(userId);
+  const likeCounts = await fetchLikeCountsForUsers([userId]);
 
-  const profile = mapToPublicTrader(data, analytics);
+  const profile = mapToPublicTrader(data, analytics, likeCounts.get(userId) ?? 0);
   profile.email = (data as any).email ?? null;
   return profile;
 }
@@ -264,8 +407,9 @@ export async function getPublicProfileByUsername(
 
   // Fetch full analytics for the profile owner
   const analytics = await computeFullAnalyticsForUser(data.id);
+  const likeCounts = await fetchLikeCountsForUsers([data.id]);
 
-  const profile = mapToPublicTrader(data, analytics);
+  const profile = mapToPublicTrader(data, analytics, likeCounts.get(data.id) ?? 0);
   profile.email = (data as any).email ?? null;
   return profile;
 }
@@ -356,13 +500,28 @@ export async function getUserConnections(): Promise<Connection[]> {
  * Map a DbProfile to a PublicTraderProfile.
  * Analytics are computed from the full trades dataset using the shared analytics engine.
  */
-function mapToPublicTrader(profile: any, analytics?: TradeAnalytics): PublicTraderProfile {
-  return {
+function mapToPublicTrader(
+  profile: any,
+  analytics?: TradeAnalytics,
+  likeCount: number = 0
+): PublicTraderProfile {
+  const totalTrades = analytics?.totalTrades ?? 0;
+  const winRate = analytics?.winRate ?? null;
+  const winCount = analytics?.winCount ?? 0;
+  const lossCount = analytics?.lossCount ?? 0;
+  const breakevenCount = analytics?.breakevenCount ?? 0;
+
+  console.log("Community trader", profile.id);
+  console.log("Stats", totalTrades, winRate);
+
+  const trader: PublicTraderProfile = {
     id: profile.id,
     username: profile.username ?? null,
     fullName: profile.full_name ?? null,
+    full_name: profile.full_name ?? null,
     bio: profile.bio ?? null,
     avatarUrl: profile.avatar_url ?? null,
+    avatar_url: profile.avatar_url ?? null,
     country: profile.country ?? null,
     tradingStyle: profile.trading_style ?? null,
     markets: profile.markets
@@ -372,8 +531,15 @@ function mapToPublicTrader(profile: any, analytics?: TradeAnalytics): PublicTrad
           .filter(Boolean)
       : null,
     experience: profile.experience ?? null,
-    tradesLogged: analytics?.totalTrades ?? 0,
-    winRate: analytics?.winRate ?? null,
+    tradesLogged: totalTrades,
+    totalTrades,
+    winRate,
+    wins: winCount,
+    winCount,
+    losses: lossCount,
+    lossCount,
+    breakeven: breakevenCount,
+    breakevenCount,
     totalPnl: analytics?.totalPnl ?? null,
     avgRr: analytics?.avgRr ?? null,
     showStats: profile.show_stats ?? true,
@@ -388,13 +554,14 @@ function mapToPublicTrader(profile: any, analytics?: TradeAnalytics): PublicTrad
     github: profile.github ?? null,
     discord: profile.discord ?? null,
     telegram: profile.telegram ?? null,
-    winCount: analytics?.winCount ?? 0,
-    lossCount: analytics?.lossCount ?? 0,
-    breakevenCount: analytics?.breakevenCount ?? 0,
     bestTrade: analytics?.bestTrade ?? null,
     worstTrade: analytics?.worstTrade ?? null,
     currentStreak: analytics?.currentStreak ?? { type: 'none', count: 0 },
     pnlTrend: analytics?.pnlTrend ?? [],
     marketDistribution: analytics?.marketDistribution ?? [],
+    likes: likeCount,
+    likeCount,
   };
+  console.log("AFTER MAP", trader);
+  return trader;
 }

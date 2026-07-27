@@ -9,6 +9,22 @@ export async function GET(request: Request) {
 
   try {
     const result = await getPublicTraders(page, searchQuery, sortBy);
+    console.log(
+      '[API /api/community/traders] Raw result traders:',
+      JSON.stringify(
+        result.traders.map((t) => ({
+          id: t.id,
+          username: t.username,
+          tradesLogged: t.tradesLogged,
+          winRate: t.winRate,
+          totalPnl: t.totalPnl,
+          likeCount: t.likeCount,
+          showStats: t.showStats,
+        })),
+        null,
+        2
+      )
+    );
     return NextResponse.json(result);
   } catch (err) {
     console.error('[api/community/traders] Error:', err);

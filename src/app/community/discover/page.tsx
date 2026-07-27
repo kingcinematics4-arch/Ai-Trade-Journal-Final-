@@ -7,6 +7,7 @@ import { Loader2, Users, Search, ListFilter, X } from 'lucide-react';
 import type { PublicTraderProfile, PaginatedTraders } from '@/types/community';
 import { useDebounce } from '@/hooks/useDebounce';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import { createClient } from '@/lib/supabase';
 
 const SkeletonCard = () => (
   <div className="h-[180px] w-full max-w-[520px] bg-[#111111] border border-white/[0.06] rounded-[20px] p-5 animate-pulse">
@@ -58,9 +59,17 @@ export default function DiscoverPage() {
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
 
   const fetchTraders = useCallback(
-    async (pageNum: number, query: string, sort: string, append: boolean = false) => {
-      if (pageNum === 1 && !append) setLoading(true);
-      else setLoadingMore(true);
+    async (
+      pageNum: number,
+      query: string,
+      sort: string,
+      append: boolean = false,
+      showLoading: boolean = true
+    ) => {
+      if (showLoading) {
+        if (pageNum === 1 && !append) setLoading(true);
+        else setLoadingMore(true);
+      }
       setError(null);
 
       try {
@@ -68,6 +77,7 @@ export default function DiscoverPage() {
           page: String(pageNum),
           searchQuery: query,
           sortBy: sort,
+          _t: String(Date.now()),
         });
 
         const response = await fetch(`/api/community/traders?${params.toString()}`);
@@ -75,6 +85,22 @@ export default function DiscoverPage() {
           throw new Error('Failed to fetch traders');
         }
         const result: PaginatedTraders = await response.json();
+        console.log(
+          '[DiscoverPage] Fetched traders:',
+          JSON.stringify(
+            result.traders.map((t) => ({
+              id: t.id,
+              username: t.username,
+              tradesLogged: t.tradesLogged,
+              winRate: t.winRate,
+              totalPnl: t.totalPnl,
+              likeCount: t.likeCount,
+              showStats: t.showStats,
+            })),
+            null,
+            2
+          )
+        );
         setTraders((prev) => (append ? [...prev, ...result.traders] : result.traders));
         setTotal(result.total);
         setHasMore(result.hasMore);
@@ -82,8 +108,10 @@ export default function DiscoverPage() {
         setError(err instanceof Error ? err.message : 'Failed to load traders');
         console.error('[DiscoverPage] Error:', err);
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
+        if (showLoading) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
     },
     []
@@ -100,6 +128,28 @@ export default function DiscoverPage() {
     setPage(nextPage);
     fetchTraders(nextPage, debouncedSearchTerm, sortBy, true);
   }, [page, debouncedSearchTerm, sortBy, fetchTraders]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel('community-trades-refresh')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trades',
+        },
+        () => {
+          fetchTraders(1, debouncedSearchTerm, sortBy, false, false);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [debouncedSearchTerm, sortBy, fetchTraders]);
 
   const sortOptions = useMemo(
     () => [

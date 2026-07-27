@@ -34,13 +34,24 @@ const truncateBio = (bio?: string) => {
 };
 
 const TraderCardComponent = ({ trader }: TraderCardProps) => {
+  const totalTrades = trader.totalTrades ?? trader.tradesLogged ?? 0;
+  const winRate = trader.winRate ?? 0;
+
+  console.log("CARD PROPS", trader);
+  console.log("Community trader", trader.id);
+  console.log("Stats", totalTrades, trader.winRate);
+
   const router = useRouter();
 
+  const fullName = trader.full_name ?? trader.fullName;
+  const avatarUrl = trader.avatar_url ?? trader.avatarUrl;
+  const likes = trader.likes ?? trader.likeCount ?? 0;
+
   const displayName = useMemo(() => {
-    if (trader.fullName?.trim()) return trader.fullName.trim();
+    if (fullName?.trim()) return fullName.trim();
     if (trader.username?.trim()) return trader.username.trim();
     return 'Trader';
-  }, [trader.fullName, trader.username]);
+  }, [fullName, trader.username]);
 
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
@@ -78,15 +89,16 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           profileOwnerId={trader.id}
           size="sm"
           compact
+          initialCount={likes}
         />
       </div>
       {/* Top row: avatar + name/bio | stats | button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="h-[56px] w-[56px] rounded-full overflow-hidden flex-shrink-0">
-            {trader.avatarUrl ? (
+            {avatarUrl ? (
               <img
-                src={trader.avatarUrl}
+                src={avatarUrl}
                 alt={displayName}
                 className="h-full w-full object-cover"
               />
@@ -109,10 +121,10 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           </div>
         </div>
 
-          <div className="w-[25%] flex flex-col items-end justify-center gap-2 flex-shrink-0">
+        <div className="w-[25%] flex flex-col items-end justify-center gap-2 flex-shrink-0">
           <div className="text-right">
             <span className="block text-[18px] font-semibold text-white leading-tight">
-              {`${Math.round(trader.winRate ?? 0)}%`}
+              {`${Math.round(winRate)}%`}
             </span>
             <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
               Win Rate
@@ -120,7 +132,7 @@ const TraderCardComponent = ({ trader }: TraderCardProps) => {
           </div>
           <div className="text-right">
             <span className="block text-[18px] font-semibold text-white leading-tight">
-              {String(trader.tradesLogged)}
+              {String(totalTrades)}
             </span>
             <span className="block text-[10px] text-white/40 uppercase tracking-wider leading-tight">
               Trades

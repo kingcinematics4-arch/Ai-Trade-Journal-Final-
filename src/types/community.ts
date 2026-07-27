@@ -36,14 +36,17 @@ export interface PublicTraderProfile {
   username: string | null;
   email: string | null;
   fullName: string | null;
+  full_name?: string | null;
   bio: string | null;
   avatarUrl: string | null;
+  avatar_url?: string | null;
   country: string | null;
   tradingStyle: string | null;
   /** Parsed array of markets (split from the comma-separated DB column) */
   markets: string[] | null;
   experience: string | null;
   tradesLogged: number;
+  totalTrades: number;
   winRate: number | null;
   totalPnl: number | null;
   avgRr: number | null;
@@ -59,14 +62,19 @@ export interface PublicTraderProfile {
   github: string | null;
   discord: string | null;
   telegram: string | null;
+  wins: number;
   winCount: number;
+  losses: number;
   lossCount: number;
+  breakeven: number;
   breakevenCount: number;
   bestTrade: { pnl: number; asset: string; strategy: string; date: string } | null;
   worstTrade: { pnl: number; asset: string; strategy: string; date: string } | null;
   currentStreak: { type: 'win' | 'loss' | 'none'; count: number };
   pnlTrend: { date: string; pnl: number; cumulative: number; tradeNumber: number; asset: string }[];
   marketDistribution: { id: string; name: string; value: number; trades: number; pnl: number }[];
+  likes: number;
+  likeCount: number;
 }
 
 /** A like on a public profile */
